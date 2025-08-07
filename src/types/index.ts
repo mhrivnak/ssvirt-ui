@@ -308,7 +308,8 @@ export const QUERY_KEYS = {
   // Organizations
   organizations: ['organizations'] as const,
   organization: (id: string) => ['organizations', id] as const,
-  organizationUsers: (orgId: string) => ['organizations', orgId, 'users'] as const,
+  organizationUsers: (orgId: string) =>
+    ['organizations', orgId, 'users'] as const,
 
   // VDCs
   vdcs: ['vdcs'] as const,

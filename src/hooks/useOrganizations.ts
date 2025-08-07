@@ -140,8 +140,13 @@ export const useInviteUserToOrganization = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ organizationId, data }: { organizationId: string; data: InviteUserRequest }) =>
-      OrganizationService.inviteUserToOrganization(organizationId, data),
+    mutationFn: ({
+      organizationId,
+      data,
+    }: {
+      organizationId: string;
+      data: InviteUserRequest;
+    }) => OrganizationService.inviteUserToOrganization(organizationId, data),
     onSuccess: (_, variables) => {
       // Invalidate organization users list to refresh
       queryClient.invalidateQueries({
@@ -161,8 +166,13 @@ export const useUpdateOrganizationUserRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ organizationId, data }: { organizationId: string; data: UpdateUserRoleRequest }) =>
-      OrganizationService.updateOrganizationUserRole(organizationId, data),
+    mutationFn: ({
+      organizationId,
+      data,
+    }: {
+      organizationId: string;
+      data: UpdateUserRoleRequest;
+    }) => OrganizationService.updateOrganizationUserRole(organizationId, data),
     onSuccess: (_, variables) => {
       // Invalidate organization users list to refresh
       queryClient.invalidateQueries({
@@ -182,7 +192,13 @@ export const useRemoveUserFromOrganization = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ organizationId, userId }: { organizationId: string; userId: string }) =>
+    mutationFn: ({
+      organizationId,
+      userId,
+    }: {
+      organizationId: string;
+      userId: string;
+    }) =>
       OrganizationService.removeUserFromOrganization(organizationId, userId),
     onSuccess: (_, variables) => {
       // Invalidate organization users list to refresh

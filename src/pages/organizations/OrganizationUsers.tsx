@@ -53,12 +53,12 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
+import {
   useOrganization,
   useOrganizationUsers,
   useInviteUserToOrganization,
   useUpdateOrganizationUserRole,
-  useRemoveUserFromOrganization
+  useRemoveUserFromOrganization,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type {
@@ -108,7 +108,9 @@ const OrganizationUsers: React.FC = () => {
 
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading } = useOrganization(id || '');
-  const { data: usersResponse, isLoading: usersLoading } = useOrganizationUsers(id || '');
+  const { data: usersResponse, isLoading: usersLoading } = useOrganizationUsers(
+    id || ''
+  );
   const inviteUserMutation = useInviteUserToOrganization();
   const updateUserRoleMutation = useUpdateOrganizationUserRole();
   const removeUserMutation = useRemoveUserFromOrganization();
@@ -231,7 +233,7 @@ const OrganizationUsers: React.FC = () => {
           setNotification({
             variant: 'success',
             title: 'User Invited Successfully',
-            message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this organization.`
+            message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this organization.`,
           });
           // Auto-hide notification after 5 seconds
           setTimeout(() => setNotification(null), 5000);
@@ -239,7 +241,7 @@ const OrganizationUsers: React.FC = () => {
         onError: (error) => {
           console.error('Failed to invite user:', error);
           setEmailError('Failed to send invitation. Please try again.');
-        }
+        },
       }
     );
   };
@@ -271,7 +273,7 @@ const OrganizationUsers: React.FC = () => {
           setNotification({
             variant: 'success',
             title: 'User Role Updated',
-            message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`
+            message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`,
           });
           // Auto-hide notification after 5 seconds
           setTimeout(() => setNotification(null), 5000);
@@ -282,11 +284,12 @@ const OrganizationUsers: React.FC = () => {
           setNotification({
             variant: 'danger',
             title: 'Failed to Update Role',
-            message: 'An error occurred while updating the user role. Please try again.'
+            message:
+              'An error occurred while updating the user role. Please try again.',
           });
           // Auto-hide notification after 5 seconds
           setTimeout(() => setNotification(null), 5000);
-        }
+        },
       }
     );
   };
@@ -307,7 +310,7 @@ const OrganizationUsers: React.FC = () => {
             setNotification({
               variant: 'success',
               title: 'User Removed',
-              message: `${user.first_name} ${user.last_name} has been removed from this organization.`
+              message: `${user.first_name} ${user.last_name} has been removed from this organization.`,
             });
             // Auto-hide notification after 5 seconds
             setTimeout(() => setNotification(null), 5000);
@@ -318,11 +321,12 @@ const OrganizationUsers: React.FC = () => {
             setNotification({
               variant: 'danger',
               title: 'Failed to Remove User',
-              message: 'An error occurred while removing the user. Please try again.'
+              message:
+                'An error occurred while removing the user. Please try again.',
             });
             // Auto-hide notification after 5 seconds
             setTimeout(() => setNotification(null), 5000);
-          }
+          },
         }
       );
     }
