@@ -4,7 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppLayout from './components/layouts/AppLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/auth/Login';
-import Organizations from './pages/organizations/Organizations';
+import {
+  Organizations,
+  OrganizationDetail,
+  OrganizationUsers,
+  OrganizationForm,
+} from './pages/organizations';
 import VMs from './pages/vms/VMs';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -92,6 +97,56 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <AppLayout>
                       <Organizations />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORGANIZATION_CREATE}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <OrganizationForm />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORGANIZATION_DETAIL}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <OrganizationDetail />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORGANIZATION_EDIT}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <OrganizationForm />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORGANIZATION_USERS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <OrganizationUsers />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.ORGANIZATION_ANALYTICS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Organization Analytics - Coming in future PR</div>
                     </AppLayout>
                   </ProtectedRoute>
                 }
