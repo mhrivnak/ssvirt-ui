@@ -1,0 +1,51 @@
+# Labeler configuration for auto-labeling PRs based on file changes
+
+# Frontend/UI changes
+"ui":
+  - src/components/**/*
+  - src/pages/**/*
+  - "**/*.css"
+  - "**/*.scss"
+
+# API/Services changes  
+"api":
+  - src/services/**/*
+  - src/hooks/**/*
+
+# Configuration changes
+"config":
+  - "*.json"
+  - "*.js"
+  - "*.ts"
+  - ".env*"
+  - ".github/**/*"
+  - "vite.config.*"
+  - "tsconfig.*"
+
+# Documentation changes
+"documentation":
+  - "**/*.md"
+  - "docs/**/*"
+
+# Dependencies
+"dependencies":
+  - package.json
+  - package-lock.json
+
+# Testing
+"testing":
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "test/**/*"
+  - "__tests__/**/*"
+
+# TypeScript types
+"types":
+  - src/types/**/*
+  - "**/*.d.ts"
+
+# Build/CI
+"build":
+  - ".github/workflows/**/*"
+  - "vite.config.*"
+  - "Dockerfile*"

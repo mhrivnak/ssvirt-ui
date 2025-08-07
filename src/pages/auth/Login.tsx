@@ -14,23 +14,32 @@ const Login: React.FC = () => {
   const [isValidUsername, setIsValidUsername] = React.useState(true);
   const [passwordValue, setPasswordValue] = React.useState('');
   const [isValidPassword, setIsValidPassword] = React.useState(true);
-  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = React.useState(false);
+  const [isLoginButtonDisabled, setIsLoginButtonDisabled] =
+    React.useState(false);
 
-  const handleUsernameChange = (_event: React.FormEvent<HTMLInputElement>, value: string) => {
+  const handleUsernameChange = (
+    _event: React.FormEvent<HTMLInputElement>,
+    value: string
+  ) => {
     setUsernameValue(value);
   };
 
-  const handlePasswordChange = (_event: React.FormEvent<HTMLInputElement>, value: string) => {
+  const handlePasswordChange = (
+    _event: React.FormEvent<HTMLInputElement>,
+    value: string
+  ) => {
     setPasswordValue(value);
   };
 
-  const onLoginButtonClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onLoginButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     event.preventDefault();
     setIsLoginButtonDisabled(true);
     setShowHelperText(false);
     setIsValidUsername(!!usernameValue);
     setIsValidPassword(!!passwordValue);
-    
+
     if (usernameValue && passwordValue) {
       // TODO: Implement actual login logic in PR #2
       console.log('Login attempt:', { username: usernameValue });
@@ -66,7 +75,7 @@ const Login: React.FC = () => {
       footerListItems={[
         <LoginMainFooterBandItem key="version">
           Version {CONFIG.APP_VERSION}
-        </LoginMainFooterBandItem>
+        </LoginMainFooterBandItem>,
       ]}
       textContent="Self-Service Virtual Infrastructure Runtime"
       loginTitle="Log in to your account"

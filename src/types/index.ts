@@ -76,7 +76,11 @@ export interface VM {
   org_name: string;
 }
 
-export type VMStatus = 'POWERED_ON' | 'POWERED_OFF' | 'SUSPENDED' | 'UNRESOLVED';
+export type VMStatus =
+  | 'POWERED_ON'
+  | 'POWERED_OFF'
+  | 'SUSPENDED'
+  | 'UNRESOLVED';
 
 export interface VMPowerOperation {
   vm_id: string;

@@ -67,24 +67,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       </MastheadToggle>
       <MastheadMain>
         <MastheadBrand>
-          <Brand src="/logo.svg" alt={CONFIG.APP_TITLE} heights={{ default: '36px' }}>
+          <Brand
+            src="/logo.svg"
+            alt={CONFIG.APP_TITLE}
+            heights={{ default: '36px' }}
+          >
             <source media="(min-width: 768px)" srcSet="/logo.svg" />
             <source media="(max-width: 767px)" srcSet="/logo-mobile.svg" />
           </Brand>
         </MastheadBrand>
       </MastheadMain>
-      <MastheadContent>
-        {/* TODO: Add user menu in PR #3 */}
-      </MastheadContent>
+      <MastheadContent>{/* TODO: Add user menu in PR #3 */}</MastheadContent>
     </Masthead>
   );
 
   const sidebar = (
     <PageSidebar>
       <Sidebar isPanelRight={false}>
-        <SidebarPanel>
-          {navigation}
-        </SidebarPanel>
+        <SidebarPanel>{navigation}</SidebarPanel>
         <SidebarContent>
           <div>{/* Additional sidebar content can go here */}</div>
         </SidebarContent>

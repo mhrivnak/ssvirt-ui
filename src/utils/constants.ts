@@ -1,6 +1,7 @@
 // Environment-based configuration constants
 export const CONFIG = {
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  API_BASE_URL:
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   APP_TITLE: import.meta.env.VITE_APP_TITLE || 'SSVIRT Web UI',
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.1',
   DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
@@ -13,32 +14,35 @@ export const API_ENDPOINTS = {
   LOGIN: '/sessions',
   LOGOUT: '/sessions',
   SESSION: '/session',
-  
+
   // User
   USER_PROFILE: '/v1/user/profile',
-  
+
   // Organizations
   ORGANIZATIONS: '/org',
   ORGANIZATION_BY_ID: (id: string) => `/org/${id}`,
-  
+
   // VDCs
   VDC_BY_ID: (id: string) => `/vdc/${id}`,
   VDCS_BY_ORG: (orgId: string) => `/org/${orgId}/vdcs/query`,
-  
+
   // VMs
   VM_BY_ID: (id: string) => `/vm/${id}`,
   VMS_BY_VAPP: (vappId: string) => `/vApp/${vappId}/vms/query`,
-  VM_POWER_ACTION: (vmId: string, action: string) => `/vm/${vmId}/power/action/${action}`,
-  
+  VM_POWER_ACTION: (vmId: string, action: string) =>
+    `/vm/${vmId}/power/action/${action}`,
+
   // vApps
-  INSTANTIATE_VAPP: (vdcId: string) => `/vdc/${vdcId}/action/instantiateVAppTemplate`,
-  
+  INSTANTIATE_VAPP: (vdcId: string) =>
+    `/vdc/${vdcId}/action/instantiateVAppTemplate`,
+
   // Catalogs
   CATALOGS_BY_ORG: (orgId: string) => `/org/${orgId}/catalogs/query`,
   CATALOG_BY_ID: (id: string) => `/catalog/${id}`,
-  CATALOG_ITEMS: (catalogId: string) => `/catalog/${catalogId}/catalogItems/query`,
+  CATALOG_ITEMS: (catalogId: string) =>
+    `/catalog/${catalogId}/catalogItems/query`,
   CATALOG_ITEM_BY_ID: (id: string) => `/catalogItem/${id}`,
-  
+
   // System
   HEALTH: '/health',
   READY: '/ready',

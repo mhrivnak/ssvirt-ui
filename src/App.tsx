@@ -29,14 +29,29 @@ const App: React.FC = () => {
     <BrowserRouter>
       <AppLayout>
         <Routes>
-          <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+          <Route
+            path={ROUTES.HOME}
+            element={<Navigate to={ROUTES.DASHBOARD} replace />}
+          />
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.ORGANIZATIONS} element={<Organizations />} />
           <Route path={ROUTES.VMS} element={<VMs />} />
-          <Route path={ROUTES.VDCS} element={<div>VDCs - Coming in future PR</div>} />
-          <Route path={ROUTES.CATALOGS} element={<div>Catalogs - Coming in future PR</div>} />
-          <Route path={ROUTES.PROFILE} element={<div>Profile - Coming in future PR</div>} />
-          <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+          <Route
+            path={ROUTES.VDCS}
+            element={<div>VDCs - Coming in future PR</div>}
+          />
+          <Route
+            path={ROUTES.CATALOGS}
+            element={<div>Catalogs - Coming in future PR</div>}
+          />
+          <Route
+            path={ROUTES.PROFILE}
+            element={<div>Profile - Coming in future PR</div>}
+          />
+          <Route
+            path="*"
+            element={<Navigate to={ROUTES.DASHBOARD} replace />}
+          />
         </Routes>
       </AppLayout>
     </BrowserRouter>
