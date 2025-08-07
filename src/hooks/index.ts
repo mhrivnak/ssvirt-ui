@@ -64,3 +64,11 @@ export {
 export { useDashboardStats, useRecentActivity } from './useDashboard';
 
 export { usePowerOperationTracking } from './usePowerOperationTracking';
+
+export {
+  useUserPreferences,
+  useUpdateUserPreferences,
+  useChangePassword,
+  useSecuritySettings,
+  useUpdateSecuritySetting,
+} from './useUserProfile';
