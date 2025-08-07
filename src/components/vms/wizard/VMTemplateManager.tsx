@@ -223,7 +223,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
 
         const updatedTemplates = [...templates, importedTemplate];
         saveTemplates(updatedTemplates);
-      } catch (error) {
+      } catch {
         setError('Failed to import template: Invalid JSON format');
       }
     };

@@ -166,7 +166,7 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
 
   const handleRemoveCustomProperty = (key: string) => {
     const currentProperties = formData.advanced_config.custom_properties || {};
-    const { [key]: removed, ...updatedProperties } = currentProperties;
+    const { [key]: _, ...updatedProperties } = currentProperties;
     updateAdvancedConfig({ custom_properties: updatedProperties });
   };
 
