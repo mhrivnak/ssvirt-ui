@@ -56,6 +56,7 @@ import { useAuth } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
 import { handleFormError } from '../../utils/errorHandler';
+import { AuthService } from '../../services/api';
 
 interface UserProfileData {
   first_name: string;
@@ -312,11 +313,22 @@ const UserProfile: React.FC = () => {
     }
 
     try {
-      // TODO: Call API to update profile
-      console.log('Updating profile:', profileData);
+      // Call API to update profile
+      const updatedUser = await AuthService.updateUserProfile({
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        email: profileData.email,
+      });
 
-      // Simulate API success
-      setOriginalProfileData({ ...profileData });
+      // Update form state with successful response
+      const updatedProfileData = {
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        email: updatedUser.email,
+      };
+      
+      setOriginalProfileData(updatedProfileData);
+      setProfileData(updatedProfileData);
       setProfileHasChanges(false);
 
       // Show success message (would be handled by a notification system)
