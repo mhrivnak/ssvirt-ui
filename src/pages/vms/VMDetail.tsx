@@ -48,7 +48,6 @@ import {
   ExclamationTriangleIcon,
   EditIcon,
   TrashIcon,
-  RedoIcon,
   CpuIcon,
   ServerIcon,
   NetworkIcon,
@@ -58,7 +57,8 @@ import {
   EllipsisVIcon,
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
-import { useVMs } from '../../hooks';
+import { useVMs, usePowerOperationTracking } from '../../hooks';
+import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -137,6 +137,7 @@ const VMDetail: React.FC = () => {
   // In a real app, this would use the individual VM endpoint
   const { data: vmsResponse, isLoading, error } = useVMs({});
   const vm = vmsResponse?.data?.find((v: VM) => v.id === id);
+  const { operations: powerOperations } = usePowerOperationTracking();
 
   const handleTabClick = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
@@ -181,31 +182,6 @@ const VMDetail: React.FC = () => {
   };
 
   const getVMActions = () => [
-    {
-      title: 'Power On',
-      onClick: () => console.log('Power on VM:', id),
-      isDisabled: vm?.status === 'POWERED_ON',
-      icon: <PlayIcon />,
-    },
-    {
-      title: 'Power Off',
-      onClick: () => console.log('Power off VM:', id),
-      isDisabled: vm?.status === 'POWERED_OFF',
-      icon: <PowerOffIcon />,
-    },
-    {
-      title: 'Suspend',
-      onClick: () => console.log('Suspend VM:', id),
-      isDisabled: vm?.status !== 'POWERED_ON',
-      icon: <PauseIcon />,
-    },
-    {
-      title: 'Reset',
-      onClick: () => console.log('Reset VM:', id),
-      isDisabled: vm?.status !== 'POWERED_ON',
-      icon: <RedoIcon />,
-    },
-    { isSeparator: true },
     {
       title: 'Edit Configuration',
       onClick: () => console.log('Edit VM:', id),
@@ -295,38 +271,44 @@ const VMDetail: React.FC = () => {
               </Stack>
             </SplitItem>
             <SplitItem>
-              <Dropdown
-                isOpen={isActionsOpen}
-                onOpenChange={setIsActionsOpen}
-                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    onClick={() => setIsActionsOpen(!isActionsOpen)}
-                    isExpanded={isActionsOpen}
-                    icon={<EllipsisVIcon />}
-                  >
-                    Actions
-                  </MenuToggle>
-                )}
-              >
-                <DropdownList>
-                  {getVMActions().map((action, index) =>
-                    action.isSeparator ? (
-                      <DropdownItem key={`separator-${index}`} />
-                    ) : (
-                      <DropdownItem
-                        key={action.title}
-                        onClick={action.onClick}
-                        isDisabled={action.isDisabled}
-                        isDanger={action.isDanger}
-                        icon={action.icon}
+              <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                <FlexItem>
+                  <VMPowerActions vm={vm} variant="buttons" size="sm" />
+                </FlexItem>
+                <FlexItem>
+                  <Dropdown
+                    isOpen={isActionsOpen}
+                    onOpenChange={setIsActionsOpen}
+                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                      <MenuToggle
+                        ref={toggleRef}
+                        onClick={() => setIsActionsOpen(!isActionsOpen)}
+                        isExpanded={isActionsOpen}
+                        icon={<EllipsisVIcon />}
                       >
-                        {action.title}
-                      </DropdownItem>
-                    )
-                  )}
-                </DropdownList>
-              </Dropdown>
+                        Other Actions
+                      </MenuToggle>
+                    )}
+                  >
+                    <DropdownList>
+                      {getVMActions().map((action, index) =>
+                        action.isSeparator ? (
+                          <DropdownItem key={`separator-${index}`} />
+                        ) : (
+                          <DropdownItem
+                            key={action.title}
+                            onClick={action.onClick}
+                            isDanger={action.isDanger}
+                            icon={action.icon}
+                          >
+                            {action.title}
+                          </DropdownItem>
+                        )
+                      )}
+                    </DropdownList>
+                  </Dropdown>
+                </FlexItem>
+              </Flex>
             </SplitItem>
           </Split>
         </StackItem>
@@ -767,6 +749,9 @@ const VMDetail: React.FC = () => {
           </Tabs>
         </StackItem>
       </Stack>
+
+      {/* Power Operation Status */}
+      <PowerOperationStatus operations={powerOperations} />
     </PageSection>
   );
 };

@@ -137,6 +137,23 @@ export interface VMPowerOperation {
   };
 }
 
+// Bulk operation types
+export interface BulkVMPowerOperation {
+  vm_ids: string[];
+  action: string;
+  operations: VMPowerOperation[];
+  completed_count: number;
+  failed_count: number;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+}
+
+export interface PowerOperationResult {
+  vm_id: string;
+  success: boolean;
+  operation?: VMPowerOperation;
+  error?: string;
+}
+
 // Catalog types
 export interface Catalog {
   id: string;

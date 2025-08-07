@@ -210,3 +210,111 @@ export const useResetVM = () => {
     },
   });
 };
+
+/**
+ * Hook to bulk power on multiple VMs
+ */
+export const useBulkPowerOnVMs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vmIds: string[]) => VMService.bulkPowerOnVMs(vmIds),
+    onSuccess: (_, vmIds) => {
+      // Invalidate VM data for all affected VMs
+      vmIds.forEach(vmId => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk power on VMs:', error);
+    },
+  });
+};
+
+/**
+ * Hook to bulk power off multiple VMs
+ */
+export const useBulkPowerOffVMs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vmIds: string[]) => VMService.bulkPowerOffVMs(vmIds),
+    onSuccess: (_, vmIds) => {
+      // Invalidate VM data for all affected VMs
+      vmIds.forEach(vmId => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk power off VMs:', error);
+    },
+  });
+};
+
+/**
+ * Hook to bulk reboot multiple VMs
+ */
+export const useBulkRebootVMs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vmIds: string[]) => VMService.bulkRebootVMs(vmIds),
+    onSuccess: (_, vmIds) => {
+      // Invalidate VM data for all affected VMs
+      vmIds.forEach(vmId => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk reboot VMs:', error);
+    },
+  });
+};
+
+/**
+ * Hook to bulk suspend multiple VMs
+ */
+export const useBulkSuspendVMs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vmIds: string[]) => VMService.bulkSuspendVMs(vmIds),
+    onSuccess: (_, vmIds) => {
+      // Invalidate VM data for all affected VMs
+      vmIds.forEach(vmId => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk suspend VMs:', error);
+    },
+  });
+};
+
+/**
+ * Hook to bulk reset multiple VMs
+ */
+export const useBulkResetVMs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vmIds: string[]) => VMService.bulkResetVMs(vmIds),
+    onSuccess: (_, vmIds) => {
+      // Invalidate VM data for all affected VMs
+      vmIds.forEach(vmId => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
+      });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk reset VMs:', error);
+    },
+  });
+};
