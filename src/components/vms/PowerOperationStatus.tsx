@@ -46,14 +46,40 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
   );
 
   useEffect(() => {
-    const newStatuses: OperationStatus[] = operations.map((op) => ({
-      id: `${op.vm_id}-${op.action}-${op.timestamp}`,
-      vmId: op.vm_id,
-      action: op.action,
-      status: op.task?.status === 'running' ? 'running' : 'completed',
-      message: op.message,
-      progress: op.task?.status === 'running' ? 50 : 100,
-    }));
+    const newStatuses: OperationStatus[] = operations.map((op) => {
+      // Map task status to our operation status
+      let operationStatus: 'pending' | 'running' | 'completed' | 'failed';
+      let progress: number | undefined;
+
+      switch (op.task?.status) {
+        case 'running':
+          operationStatus = 'running';
+          progress = 50;
+          break;
+        case 'failed':
+          operationStatus = 'failed';
+          progress = 100;
+          break;
+        case 'pending':
+          operationStatus = 'pending';
+          progress = 0;
+          break;
+        case 'completed':
+        default:
+          operationStatus = 'completed';
+          progress = 100;
+          break;
+      }
+
+      return {
+        id: `${op.vm_id}-${op.action}-${op.timestamp}`,
+        vmId: op.vm_id,
+        action: op.action,
+        status: operationStatus,
+        message: op.message,
+        progress,
+      };
+    });
 
     setOperationStatuses(newStatuses);
 
@@ -79,6 +105,8 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
         return AlertVariant.danger;
       case 'running':
         return AlertVariant.info;
+      case 'pending':
+        return AlertVariant.warning;
       default:
         return AlertVariant.info;
     }
@@ -92,6 +120,8 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
         return <TimesCircleIcon />;
       case 'running':
         return <InProgressIcon />;
+      case 'pending':
+        return <ExclamationCircleIcon />;
       default:
         return <ExclamationCircleIcon />;
     }

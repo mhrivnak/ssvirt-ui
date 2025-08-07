@@ -5,6 +5,8 @@ import {
   DropdownItem,
   DropdownList,
   MenuToggle,
+  Alert,
+  AlertVariant,
 } from '@patternfly/react-core';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import {
@@ -47,9 +49,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [confirmationAction, setConfirmationAction] =
     useState<PowerAction | null>(null);
-
-  const isBulkOperation = vmIds && vmIds.length > 0;
-  const targetVmIds = isBulkOperation ? vmIds : vm ? [vm.id] : [];
+  const [error, setError] = useState<string | null>(null);
 
   // Single VM hooks
   const powerOnMutation = usePowerOnVM();
@@ -64,6 +64,15 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   const bulkRebootMutation = useBulkRebootVMs();
   const bulkSuspendMutation = useBulkSuspendVMs();
   const bulkResetMutation = useBulkResetVMs();
+
+  // Validate props after hooks (React hooks rules compliance)
+  if (!vm && (!vmIds || vmIds.length === 0)) {
+    console.warn('VMPowerActions: Either vm or vmIds prop must be provided');
+    return null;
+  }
+
+  const isBulkOperation = vmIds && vmIds.length > 0;
+  const targetVmIds = isBulkOperation ? vmIds : vm ? [vm.id] : [];
 
   const handlePowerAction = async (action: PowerAction) => {
     if (targetVmIds.length === 0) return;
@@ -108,8 +117,16 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
         }
       }
       setConfirmationAction(null);
+      setError(null); // Clear any previous errors on success
     } catch (error) {
       console.error(`Failed to ${action.toLowerCase()} VM(s):`, error);
+      const actionLabel = getActionLabel(action).toLowerCase();
+      const targetDesc = isBulkOperation
+        ? `${targetVmIds.length} VMs`
+        : `VM ${vm?.name || 'Unknown'}`;
+      setError(
+        `Failed to ${actionLabel.replace(' all', '')} ${targetDesc}. Please try again.`
+      );
     }
   };
 
@@ -192,6 +209,20 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   if (variant === 'buttons') {
     return (
       <>
+        {error && (
+          <Alert
+            variant={AlertVariant.danger}
+            title="Power Operation Failed"
+            isInline
+            actionClose={
+              <Button variant="plain" onClick={() => setError(null)} />
+            }
+            style={{ marginBottom: '8px' }}
+          >
+            {error}
+          </Alert>
+        )}
+
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {actions.map((action) => (
             <Button
@@ -228,6 +259,20 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
 
   return (
     <>
+      {error && (
+        <Alert
+          variant={AlertVariant.danger}
+          title="Power Operation Failed"
+          isInline
+          actionClose={
+            <Button variant="plain" onClick={() => setError(null)} />
+          }
+          style={{ marginBottom: '8px' }}
+        >
+          {error}
+        </Alert>
+      )}
+
       <Dropdown
         isOpen={isDropdownOpen}
         onSelect={() => setIsDropdownOpen(false)}
