@@ -66,7 +66,7 @@ import {
   useOrganizations,
   usePowerOperationTracking,
 } from '../../hooks';
-import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
+import { VMPowerActions, PowerOperationStatus, VMCreationWizard } from '../../components/vms';
 import type { VM, VMStatus, VMQueryParams } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
@@ -127,6 +127,7 @@ const VMs: React.FC = () => {
   const [isOrgSelectOpen, setIsOrgSelectOpen] = useState(false);
   const [isPresetDropdownOpen, setIsPresetDropdownOpen] = useState(false);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
+  const [isCreateVMWizardOpen, setIsCreateVMWizardOpen] = useState(false);
 
   // Filter presets
   const [filterPresets, setFilterPresets] =
@@ -369,7 +370,7 @@ const VMs: React.FC = () => {
               <Button
                 variant="primary"
                 icon={<PlusIcon />}
-                onClick={() => console.log('Create VM')}
+                onClick={() => setIsCreateVMWizardOpen(true)}
               >
                 Create VM
               </Button>
@@ -688,7 +689,7 @@ const VMs: React.FC = () => {
                       <Button
                         variant="primary"
                         icon={<PlusIcon />}
-                        onClick={() => console.log('Create VM')}
+                        onClick={() => setIsCreateVMWizardOpen(true)}
                       >
                         Create Virtual Machine
                       </Button>
@@ -931,6 +932,12 @@ const VMs: React.FC = () => {
 
       {/* Power Operation Status */}
       <PowerOperationStatus operations={powerOperations} />
+
+      {/* VM Creation Wizard */}
+      <VMCreationWizard
+        isOpen={isCreateVMWizardOpen}
+        onClose={() => setIsCreateVMWizardOpen(false)}
+      />
     </PageSection>
   );
 };

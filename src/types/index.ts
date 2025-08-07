@@ -268,6 +268,70 @@ export interface CreateVMRequest {
   catalog_item_id: string;
   cpu_count?: number;
   memory_mb?: number;
+  description?: string;
+  network_config?: VMNetworkConfig;
+  storage_config?: VMStorageConfig;
+  advanced_config?: VMAdvancedConfig;
+}
+
+// VM Creation Wizard types
+export interface VMNetworkConfig {
+  network_id?: string;
+  ip_allocation_mode?: 'DHCP' | 'STATIC' | 'POOL';
+  ip_address?: string;
+  gateway?: string;
+  subnet_mask?: string;
+  dns_servers?: string[];
+}
+
+export interface VMStorageConfig {
+  disk_size_gb?: number;
+  storage_profile?: string;
+  additional_disks?: AdditionalDisk[];
+}
+
+export interface AdditionalDisk {
+  id: string;
+  size_gb: number;
+  storage_profile?: string;
+  bus_type?: 'IDE' | 'SCSI' | 'SATA';
+  bus_sub_type?: string;
+}
+
+export interface VMAdvancedConfig {
+  cloud_init_enabled?: boolean;
+  cloud_init_script?: string;
+  guest_customization?: boolean;
+  computer_name?: string;
+  admin_password?: string;
+  auto_logon?: boolean;
+  time_zone?: string;
+  custom_properties?: Record<string, string>;
+}
+
+export interface VMCreationTemplate {
+  id: string;
+  name: string;
+  description: string;
+  catalog_item_id: string;
+  cpu_count: number;
+  memory_mb: number;
+  network_config?: VMNetworkConfig;
+  storage_config?: VMStorageConfig;
+  advanced_config?: VMAdvancedConfig;
+  created_by: string;
+  created_at: string;
+  is_shared: boolean;
+}
+
+export interface VMCreationProgress {
+  task_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress_percent: number;
+  current_step: string;
+  steps_completed: string[];
+  estimated_completion: string;
+  error_message?: string;
 }
 
 export interface UpdateVMRequest {
