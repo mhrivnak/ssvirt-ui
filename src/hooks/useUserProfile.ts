@@ -75,13 +75,16 @@ export const useUpdateSecuritySetting = () => {
       UserProfileService.updateSecuritySetting(request),
     onSuccess: (updatedSetting, variables) => {
       // Update the security settings cache
-      queryClient.setQueryData(QUERY_KEYS.securitySettings, (oldData: SecuritySetting[] | undefined) => {
-        if (!oldData) return [updatedSetting];
-        
-        return oldData.map((setting: SecuritySetting) =>
-          setting.id === variables.setting_id ? updatedSetting : setting
-        );
-      });
+      queryClient.setQueryData(
+        QUERY_KEYS.securitySettings,
+        (oldData: SecuritySetting[] | undefined) => {
+          if (!oldData) return [updatedSetting];
+
+          return oldData.map((setting: SecuritySetting) =>
+            setting.id === variables.setting_id ? updatedSetting : setting
+          );
+        }
+      );
     },
     onError: (error) => {
       console.error('Failed to update security setting:', error);

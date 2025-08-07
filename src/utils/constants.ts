@@ -53,7 +53,8 @@ export const API_ENDPOINTS = {
   USER_PREFERENCES: '/v1/user/preferences',
   USER_PASSWORD: '/v1/user/password',
   USER_SECURITY_SETTINGS: '/v1/user/security/settings',
-  USER_SECURITY_SETTING: (settingId: string) => `/v1/user/security/settings/${settingId}`,
+  USER_SECURITY_SETTING: (settingId: string) =>
+    `/v1/user/security/settings/${settingId}`,
 
   // Organizations
   ORGANIZATIONS: '/org',

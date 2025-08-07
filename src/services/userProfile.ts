@@ -26,7 +26,9 @@ export class UserProfileService {
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to get user preferences');
+        throw new Error(
+          response.data.message || 'Failed to get user preferences'
+        );
       }
     } catch (error) {
       console.error('Failed to get user preferences:', error);
@@ -49,7 +51,9 @@ export class UserProfileService {
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to update user preferences');
+        throw new Error(
+          response.data.message || 'Failed to update user preferences'
+        );
       }
     } catch (error) {
       console.error('Failed to update user preferences:', error);
@@ -88,7 +92,9 @@ export class UserProfileService {
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to get security settings');
+        throw new Error(
+          response.data.message || 'Failed to get security settings'
+        );
       }
     } catch (error) {
       console.error('Failed to get security settings:', error);
@@ -111,7 +117,9 @@ export class UserProfileService {
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to update security setting');
+        throw new Error(
+          response.data.message || 'Failed to update security setting'
+        );
       }
     } catch (error) {
       console.error('Failed to update security setting:', error);

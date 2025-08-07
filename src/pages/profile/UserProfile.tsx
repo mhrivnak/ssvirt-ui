@@ -104,14 +104,14 @@ interface Notification {
 
 const UserProfile: React.FC = () => {
   const { user, isLoading } = useAuth();
-  
+
   // API hooks
   const { data: userPreferencesData } = useUserPreferences();
   const { data: securitySettingsData } = useSecuritySettings();
   const updatePreferencesMutation = useUpdateUserPreferences();
   const changePasswordMutation = useChangePassword();
   const updateSecuritySettingMutation = useUpdateSecuritySetting();
-  
+
   const [activeTabKey, setActiveTabKey] = useState<string>('profile');
 
   // Notifications state
@@ -196,7 +196,9 @@ const UserProfile: React.FC = () => {
   ]);
 
   // Security settings state
-  const [securitySettings, setSecuritySettings] = useState<SecuritySetting[]>([]);
+  const [securitySettings, setSecuritySettings] = useState<SecuritySetting[]>(
+    []
+  );
 
   // Initialize profile data when user loads
   useEffect(() => {
@@ -1059,12 +1061,15 @@ const UserProfile: React.FC = () => {
                                     isChecked={setting.enabled}
                                     onChange={async (_, checked) => {
                                       try {
-                                        const updateRequest: UpdateSecuritySettingRequest = {
-                                          setting_id: setting.id,
-                                          enabled: checked,
-                                        };
+                                        const updateRequest: UpdateSecuritySettingRequest =
+                                          {
+                                            setting_id: setting.id,
+                                            enabled: checked,
+                                          };
 
-                                        await updateSecuritySettingMutation.mutateAsync(updateRequest);
+                                        await updateSecuritySettingMutation.mutateAsync(
+                                          updateRequest
+                                        );
 
                                         addNotification({
                                           variant: 'success',
@@ -1079,7 +1084,8 @@ const UserProfile: React.FC = () => {
                                         );
                                         addNotification({
                                           variant: 'danger',
-                                          title: 'Security Setting Update Failed',
+                                          title:
+                                            'Security Setting Update Failed',
                                           message: errorMessage,
                                         });
                                       }
