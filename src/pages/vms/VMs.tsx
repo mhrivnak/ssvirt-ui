@@ -121,16 +121,19 @@ const VMs: React.FC = () => {
   ]);
 
   // Data fetching
-  const queryParams: VMQueryParams = useMemo(() => ({
-    search: filters.search || undefined,
-    vm_status: filters.status || undefined,
-    vdc_id: filters.vdc_id || undefined,
-    organization_id: filters.org_id || undefined,
-    sort_by: sortBy,
-    sort_order: sortDirection,
-    page: currentPage,
-    per_page: perPage,
-  }), [filters, sortBy, sortDirection, currentPage, perPage]);
+  const queryParams: VMQueryParams = useMemo(
+    () => ({
+      search: filters.search || undefined,
+      vm_status: filters.status || undefined,
+      vdc_id: filters.vdc_id || undefined,
+      organization_id: filters.org_id || undefined,
+      sort_by: sortBy,
+      sort_order: sortDirection,
+      page: currentPage,
+      per_page: perPage,
+    }),
+    [filters, sortBy, sortDirection, currentPage, perPage]
+  );
 
   const { data: vmsResponse, isLoading, error } = useVMs(queryParams);
   const { data: vdcsResponse } = useVDCs();
@@ -146,7 +149,7 @@ const VMs: React.FC = () => {
     if (savedPresets) {
       try {
         const parsed = JSON.parse(savedPresets);
-        setFilterPresets(prev => [...prev, ...parsed]);
+        setFilterPresets((prev) => [...prev, ...parsed]);
       } catch (error) {
         console.error('Failed to load saved filter presets:', error);
       }
@@ -159,7 +162,7 @@ const VMs: React.FC = () => {
   }, [filters, sortBy, sortDirection, currentPage]);
 
   const handleFilterChange = (key: keyof VMFilters, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1); // Reset to first page when filtering
   };
 
@@ -175,15 +178,15 @@ const VMs: React.FC = () => {
 
   const handleSelectVM = (vmId: string, checked: boolean) => {
     if (checked) {
-      setSelectedVMs(prev => [...prev, vmId]);
+      setSelectedVMs((prev) => [...prev, vmId]);
     } else {
-      setSelectedVMs(prev => prev.filter(id => id !== vmId));
+      setSelectedVMs((prev) => prev.filter((id) => id !== vmId));
     }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedVMs(vms.map(vm => vm.id));
+      setSelectedVMs(vms.map((vm) => vm.id));
     } else {
       setSelectedVMs([]);
     }
@@ -191,7 +194,7 @@ const VMs: React.FC = () => {
 
   const handleSort = (columnKey: string) => {
     if (sortBy === columnKey) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortBy(columnKey);
       setSortDirection('asc');
@@ -223,11 +226,16 @@ const VMs: React.FC = () => {
       },
     };
 
-    const customPresets = filterPresets.filter(p => p.id.startsWith('preset-'));
+    const customPresets = filterPresets.filter((p) =>
+      p.id.startsWith('preset-')
+    );
     const updatedCustomPresets = [...customPresets, newPreset];
-    
-    localStorage.setItem('vm_filter_presets', JSON.stringify(updatedCustomPresets));
-    setFilterPresets(prev => [...prev, newPreset]);
+
+    localStorage.setItem(
+      'vm_filter_presets',
+      JSON.stringify(updatedCustomPresets)
+    );
+    setFilterPresets((prev) => [...prev, newPreset]);
     setPresetName('');
     setShowPresetModal(false);
   };
@@ -235,9 +243,11 @@ const VMs: React.FC = () => {
   const handleDeletePreset = (presetId: string) => {
     if (!presetId.startsWith('preset-')) return; // Don't delete built-in presets
 
-    const updatedPresets = filterPresets.filter(p => p.id !== presetId);
-    const customPresets = updatedPresets.filter(p => p.id.startsWith('preset-'));
-    
+    const updatedPresets = filterPresets.filter((p) => p.id !== presetId);
+    const customPresets = updatedPresets.filter((p) =>
+      p.id.startsWith('preset-')
+    );
+
     localStorage.setItem('vm_filter_presets', JSON.stringify(customPresets));
     setFilterPresets(updatedPresets);
   };
@@ -340,7 +350,8 @@ const VMs: React.FC = () => {
     },
   ];
 
-  const hasActiveFilters = filters.search || filters.status || filters.vdc_id || filters.org_id;
+  const hasActiveFilters =
+    filters.search || filters.status || filters.vdc_id || filters.org_id;
   const filteredCount = vms.length;
   const isAllSelected = vms.length > 0 && selectedVMs.length === vms.length;
 
@@ -401,7 +412,9 @@ const VMs: React.FC = () => {
                     <SearchInput
                       placeholder="Search VMs by name..."
                       value={filters.search}
-                      onChange={(_, value) => handleFilterChange('search', value)}
+                      onChange={(_, value) =>
+                        handleFilterChange('search', value)
+                      }
                       onClear={() => handleFilterChange('search', '')}
                       style={{ width: '300px' }}
                     />
@@ -421,10 +434,14 @@ const VMs: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsStatusSelectOpen(!isStatusSelectOpen)}
+                          onClick={() =>
+                            setIsStatusSelectOpen(!isStatusSelectOpen)
+                          }
                           isExpanded={isStatusSelectOpen}
                         >
-                          {filters.status ? VM_STATUS_LABELS[filters.status as VMStatus] : 'All Statuses'}
+                          {filters.status
+                            ? VM_STATUS_LABELS[filters.status as VMStatus]
+                            : 'All Statuses'}
                         </MenuToggle>
                       )}
                     >
@@ -433,7 +450,9 @@ const VMs: React.FC = () => {
                         <SelectOption value="POWERED_ON">Running</SelectOption>
                         <SelectOption value="POWERED_OFF">Stopped</SelectOption>
                         <SelectOption value="SUSPENDED">Suspended</SelectOption>
-                        <SelectOption value="UNRESOLVED">Unresolved</SelectOption>
+                        <SelectOption value="UNRESOLVED">
+                          Unresolved
+                        </SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
@@ -455,16 +474,16 @@ const VMs: React.FC = () => {
                           onClick={() => setIsVDCSelectOpen(!isVDCSelectOpen)}
                           isExpanded={isVDCSelectOpen}
                         >
-                          {filters.vdc_id 
-                            ? vdcs.find(vdc => vdc.id === filters.vdc_id)?.name || 'Unknown VDC'
-                            : 'All VDCs'
-                          }
+                          {filters.vdc_id
+                            ? vdcs.find((vdc) => vdc.id === filters.vdc_id)
+                                ?.name || 'Unknown VDC'
+                            : 'All VDCs'}
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="">All VDCs</SelectOption>
-                        {vdcs.map(vdc => (
+                        {vdcs.map((vdc) => (
                           <SelectOption key={vdc.id} value={vdc.id}>
                             {vdc.name}
                           </SelectOption>
@@ -490,16 +509,17 @@ const VMs: React.FC = () => {
                           onClick={() => setIsOrgSelectOpen(!isOrgSelectOpen)}
                           isExpanded={isOrgSelectOpen}
                         >
-                          {filters.org_id 
-                            ? organizations.find(org => org.id === filters.org_id)?.display_name || 'Unknown Org'
-                            : 'All Organizations'
-                          }
+                          {filters.org_id
+                            ? organizations.find(
+                                (org) => org.id === filters.org_id
+                              )?.display_name || 'Unknown Org'
+                            : 'All Organizations'}
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="">All Organizations</SelectOption>
-                        {organizations.map(org => (
+                        {organizations.map((org) => (
                           <SelectOption key={org.id} value={org.id}>
                             {org.display_name}
                           </SelectOption>
@@ -517,7 +537,9 @@ const VMs: React.FC = () => {
                         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                           <MenuToggle
                             ref={toggleRef}
-                            onClick={() => setIsPresetDropdownOpen(!isPresetDropdownOpen)}
+                            onClick={() =>
+                              setIsPresetDropdownOpen(!isPresetDropdownOpen)
+                            }
                             isExpanded={isPresetDropdownOpen}
                             icon={<FilterIcon />}
                           >
@@ -526,7 +548,7 @@ const VMs: React.FC = () => {
                         )}
                       >
                         <DropdownList>
-                          {filterPresets.map(preset => (
+                          {filterPresets.map((preset) => (
                             <DropdownItem
                               key={preset.id}
                               onClick={() => handleApplyPreset(preset)}
@@ -572,7 +594,9 @@ const VMs: React.FC = () => {
                           toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                             <MenuToggle
                               ref={toggleRef}
-                              onClick={() => setIsBulkActionsOpen(!isBulkActionsOpen)}
+                              onClick={() =>
+                                setIsBulkActionsOpen(!isBulkActionsOpen)
+                              }
                               isExpanded={isBulkActionsOpen}
                             >
                               Actions ({selectedVMs.length} selected)
@@ -580,7 +604,7 @@ const VMs: React.FC = () => {
                           )}
                         >
                           <DropdownList>
-                            {getBulkActions().map((action, index) => 
+                            {getBulkActions().map((action, index) =>
                               action.isSeparator ? (
                                 <DropdownItem key={`separator-${index}`} />
                               ) : (
@@ -610,7 +634,10 @@ const VMs: React.FC = () => {
                   )}
 
                   {/* Pagination */}
-                  <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                  <ToolbarItem
+                    variant="pagination"
+                    align={{ default: 'alignEnd' }}
+                  >
                     <Pagination
                       itemCount={filteredCount}
                       perPage={perPage}
@@ -632,13 +659,23 @@ const VMs: React.FC = () => {
         {/* Results Summary */}
         {hasActiveFilters && (
           <StackItem>
-            <Alert variant={AlertVariant.info} isInline title={`Showing ${filteredCount} filtered results`}>
-              Active filters: {[
+            <Alert
+              variant={AlertVariant.info}
+              isInline
+              title={`Showing ${filteredCount} filtered results`}
+            >
+              Active filters:{' '}
+              {[
                 filters.search && `search: "${filters.search}"`,
-                filters.status && `status: ${VM_STATUS_LABELS[filters.status as VMStatus]}`,
-                filters.vdc_id && `VDC: ${vdcs.find(v => v.id === filters.vdc_id)?.name}`,
-                filters.org_id && `org: ${organizations.find(o => o.id === filters.org_id)?.display_name}`,
-              ].filter(Boolean).join(', ')}
+                filters.status &&
+                  `status: ${VM_STATUS_LABELS[filters.status as VMStatus]}`,
+                filters.vdc_id &&
+                  `VDC: ${vdcs.find((v) => v.id === filters.vdc_id)?.name}`,
+                filters.org_id &&
+                  `org: ${organizations.find((o) => o.id === filters.org_id)?.display_name}`,
+              ]
+                .filter(Boolean)
+                .join(', ')}
             </Alert>
           </StackItem>
         )}
@@ -655,13 +692,14 @@ const VMs: React.FC = () => {
                 <EmptyState variant={EmptyStateVariant.lg}>
                   <VirtualMachineIcon />
                   <Title headingLevel="h4" size="lg">
-                    {hasActiveFilters ? 'No VMs match your filters' : 'No virtual machines found'}
+                    {hasActiveFilters
+                      ? 'No VMs match your filters'
+                      : 'No virtual machines found'}
                   </Title>
                   <EmptyStateBody>
-                    {hasActiveFilters 
+                    {hasActiveFilters
                       ? 'Try adjusting your search criteria or clear the filters to see all VMs.'
-                      : 'Get started by creating your first virtual machine.'
-                    }
+                      : 'Get started by creating your first virtual machine.'}
                   </EmptyStateBody>
                   <EmptyStateActions>
                     {hasActiveFilters ? (
@@ -693,7 +731,10 @@ const VMs: React.FC = () => {
                       </Th>
                       <Th
                         sort={{
-                          sortBy: { index: sortBy === 'name' ? 0 : undefined, direction: sortDirection },
+                          sortBy: {
+                            index: sortBy === 'name' ? 0 : undefined,
+                            direction: sortDirection,
+                          },
                           onSort: () => handleSort('name'),
                           columnIndex: 0,
                         }}
@@ -705,7 +746,10 @@ const VMs: React.FC = () => {
                       <Th>Organization</Th>
                       <Th
                         sort={{
-                          sortBy: { index: sortBy === 'cpu_count' ? 1 : undefined, direction: sortDirection },
+                          sortBy: {
+                            index: sortBy === 'cpu_count' ? 1 : undefined,
+                            direction: sortDirection,
+                          },
                           onSort: () => handleSort('cpu_count'),
                           columnIndex: 1,
                         }}
@@ -714,7 +758,10 @@ const VMs: React.FC = () => {
                       </Th>
                       <Th
                         sort={{
-                          sortBy: { index: sortBy === 'memory_mb' ? 2 : undefined, direction: sortDirection },
+                          sortBy: {
+                            index: sortBy === 'memory_mb' ? 2 : undefined,
+                            direction: sortDirection,
+                          },
                           onSort: () => handleSort('memory_mb'),
                           columnIndex: 2,
                         }}
@@ -723,7 +770,10 @@ const VMs: React.FC = () => {
                       </Th>
                       <Th
                         sort={{
-                          sortBy: { index: sortBy === 'created_at' ? 3 : undefined, direction: sortDirection },
+                          sortBy: {
+                            index: sortBy === 'created_at' ? 3 : undefined,
+                            direction: sortDirection,
+                          },
                           onSort: () => handleSort('created_at'),
                           columnIndex: 3,
                         }}
@@ -734,13 +784,15 @@ const VMs: React.FC = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {vms.map(vm => (
+                    {vms.map((vm) => (
                       <Tr key={vm.id}>
                         <Td>
                           <Checkbox
                             id={`select-${vm.id}`}
                             isChecked={selectedVMs.includes(vm.id)}
-                            onChange={(_, checked) => handleSelectVM(vm.id, checked)}
+                            onChange={(_, checked) =>
+                              handleSelectVM(vm.id, checked)
+                            }
                             aria-label={`Select VM ${vm.name}`}
                           />
                         </Td>
@@ -748,17 +800,25 @@ const VMs: React.FC = () => {
                           <div>
                             <strong>{vm.name}</strong>
                             <br />
-                            <small className="pf-v6-u-color-200">{vm.vm_name}</small>
+                            <small className="pf-v6-u-color-200">
+                              {vm.vm_name}
+                            </small>
                           </div>
                         </Td>
                         <Td>{getStatusBadge(vm.status)}</Td>
                         <Td>
-                          <Link to={`/vdcs/${vm.vdc_name}`} className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline">
+                          <Link
+                            to={`/vdcs/${vm.vdc_name}`}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
                             {vm.vdc_name}
                           </Link>
                         </Td>
                         <Td>
-                          <Link to={`/organizations/${vm.org_name}`} className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline">
+                          <Link
+                            to={`/organizations/${vm.org_name}`}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
                             {vm.org_name}
                           </Link>
                         </Td>
@@ -807,7 +867,10 @@ const VMs: React.FC = () => {
       >
         <Stack hasGutter>
           <StackItem>
-            <p>Save your current filter settings as a preset for quick access later.</p>
+            <p>
+              Save your current filter settings as a preset for quick access
+              later.
+            </p>
           </StackItem>
           <StackItem>
             <label htmlFor="preset-name">Preset Name</label>
@@ -821,12 +884,26 @@ const VMs: React.FC = () => {
             />
           </StackItem>
           <StackItem>
-            <p><strong>Current filters:</strong></p>
+            <p>
+              <strong>Current filters:</strong>
+            </p>
             <ul>
               {filters.search && <li>Search: "{filters.search}"</li>}
-              {filters.status && <li>Status: {VM_STATUS_LABELS[filters.status as VMStatus]}</li>}
-              {filters.vdc_id && <li>VDC: {vdcs.find(v => v.id === filters.vdc_id)?.name}</li>}
-              {filters.org_id && <li>Organization: {organizations.find(o => o.id === filters.org_id)?.display_name}</li>}
+              {filters.status && (
+                <li>Status: {VM_STATUS_LABELS[filters.status as VMStatus]}</li>
+              )}
+              {filters.vdc_id && (
+                <li>VDC: {vdcs.find((v) => v.id === filters.vdc_id)?.name}</li>
+              )}
+              {filters.org_id && (
+                <li>
+                  Organization:{' '}
+                  {
+                    organizations.find((o) => o.id === filters.org_id)
+                      ?.display_name
+                  }
+                </li>
+              )}
               {!hasActiveFilters && <li>No filters applied</li>}
             </ul>
           </StackItem>
