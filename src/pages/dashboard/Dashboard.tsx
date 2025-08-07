@@ -23,7 +23,13 @@ import {
   SyncAltIcon,
   ExternalLinkAltIcon,
 } from '@patternfly/react-icons';
-import { useDashboardStats, useRecentActivity } from '../../hooks';
+import {
+  useDashboardStats,
+  useRecentActivity,
+  useVMs,
+  useBulkPowerOnVMs,
+  useBulkPowerOffVMs,
+} from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import {
   ResourceCard,
@@ -38,6 +44,9 @@ const Dashboard: React.FC = () => {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: activities, isLoading: activitiesLoading } =
     useRecentActivity(5);
+  const { data: vmsData } = useVMs();
+  const bulkPowerOnMutation = useBulkPowerOnVMs();
+  const bulkPowerOffMutation = useBulkPowerOffVMs();
 
   const resourceCards = [
     {
@@ -118,8 +127,12 @@ const Dashboard: React.FC = () => {
       icon: PlayIcon,
       variant: 'secondary' as const,
       onClick: () => {
-        // TODO: Implement bulk power on
-        console.log('Bulk power on VMs');
+        if (vmsData?.data) {
+          const vmIds = vmsData.data.map((vm) => vm.id);
+          if (vmIds.length > 0) {
+            bulkPowerOnMutation.mutate(vmIds);
+          }
+        }
       },
     },
     {
@@ -127,8 +140,12 @@ const Dashboard: React.FC = () => {
       icon: StopIcon,
       variant: 'secondary' as const,
       onClick: () => {
-        // TODO: Implement bulk power off
-        console.log('Bulk power off VMs');
+        if (vmsData?.data) {
+          const vmIds = vmsData.data.map((vm) => vm.id);
+          if (vmIds.length > 0) {
+            bulkPowerOffMutation.mutate(vmIds);
+          }
+        }
       },
     },
     {
