@@ -59,7 +59,7 @@ import {
   VirtualMachineIcon,
   ExclamationTriangleIcon,
 } from '@patternfly/react-icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useVMs, useVDCs, useOrganizations } from '../../hooks';
 import type { VM, VMStatus, VMQueryParams } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
@@ -98,6 +98,8 @@ const defaultPresets: FilterPreset[] = [
 ];
 
 const VMs: React.FC = () => {
+  const navigate = useNavigate();
+
   // State management
   const [filters, setFilters] = useState<VMFilters>({
     search: '',
@@ -315,7 +317,7 @@ const VMs: React.FC = () => {
     { isSeparator: true },
     {
       title: 'View Details',
-      onClick: () => console.log('View VM details:', vm.id),
+      onClick: () => navigate(`/vms/${vm.id}`),
     },
     {
       title: 'Edit',
@@ -802,7 +804,12 @@ const VMs: React.FC = () => {
                         </Td>
                         <Td>
                           <div>
-                            <strong>{vm.name}</strong>
+                            <Link
+                              to={`/vms/${vm.id}`}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              <strong>{vm.name}</strong>
+                            </Link>
                             <br />
                             <small className="pf-v6-u-color-200">
                               {vm.vm_name}
