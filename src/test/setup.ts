@@ -18,6 +18,30 @@ vi.mock('../utils/config', () => ({
   resetRuntimeConfig: vi.fn(),
 }));
 
+// Mock the constants module to prevent CONFIG proxy issues
+vi.mock('../utils/constants', async () => {
+  const actual = await vi.importActual('../utils/constants') as any;
+  return {
+    ...actual,
+    CONFIG: {
+      API_BASE_URL: 'http://localhost:8080/api',
+      APP_TITLE: 'SSVIRT Web UI',
+      APP_VERSION: '0.0.1',
+      DEV_MODE: false,
+      JWT_TOKEN_KEY: 'ssvirt_token',
+      LOGO_URL: '/vite.svg',
+    },
+    getConfig: vi.fn().mockReturnValue({
+      API_BASE_URL: 'http://localhost:8080/api',
+      APP_TITLE: 'SSVIRT Web UI',
+      APP_VERSION: '0.0.1',
+      DEV_MODE: false,
+      JWT_TOKEN_KEY: 'ssvirt_token',
+      LOGO_URL: '/vite.svg',
+    }),
+  };
+});
+
 // Mock fetch for config loading
 global.fetch = vi.fn().mockResolvedValue({
   ok: true,
