@@ -50,6 +50,7 @@ import {
   KeyIcon,
   EyeIcon,
   EyeSlashIcon,
+  TimesIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks';
@@ -96,9 +97,20 @@ interface SecuritySetting {
   last_used?: string;
 }
 
+interface Notification {
+  id: string;
+  variant: 'success' | 'danger' | 'warning' | 'info';
+  title: string;
+  message?: string;
+  timestamp: number;
+}
+
 const UserProfile: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [activeTabKey, setActiveTabKey] = useState<string>('profile');
+
+  // Notifications state
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Profile form state
   const [profileData, setProfileData] = useState<UserProfileData>({
@@ -172,7 +184,7 @@ const UserProfile: React.FC = () => {
   ]);
 
   // Security settings state
-  const [securitySettings] = useState<SecuritySetting[]>([
+  const [securitySettings, setSecuritySettings] = useState<SecuritySetting[]>([
     {
       id: 'two_factor',
       name: 'Two-Factor Authentication',
@@ -252,6 +264,30 @@ const UserProfile: React.FC = () => {
     }
   }, [preferences, originalPreferences]);
 
+  // Auto-remove notifications after 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNotifications(prev => prev.filter(notification => 
+        Date.now() - notification.timestamp < 5000
+      ));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: `notification-${Date.now()}-${Math.random()}`,
+      timestamp: Date.now(),
+    };
+    setNotifications(prev => [...prev, newNotification]);
+  };
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+  };
+
   const validateProfile = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -286,8 +322,28 @@ const UserProfile: React.FC = () => {
 
     if (!passwordData.new_password) {
       errors.new_password = 'New password is required';
-    } else if (passwordData.new_password.length < 8) {
-      errors.new_password = 'Password must be at least 8 characters';
+    } else {
+      const passwordRequirements = [];
+      
+      if (passwordData.new_password.length < 8) {
+        passwordRequirements.push('at least 8 characters');
+      }
+      if (!/[a-z]/.test(passwordData.new_password)) {
+        passwordRequirements.push('one lowercase letter');
+      }
+      if (!/[A-Z]/.test(passwordData.new_password)) {
+        passwordRequirements.push('one uppercase letter');
+      }
+      if (!/\d/.test(passwordData.new_password)) {
+        passwordRequirements.push('one number');
+      }
+      if (!/[!@#$%^&*()_+=[\]{};':"\\|,.<>/?]/.test(passwordData.new_password)) {
+        passwordRequirements.push('one special character');
+      }
+      
+      if (passwordRequirements.length > 0) {
+        errors.new_password = `Password must contain ${passwordRequirements.join(', ')}`;
+      }
     }
 
     if (!passwordData.confirm_password) {
@@ -331,8 +387,12 @@ const UserProfile: React.FC = () => {
       setProfileData(updatedProfileData);
       setProfileHasChanges(false);
 
-      // Show success message (would be handled by a notification system)
-      alert('Profile updated successfully!');
+      // Show success notification
+      addNotification({
+        variant: 'success',
+        title: 'Profile Updated',
+        message: 'Your profile information has been updated successfully.',
+      });
     } catch (error) {
       const errorMessage = handleFormError(
         error,
@@ -356,7 +416,11 @@ const UserProfile: React.FC = () => {
       setOriginalPreferences({ ...preferences });
       setPreferencesHasChanges(false);
 
-      alert('Preferences updated successfully!');
+      addNotification({
+        variant: 'success',
+        title: 'Preferences Updated',
+        message: 'Your preferences have been saved successfully.',
+      });
     } catch (error) {
       const errorMessage = handleFormError(
         error,
@@ -387,7 +451,11 @@ const UserProfile: React.FC = () => {
       setPasswordErrors({});
       setShowPasswordModal(false);
 
-      alert('Password changed successfully!');
+      addNotification({
+        variant: 'success',
+        title: 'Password Changed',
+        message: 'Your password has been changed successfully.',
+      });
     } catch (error) {
       const errorMessage = handleFormError(
         error,
@@ -417,13 +485,45 @@ const UserProfile: React.FC = () => {
   } => {
     if (password.length === 0)
       return { score: 0, label: '', variant: 'danger' };
-    if (password.length < 6)
-      return { score: 25, label: 'Weak', variant: 'danger' };
-    if (password.length < 8)
-      return { score: 50, label: 'Fair', variant: 'warning' };
-    if (password.length < 12)
-      return { score: 75, label: 'Good', variant: 'warning' };
-    return { score: 100, label: 'Strong', variant: 'success' };
+
+    let score = 0;
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      numbers: /\d/.test(password),
+      symbols: /[!@#$%^&*()_+=[\]{};':"\\|,.<>/?]/.test(password),
+    };
+
+    // Length scoring
+    if (password.length >= 8) score += 20;
+    if (password.length >= 12) score += 10;
+    if (password.length >= 16) score += 10;
+
+    // Character variety scoring
+    if (checks.lowercase) score += 15;
+    if (checks.uppercase) score += 15;
+    if (checks.numbers) score += 15;
+    if (checks.symbols) score += 15;
+
+    // Common patterns penalty
+    const commonPatterns = [
+      /123/, /abc/, /qwe/, /password/, /admin/, /user/
+    ];
+    const hasCommonPattern = commonPatterns.some(pattern => 
+      pattern.test(password.toLowerCase())
+    );
+    if (hasCommonPattern) score -= 20;
+
+    // Ensure score is within bounds
+    score = Math.max(0, Math.min(100, score));
+
+    // Determine label and variant based on score
+    if (score < 30) return { score, label: 'Very Weak', variant: 'danger' };
+    if (score < 50) return { score, label: 'Weak', variant: 'danger' };
+    if (score < 70) return { score, label: 'Fair', variant: 'warning' };
+    if (score < 90) return { score, label: 'Good', variant: 'warning' };
+    return { score, label: 'Strong', variant: 'success' };
   };
 
   if (isLoading) {
@@ -474,6 +574,30 @@ const UserProfile: React.FC = () => {
           </Split>
         </StackItem>
 
+        {/* Notifications */}
+        {notifications.map((notification) => (
+          <StackItem key={notification.id}>
+            <Alert
+              variant={notification.variant}
+              title={notification.title}
+              isInline
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => removeNotification(notification.id)}
+                  aria-label="Close notification"
+                >
+                  <Icon>
+                    <TimesIcon />
+                  </Icon>
+                </Button>
+              }
+            >
+              {notification.message}
+            </Alert>
+          </StackItem>
+        ))}
+
         {/* User Info Card */}
         <StackItem>
           <Card>
@@ -516,7 +640,7 @@ const UserProfile: React.FC = () => {
                 </TabTitleText>
               }
             >
-              <TabContent id="profile-tab">
+              <TabContent id="profile-info-tab">
                 <Card>
                   <CardBody>
                     <Form onSubmit={handleProfileSubmit}>
@@ -679,7 +803,7 @@ const UserProfile: React.FC = () => {
                 </TabTitleText>
               }
             >
-              <TabContent id="profile-tab">
+              <TabContent id="preferences-tab">
                 <Card>
                   <CardBody>
                     <Form onSubmit={handlePreferencesSubmit}>
@@ -865,7 +989,7 @@ const UserProfile: React.FC = () => {
                 </TabTitleText>
               }
             >
-              <TabContent id="profile-tab">
+              <TabContent id="security-tab">
                 <Stack hasGutter>
                   {/* Password Change */}
                   <StackItem>
@@ -928,11 +1052,17 @@ const UserProfile: React.FC = () => {
                                     label="Enabled"
                                     isChecked={setting.enabled}
                                     onChange={(_, checked) => {
-                                      // TODO: Update security setting
-                                      console.log(
-                                        `Toggle ${setting.id}:`,
-                                        checked
+                                      // Update security setting
+                                      setSecuritySettings(prev => 
+                                        prev.map(s => 
+                                          s.id === setting.id 
+                                            ? { ...s, enabled: checked, last_used: checked ? new Date().toISOString() : s.last_used }
+                                            : s
+                                        )
                                       );
+                                      
+                                      // TODO: Call API to persist security setting change
+                                      // await SecurityService.updateSetting(setting.id, checked);
                                     }}
                                   />
                                 </SplitItem>
@@ -959,7 +1089,7 @@ const UserProfile: React.FC = () => {
                 </TabTitleText>
               }
             >
-              <TabContent id="profile-tab">
+              <TabContent id="activity-tab">
                 <Card>
                   <CardBody>
                     <Stack hasGutter>
@@ -1217,7 +1347,7 @@ const UserProfile: React.FC = () => {
               <ActionGroup>
                 <Button
                   variant="primary"
-                  onClick={handlePasswordSubmit}
+                  type="submit"
                   icon={<SaveIcon />}
                 >
                   Change Password
