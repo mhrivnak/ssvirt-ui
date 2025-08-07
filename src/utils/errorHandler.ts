@@ -6,13 +6,24 @@ import { logger } from './logger';
 function isAxiosErrorWithResponse(error: unknown): error is {
   response: { data?: { message?: string } };
 } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error &&
-    typeof (error as { response?: unknown }).response === 'object' &&
-    (error as { response?: unknown }).response !== null
-  );
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return false;
+  }
+
+  const response = (error as { response?: unknown }).response;
+  if (typeof response !== 'object' || response === null) {
+    return false;
+  }
+
+  // Check if data exists and is an object (if it exists)
+  if ('data' in response) {
+    const data = (response as { data?: unknown }).data;
+    if (data !== undefined && (typeof data !== 'object' || data === null)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -88,5 +99,8 @@ export function handleFormError(
     extractedMessage: errorMessage,
   });
 
-  return errorMessage || fallbackMessage;
+  // Use fallbackMessage if we got the generic default message
+  return errorMessage === 'An unexpected error occurred'
+    ? fallbackMessage
+    : errorMessage;
 }
