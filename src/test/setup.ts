@@ -7,8 +7,26 @@ process.env.VITE_APP_TITLE = 'SSVIRT Web UI';
 process.env.VITE_APP_VERSION = '0.0.1';
 process.env.VITE_LOGO_URL = '/vite.svg';
 process.env.VITE_JWT_TOKEN_KEY = 'ssvirt_token';
+process.env.NODE_ENV = 'test';
 
-// Mock fetch for config loading (only needed for runtime config tests)
+// Mock the entire runtime config module to prevent CI issues
+vi.mock('../utils/config', () => ({
+  loadRuntimeConfig: vi.fn().mockResolvedValue({
+    apiBaseUrl: 'http://localhost:8080/api',
+    appTitle: 'SSVIRT Web UI',
+    appVersion: '0.0.1',
+    logoUrl: '/vite.svg',
+  }),
+  getRuntimeConfig: vi.fn().mockReturnValue({
+    apiBaseUrl: 'http://localhost:8080/api',
+    appTitle: 'SSVIRT Web UI',
+    appVersion: '0.0.1',
+    logoUrl: '/vite.svg',
+  }),
+  resetRuntimeConfig: vi.fn(),
+}));
+
+// Mock fetch for config loading
 global.fetch = vi.fn().mockResolvedValue({
   ok: true,
   json: vi.fn().mockResolvedValue({

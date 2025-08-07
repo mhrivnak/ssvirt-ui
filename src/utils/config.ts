@@ -28,14 +28,17 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   try {
     const response = await fetch('/config.json');
     if (response.ok) {
-      const config = await response.json() as RuntimeConfig;
+      const config = (await response.json()) as RuntimeConfig;
       runtimeConfig = { ...DEFAULT_CONFIG, ...config };
       console.log('Loaded runtime configuration from /config.json');
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
   } catch (error) {
-    console.warn('Failed to load /config.json, using environment defaults:', error);
+    console.warn(
+      'Failed to load /config.json, using environment defaults:',
+      error
+    );
     runtimeConfig = DEFAULT_CONFIG;
   }
 
@@ -48,7 +51,9 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
  */
 export function getRuntimeConfig(): RuntimeConfig {
   if (!runtimeConfig) {
-    throw new Error('Runtime configuration not loaded. Call loadRuntimeConfig() first.');
+    throw new Error(
+      'Runtime configuration not loaded. Call loadRuntimeConfig() first.'
+    );
   }
   return runtimeConfig;
 }

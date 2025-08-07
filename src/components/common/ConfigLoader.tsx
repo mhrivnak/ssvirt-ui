@@ -19,7 +19,9 @@ export const ConfigLoader: React.FC<ConfigLoaderProps> = ({ children }) => {
         await loadRuntimeConfig();
         setIsLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load configuration');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load configuration'
+        );
         setIsLoading(false);
       }
     };
@@ -29,14 +31,16 @@ export const ConfigLoader: React.FC<ConfigLoaderProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '1rem'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
         <Spinner size="lg" />
         <div>Loading configuration...</div>
       </div>
@@ -45,15 +49,17 @@ export const ConfigLoader: React.FC<ConfigLoaderProps> = ({ children }) => {
 
   if (error) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '1rem',
-        color: 'red'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '1rem',
+          color: 'red',
+        }}
+      >
         <div>Failed to load application configuration</div>
         <div>{error}</div>
       </div>
