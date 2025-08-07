@@ -54,17 +54,17 @@ import {
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useVDC } from '../../hooks';
+import { VDCService } from '../../services';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import type { User } from '../../types';
+import type {
+  VDCUser as VDCUserType,
+  InviteVDCUserRequest,
+  UpdateVDCUserRoleRequest,
+} from '../../types';
 import { ROUTES } from '../../utils/constants';
 
-// Mock user data - in real implementation, this would come from API
-interface VDCUser extends User {
-  role: 'admin' | 'user' | 'viewer';
-  joined_at: string;
-  last_active: string;
-  status: 'active' | 'inactive' | 'invited';
-}
+// Use the VDCUser type from types file
+type VDCUser = VDCUserType;
 
 const mockUsers: VDCUser[] = [
   {
@@ -199,7 +199,7 @@ const VDCUsers: React.FC = () => {
     setPage(1);
   };
 
-  const handleInviteUser = () => {
+  const handleInviteUser = async () => {
     // Clear previous errors
     setEmailError('');
 
@@ -216,18 +216,27 @@ const VDCUsers: React.FC = () => {
       return;
     }
 
-    // TODO: Implement actual user invitation API call
-    console.log('Inviting user to VDC:', {
-      email: inviteEmail,
-      role: inviteRole,
-      vdcId: id,
-    });
+    if (!id) return;
 
-    // Reset form and close modal
-    setInviteEmail('');
-    setInviteRole('user');
-    setEmailError('');
-    setIsInviteModalOpen(false);
+    try {
+      const inviteData: InviteVDCUserRequest = {
+        email: inviteEmail,
+        role: inviteRole as 'admin' | 'user' | 'viewer',
+      };
+
+      await VDCService.inviteUserToVDC(id, inviteData);
+
+      // Reset form and close modal
+      setInviteEmail('');
+      setInviteRole('user');
+      setEmailError('');
+      setIsInviteModalOpen(false);
+
+      // TODO: Show success notification and refresh user list
+    } catch (error) {
+      console.error('Failed to invite user to VDC:', error);
+      setEmailError('Failed to send invitation. Please try again.');
+    }
   };
 
   const handleEditUser = (user: VDCUser) => {
@@ -236,30 +245,44 @@ const VDCUsers: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUserRole = () => {
-    if (!selectedUser) return;
+  const handleUpdateUserRole = async () => {
+    if (!selectedUser || !id) return;
 
-    // TODO: Implement actual user role update API call
-    console.log('Updating user role in VDC:', {
-      userId: selectedUser.id,
-      role: editRole,
-      vdcId: id,
-    });
+    try {
+      const updateData: UpdateVDCUserRoleRequest = {
+        user_id: selectedUser.id,
+        role: editRole as 'admin' | 'user' | 'viewer',
+      };
 
-    // Reset and close modal
-    setSelectedUser(null);
-    setEditRole('');
-    setIsEditModalOpen(false);
+      await VDCService.updateVDCUserRole(id, updateData);
+
+      // Reset and close modal
+      setSelectedUser(null);
+      setEditRole('');
+      setIsEditModalOpen(false);
+
+      // TODO: Show success notification and refresh user list
+    } catch (error) {
+      console.error('Failed to update user role in VDC:', error);
+      // TODO: Show error notification
+    }
   };
 
-  const handleRemoveUser = (user: VDCUser) => {
+  const handleRemoveUser = async (user: VDCUser) => {
     if (
       window.confirm(
         `Are you sure you want to remove ${user.first_name} ${user.last_name} from this VDC?`
       )
     ) {
-      // TODO: Implement actual user removal API call
-      console.log('Removing user from VDC:', { userId: user.id, vdcId: id });
+      if (!id) return;
+
+      try {
+        await VDCService.removeUserFromVDC(id, user.id);
+        // TODO: Show success notification and refresh user list
+      } catch (error) {
+        console.error('Failed to remove user from VDC:', error);
+        // TODO: Show error notification
+      }
     }
   };
 
