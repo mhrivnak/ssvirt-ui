@@ -1,5 +1,7 @@
-// Environment-based configuration constants
-export const CONFIG = {
+import { getRuntimeConfig } from './config';
+
+// Fallback configuration for when runtime config is not available (e.g., tests)
+const FALLBACK_CONFIG = {
   API_BASE_URL:
     import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   APP_TITLE: import.meta.env.VITE_APP_TITLE || 'SSVIRT Web UI',
@@ -8,6 +10,36 @@ export const CONFIG = {
   JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
   LOGO_URL: import.meta.env.VITE_LOGO_URL || '/vite.svg',
 } as const;
+
+// Runtime configuration getter with fallback
+export const getConfig = () => {
+  // In test environment, always use fallback to avoid async loading issues
+  if (process.env.NODE_ENV === 'test' || typeof window === 'undefined') {
+    return FALLBACK_CONFIG;
+  }
+
+  try {
+    const runtimeConfig = getRuntimeConfig();
+    return {
+      API_BASE_URL: runtimeConfig.apiBaseUrl,
+      APP_TITLE: runtimeConfig.appTitle,
+      APP_VERSION: runtimeConfig.appVersion,
+      DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
+      JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
+      LOGO_URL: runtimeConfig.logoUrl,
+    } as const;
+  } catch {
+    // Runtime config not loaded yet, use fallback
+    return FALLBACK_CONFIG;
+  }
+};
+
+// Legacy CONFIG export for backward compatibility
+export const CONFIG = new Proxy({} as ReturnType<typeof getConfig>, {
+  get(_target, prop) {
+    return getConfig()[prop as keyof ReturnType<typeof getConfig>];
+  },
+});
 
 // API endpoints
 export const API_ENDPOINTS = {
