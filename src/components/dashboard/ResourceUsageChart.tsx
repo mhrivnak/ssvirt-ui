@@ -5,15 +5,13 @@ import {
   CardTitle,
   Stack,
   StackItem,
-  Text,
-  TextVariants,
   Progress,
   ProgressSize,
   ProgressVariant,
   Split,
   SplitItem,
 } from '@patternfly/react-core';
-import { DashboardStats } from '../../types';
+import type { DashboardStats } from '../../types';
 
 interface ResourceUsageChartProps {
   stats?: DashboardStats;
@@ -40,23 +38,20 @@ export const ResourceUsageChart: React.FC<ResourceUsageChartProps> = ({
   return (
     <Card isFullHeight>
       <CardTitle>
-        <Text component={TextVariants.h2}>Resource Utilization</Text>
+        <h2>Resource Utilization</h2>
       </CardTitle>
       <CardBody>
         <Stack hasGutter>
           <StackItem>
             <Split>
               <SplitItem isFilled>
-                <Text component={TextVariants.h4}>VM Usage</Text>
-                <Text
-                  component={TextVariants.small}
-                  className="pf-v6-u-color-200"
-                >
+                <h4>VM Usage</h4>
+                <small className="pf-v6-u-color-200">
                   {stats.running_vms} of {stats.total_vms} VMs running
-                </Text>
+                </small>
               </SplitItem>
               <SplitItem>
-                <Text component={TextVariants.h4}>{vmUtilization}%</Text>
+                <h4>{vmUtilization}%</h4>
               </SplitItem>
             </Split>
           </StackItem>
@@ -75,12 +70,10 @@ export const ResourceUsageChart: React.FC<ResourceUsageChartProps> = ({
               <StackItem>
                 <Split>
                   <SplitItem isFilled>
-                    <Text component={TextVariants.p}>Organizations</Text>
+                    <p>Organizations</p>
                   </SplitItem>
                   <SplitItem>
-                    <Text component={TextVariants.p}>
-                      {stats.total_organizations}
-                    </Text>
+                    <p>{stats.total_organizations}</p>
                   </SplitItem>
                 </Split>
               </StackItem>
@@ -88,10 +81,10 @@ export const ResourceUsageChart: React.FC<ResourceUsageChartProps> = ({
               <StackItem>
                 <Split>
                   <SplitItem isFilled>
-                    <Text component={TextVariants.p}>Virtual Data Centers</Text>
+                    <p>Virtual Data Centers</p>
                   </SplitItem>
                   <SplitItem>
-                    <Text component={TextVariants.p}>{stats.total_vdcs}</Text>
+                    <p>{stats.total_vdcs}</p>
                   </SplitItem>
                 </Split>
               </StackItem>
@@ -99,12 +92,10 @@ export const ResourceUsageChart: React.FC<ResourceUsageChartProps> = ({
               <StackItem>
                 <Split>
                   <SplitItem isFilled>
-                    <Text component={TextVariants.p}>Catalogs</Text>
+                    <p>Catalogs</p>
                   </SplitItem>
                   <SplitItem>
-                    <Text component={TextVariants.p}>
-                      {stats.total_catalogs}
-                    </Text>
+                    <p>{stats.total_catalogs}</p>
                   </SplitItem>
                 </Split>
               </StackItem>

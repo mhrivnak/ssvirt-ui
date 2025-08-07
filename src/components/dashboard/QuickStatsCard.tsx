@@ -8,11 +8,9 @@ import {
   Stack,
   StackItem,
   Button,
-  Text,
-  TextVariants,
   Badge,
 } from '@patternfly/react-core';
-import { DashboardStats } from '../../types';
+import type { DashboardStats } from '../../types';
 
 interface QuickStatsCardProps {
   stats?: DashboardStats;
@@ -33,14 +31,14 @@ export const QuickStatsCard: React.FC<QuickStatsCardProps> = ({
   return (
     <Card isFullHeight>
       <CardTitle>
-        <Text component={TextVariants.h2}>Quick Stats</Text>
+        <h2>Quick Stats</h2>
       </CardTitle>
       <CardBody>
         <Stack hasGutter>
           <StackItem>
             <Split>
               <SplitItem isFilled>
-                <Text component={TextVariants.h4}>System Status</Text>
+                <h4>System Status</h4>
               </SplitItem>
               <SplitItem>
                 <Badge color="green">Healthy</Badge>
@@ -51,10 +49,10 @@ export const QuickStatsCard: React.FC<QuickStatsCardProps> = ({
           <StackItem>
             <Split>
               <SplitItem isFilled>
-                <Text component={TextVariants.p}>Total Resources</Text>
+                <p>Total Resources</p>
               </SplitItem>
               <SplitItem>
-                <Text component={TextVariants.p}>{totalResources}</Text>
+                <p>{totalResources}</p>
               </SplitItem>
             </Split>
           </StackItem>
@@ -62,7 +60,7 @@ export const QuickStatsCard: React.FC<QuickStatsCardProps> = ({
           <StackItem>
             <Split>
               <SplitItem isFilled>
-                <Text component={TextVariants.p}>Active VMs</Text>
+                <p>Active VMs</p>
               </SplitItem>
               <SplitItem>
                 <Badge color="blue">{stats?.running_vms ?? 0}</Badge>

@@ -7,8 +7,6 @@ import {
   Stack,
   StackItem,
   Button,
-  Text,
-  TextVariants,
   Split,
   SplitItem,
   Flex,
@@ -26,7 +24,7 @@ import {
   ExternalLinkAltIcon,
 } from '@patternfly/react-icons';
 import { useDashboardStats, useRecentActivity } from '../../hooks';
-import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 import {
   ResourceCard,
   ActivityTimeline,
@@ -38,9 +36,8 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: activities, isLoading: activitiesLoading } = useRecentActivity({
-    per_page: 5,
-  });
+  const { data: activities, isLoading: activitiesLoading } =
+    useRecentActivity(5);
 
   const resourceCards = [
     {
@@ -49,7 +46,7 @@ const Dashboard: React.FC = () => {
       total: stats?.data.total_vms ?? 0,
       running: stats?.data.running_vms ?? 0,
       stopped: stats?.data.stopped_vms ?? 0,
-      color: 'blue' as const,
+      color: 'info' as const,
       actions: [
         {
           label: 'Create VM',
@@ -67,7 +64,7 @@ const Dashboard: React.FC = () => {
       title: 'Organizations',
       icon: BuildingIcon,
       total: stats?.data.total_organizations ?? 0,
-      color: 'green' as const,
+      color: 'success' as const,
       actions: [
         {
           label: 'View Organizations',
@@ -80,7 +77,7 @@ const Dashboard: React.FC = () => {
       title: 'Virtual Data Centers',
       icon: NetworkIcon,
       total: stats?.data.total_vdcs ?? 0,
-      color: 'purple' as const,
+      color: 'custom' as const,
       actions: [
         {
           label: 'Create VDC',
@@ -98,7 +95,7 @@ const Dashboard: React.FC = () => {
       title: 'Catalogs',
       icon: CatalogIcon,
       total: stats?.data.total_catalogs ?? 0,
-      color: 'orange' as const,
+      color: 'warning' as const,
       actions: [
         {
           label: 'Browse Catalogs',
@@ -162,9 +159,9 @@ const Dashboard: React.FC = () => {
               <Title headingLevel="h1" size="xl">
                 Dashboard
               </Title>
-              <Text component={TextVariants.p} className="pf-v6-u-color-200">
+              <p className="pf-v6-u-color-200">
                 Overview of your virtual infrastructure resources
-              </Text>
+              </p>
             </SplitItem>
             <SplitItem>
               <Flex

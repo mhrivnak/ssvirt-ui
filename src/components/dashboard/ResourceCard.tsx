@@ -8,14 +8,12 @@ import {
   Stack,
   StackItem,
   Button,
-  Text,
-  TextVariants,
   Badge,
   Flex,
   FlexItem,
   Icon,
 } from '@patternfly/react-core';
-import { SVGIconProps } from '@patternfly/react-icons/dist/esm/createIcon';
+import type { SVGIconProps } from '@patternfly/react-icons/dist/esm/createIcon';
 
 interface ResourceAction {
   label: string;
@@ -29,7 +27,7 @@ interface ResourceCardProps {
   total: number;
   running?: number;
   stopped?: number;
-  color: 'blue' | 'green' | 'purple' | 'orange' | 'red';
+  color: 'success' | 'info' | 'warning' | 'danger' | 'custom';
   actions: ResourceAction[];
 }
 
@@ -52,7 +50,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             </Icon>
           </SplitItem>
           <SplitItem isFilled>
-            <Text component={TextVariants.h3}>{title}</Text>
+            <h3>{title}</h3>
           </SplitItem>
         </Split>
       </CardTitle>
@@ -61,18 +59,8 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
           <StackItem>
             <Split>
               <SplitItem isFilled>
-                <Text
-                  component={TextVariants.h1}
-                  className="pf-v6-u-font-size-2xl"
-                >
-                  {total}
-                </Text>
-                <Text
-                  component={TextVariants.small}
-                  className="pf-v6-u-color-200"
-                >
-                  Total
-                </Text>
+                <h1 className="pf-v6-u-font-size-2xl">{total}</h1>
+                <small className="pf-v6-u-color-200">Total</small>
               </SplitItem>
             </Split>
           </StackItem>

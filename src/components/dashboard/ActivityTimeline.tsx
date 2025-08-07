@@ -8,8 +8,6 @@ import {
   Stack,
   StackItem,
   Button,
-  Text,
-  TextVariants,
   List,
   ListItem,
   Flex,
@@ -26,8 +24,8 @@ import {
   NetworkIcon,
   CubeIcon,
 } from '@patternfly/react-icons';
-import { RecentActivity } from '../../types';
-import { LoadingSpinner } from '../common/LoadingSpinner';
+import type { RecentActivity } from '../../types';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 interface ActivityTimelineProps {
   activities?: RecentActivity[];
@@ -86,7 +84,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
       <CardTitle>
         <Split>
           <SplitItem isFilled>
-            <Text component={TextVariants.h2}>Recent Activity</Text>
+            <h2>Recent Activity</h2>
           </SplitItem>
           {onViewAll && (
             <SplitItem>
@@ -109,18 +107,13 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                   alignItems={{ default: 'alignItemsCenter' }}
                 >
                   <FlexItem>{getActivityIcon(activity.type)}</FlexItem>
-                  <FlexItem isFilled>
+                  <FlexItem flex={{ default: 'flex_1' }}>
                     <Stack>
                       <StackItem>
-                        <Text component={TextVariants.p}>
-                          {activity.description}
-                        </Text>
+                        <p>{activity.description}</p>
                       </StackItem>
                       <StackItem>
-                        <Text
-                          component={TextVariants.small}
-                          className="pf-v6-u-color-200"
-                        >
+                        <small className="pf-v6-u-color-200">
                           by {activity.user} •{' '}
                           <Timestamp
                             date={new Date(activity.timestamp)}
@@ -128,7 +121,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                               variant: TimestampTooltipVariant.default,
                             }}
                           />
-                        </Text>
+                        </small>
                       </StackItem>
                     </Stack>
                   </FlexItem>
@@ -137,9 +130,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
             ))}
           </List>
         ) : (
-          <Text component={TextVariants.p} className="pf-v6-u-color-200">
-            No recent activity to display
-          </Text>
+          <p className="pf-v6-u-color-200">No recent activity to display</p>
         )}
       </CardBody>
     </Card>
