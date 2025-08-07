@@ -54,17 +54,17 @@ import {
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useVDC } from '../../hooks';
+import { VDCService } from '../../services';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import type { User } from '../../types';
+import type {
+  VDCUser as VDCUserType,
+  InviteVDCUserRequest,
+  UpdateVDCUserRoleRequest,
+} from '../../types';
 import { ROUTES } from '../../utils/constants';
 
-// Mock user data - in real implementation, this would come from API
-interface VDCUser extends User {
-  role: 'admin' | 'user' | 'viewer';
-  joined_at: string;
-  last_active: string;
-  status: 'active' | 'inactive' | 'invited';
-}
+// Use the VDCUser type from types file
+type VDCUser = VDCUserType;
 
 const mockUsers: VDCUser[] = [
   {
@@ -116,6 +116,13 @@ const VDCUsers: React.FC = () => {
   const [inviteRole, setInviteRole] = useState('user');
   const [editRole, setEditRole] = useState('');
   const [emailError, setEmailError] = useState('');
+
+  // Notification states
+  const [notification, setNotification] = useState<{
+    variant: 'success' | 'danger' | 'info';
+    title: string;
+    message: string;
+  } | null>(null);
 
   // Hooks must be called before any conditional returns
   const { data: vdcResponse, isLoading } = useVDC(id || '');
@@ -199,7 +206,7 @@ const VDCUsers: React.FC = () => {
     setPage(1);
   };
 
-  const handleInviteUser = () => {
+  const handleInviteUser = async () => {
     // Clear previous errors
     setEmailError('');
 
@@ -216,18 +223,34 @@ const VDCUsers: React.FC = () => {
       return;
     }
 
-    // TODO: Implement actual user invitation API call
-    console.log('Inviting user to VDC:', {
-      email: inviteEmail,
-      role: inviteRole,
-      vdcId: id,
-    });
+    if (!id) return;
 
-    // Reset form and close modal
-    setInviteEmail('');
-    setInviteRole('user');
-    setEmailError('');
-    setIsInviteModalOpen(false);
+    try {
+      const inviteData: InviteVDCUserRequest = {
+        email: inviteEmail,
+        role: inviteRole as 'admin' | 'user' | 'viewer',
+      };
+
+      await VDCService.inviteUserToVDC(id, inviteData);
+
+      // Reset form and close modal
+      setInviteEmail('');
+      setInviteRole('user');
+      setEmailError('');
+      setIsInviteModalOpen(false);
+
+      // Show success notification and refresh user list
+      setNotification({
+        variant: 'success',
+        title: 'User Invited Successfully',
+        message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this VDC.`,
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
+    } catch (error) {
+      console.error('Failed to invite user to VDC:', error);
+      setEmailError('Failed to send invitation. Please try again.');
+    }
   };
 
   const handleEditUser = (user: VDCUser) => {
@@ -236,30 +259,74 @@ const VDCUsers: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUserRole = () => {
-    if (!selectedUser) return;
+  const handleUpdateUserRole = async () => {
+    if (!selectedUser || !id) return;
 
-    // TODO: Implement actual user role update API call
-    console.log('Updating user role in VDC:', {
-      userId: selectedUser.id,
-      role: editRole,
-      vdcId: id,
-    });
+    try {
+      const updateData: UpdateVDCUserRoleRequest = {
+        user_id: selectedUser.id,
+        role: editRole as 'admin' | 'user' | 'viewer',
+      };
 
-    // Reset and close modal
-    setSelectedUser(null);
-    setEditRole('');
-    setIsEditModalOpen(false);
+      await VDCService.updateVDCUserRole(id, updateData);
+
+      // Reset and close modal
+      setSelectedUser(null);
+      setEditRole('');
+      setIsEditModalOpen(false);
+
+      // Show success notification and refresh user list
+      setNotification({
+        variant: 'success',
+        title: 'User Role Updated',
+        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`,
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
+    } catch (error) {
+      console.error('Failed to update user role in VDC:', error);
+      // Show error notification
+      setNotification({
+        variant: 'danger',
+        title: 'Failed to Update Role',
+        message:
+          'An error occurred while updating the user role. Please try again.',
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
+    }
   };
 
-  const handleRemoveUser = (user: VDCUser) => {
+  const handleRemoveUser = async (user: VDCUser) => {
     if (
       window.confirm(
         `Are you sure you want to remove ${user.first_name} ${user.last_name} from this VDC?`
       )
     ) {
-      // TODO: Implement actual user removal API call
-      console.log('Removing user from VDC:', { userId: user.id, vdcId: id });
+      if (!id) return;
+
+      try {
+        await VDCService.removeUserFromVDC(id, user.id);
+        // Show success notification and refresh user list
+        setNotification({
+          variant: 'success',
+          title: 'User Removed',
+          message: `${user.first_name} ${user.last_name} has been removed from this VDC.`,
+        });
+        // Auto-hide notification after 5 seconds
+        setTimeout(() => setNotification(null), 5000);
+      } catch (error) {
+        console.error('Failed to remove user from VDC:', error);
+        // Show error notification
+        setNotification({
+          variant: 'danger',
+          title: 'Failed to Remove User',
+          message:
+            'An error occurred while removing the user. Please try again.',
+        });
+        // Auto-hide notification after 5 seconds
+        setTimeout(() => setNotification(null), 5000);
+      }
     }
   };
 
@@ -329,6 +396,28 @@ const VDCUsers: React.FC = () => {
   return (
     <PageSection>
       <Stack hasGutter>
+        {/* Notification */}
+        {notification && (
+          <StackItem>
+            <Alert
+              variant={notification.variant}
+              title={notification.title}
+              isInline
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => setNotification(null)}
+                  aria-label="Close notification"
+                >
+                  ×
+                </Button>
+              }
+            >
+              {notification.message}
+            </Alert>
+          </StackItem>
+        )}
+
         {/* Breadcrumb */}
         <StackItem>
           <Breadcrumb>

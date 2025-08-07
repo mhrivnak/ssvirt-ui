@@ -74,6 +74,24 @@ export interface UpdateUserRoleRequest {
   role: 'admin' | 'user' | 'viewer';
 }
 
+// VDC user management types
+export interface VDCUser extends User {
+  role: 'admin' | 'user' | 'viewer';
+  joined_at: string;
+  last_active: string;
+  status: 'active' | 'inactive' | 'invited';
+}
+
+export interface InviteVDCUserRequest {
+  email: string;
+  role: 'admin' | 'user' | 'viewer';
+}
+
+export interface UpdateVDCUserRoleRequest {
+  user_id: string;
+  role: 'admin' | 'user' | 'viewer';
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -380,6 +398,7 @@ export const QUERY_KEYS = {
   vdcs: ['vdcs'] as const,
   vdc: (id: string) => ['vdcs', id] as const,
   vdcsByOrg: (orgId: string) => ['vdcs', 'organization', orgId] as const,
+  vdcUsers: (vdcId: string) => ['vdcs', vdcId, 'users'] as const,
 
   // VMs
   vms: ['vms'] as const,

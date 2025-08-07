@@ -4,6 +4,9 @@ import type {
   VDCQueryParams,
   CreateVDCRequest,
   UpdateVDCRequest,
+  VDCUser,
+  InviteVDCUserRequest,
+  UpdateVDCUserRoleRequest,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
@@ -81,6 +84,57 @@ export class VDCService {
     const response = await api.patch<ApiResponse<VDC>>(`/api/v1/vdcs/${id}`, {
       enabled,
     });
+    return response.data;
+  }
+
+  /**
+   * Get users for a VDC
+   */
+  static async getVDCUsers(id: string): Promise<PaginatedResponse<VDCUser>> {
+    const response = await api.get<PaginatedResponse<VDCUser>>(
+      `/api/v1/vdcs/${id}/users`
+    );
+    return response.data;
+  }
+
+  /**
+   * Invite a user to a VDC
+   */
+  static async inviteUserToVDC(
+    vdcId: string,
+    data: InviteVDCUserRequest
+  ): Promise<ApiResponse<VDCUser>> {
+    const response = await api.post<ApiResponse<VDCUser>>(
+      `/api/v1/vdcs/${vdcId}/users/invite`,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Update a user's role in a VDC
+   */
+  static async updateVDCUserRole(
+    vdcId: string,
+    data: UpdateVDCUserRoleRequest
+  ): Promise<ApiResponse<VDCUser>> {
+    const response = await api.put<ApiResponse<VDCUser>>(
+      `/api/v1/vdcs/${vdcId}/users/${data.user_id}/role`,
+      { role: data.role }
+    );
+    return response.data;
+  }
+
+  /**
+   * Remove a user from a VDC
+   */
+  static async removeUserFromVDC(
+    vdcId: string,
+    userId: string
+  ): Promise<ApiResponse<null>> {
+    const response = await api.delete<ApiResponse<null>>(
+      `/api/v1/vdcs/${vdcId}/users/${userId}`
+    );
     return response.data;
   }
 }
