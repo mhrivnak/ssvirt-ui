@@ -166,6 +166,7 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
 
   const handleRemoveCustomProperty = (key: string) => {
     const currentProperties = formData.advanced_config.custom_properties || {};
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [key]: _, ...updatedProperties } = currentProperties;
     updateAdvancedConfig({ custom_properties: updatedProperties });
   };
