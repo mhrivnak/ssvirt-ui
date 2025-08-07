@@ -56,6 +56,24 @@ export interface User {
   avatar_url?: string;
 }
 
+// Organization user management types
+export interface OrganizationUser extends User {
+  role: 'admin' | 'user' | 'viewer';
+  joined_at: string;
+  last_active: string;
+  status: 'active' | 'inactive' | 'invited';
+}
+
+export interface InviteUserRequest {
+  email: string;
+  role: 'admin' | 'user' | 'viewer';
+}
+
+export interface UpdateUserRoleRequest {
+  user_id: string;
+  role: 'admin' | 'user' | 'viewer';
+}
+
 export interface LoginRequest {
   username: string;
   password: string;

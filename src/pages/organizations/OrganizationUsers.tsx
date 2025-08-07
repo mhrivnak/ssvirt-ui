@@ -54,17 +54,17 @@ import {
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrganization } from '../../hooks';
+import { OrganizationService } from '../../services';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import type { User } from '../../types';
+import type {
+  OrganizationUser as OrgUser,
+  InviteUserRequest,
+  UpdateUserRoleRequest,
+} from '../../types';
 import { ROUTES } from '../../utils/constants';
 
-// Mock user data - in real implementation, this would come from API
-interface OrganizationUser extends User {
-  role: 'admin' | 'user' | 'viewer';
-  joined_at: string;
-  last_active: string;
-  status: 'active' | 'inactive' | 'invited';
-}
+// Use the OrganizationUser type from types file
+type OrganizationUser = OrgUser;
 
 const mockUsers: OrganizationUser[] = [
   {
@@ -214,7 +214,7 @@ const OrganizationUsers: React.FC = () => {
     setPage(1);
   };
 
-  const handleInviteUser = () => {
+  const handleInviteUser = async () => {
     // Clear previous errors
     setEmailError('');
 
@@ -229,14 +229,27 @@ const OrganizationUsers: React.FC = () => {
       return;
     }
 
-    // TODO: Implement actual user invitation API call
-    console.log('Inviting user:', { email: inviteEmail, role: inviteRole });
+    if (!id) return;
 
-    // Reset form and close modal
-    setInviteEmail('');
-    setInviteRole('user');
-    setEmailError('');
-    setIsInviteModalOpen(false);
+    try {
+      const inviteData: InviteUserRequest = {
+        email: inviteEmail,
+        role: inviteRole as 'admin' | 'user' | 'viewer',
+      };
+
+      await OrganizationService.inviteUserToOrganization(id, inviteData);
+
+      // Reset form and close modal
+      setInviteEmail('');
+      setInviteRole('user');
+      setEmailError('');
+      setIsInviteModalOpen(false);
+
+      // TODO: Show success notification and refresh user list
+    } catch (error) {
+      console.error('Failed to invite user:', error);
+      setEmailError('Failed to send invitation. Please try again.');
+    }
   };
 
   const handleEditUser = (user: OrganizationUser) => {
@@ -245,29 +258,44 @@ const OrganizationUsers: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateUserRole = () => {
-    if (!selectedUser) return;
+  const handleUpdateUserRole = async () => {
+    if (!selectedUser || !id) return;
 
-    // TODO: Implement actual user role update API call
-    console.log('Updating user role:', {
-      userId: selectedUser.id,
-      role: editRole,
-    });
+    try {
+      const updateData: UpdateUserRoleRequest = {
+        user_id: selectedUser.id,
+        role: editRole as 'admin' | 'user' | 'viewer',
+      };
 
-    // Reset and close modal
-    setSelectedUser(null);
-    setEditRole('');
-    setIsEditModalOpen(false);
+      await OrganizationService.updateOrganizationUserRole(id, updateData);
+
+      // Reset and close modal
+      setSelectedUser(null);
+      setEditRole('');
+      setIsEditModalOpen(false);
+
+      // TODO: Show success notification and refresh user list
+    } catch (error) {
+      console.error('Failed to update user role:', error);
+      // TODO: Show error notification
+    }
   };
 
-  const handleRemoveUser = (user: OrganizationUser) => {
+  const handleRemoveUser = async (user: OrganizationUser) => {
     if (
       window.confirm(
         `Are you sure you want to remove ${user.first_name} ${user.last_name} from this organization?`
       )
     ) {
-      // TODO: Implement actual user removal API call
-      console.log('Removing user:', user.id);
+      if (!id) return;
+
+      try {
+        await OrganizationService.removeUserFromOrganization(id, user.id);
+        // TODO: Show success notification and refresh user list
+      } catch (error) {
+        console.error('Failed to remove user:', error);
+        // TODO: Show error notification
+      }
     }
   };
 
