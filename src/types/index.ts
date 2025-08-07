@@ -7,6 +7,45 @@ export interface ApiResponse<T> {
   details?: string;
 }
 
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+    total_pages: number;
+  };
+  error?: string;
+  message?: string;
+}
+
+export interface ApiError {
+  success: false;
+  error: string;
+  message: string;
+  details?: string;
+  status?: number;
+}
+
+// Query and filter types
+export interface PaginationParams {
+  page?: number;
+  per_page?: number;
+}
+
+export interface SortParams {
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+export interface FilterParams {
+  search?: string;
+  status?: string;
+  organization_id?: string;
+  enabled?: boolean;
+}
+
 // Authentication types
 export interface User {
   id: string;
@@ -119,3 +158,132 @@ export interface CatalogItem {
   created_at: string;
   updated_at: string;
 }
+
+// Dashboard types
+export interface DashboardStats {
+  total_vms: number;
+  running_vms: number;
+  stopped_vms: number;
+  total_organizations: number;
+  total_vdcs: number;
+  total_catalogs: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  type:
+    | 'vm_created'
+    | 'vm_powered_on'
+    | 'vm_powered_off'
+    | 'org_created'
+    | 'vdc_created';
+  description: string;
+  user: string;
+  timestamp: string;
+  resource_id?: string;
+  resource_name?: string;
+}
+
+// Query parameter types for each domain
+export interface VMQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  vm_status?: VMStatus;
+  vdc_id?: string;
+}
+
+export interface OrganizationQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  // Organization-specific filters
+}
+
+export interface VDCQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  // VDC-specific filters
+}
+
+export interface CatalogQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  organization?: string;
+  is_shared?: boolean;
+}
+
+// Request types for create/update operations
+export interface CreateOrganizationRequest {
+  name: string;
+  display_name: string;
+  description?: string;
+  enabled?: boolean;
+}
+
+export interface UpdateOrganizationRequest
+  extends Partial<CreateOrganizationRequest> {
+  id: string;
+}
+
+export interface CreateVDCRequest {
+  name: string;
+  organization_id: string;
+  allocation_model: string;
+  cpu_limit: number;
+  memory_limit_mb: number;
+  storage_limit_mb: number;
+  enabled?: boolean;
+}
+
+export interface UpdateVDCRequest extends Partial<CreateVDCRequest> {
+  id: string;
+}
+
+export interface CreateVMRequest {
+  name: string;
+  vdc_id: string;
+  catalog_item_id: string;
+  cpu_count?: number;
+  memory_mb?: number;
+}
+
+export interface UpdateVMRequest {
+  id: string;
+  name?: string;
+  cpu_count?: number;
+  memory_mb?: number;
+}
+
+// React Query keys
+export const QUERY_KEYS = {
+  // Auth
+  session: ['auth', 'session'] as const,
+  userProfile: ['auth', 'user'] as const,
+
+  // Dashboard
+  dashboardStats: ['dashboard', 'stats'] as const,
+  recentActivity: ['dashboard', 'activity'] as const,
+
+  // Organizations
+  organizations: ['organizations'] as const,
+  organization: (id: string) => ['organizations', id] as const,
+
+  // VDCs
+  vdcs: ['vdcs'] as const,
+  vdc: (id: string) => ['vdcs', id] as const,
+  vdcsByOrg: (orgId: string) => ['vdcs', 'organization', orgId] as const,
+
+  // VMs
+  vms: ['vms'] as const,
+  vm: (id: string) => ['vms', id] as const,
+  vmsByVdc: (vdcId: string) => ['vms', 'vdc', vdcId] as const,
+
+  // Catalogs
+  catalogs: ['catalogs'] as const,
+  catalog: (id: string) => ['catalogs', id] as const,
+  catalogItems: (catalogId: string) =>
+    ['catalogs', catalogId, 'items'] as const,
+} as const;
