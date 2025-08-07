@@ -205,6 +205,7 @@ export interface VDCQueryParams
     SortParams,
     FilterParams {
   // VDC-specific filters
+  allocation_model?: string;
 }
 
 export interface CatalogQueryParams

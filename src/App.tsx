@@ -10,6 +10,7 @@ import {
   OrganizationUsers,
   OrganizationForm,
 } from './pages/organizations';
+import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import VMs from './pages/vms/VMs';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -166,7 +167,47 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>VDCs - Coming in future PR</div>
+                      <VDCs />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.VDC_CREATE}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VDCForm />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.VDC_DETAIL}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VDCDetail />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.VDC_EDIT}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VDCForm />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.VDC_USERS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VDCUsers />
                     </AppLayout>
                   </ProtectedRoute>
                 }
