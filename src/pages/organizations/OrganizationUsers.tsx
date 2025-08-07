@@ -130,6 +130,13 @@ const OrganizationUsers: React.FC = () => {
   const [editRole, setEditRole] = useState('');
   const [emailError, setEmailError] = useState('');
 
+  // Notification states
+  const [notification, setNotification] = useState<{
+    variant: 'success' | 'danger' | 'info';
+    title: string;
+    message: string;
+  } | null>(null);
+
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading } = useOrganization(id || '');
 
@@ -245,7 +252,14 @@ const OrganizationUsers: React.FC = () => {
       setEmailError('');
       setIsInviteModalOpen(false);
 
-      // TODO: Show success notification and refresh user list
+      // Show success notification and refresh user list
+      setNotification({
+        variant: 'success',
+        title: 'User Invited Successfully',
+        message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this organization.`
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
     } catch (error) {
       console.error('Failed to invite user:', error);
       setEmailError('Failed to send invitation. Please try again.');
@@ -274,10 +288,24 @@ const OrganizationUsers: React.FC = () => {
       setEditRole('');
       setIsEditModalOpen(false);
 
-      // TODO: Show success notification and refresh user list
+      // Show success notification and refresh user list
+      setNotification({
+        variant: 'success',
+        title: 'User Role Updated',
+        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
     } catch (error) {
       console.error('Failed to update user role:', error);
-      // TODO: Show error notification
+      // Show error notification
+      setNotification({
+        variant: 'danger',
+        title: 'Failed to Update Role',
+        message: 'An error occurred while updating the user role. Please try again.'
+      });
+      // Auto-hide notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
     }
   };
 
@@ -291,10 +319,24 @@ const OrganizationUsers: React.FC = () => {
 
       try {
         await OrganizationService.removeUserFromOrganization(id, user.id);
-        // TODO: Show success notification and refresh user list
+        // Show success notification and refresh user list
+        setNotification({
+          variant: 'success',
+          title: 'User Removed',
+          message: `${user.first_name} ${user.last_name} has been removed from this organization.`
+        });
+        // Auto-hide notification after 5 seconds
+        setTimeout(() => setNotification(null), 5000);
       } catch (error) {
         console.error('Failed to remove user:', error);
-        // TODO: Show error notification
+        // Show error notification
+        setNotification({
+          variant: 'danger',
+          title: 'Failed to Remove User',
+          message: 'An error occurred while removing the user. Please try again.'
+        });
+        // Auto-hide notification after 5 seconds
+        setTimeout(() => setNotification(null), 5000);
       }
     }
   };
@@ -368,6 +410,28 @@ const OrganizationUsers: React.FC = () => {
   return (
     <PageSection>
       <Stack hasGutter>
+        {/* Notification */}
+        {notification && (
+          <StackItem>
+            <Alert
+              variant={notification.variant}
+              title={notification.title}
+              isInline
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => setNotification(null)}
+                  aria-label="Close notification"
+                >
+                  ×
+                </Button>
+              }
+            >
+              {notification.message}
+            </Alert>
+          </StackItem>
+        )}
+
         {/* Breadcrumb */}
         <StackItem>
           <Breadcrumb>
