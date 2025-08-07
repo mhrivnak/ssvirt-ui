@@ -202,16 +202,12 @@ const Organizations: React.FC = () => {
         {/* Error Alert */}
         {errorMessage && (
           <StackItem>
-            <Alert
-              variant={AlertVariant.danger}
-              title="Error"
-              actionClose={{
-                onClick: () => setErrorMessage(''),
-                'aria-label': 'Close error alert',
-              }}
-              isInline
-            >
+            <Alert variant={AlertVariant.danger} title="Error" isInline>
               {errorMessage}
+              <br />
+              <Button variant="link" onClick={() => setErrorMessage('')}>
+                Dismiss
+              </Button>
             </Alert>
           </StackItem>
         )}

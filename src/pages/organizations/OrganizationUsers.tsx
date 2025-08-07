@@ -144,7 +144,10 @@ const OrganizationUsers: React.FC = () => {
           <EmptyStateBody>
             No organization ID provided. Please select a valid organization.
           </EmptyStateBody>
-          <Button variant="primary" onClick={() => navigate(ROUTES.ORGANIZATIONS)}>
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ORGANIZATIONS)}
+          >
             Back to Organizations
           </Button>
         </EmptyState>
@@ -323,7 +326,10 @@ const OrganizationUsers: React.FC = () => {
           <EmptyStateBody>
             The organization you're looking for doesn't exist.
           </EmptyStateBody>
-          <Button variant="primary" onClick={() => navigate(ROUTES.ORGANIZATIONS)}>
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ORGANIZATIONS)}
+          >
             Back to Organizations
           </Button>
         </EmptyState>
@@ -610,13 +616,7 @@ const OrganizationUsers: React.FC = () => {
         }}
       >
         <Form>
-          <FormGroup
-            label="Email Address"
-            isRequired
-            fieldId="invite-email"
-            helperTextInvalid={emailError}
-            validated={emailError ? 'error' : 'default'}
-          >
+          <FormGroup label="Email Address" isRequired fieldId="invite-email">
             <TextInput
               isRequired
               type="email"
@@ -629,6 +629,17 @@ const OrganizationUsers: React.FC = () => {
               placeholder="user@example.com"
               validated={emailError ? 'error' : 'default'}
             />
+            {emailError && (
+              <div
+                style={{
+                  color: 'var(--pf-global--danger-color--100)',
+                  fontSize: '0.875rem',
+                  marginTop: '0.25rem',
+                }}
+              >
+                {emailError}
+              </div>
+            )}
           </FormGroup>
           <FormGroup label="Role" isRequired fieldId="invite-role">
             <FormSelect
