@@ -11,7 +11,7 @@ import {
   OrganizationForm,
 } from './pages/organizations';
 import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
-import VMs from './pages/vms/VMs';
+import { VMs, VMDetail } from './pages/vms';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -159,6 +159,16 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <AppLayout>
                       <VMs />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.VM_DETAIL}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VMDetail />
                     </AppLayout>
                   </ProtectedRoute>
                 }
