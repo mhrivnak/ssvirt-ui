@@ -66,7 +66,11 @@ import {
   useOrganizations,
   usePowerOperationTracking,
 } from '../../hooks';
-import { VMPowerActions, PowerOperationStatus, VMCreationWizard } from '../../components/vms';
+import {
+  VMPowerActions,
+  PowerOperationStatus,
+  VMCreationWizard,
+} from '../../components/vms';
 import type { VM, VMStatus, VMQueryParams } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';

@@ -37,13 +37,41 @@ interface VMCreationProgressProps {
 
 // Mock progress steps for demonstration
 const CREATION_STEPS = [
-  { id: 'validate', name: 'Validating configuration', description: 'Checking resource availability and configuration' },
-  { id: 'allocate', name: 'Allocating resources', description: 'Reserving CPU, memory, and storage resources' },
-  { id: 'provision', name: 'Provisioning VM', description: 'Creating virtual machine from template' },
-  { id: 'network', name: 'Configuring network', description: 'Setting up network interfaces and connectivity' },
-  { id: 'storage', name: 'Configuring storage', description: 'Attaching and formatting storage devices' },
-  { id: 'customize', name: 'Applying customization', description: 'Running cloud-init or guest customization' },
-  { id: 'finalize', name: 'Finalizing deployment', description: 'Completing VM setup and registration' },
+  {
+    id: 'validate',
+    name: 'Validating configuration',
+    description: 'Checking resource availability and configuration',
+  },
+  {
+    id: 'allocate',
+    name: 'Allocating resources',
+    description: 'Reserving CPU, memory, and storage resources',
+  },
+  {
+    id: 'provision',
+    name: 'Provisioning VM',
+    description: 'Creating virtual machine from template',
+  },
+  {
+    id: 'network',
+    name: 'Configuring network',
+    description: 'Setting up network interfaces and connectivity',
+  },
+  {
+    id: 'storage',
+    name: 'Configuring storage',
+    description: 'Attaching and formatting storage devices',
+  },
+  {
+    id: 'customize',
+    name: 'Applying customization',
+    description: 'Running cloud-init or guest customization',
+  },
+  {
+    id: 'finalize',
+    name: 'Finalizing deployment',
+    description: 'Completing VM setup and registration',
+  },
 ];
 
 function VMCreationProgress({
@@ -66,11 +94,11 @@ function VMCreationProgress({
     const interval = setInterval(() => {
       setCurrentStepIndex((prevIndex) => {
         if (prevIndex < CREATION_STEPS.length - 1) {
-          setCompletedSteps(prev => [...prev, CREATION_STEPS[prevIndex].id]);
+          setCompletedSteps((prev) => [...prev, CREATION_STEPS[prevIndex].id]);
           return prevIndex + 1;
         } else {
           // Complete the last step
-          setCompletedSteps(prev => [...prev, CREATION_STEPS[prevIndex].id]);
+          setCompletedSteps((prev) => [...prev, CREATION_STEPS[prevIndex].id]);
           setIsComplete(true);
           clearInterval(interval);
           return prevIndex;
@@ -84,7 +112,9 @@ function VMCreationProgress({
   // Handle real progress updates
   useEffect(() => {
     if (progress) {
-      setCurrentStepIndex(Math.floor((progress.progress_percent / 100) * CREATION_STEPS.length));
+      setCurrentStepIndex(
+        Math.floor((progress.progress_percent / 100) * CREATION_STEPS.length)
+      );
       setCompletedSteps(progress.steps_completed);
       setIsComplete(progress.status === 'completed');
       setHasError(progress.status === 'failed');
@@ -114,11 +144,15 @@ function VMCreationProgress({
   const getStepIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircleIcon color="var(--pf-v6-global--success-color--100)" />;
+        return (
+          <CheckCircleIcon color="var(--pf-v6-global--success-color--100)" />
+        );
       case 'in-progress':
         return <InProgressIcon color="var(--pf-v6-global--info-color--100)" />;
       case 'error':
-        return <ExclamationCircleIcon color="var(--pf-v6-global--danger-color--100)" />;
+        return (
+          <ExclamationCircleIcon color="var(--pf-v6-global--danger-color--100)" />
+        );
       default:
         return <ClockIcon color="var(--pf-v6-global--Color--200)" />;
     }
@@ -181,7 +215,13 @@ function VMCreationProgress({
             <CardBody>
               <Stack>
                 <StackItem>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                    }}
+                  >
                     <VirtualMachineIcon />
                     <div>
                       <Title headingLevel="h3" size="lg">
@@ -202,13 +242,21 @@ function VMCreationProgress({
         <StackItem>
           <Stack hasGutter>
             <StackItem>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <Title headingLevel="h4" size="md">
-                  {hasError ? 'Creation Failed' : isComplete ? 'Creation Complete' : 'Creation Progress'}
+                  {hasError
+                    ? 'Creation Failed'
+                    : isComplete
+                      ? 'Creation Complete'
+                      : 'Creation Progress'}
                 </Title>
-                <span className="pf-v6-u-color-200">
-                  {getEstimatedTime()}
-                </span>
+                <span className="pf-v6-u-color-200">{getEstimatedTime()}</span>
               </div>
             </StackItem>
             <StackItem>
@@ -230,7 +278,9 @@ function VMCreationProgress({
               title="VM Creation Failed"
               isInline
             >
-              {error || progress?.error_message || 'An error occurred during VM creation. Please try again or contact support.'}
+              {error ||
+                progress?.error_message ||
+                'An error occurred during VM creation. Please try again or contact support.'}
             </Alert>
           </StackItem>
         )}
@@ -243,7 +293,8 @@ function VMCreationProgress({
               title="VM Created Successfully"
               isInline
             >
-              Your virtual machine "{vmName}" has been created successfully and is ready to use.
+              Your virtual machine "{vmName}" has been created successfully and
+              is ready to use.
             </Alert>
           </StackItem>
         )}
@@ -262,14 +313,15 @@ function VMCreationProgress({
                   <List isPlain>
                     {CREATION_STEPS.map((step, index) => {
                       const status = getStepStatus(step.id, index);
-                      const isCurrentStep = index === currentStepIndex && !isComplete;
-                      
+                      const isCurrentStep =
+                        index === currentStepIndex && !isComplete;
+
                       return (
                         <ListItem key={step.id}>
-                          <div 
-                            style={{ 
-                              display: 'flex', 
-                              alignItems: 'flex-start', 
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
                               gap: '12px',
                               padding: '8px 0',
                               opacity: status === 'pending' ? 0.6 : 1,
@@ -279,10 +331,12 @@ function VMCreationProgress({
                               {getStepIcon(status)}
                             </div>
                             <div style={{ flex: 1 }}>
-                              <div style={{ 
-                                fontWeight: isCurrentStep ? 'bold' : 'normal',
-                                marginBottom: '4px'
-                              }}>
+                              <div
+                                style={{
+                                  fontWeight: isCurrentStep ? 'bold' : 'normal',
+                                  marginBottom: '4px',
+                                }}
+                              >
                                 {step.name}
                                 {isCurrentStep && !hasError && !isComplete && (
                                   <span className="pf-v6-u-ml-sm pf-v6-u-color-100">
@@ -326,14 +380,16 @@ function VMCreationProgress({
 
         {/* Modal Actions */}
         <StackItem>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            padding: '16px 0',
-            borderTop: '1px solid var(--pf-v6-global--BorderColor--100)'
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: '16px 0',
+              borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
+            }}
+          >
             <Button
-              variant={isComplete ? "primary" : "secondary"}
+              variant={isComplete ? 'primary' : 'secondary'}
               onClick={handleClose}
             >
               {isComplete ? 'Done' : hasError ? 'Close' : 'Cancel'}

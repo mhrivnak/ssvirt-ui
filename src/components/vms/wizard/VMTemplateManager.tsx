@@ -32,11 +32,7 @@ import {
   Td,
   ActionsColumn,
 } from '@patternfly/react-table';
-import {
-  PlusIcon,
-  CatalogIcon,
-  ImportIcon,
-} from '@patternfly/react-icons';
+import { PlusIcon, CatalogIcon, ImportIcon } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { VMCreationTemplate } from '../../../types';
 
@@ -61,7 +57,8 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
 }) => {
   const [templates, setTemplates] = useState<VMCreationTemplate[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<VMCreationTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] =
+    useState<VMCreationTemplate | null>(null);
   const [templateForm, setTemplateForm] = useState<TemplateFormData>({
     name: '',
     description: '',
@@ -91,7 +88,10 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
 
   const saveTemplates = (updatedTemplates: VMCreationTemplate[]) => {
     try {
-      localStorage.setItem('vm_creation_templates', JSON.stringify(updatedTemplates));
+      localStorage.setItem(
+        'vm_creation_templates',
+        JSON.stringify(updatedTemplates)
+      );
       setTemplates(updatedTemplates);
     } catch (error) {
       console.error('Failed to save templates:', error);
@@ -148,7 +148,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
       is_shared: templateForm.isShared,
     };
 
-    const updatedTemplates = templates.map(t => 
+    const updatedTemplates = templates.map((t) =>
       t.id === editingTemplate.id ? updatedTemplate : t
     );
     saveTemplates(updatedTemplates);
@@ -156,7 +156,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
   };
 
   const handleDeleteTemplate = (templateId: string) => {
-    const updatedTemplates = templates.filter(t => t.id !== templateId);
+    const updatedTemplates = templates.filter((t) => t.id !== templateId);
     saveTemplates(updatedTemplates);
   };
 
@@ -259,13 +259,13 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
       <Stack hasGutter>
         {error && (
           <StackItem>
-            <Alert
-              variant={AlertVariant.danger}
-              title="Error"
-              isInline
-            >
+            <Alert variant={AlertVariant.danger} title="Error" isInline>
               {error}
-              <Button variant="plain" onClick={() => setError(null)} style={{ float: 'right' }}>
+              <Button
+                variant="plain"
+                onClick={() => setError(null)}
+                style={{ float: 'right' }}
+              >
                 ×
               </Button>
             </Alert>
@@ -280,18 +280,29 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                 <Stack hasGutter>
                   <StackItem>
                     <Title headingLevel="h3" size="lg">
-                      {editingTemplate ? 'Edit Template' : 'Create New Template'}
+                      {editingTemplate
+                        ? 'Edit Template'
+                        : 'Create New Template'}
                     </Title>
                   </StackItem>
 
                   <StackItem>
                     <Grid hasGutter>
                       <GridItem span={6}>
-                        <FormGroup label="Template Name" isRequired fieldId="template-name">
+                        <FormGroup
+                          label="Template Name"
+                          isRequired
+                          fieldId="template-name"
+                        >
                           <TextInput
                             id="template-name"
                             value={templateForm.name}
-                            onChange={(_, value) => setTemplateForm(prev => ({ ...prev, name: value }))}
+                            onChange={(_, value) =>
+                              setTemplateForm((prev) => ({
+                                ...prev,
+                                name: value,
+                              }))
+                            }
                             placeholder="Enter template name..."
                           />
                         </FormGroup>
@@ -302,7 +313,12 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                             id="template-shared"
                             label="Make template shared"
                             isChecked={templateForm.isShared}
-                            onChange={(_, checked) => setTemplateForm(prev => ({ ...prev, isShared: checked }))}
+                            onChange={(_, checked) =>
+                              setTemplateForm((prev) => ({
+                                ...prev,
+                                isShared: checked,
+                              }))
+                            }
                           />
                         </FormGroup>
                       </GridItem>
@@ -310,11 +326,19 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                   </StackItem>
 
                   <StackItem>
-                    <FormGroup label="Description" fieldId="template-description">
+                    <FormGroup
+                      label="Description"
+                      fieldId="template-description"
+                    >
                       <TextArea
                         id="template-description"
                         value={templateForm.description}
-                        onChange={(_, value) => setTemplateForm(prev => ({ ...prev, description: value }))}
+                        onChange={(_, value) =>
+                          setTemplateForm((prev) => ({
+                            ...prev,
+                            description: value,
+                          }))
+                        }
                         placeholder="Optional description..."
                         rows={3}
                       />
@@ -329,11 +353,14 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                         isInline
                         isPlain
                       >
-                        <strong>Resources:</strong> {currentFormData.cpu_count} CPU, {formatMemory(currentFormData.memory_mb)}
+                        <strong>Resources:</strong> {currentFormData.cpu_count}{' '}
+                        CPU, {formatMemory(currentFormData.memory_mb)}
                         <br />
-                        <strong>Storage:</strong> {currentFormData.storage_config.disk_size_gb} GB
+                        <strong>Storage:</strong>{' '}
+                        {currentFormData.storage_config.disk_size_gb} GB
                         <br />
-                        <strong>Network:</strong> {currentFormData.network_config.ip_allocation_mode}
+                        <strong>Network:</strong>{' '}
+                        {currentFormData.network_config.ip_allocation_mode}
                         {currentFormData.advanced_config.cloud_init_enabled && (
                           <>
                             <br />
@@ -348,10 +375,18 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <Button
                         variant="primary"
-                        onClick={editingTemplate ? handleUpdateTemplate : handleCreateTemplate}
-                        isDisabled={!templateForm.name.trim() || !currentFormData}
+                        onClick={
+                          editingTemplate
+                            ? handleUpdateTemplate
+                            : handleCreateTemplate
+                        }
+                        isDisabled={
+                          !templateForm.name.trim() || !currentFormData
+                        }
                       >
-                        {editingTemplate ? 'Update Template' : 'Create Template'}
+                        {editingTemplate
+                          ? 'Update Template'
+                          : 'Create Template'}
                       </Button>
                       <Button variant="link" onClick={resetForm}>
                         Cancel
@@ -367,7 +402,13 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
         {/* Template Actions */}
         {!showCreateForm && (
           <StackItem>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Title headingLevel="h3" size="lg">
                 Saved Templates
               </Title>
@@ -383,7 +424,9 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                   <Button
                     variant="secondary"
                     icon={<ImportIcon />}
-                    onClick={() => document.getElementById('import-template')?.click()}
+                    onClick={() =>
+                      document.getElementById('import-template')?.click()
+                    }
                   >
                     Import
                   </Button>
@@ -411,7 +454,8 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                   No templates saved
                 </Title>
                 <EmptyStateBody>
-                  Create your first VM template to reuse configurations for future deployments.
+                  Create your first VM template to reuse configurations for
+                  future deployments.
                 </EmptyStateBody>
                 <EmptyStateActions>
                   <Button
@@ -452,15 +496,24 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                             </div>
                           </Td>
                           <Td>
-                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '4px',
+                                flexWrap: 'wrap',
+                              }}
+                            >
                               <Badge>{template.cpu_count} CPU</Badge>
                               <Badge>{formatMemory(template.memory_mb)}</Badge>
-                              <Badge>{template.storage_config?.disk_size_gb || 50} GB</Badge>
+                              <Badge>
+                                {template.storage_config?.disk_size_gb || 50} GB
+                              </Badge>
                             </div>
                           </Td>
                           <Td>
                             <Badge color="blue">
-                              {template.network_config?.ip_allocation_mode || 'DHCP'}
+                              {template.network_config?.ip_allocation_mode ||
+                                'DHCP'}
                             </Badge>
                           </Td>
                           <Td>
@@ -495,12 +548,14 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
                                   },
                                   {
                                     title: 'Export',
-                                    onClick: () => handleExportTemplate(template),
+                                    onClick: () =>
+                                      handleExportTemplate(template),
                                   },
                                   { isSeparator: true },
                                   {
                                     title: 'Delete',
-                                    onClick: () => handleDeleteTemplate(template.id),
+                                    onClick: () =>
+                                      handleDeleteTemplate(template.id),
                                     isDanger: true,
                                   },
                                 ]}
@@ -524,19 +579,22 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
               title="Current Configuration Available"
               isInline
             >
-              You can create a template from your current wizard configuration to save and reuse these settings later.
+              You can create a template from your current wizard configuration
+              to save and reuse these settings later.
             </Alert>
           </StackItem>
         )}
 
         {/* Modal Actions */}
         <StackItem>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'flex-end', 
-            padding: '16px 0',
-            borderTop: '1px solid var(--pf-v6-global--BorderColor--100)'
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: '16px 0',
+              borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
+            }}
+          >
             <Button variant="secondary" onClick={onClose}>
               Close
             </Button>

@@ -106,7 +106,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
   const [cloudInitError, setCloudInitError] = useState('');
   const [isExpandedCloudInit, setIsExpandedCloudInit] = useState(false);
 
-  const updateAdvancedConfig = (updates: Partial<typeof formData.advanced_config>) => {
+  const updateAdvancedConfig = (
+    updates: Partial<typeof formData.advanced_config>
+  ) => {
     const updatedAdvancedConfig = {
       ...formData.advanced_config,
       ...updates,
@@ -124,10 +126,12 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
 
   const handleCloudInitScriptChange = (script: string) => {
     updateAdvancedConfig({ cloud_init_script: script });
-    
+
     // Basic validation
     if (script.trim() && !script.trim().startsWith('#cloud-config')) {
-      setCloudInitError('Cloud-init script should typically start with "#cloud-config"');
+      setCloudInitError(
+        'Cloud-init script should typically start with "#cloud-config"'
+      );
     } else {
       setCloudInitError('');
     }
@@ -177,7 +181,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
   };
 
   const customProperties = formData.advanced_config.custom_properties || {};
-  const selectedTimeZone = TIME_ZONES.find(tz => tz.value === formData.advanced_config.time_zone);
+  const selectedTimeZone = TIME_ZONES.find(
+    (tz) => tz.value === formData.advanced_config.time_zone
+  );
 
   return (
     <Stack hasGutter>
@@ -187,7 +193,8 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
           Advanced Options
         </Title>
         <p className="pf-v6-u-color-200">
-          Configure advanced VM settings including cloud-init, guest customization, and custom properties.
+          Configure advanced VM settings including cloud-init, guest
+          customization, and custom properties.
         </p>
       </StackItem>
 
@@ -197,7 +204,13 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
           <CardBody>
             <Stack hasGutter>
               <StackItem>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <div>
                     <Title headingLevel="h3" size="lg">
                       <CodeIcon className="pf-v6-u-mr-sm" />
@@ -210,7 +223,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                   <Switch
                     id="cloud-init-toggle"
                     label="Enable cloud-init"
-                    isChecked={formData.advanced_config.cloud_init_enabled || false}
+                    isChecked={
+                      formData.advanced_config.cloud_init_enabled || false
+                    }
                     onChange={(_, checked) => handleCloudInitToggle(checked)}
                   />
                 </div>
@@ -221,15 +236,16 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                   <StackItem>
                     <Divider />
                   </StackItem>
-                  
+
                   <StackItem>
                     <Alert
                       variant={AlertVariant.info}
                       isInline
                       title="Cloud-init Information"
                     >
-                      Cloud-init allows you to configure your VM automatically on first boot. 
-                      This includes setting up users, installing packages, and running custom commands.
+                      Cloud-init allows you to configure your VM automatically
+                      on first boot. This includes setting up users, installing
+                      packages, and running custom commands.
                     </Alert>
                   </StackItem>
 
@@ -249,13 +265,15 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                         </Button>
                         <Button
                           variant="link"
-                          onClick={() => setIsExpandedCloudInit(!isExpandedCloudInit)}
+                          onClick={() =>
+                            setIsExpandedCloudInit(!isExpandedCloudInit)
+                          }
                           size="sm"
                         >
                           {isExpandedCloudInit ? 'Hide' : 'Show'} sample script
                         </Button>
                       </div>
-                      
+
                       {isExpandedCloudInit && (
                         <ExpandableSection isExpanded>
                           <CodeBlock>
@@ -263,11 +281,13 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                           </CodeBlock>
                         </ExpandableSection>
                       )}
-                      
+
                       <TextArea
                         id="cloud-init-script"
                         value={formData.advanced_config.cloud_init_script || ''}
-                        onChange={(_, value) => handleCloudInitScriptChange(value)}
+                        onChange={(_, value) =>
+                          handleCloudInitScriptChange(value)
+                        }
                         placeholder="Enter cloud-init configuration..."
                         rows={12}
                         resizeOrientation="vertical"
@@ -282,7 +302,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                       )}
                       {cloudInitError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{cloudInitError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {cloudInitError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
@@ -300,7 +322,13 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
           <CardBody>
             <Stack hasGutter>
               <StackItem>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <div>
                     <Title headingLevel="h3" size="lg">
                       <DesktopIcon className="pf-v6-u-mr-sm" />
@@ -313,8 +341,12 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                   <Switch
                     id="guest-customization-toggle"
                     label="Enable guest customization"
-                    isChecked={formData.advanced_config.guest_customization || false}
-                    onChange={(_, checked) => handleGuestCustomizationToggle(checked)}
+                    isChecked={
+                      formData.advanced_config.guest_customization || false
+                    }
+                    onChange={(_, checked) =>
+                      handleGuestCustomizationToggle(checked)
+                    }
                   />
                 </div>
               </StackItem>
@@ -324,15 +356,16 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                   <StackItem>
                     <Divider />
                   </StackItem>
-                  
+
                   <StackItem>
                     <Alert
                       variant={AlertVariant.warning}
                       isInline
                       title="Guest Customization Notice"
                     >
-                      Guest customization is primarily for Windows VMs and requires VMware Tools to be installed.
-                      For Linux VMs, consider using cloud-init instead.
+                      Guest customization is primarily for Windows VMs and
+                      requires VMware Tools to be installed. For Linux VMs,
+                      consider using cloud-init instead.
                     </Alert>
                   </StackItem>
 
@@ -346,12 +379,15 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                           <TextInput
                             id="computer-name"
                             value={formData.advanced_config.computer_name || ''}
-                            onChange={(_, value) => updateAdvancedConfig({ computer_name: value })}
+                            onChange={(_, value) =>
+                              updateAdvancedConfig({ computer_name: value })
+                            }
                             placeholder="Enter computer name..."
                           />
                           <HelperText>
                             <HelperTextItem icon={<InfoCircleIcon />}>
-                              Set the hostname for the VM (leave empty to use default)
+                              Set the hostname for the VM (leave empty to use
+                              default)
                             </HelperTextItem>
                           </HelperText>
                         </FormGroup>
@@ -365,43 +401,56 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                           <TextInput
                             id="admin-password"
                             type="password"
-                            value={formData.advanced_config.admin_password || ''}
-                            onChange={(_, value) => updateAdvancedConfig({ admin_password: value })}
+                            value={
+                              formData.advanced_config.admin_password || ''
+                            }
+                            onChange={(_, value) =>
+                              updateAdvancedConfig({ admin_password: value })
+                            }
                             placeholder="Enter password..."
                           />
                           <HelperText>
                             <HelperTextItem icon={<InfoCircleIcon />}>
-                              Set password for the administrator account (Windows only)
+                              Set password for the administrator account
+                              (Windows only)
                             </HelperTextItem>
                           </HelperText>
                         </FormGroup>
                       </GridItem>
 
                       <GridItem span={6}>
-                        <FormGroup
-                          label="Time Zone"
-                          fieldId="time-zone"
-                        >
+                        <FormGroup label="Time Zone" fieldId="time-zone">
                           <Select
                             id="time-zone"
                             isOpen={isTimeZoneSelectOpen}
                             selected={formData.advanced_config.time_zone || ''}
-                            onSelect={(_, selection) => handleTimeZoneChange(selection as string)}
+                            onSelect={(_, selection) =>
+                              handleTimeZoneChange(selection as string)
+                            }
                             onOpenChange={setIsTimeZoneSelectOpen}
-                            toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                            toggle={(
+                              toggleRef: React.Ref<MenuToggleElement>
+                            ) => (
                               <MenuToggle
                                 ref={toggleRef}
-                                onClick={() => setIsTimeZoneSelectOpen(!isTimeZoneSelectOpen)}
+                                onClick={() =>
+                                  setIsTimeZoneSelectOpen(!isTimeZoneSelectOpen)
+                                }
                                 isExpanded={isTimeZoneSelectOpen}
                                 style={{ width: '100%' }}
                               >
-                                {selectedTimeZone ? selectedTimeZone.label : 'Select time zone...'}
+                                {selectedTimeZone
+                                  ? selectedTimeZone.label
+                                  : 'Select time zone...'}
                               </MenuToggle>
                             )}
                           >
                             <SelectList>
                               {TIME_ZONES.map((timeZone) => (
-                                <SelectOption key={timeZone.value} value={timeZone.value}>
+                                <SelectOption
+                                  key={timeZone.value}
+                                  value={timeZone.value}
+                                >
                                   {timeZone.label}
                                 </SelectOption>
                               ))}
@@ -420,12 +469,17 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                           <Switch
                             id="auto-logon"
                             label="Enable automatic logon"
-                            isChecked={formData.advanced_config.auto_logon || false}
-                            onChange={(_, checked) => updateAdvancedConfig({ auto_logon: checked })}
+                            isChecked={
+                              formData.advanced_config.auto_logon || false
+                            }
+                            onChange={(_, checked) =>
+                              updateAdvancedConfig({ auto_logon: checked })
+                            }
                           />
                           <HelperText>
                             <HelperTextItem icon={<InfoCircleIcon />}>
-                              Automatically log in the administrator account on boot
+                              Automatically log in the administrator account on
+                              boot
                             </HelperTextItem>
                           </HelperText>
                         </FormGroup>
@@ -449,7 +503,8 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                   Custom Properties
                 </Title>
                 <p className="pf-v6-u-color-200">
-                  Add custom metadata properties to the VM for identification or automation
+                  Add custom metadata properties to the VM for identification or
+                  automation
                 </p>
               </StackItem>
 
@@ -481,7 +536,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                         variant="secondary"
                         icon={<PlusIcon />}
                         onClick={handleAddCustomProperty}
-                        isDisabled={!newPropertyKey.trim() || !newPropertyValue.trim()}
+                        isDisabled={
+                          !newPropertyKey.trim() || !newPropertyValue.trim()
+                        }
                         style={{ width: '100%' }}
                       >
                         Add Property
@@ -493,7 +550,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
 
               {Object.keys(customProperties).length > 0 && (
                 <StackItem>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <div
+                    style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
+                  >
                     {Object.entries(customProperties).map(([key, value]) => (
                       <Badge key={key} color="blue">
                         {key}: {value}
@@ -534,11 +593,11 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                         <CodeIcon />
                       </div>
                       <div style={{ fontSize: '1.2em', fontWeight: 'bold' }}>
-                        {formData.advanced_config.cloud_init_enabled ? 'Enabled' : 'Disabled'}
+                        {formData.advanced_config.cloud_init_enabled
+                          ? 'Enabled'
+                          : 'Disabled'}
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Cloud-init
-                      </div>
+                      <div className="pf-v6-u-color-200">Cloud-init</div>
                     </div>
                   </GridItem>
                   <GridItem span={4}>
@@ -547,7 +606,9 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                         <DesktopIcon />
                       </div>
                       <div style={{ fontSize: '1.2em', fontWeight: 'bold' }}>
-                        {formData.advanced_config.guest_customization ? 'Enabled' : 'Disabled'}
+                        {formData.advanced_config.guest_customization
+                          ? 'Enabled'
+                          : 'Disabled'}
                       </div>
                       <div className="pf-v6-u-color-200">
                         Guest Customization
@@ -562,19 +623,25 @@ const AdvancedOptionsStep: React.FC<AdvancedOptionsStepProps> = ({
                       <div style={{ fontSize: '1.2em', fontWeight: 'bold' }}>
                         {Object.keys(customProperties).length}
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Custom Properties
-                      </div>
+                      <div className="pf-v6-u-color-200">Custom Properties</div>
                     </div>
                   </GridItem>
                 </Grid>
               </StackItem>
 
-              {(formData.advanced_config.cloud_init_enabled || formData.advanced_config.guest_customization) && (
+              {(formData.advanced_config.cloud_init_enabled ||
+                formData.advanced_config.guest_customization) && (
                 <StackItem>
-                  <Alert variant={AlertVariant.info} isInline isPlain title="Initialization Configuration">
-                    {formData.advanced_config.cloud_init_enabled && 'Cloud-init script will run on first boot. '}
-                    {formData.advanced_config.guest_customization && 'Guest OS customization will be applied during deployment.'}
+                  <Alert
+                    variant={AlertVariant.info}
+                    isInline
+                    isPlain
+                    title="Initialization Configuration"
+                  >
+                    {formData.advanced_config.cloud_init_enabled &&
+                      'Cloud-init script will run on first boot. '}
+                    {formData.advanced_config.guest_customization &&
+                      'Guest OS customization will be applied during deployment.'}
                   </Alert>
                 </StackItem>
               )}

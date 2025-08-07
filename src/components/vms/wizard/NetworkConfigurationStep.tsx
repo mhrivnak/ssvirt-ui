@@ -46,18 +46,37 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
   const [newDnsServer, setNewDnsServer] = useState('');
 
   const validateIP = (ip: string) => {
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipRegex.test(ip);
   };
 
   const validateSubnetMask = (mask: string) => {
     const validMasks = [
-      '255.255.255.0', '255.255.254.0', '255.255.252.0', '255.255.248.0',
-      '255.255.240.0', '255.255.224.0', '255.255.192.0', '255.255.128.0',
-      '255.255.0.0', '255.254.0.0', '255.252.0.0', '255.248.0.0',
-      '255.240.0.0', '255.224.0.0', '255.192.0.0', '255.128.0.0',
-      '255.0.0.0', '254.0.0.0', '252.0.0.0', '248.0.0.0',
-      '240.0.0.0', '224.0.0.0', '192.0.0.0', '128.0.0.0'
+      '255.255.255.0',
+      '255.255.254.0',
+      '255.255.252.0',
+      '255.255.248.0',
+      '255.255.240.0',
+      '255.255.224.0',
+      '255.255.192.0',
+      '255.255.128.0',
+      '255.255.0.0',
+      '255.254.0.0',
+      '255.252.0.0',
+      '255.248.0.0',
+      '255.240.0.0',
+      '255.224.0.0',
+      '255.192.0.0',
+      '255.128.0.0',
+      '255.0.0.0',
+      '254.0.0.0',
+      '252.0.0.0',
+      '248.0.0.0',
+      '240.0.0.0',
+      '224.0.0.0',
+      '192.0.0.0',
+      '128.0.0.0',
     ];
     return validMasks.includes(mask);
   };
@@ -136,9 +155,10 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
   };
 
   const handleRemoveDnsServer = (serverToRemove: string) => {
-    const updatedDnsServers = (formData.network_config.dns_servers || [])
-      .filter(server => server !== serverToRemove);
-    
+    const updatedDnsServers = (
+      formData.network_config.dns_servers || []
+    ).filter((server) => server !== serverToRemove);
+
     const updatedNetworkConfig = {
       ...formData.network_config,
       dns_servers: updatedDnsServers,
@@ -158,15 +178,21 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
           Network Configuration
         </Title>
         <p className="pf-v6-u-color-200">
-          Configure network settings for your virtual machine including IP allocation and DNS settings.
+          Configure network settings for your virtual machine including IP
+          allocation and DNS settings.
         </p>
       </StackItem>
 
       {/* VDC Network Info */}
       {selectedVDC && (
         <StackItem>
-          <Alert variant={AlertVariant.info} isInline title="VDC Network Information">
-            This VM will be deployed in the <strong>{selectedVDC.name}</strong> VDC network namespace: <code>{selectedVDC.namespace}</code>
+          <Alert
+            variant={AlertVariant.info}
+            isInline
+            title="VDC Network Information"
+          >
+            This VM will be deployed in the <strong>{selectedVDC.name}</strong>{' '}
+            VDC network namespace: <code>{selectedVDC.namespace}</code>
           </Alert>
         </StackItem>
       )}
@@ -190,7 +216,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                   <GridItem span={4}>
                     <Card
                       isSelectable
-                      isSelected={formData.network_config.ip_allocation_mode === 'DHCP'}
+                      isSelected={
+                        formData.network_config.ip_allocation_mode === 'DHCP'
+                      }
                       onClick={() => handleAllocationModeChange('DHCP')}
                       style={{ cursor: 'pointer' }}
                     >
@@ -200,14 +228,20 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                             <Radio
                               id="dhcp-mode"
                               name="ip-allocation"
-                              isChecked={formData.network_config.ip_allocation_mode === 'DHCP'}
-                              onChange={() => handleAllocationModeChange('DHCP')}
+                              isChecked={
+                                formData.network_config.ip_allocation_mode ===
+                                'DHCP'
+                              }
+                              onChange={() =>
+                                handleAllocationModeChange('DHCP')
+                              }
                               label="DHCP (Automatic)"
                             />
                           </StackItem>
                           <StackItem>
                             <p className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
-                              Automatically obtain IP address from the network DHCP server
+                              Automatically obtain IP address from the network
+                              DHCP server
                             </p>
                             <Badge color="green">Recommended</Badge>
                           </StackItem>
@@ -219,7 +253,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                   <GridItem span={4}>
                     <Card
                       isSelectable
-                      isSelected={formData.network_config.ip_allocation_mode === 'STATIC'}
+                      isSelected={
+                        formData.network_config.ip_allocation_mode === 'STATIC'
+                      }
                       onClick={() => handleAllocationModeChange('STATIC')}
                       style={{ cursor: 'pointer' }}
                     >
@@ -229,8 +265,13 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                             <Radio
                               id="static-mode"
                               name="ip-allocation"
-                              isChecked={formData.network_config.ip_allocation_mode === 'STATIC'}
-                              onChange={() => handleAllocationModeChange('STATIC')}
+                              isChecked={
+                                formData.network_config.ip_allocation_mode ===
+                                'STATIC'
+                              }
+                              onChange={() =>
+                                handleAllocationModeChange('STATIC')
+                              }
                               label="Static IP"
                             />
                           </StackItem>
@@ -248,7 +289,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                   <GridItem span={4}>
                     <Card
                       isSelectable
-                      isSelected={formData.network_config.ip_allocation_mode === 'POOL'}
+                      isSelected={
+                        formData.network_config.ip_allocation_mode === 'POOL'
+                      }
                       onClick={() => handleAllocationModeChange('POOL')}
                       style={{ cursor: 'pointer' }}
                     >
@@ -258,8 +301,13 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                             <Radio
                               id="pool-mode"
                               name="ip-allocation"
-                              isChecked={formData.network_config.ip_allocation_mode === 'POOL'}
-                              onChange={() => handleAllocationModeChange('POOL')}
+                              isChecked={
+                                formData.network_config.ip_allocation_mode ===
+                                'POOL'
+                              }
+                              onChange={() =>
+                                handleAllocationModeChange('POOL')
+                              }
                               label="IP Pool"
                             />
                           </StackItem>
@@ -295,7 +343,8 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                     isInline
                     title="Static IP Configuration"
                   >
-                    Ensure the IP address is available and doesn't conflict with other systems on the network.
+                    Ensure the IP address is available and doesn't conflict with
+                    other systems on the network.
                   </Alert>
                 </StackItem>
 
@@ -310,7 +359,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         <TextInput
                           id="static-ip"
                           value={formData.network_config.ip_address || ''}
-                          onChange={(_, value) => handleStaticIPChange('ip_address', value)}
+                          onChange={(_, value) =>
+                            handleStaticIPChange('ip_address', value)
+                          }
                           placeholder="192.168.1.100"
                           validated={ipError ? 'error' : 'default'}
                         />
@@ -323,7 +374,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         )}
                         {ipError && (
                           <HelperText>
-                            <HelperTextItem variant="error">{ipError}</HelperTextItem>
+                            <HelperTextItem variant="error">
+                              {ipError}
+                            </HelperTextItem>
                           </HelperText>
                         )}
                       </FormGroup>
@@ -338,7 +391,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         <TextInput
                           id="subnet-mask"
                           value={formData.network_config.subnet_mask || ''}
-                          onChange={(_, value) => handleStaticIPChange('subnet_mask', value)}
+                          onChange={(_, value) =>
+                            handleStaticIPChange('subnet_mask', value)
+                          }
                           placeholder="255.255.255.0"
                           validated={subnetError ? 'error' : 'default'}
                         />
@@ -351,22 +406,22 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         )}
                         {subnetError && (
                           <HelperText>
-                            <HelperTextItem variant="error">{subnetError}</HelperTextItem>
+                            <HelperTextItem variant="error">
+                              {subnetError}
+                            </HelperTextItem>
                           </HelperText>
                         )}
                       </FormGroup>
                     </GridItem>
 
                     <GridItem span={6}>
-                      <FormGroup
-                        label="Gateway"
-                        isRequired
-                        fieldId="gateway"
-                      >
+                      <FormGroup label="Gateway" isRequired fieldId="gateway">
                         <TextInput
                           id="gateway"
                           value={formData.network_config.gateway || ''}
-                          onChange={(_, value) => handleStaticIPChange('gateway', value)}
+                          onChange={(_, value) =>
+                            handleStaticIPChange('gateway', value)
+                          }
                           placeholder="192.168.1.1"
                           validated={gatewayError ? 'error' : 'default'}
                         />
@@ -379,7 +434,9 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         )}
                         {gatewayError && (
                           <HelperText>
-                            <HelperTextItem variant="error">{gatewayError}</HelperTextItem>
+                            <HelperTextItem variant="error">
+                              {gatewayError}
+                            </HelperTextItem>
                           </HelperText>
                         )}
                       </FormGroup>
@@ -407,14 +464,17 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
               </StackItem>
 
               <StackItem>
-                <FormGroup
-                  label="DNS Servers"
-                  fieldId="dns-servers"
-                >
+                <FormGroup label="DNS Servers" fieldId="dns-servers">
                   <Stack hasGutter>
                     {dnsServers.length > 0 && (
                       <StackItem>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '8px',
+                          }}
+                        >
                           {dnsServers.map((server, index) => (
                             <Badge key={index} color="blue">
                               {server}
@@ -432,7 +492,7 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                         </div>
                       </StackItem>
                     )}
-                    
+
                     <StackItem>
                       <InputGroup>
                         <InputGroupItem isFill>
@@ -468,13 +528,16 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                   {!dnsError && (
                     <HelperText>
                       <HelperTextItem icon={<InfoCircleIcon />}>
-                        Add DNS server IP addresses. If not specified, default system DNS will be used.
+                        Add DNS server IP addresses. If not specified, default
+                        system DNS will be used.
                       </HelperTextItem>
                     </HelperText>
                   )}
                   {dnsError && (
                     <HelperText>
-                      <HelperTextItem variant="error">{dnsError}</HelperTextItem>
+                      <HelperTextItem variant="error">
+                        {dnsError}
+                      </HelperTextItem>
                     </HelperText>
                   )}
                 </FormGroup>
@@ -486,21 +549,25 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                   <p className="pf-v6-u-font-size-sm pf-v6-u-color-200 pf-v6-u-mb-sm">
                     Common DNS servers:
                   </p>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1'].map((server) => (
-                      <Button
-                        key={server}
-                        variant="link"
-                        size="sm"
-                        onClick={() => {
-                          setNewDnsServer(server);
-                          setDnsError('');
-                        }}
-                        isDisabled={dnsServers.includes(server)}
-                      >
-                        {server}
-                      </Button>
-                    ))}
+                  <div
+                    style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
+                  >
+                    {['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1'].map(
+                      (server) => (
+                        <Button
+                          key={server}
+                          variant="link"
+                          size="sm"
+                          onClick={() => {
+                            setNewDnsServer(server);
+                            setDnsError('');
+                          }}
+                          isDisabled={dnsServers.includes(server)}
+                        >
+                          {server}
+                        </Button>
+                      )
+                    )}
                   </div>
                 </div>
               </StackItem>
@@ -523,21 +590,28 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
                 <Grid hasGutter>
                   <GridItem span={6}>
                     <div>
-                      <strong>IP Allocation:</strong> {formData.network_config.ip_allocation_mode}
+                      <strong>IP Allocation:</strong>{' '}
+                      {formData.network_config.ip_allocation_mode}
                       {isStaticMode && formData.network_config.ip_address && (
                         <div className="pf-v6-u-mt-sm">
-                          <strong>Static IP:</strong> {formData.network_config.ip_address}
+                          <strong>Static IP:</strong>{' '}
+                          {formData.network_config.ip_address}
                           <br />
-                          <strong>Gateway:</strong> {formData.network_config.gateway || 'Not set'}
+                          <strong>Gateway:</strong>{' '}
+                          {formData.network_config.gateway || 'Not set'}
                           <br />
-                          <strong>Subnet Mask:</strong> {formData.network_config.subnet_mask || 'Not set'}
+                          <strong>Subnet Mask:</strong>{' '}
+                          {formData.network_config.subnet_mask || 'Not set'}
                         </div>
                       )}
                     </div>
                   </GridItem>
                   <GridItem span={6}>
                     <div>
-                      <strong>DNS Servers:</strong> {dnsServers.length === 0 ? 'Default system DNS' : `${dnsServers.length} configured`}
+                      <strong>DNS Servers:</strong>{' '}
+                      {dnsServers.length === 0
+                        ? 'Default system DNS'
+                        : `${dnsServers.length} configured`}
                       {dnsServers.length > 0 && (
                         <div className="pf-v6-u-mt-sm">
                           {dnsServers.join(', ')}

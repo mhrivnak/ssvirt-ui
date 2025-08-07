@@ -7,7 +7,12 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import { useCreateVM, useVDCs, useCatalogs, useAllCatalogItems } from '../../hooks';
+import {
+  useCreateVM,
+  useVDCs,
+  useCatalogs,
+  useAllCatalogItems,
+} from '../../hooks';
 import type {
   CreateVMRequest,
   VMNetworkConfig,
@@ -41,21 +46,21 @@ export interface WizardFormData {
   name: string;
   description: string;
   vdc_id: string;
-  
+
   // Template Selection
   catalog_item_id: string;
   selectedTemplate?: CatalogItem;
-  
+
   // Resource Specification
   cpu_count: number;
   memory_mb: number;
-  
+
   // Network Configuration
   network_config: VMNetworkConfig;
-  
+
   // Storage Configuration
   storage_config: VMStorageConfig;
-  
+
   // Advanced Options
   advanced_config: VMAdvancedConfig;
 }
@@ -110,7 +115,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const catalogItems = catalogItemsResponse?.data || [];
 
   const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
     setError(null); // Clear errors when form data changes
   }, []);
 
@@ -159,7 +164,6 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     setError(null);
   };
 
-
   const handleCreate = async () => {
     if (!validateStep(6)) {
       setError('Please review and correct any validation errors.');
@@ -186,7 +190,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
 
       // Start the VM creation
       await createVMMutation.mutateAsync(createRequest);
-      
+
       // TODO: Show progress modal after fixing TypeScript issues
       // setShowProgress(true);
       onClose();
@@ -242,7 +246,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   // };
 
   const handleLoadTemplate = (templateData: Partial<WizardFormData>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ...templateData,
     }));
@@ -286,7 +290,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         <NetworkConfigurationStep
           formData={formData}
           updateFormData={updateFormData}
-          selectedVDC={vdcs.find(vdc => vdc.id === formData.vdc_id)}
+          selectedVDC={vdcs.find((vdc) => vdc.id === formData.vdc_id)}
         />
       ),
     },
@@ -337,23 +341,25 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           {error}
         </Alert>
       )}
-      
+
       <Wizard>
         {steps[activeStepIndex]?.component}
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          padding: '24px',
-          borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
-          marginTop: '24px'
-        }}>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '24px',
+            borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
+            marginTop: '24px',
+          }}
+        >
           <div style={{ display: 'flex', gap: '12px' }}>
             <Button variant="link" onClick={handleClose}>
               Cancel
             </Button>
-            <Button 
-              variant="link" 
+            <Button
+              variant="link"
               onClick={() => setShowTemplateManager(true)}
               isDisabled={isCreating}
             >

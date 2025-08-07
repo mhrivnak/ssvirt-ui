@@ -59,9 +59,10 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
         : true;
 
       const matchesCatalog = selectedCatalogId
-        ? catalogs.find(catalog => 
-            catalog.name === item.name.split('-')[0] || 
-            item.name.includes(catalog.name)
+        ? catalogs.find(
+            (catalog) =>
+              catalog.name === item.name.split('-')[0] ||
+              item.name.includes(catalog.name)
           )?.id === selectedCatalogId
         : true;
 
@@ -94,7 +95,10 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
       return '🪟';
     } else if (osType.toLowerCase().includes('ubuntu')) {
       return '🐧';
-    } else if (osType.toLowerCase().includes('centos') || osType.toLowerCase().includes('rhel')) {
+    } else if (
+      osType.toLowerCase().includes('centos') ||
+      osType.toLowerCase().includes('rhel')
+    ) {
       return '🎩';
     }
     return '💿';
@@ -116,7 +120,8 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
           Select Template
         </Title>
         <p className="pf-v6-u-color-200">
-          Choose a template to use as the base for your virtual machine. Templates define the operating system and initial configuration.
+          Choose a template to use as the base for your virtual machine.
+          Templates define the operating system and initial configuration.
         </p>
       </StackItem>
 
@@ -146,12 +151,16 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
                   toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
                       ref={toggleRef}
-                      onClick={() => setIsCatalogSelectOpen(!isCatalogSelectOpen)}
+                      onClick={() =>
+                        setIsCatalogSelectOpen(!isCatalogSelectOpen)
+                      }
                       isExpanded={isCatalogSelectOpen}
                       icon={<CatalogIcon />}
                     >
                       {selectedCatalogId
-                        ? catalogs.find(catalog => catalog.id === selectedCatalogId)?.name || 'Unknown Catalog'
+                        ? catalogs.find(
+                            (catalog) => catalog.id === selectedCatalogId
+                          )?.name || 'Unknown Catalog'
                         : 'All Catalogs'}
                     </MenuToggle>
                   )}
@@ -198,16 +207,31 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
                   <CardBody>
                     <Stack hasGutter>
                       <StackItem>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px',
+                          }}
+                        >
                           <Radio
                             id={`template-${catalogItem.id}`}
                             name="template-selection"
-                            isChecked={formData.catalog_item_id === catalogItem.id}
+                            isChecked={
+                              formData.catalog_item_id === catalogItem.id
+                            }
                             onChange={() => handleTemplateSelect(catalogItem)}
                             aria-label={`Select ${catalogItem.name} template`}
                           />
                           <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '8px',
+                              }}
+                            >
                               <span style={{ fontSize: '1.2em' }}>
                                 {getOSIcon(catalogItem.os_type)}
                               </span>
@@ -218,7 +242,13 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
                             <p className="pf-v6-u-color-200 pf-v6-u-mb-sm">
                               {catalogItem.description}
                             </p>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                gap: '8px',
+                                flexWrap: 'wrap',
+                              }}
+                            >
                               <Badge>
                                 <CpuIcon className="pf-v6-u-mr-xs" />
                                 {catalogItem.cpu_count} CPU
@@ -250,9 +280,13 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
       {formData.selectedTemplate && (
         <StackItem>
           <Alert variant={AlertVariant.info} isInline title="Template Selected">
-            <strong>{formData.selectedTemplate.name}</strong> - {formData.selectedTemplate.description}
+            <strong>{formData.selectedTemplate.name}</strong> -{' '}
+            {formData.selectedTemplate.description}
             <br />
-            Default configuration: {formData.selectedTemplate.cpu_count} CPU, {formatMemory(formData.selectedTemplate.memory_mb)}, {formData.selectedTemplate.disk_size_gb} GB storage
+            Default configuration: {
+              formData.selectedTemplate.cpu_count
+            } CPU, {formatMemory(formData.selectedTemplate.memory_mb)},{' '}
+            {formData.selectedTemplate.disk_size_gb} GB storage
           </Alert>
         </StackItem>
       )}

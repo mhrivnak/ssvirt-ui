@@ -32,11 +32,7 @@ import {
   Td,
   ActionsColumn,
 } from '@patternfly/react-table';
-import {
-  ServerIcon,
-  InfoCircleIcon,
-  PlusIcon,
-} from '@patternfly/react-icons';
+import { ServerIcon, InfoCircleIcon, PlusIcon } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { AdditionalDisk } from '../../../types';
@@ -48,9 +44,21 @@ interface StorageConfigurationStepProps {
 
 // Storage profiles that might be available
 const STORAGE_PROFILES = [
-  { id: 'standard', name: 'Standard Storage', description: 'General purpose storage' },
-  { id: 'fast', name: 'Fast Storage', description: 'High-performance SSD storage' },
-  { id: 'archive', name: 'Archive Storage', description: 'Low-cost archival storage' },
+  {
+    id: 'standard',
+    name: 'Standard Storage',
+    description: 'General purpose storage',
+  },
+  {
+    id: 'fast',
+    name: 'Fast Storage',
+    description: 'High-performance SSD storage',
+  },
+  {
+    id: 'archive',
+    name: 'Archive Storage',
+    description: 'Low-cost archival storage',
+  },
 ];
 
 // Bus types for additional disks
@@ -67,13 +75,16 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
   const [diskSizeError, setDiskSizeError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isProfileSelectOpen, setIsProfileSelectOpen] = useState(false);
-  
+
   // Additional disk form state
   const [newDiskSize, setNewDiskSize] = useState(20);
   const [newDiskProfile, setNewDiskProfile] = useState('standard');
-  const [newDiskBusType, setNewDiskBusType] = useState<'IDE' | 'SCSI' | 'SATA'>('SCSI');
+  const [newDiskBusType, setNewDiskBusType] = useState<'IDE' | 'SCSI' | 'SATA'>(
+    'SCSI'
+  );
   const [isBusTypeSelectOpen, setIsBusTypeSelectOpen] = useState(false);
-  const [isNewDiskProfileSelectOpen, setIsNewDiskProfileSelectOpen] = useState(false);
+  const [isNewDiskProfileSelectOpen, setIsNewDiskProfileSelectOpen] =
+    useState(false);
 
   const validateDiskSize = (size: number) => {
     if (size < 10) {
@@ -126,7 +137,7 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
     };
 
     updateFormData({ storage_config: updatedStorageConfig });
-    
+
     // Reset form
     setNewDiskSize(20);
     setNewDiskProfile('standard');
@@ -135,8 +146,8 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
 
   const handleRemoveDisk = (diskId: string) => {
     const currentDisks = formData.storage_config.additional_disks || [];
-    const updatedDisks = currentDisks.filter(disk => disk.id !== diskId);
-    
+    const updatedDisks = currentDisks.filter((disk) => disk.id !== diskId);
+
     const updatedStorageConfig = {
       ...formData.storage_config,
       additional_disks: updatedDisks,
@@ -147,14 +158,15 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
 
   const getTotalStorage = () => {
     const primarySize = formData.storage_config.disk_size_gb || 0;
-    const additionalSize = (formData.storage_config.additional_disks || [])
-      .reduce((total, disk) => total + disk.size_gb, 0);
+    const additionalSize = (
+      formData.storage_config.additional_disks || []
+    ).reduce((total, disk) => total + disk.size_gb, 0);
     return primarySize + additionalSize;
   };
 
   const getStorageWarning = () => {
     const totalStorage = getTotalStorage();
-    
+
     if (totalStorage > 500) {
       return {
         variant: 'warning' as const,
@@ -162,19 +174,22 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
         message: `Total storage (${totalStorage} GB) is quite large. Ensure your VDC has sufficient storage quota.`,
       };
     }
-    
+
     if (totalStorage < 20) {
       return {
         variant: 'info' as const,
         title: 'Minimal Storage',
-        message: 'This is a minimal storage configuration. Consider if this will be sufficient for your workload.',
+        message:
+          'This is a minimal storage configuration. Consider if this will be sufficient for your workload.',
       };
     }
-    
+
     return null;
   };
 
-  const selectedProfile = STORAGE_PROFILES.find(p => p.id === formData.storage_config.storage_profile);
+  const selectedProfile = STORAGE_PROFILES.find(
+    (p) => p.id === formData.storage_config.storage_profile
+  );
   const additionalDisks = formData.storage_config.additional_disks || [];
   const storageWarning = getStorageWarning();
 
@@ -186,7 +201,8 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
           Storage Configuration
         </Title>
         <p className="pf-v6-u-color-200">
-          Configure storage settings for your virtual machine including disk size and additional storage.
+          Configure storage settings for your virtual machine including disk
+          size and additional storage.
         </p>
       </StackItem>
 
@@ -200,7 +216,8 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                   Primary Disk
                 </Title>
                 <p className="pf-v6-u-color-200">
-                  Configure the main system disk where the operating system will be installed
+                  Configure the main system disk where the operating system will
+                  be installed
                 </p>
               </StackItem>
 
@@ -229,19 +246,26 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                       )}
                       {diskSizeError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{diskSizeError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {diskSizeError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
                   </GridItem>
 
                   <GridItem span={4}>
-                    <FormGroup label="Or enter exact size (GB)" fieldId="disk-size-input">
+                    <FormGroup
+                      label="Or enter exact size (GB)"
+                      fieldId="disk-size-input"
+                    >
                       <TextInput
                         id="disk-size-input"
                         type="number"
                         value={formData.storage_config.disk_size_gb || 50}
-                        onChange={(_, value) => handleDiskSizeInputChange(value)}
+                        onChange={(_, value) =>
+                          handleDiskSizeInputChange(value)
+                        }
                         min={10}
                         max={1000}
                         step={1}
@@ -253,30 +277,39 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
               </StackItem>
 
               <StackItem>
-                <FormGroup
-                  label="Storage Profile"
-                  fieldId="storage-profile"
-                >
+                <FormGroup label="Storage Profile" fieldId="storage-profile">
                   <Select
                     id="storage-profile"
                     isOpen={isProfileSelectOpen}
-                    selected={formData.storage_config.storage_profile || 'standard'}
-                    onSelect={(_, selection) => handleStorageProfileChange(selection as string)}
+                    selected={
+                      formData.storage_config.storage_profile || 'standard'
+                    }
+                    onSelect={(_, selection) =>
+                      handleStorageProfileChange(selection as string)
+                    }
                     onOpenChange={setIsProfileSelectOpen}
                     toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                       <MenuToggle
                         ref={toggleRef}
-                        onClick={() => setIsProfileSelectOpen(!isProfileSelectOpen)}
+                        onClick={() =>
+                          setIsProfileSelectOpen(!isProfileSelectOpen)
+                        }
                         isExpanded={isProfileSelectOpen}
                         style={{ width: '300px' }}
                       >
-                        {selectedProfile ? selectedProfile.name : 'Select storage profile...'}
+                        {selectedProfile
+                          ? selectedProfile.name
+                          : 'Select storage profile...'}
                       </MenuToggle>
                     )}
                   >
                     <SelectList>
                       {STORAGE_PROFILES.map((profile) => (
-                        <SelectOption key={profile.id} value={profile.id} description={profile.description}>
+                        <SelectOption
+                          key={profile.id}
+                          value={profile.id}
+                          description={profile.description}
+                        >
                           {profile.name}
                         </SelectOption>
                       ))}
@@ -284,7 +317,8 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                   </Select>
                   <HelperText>
                     <HelperTextItem icon={<InfoCircleIcon />}>
-                      Storage profile determines performance and cost characteristics
+                      Storage profile determines performance and cost
+                      characteristics
                     </HelperTextItem>
                   </HelperText>
                 </FormGroup>
@@ -300,13 +334,20 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
           <CardBody>
             <Stack hasGutter>
               <StackItem>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <div>
                     <Title headingLevel="h3" size="lg">
                       Additional Disks
                     </Title>
                     <p className="pf-v6-u-color-200">
-                      Add extra disks for data storage, databases, or application files
+                      Add extra disks for data storage, databases, or
+                      application files
                     </p>
                   </div>
                   <Switch
@@ -337,19 +378,27 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                           <StackItem>
                             <Grid hasGutter>
                               <GridItem span={3}>
-                                <FormGroup label="Size (GB)" fieldId="new-disk-size">
+                                <FormGroup
+                                  label="Size (GB)"
+                                  fieldId="new-disk-size"
+                                >
                                   <TextInput
                                     id="new-disk-size"
                                     type="number"
                                     value={newDiskSize}
-                                    onChange={(_, value) => setNewDiskSize(parseInt(value) || 20)}
+                                    onChange={(_, value) =>
+                                      setNewDiskSize(parseInt(value) || 20)
+                                    }
                                     min={1}
                                     max={1000}
                                   />
                                 </FormGroup>
                               </GridItem>
                               <GridItem span={3}>
-                                <FormGroup label="Storage Profile" fieldId="new-disk-profile">
+                                <FormGroup
+                                  label="Storage Profile"
+                                  fieldId="new-disk-profile"
+                                >
                                   <Select
                                     id="new-disk-profile"
                                     isOpen={isNewDiskProfileSelectOpen}
@@ -359,20 +408,31 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                                       setIsNewDiskProfileSelectOpen(false);
                                     }}
                                     onOpenChange={setIsNewDiskProfileSelectOpen}
-                                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                                    toggle={(
+                                      toggleRef: React.Ref<MenuToggleElement>
+                                    ) => (
                                       <MenuToggle
                                         ref={toggleRef}
-                                        onClick={() => setIsNewDiskProfileSelectOpen(!isNewDiskProfileSelectOpen)}
+                                        onClick={() =>
+                                          setIsNewDiskProfileSelectOpen(
+                                            !isNewDiskProfileSelectOpen
+                                          )
+                                        }
                                         isExpanded={isNewDiskProfileSelectOpen}
                                         style={{ width: '100%' }}
                                       >
-                                        {STORAGE_PROFILES.find(p => p.id === newDiskProfile)?.name || 'Select...'}
+                                        {STORAGE_PROFILES.find(
+                                          (p) => p.id === newDiskProfile
+                                        )?.name || 'Select...'}
                                       </MenuToggle>
                                     )}
                                   >
                                     <SelectList>
                                       {STORAGE_PROFILES.map((profile) => (
-                                        <SelectOption key={profile.id} value={profile.id}>
+                                        <SelectOption
+                                          key={profile.id}
+                                          value={profile.id}
+                                        >
                                           {profile.name}
                                         </SelectOption>
                                       ))}
@@ -381,30 +441,46 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                                 </FormGroup>
                               </GridItem>
                               <GridItem span={3}>
-                                <FormGroup label="Bus Type" fieldId="new-disk-bus-type">
+                                <FormGroup
+                                  label="Bus Type"
+                                  fieldId="new-disk-bus-type"
+                                >
                                   <Select
                                     id="new-disk-bus-type"
                                     isOpen={isBusTypeSelectOpen}
                                     selected={newDiskBusType}
                                     onSelect={(_, selection) => {
-                                      setNewDiskBusType(selection as 'IDE' | 'SCSI' | 'SATA');
+                                      setNewDiskBusType(
+                                        selection as 'IDE' | 'SCSI' | 'SATA'
+                                      );
                                       setIsBusTypeSelectOpen(false);
                                     }}
                                     onOpenChange={setIsBusTypeSelectOpen}
-                                    toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                                    toggle={(
+                                      toggleRef: React.Ref<MenuToggleElement>
+                                    ) => (
                                       <MenuToggle
                                         ref={toggleRef}
-                                        onClick={() => setIsBusTypeSelectOpen(!isBusTypeSelectOpen)}
+                                        onClick={() =>
+                                          setIsBusTypeSelectOpen(
+                                            !isBusTypeSelectOpen
+                                          )
+                                        }
                                         isExpanded={isBusTypeSelectOpen}
                                         style={{ width: '100%' }}
                                       >
-                                        {BUS_TYPES.find(t => t.value === newDiskBusType)?.label || 'Select...'}
+                                        {BUS_TYPES.find(
+                                          (t) => t.value === newDiskBusType
+                                        )?.label || 'Select...'}
                                       </MenuToggle>
                                     )}
                                   >
                                     <SelectList>
                                       {BUS_TYPES.map((busType) => (
-                                        <SelectOption key={busType.value} value={busType.value}>
+                                        <SelectOption
+                                          key={busType.value}
+                                          value={busType.value}
+                                        >
                                           {busType.label}
                                         </SelectOption>
                                       ))}
@@ -451,7 +527,9 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                               <Td>{disk.size_gb} GB</Td>
                               <Td>
                                 <Badge>
-                                  {STORAGE_PROFILES.find(p => p.id === disk.storage_profile)?.name || disk.storage_profile}
+                                  {STORAGE_PROFILES.find(
+                                    (p) => p.id === disk.storage_profile
+                                  )?.name || disk.storage_profile}
                                 </Badge>
                               </Td>
                               <Td>{disk.bus_type}</Td>
@@ -512,9 +590,7 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                       <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
                         {formData.storage_config.disk_size_gb} GB
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Primary Disk
-                      </div>
+                      <div className="pf-v6-u-color-200">Primary Disk</div>
                     </div>
                   </GridItem>
                   <GridItem span={4}>
@@ -538,16 +614,21 @@ const StorageConfigurationStep: React.FC<StorageConfigurationStepProps> = ({
                       <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
                         {getTotalStorage()} GB
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Total Storage
-                      </div>
+                      <div className="pf-v6-u-color-200">Total Storage</div>
                     </div>
                   </GridItem>
                 </Grid>
               </StackItem>
               <StackItem>
-                <Alert variant={AlertVariant.info} isInline isPlain title="Storage Profile">
-                  {selectedProfile ? `${selectedProfile.name}: ${selectedProfile.description}` : 'Standard storage profile selected'}
+                <Alert
+                  variant={AlertVariant.info}
+                  isInline
+                  isPlain
+                  title="Storage Profile"
+                >
+                  {selectedProfile
+                    ? `${selectedProfile.name}: ${selectedProfile.description}`
+                    : 'Standard storage profile selected'}
                 </Alert>
               </StackItem>
             </Stack>

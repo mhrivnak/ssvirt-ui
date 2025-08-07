@@ -42,8 +42,10 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
   vdcs,
   catalogItems,
 }) => {
-  const selectedVDC = vdcs.find(vdc => vdc.id === formData.vdc_id);
-  const selectedTemplate = catalogItems.find(item => item.id === formData.catalog_item_id);
+  const selectedVDC = vdcs.find((vdc) => vdc.id === formData.vdc_id);
+  const selectedTemplate = catalogItems.find(
+    (item) => item.id === formData.catalog_item_id
+  );
 
   const formatMemory = (memoryMb: number) => {
     if (memoryMb >= 1024) {
@@ -54,11 +56,11 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
 
   const getTotalStorage = () => {
     const primarySize = formData.storage_config.disk_size_gb || 0;
-    const additionalSize = (formData.storage_config.additional_disks || [])
-      .reduce((total, disk) => total + disk.size_gb, 0);
+    const additionalSize = (
+      formData.storage_config.additional_disks || []
+    ).reduce((total, disk) => total + disk.size_gb, 0);
     return primarySize + additionalSize;
   };
-
 
   const customProperties = formData.advanced_config.custom_properties || {};
   const additionalDisks = formData.storage_config.additional_disks || [];
@@ -72,7 +74,8 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
           Review & Create
         </Title>
         <p className="pf-v6-u-color-200">
-          Review your virtual machine configuration before creating. You can go back to any step to make changes.
+          Review your virtual machine configuration before creating. You can go
+          back to any step to make changes.
         </p>
       </StackItem>
 
@@ -87,7 +90,7 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                   Virtual Machine Overview
                 </Title>
               </StackItem>
-              
+
               <StackItem>
                 <Grid hasGutter>
                   <GridItem span={6}>
@@ -101,24 +104,32 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       <DescriptionListGroup>
                         <DescriptionListTerm>Description</DescriptionListTerm>
                         <DescriptionListDescription>
-                          {formData.description || <em>No description provided</em>}
+                          {formData.description || (
+                            <em>No description provided</em>
+                          )}
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>Virtual Data Center</DescriptionListTerm>
+                        <DescriptionListTerm>
+                          Virtual Data Center
+                        </DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge color="blue">{selectedVDC?.name || 'Unknown VDC'}</Badge>
+                          <Badge color="blue">
+                            {selectedVDC?.name || 'Unknown VDC'}
+                          </Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                     </DescriptionList>
                   </GridItem>
-                  
+
                   <GridItem span={6}>
                     <DescriptionList>
                       <DescriptionListGroup>
                         <DescriptionListTerm>Template</DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge color="green">{selectedTemplate?.name || 'Unknown Template'}</Badge>
+                          <Badge color="green">
+                            {selectedTemplate?.name || 'Unknown Template'}
+                          </Badge>
                           <br />
                           <span className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
                             {selectedTemplate?.description}
@@ -126,7 +137,9 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>Operating System</DescriptionListTerm>
+                        <DescriptionListTerm>
+                          Operating System
+                        </DescriptionListTerm>
                         <DescriptionListDescription>
                           {selectedTemplate?.os_type || 'Unknown OS'}
                         </DescriptionListDescription>
@@ -189,14 +202,21 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       <DescriptionListGroup>
                         <DescriptionListTerm>Primary Disk</DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge>{formData.storage_config.disk_size_gb} GB</Badge>
+                          <Badge>
+                            {formData.storage_config.disk_size_gb} GB
+                          </Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                       <DescriptionListGroup>
-                        <DescriptionListTerm>Additional Disks</DescriptionListTerm>
+                        <DescriptionListTerm>
+                          Additional Disks
+                        </DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge color={additionalDisks.length > 0 ? 'blue' : 'grey'}>
-                            {additionalDisks.length} disk{additionalDisks.length !== 1 ? 's' : ''}
+                          <Badge
+                            color={additionalDisks.length > 0 ? 'blue' : 'grey'}
+                          >
+                            {additionalDisks.length} disk
+                            {additionalDisks.length !== 1 ? 's' : ''}
                           </Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
@@ -208,9 +228,13 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       </DescriptionListGroup>
                       {formData.storage_config.storage_profile && (
                         <DescriptionListGroup>
-                          <DescriptionListTerm>Storage Profile</DescriptionListTerm>
+                          <DescriptionListTerm>
+                            Storage Profile
+                          </DescriptionListTerm>
                           <DescriptionListDescription>
-                            <Label color="blue">{formData.storage_config.storage_profile}</Label>
+                            <Label color="blue">
+                              {formData.storage_config.storage_profile}
+                            </Label>
                           </DescriptionListDescription>
                         </DescriptionListGroup>
                       )}
@@ -236,15 +260,25 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       <DescriptionListGroup>
                         <DescriptionListTerm>IP Allocation</DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge color={formData.network_config.ip_allocation_mode === 'STATIC' ? 'orange' : 'green'}>
+                          <Badge
+                            color={
+                              formData.network_config.ip_allocation_mode ===
+                              'STATIC'
+                                ? 'orange'
+                                : 'green'
+                            }
+                          >
                             {formData.network_config.ip_allocation_mode}
                           </Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
-                      {formData.network_config.ip_allocation_mode === 'STATIC' && (
+                      {formData.network_config.ip_allocation_mode ===
+                        'STATIC' && (
                         <>
                           <DescriptionListGroup>
-                            <DescriptionListTerm>IP Address</DescriptionListTerm>
+                            <DescriptionListTerm>
+                              IP Address
+                            </DescriptionListTerm>
                             <DescriptionListDescription>
                               {formData.network_config.ip_address || 'Not set'}
                             </DescriptionListDescription>
@@ -260,8 +294,12 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       <DescriptionListGroup>
                         <DescriptionListTerm>DNS Servers</DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge color={dnsServers.length > 0 ? 'blue' : 'grey'}>
-                            {dnsServers.length > 0 ? `${dnsServers.length} configured` : 'Default'}
+                          <Badge
+                            color={dnsServers.length > 0 ? 'blue' : 'grey'}
+                          >
+                            {dnsServers.length > 0
+                              ? `${dnsServers.length} configured`
+                              : 'Default'}
                           </Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
@@ -275,8 +313,8 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
       </StackItem>
 
       {/* Advanced Configuration */}
-      {(formData.advanced_config.cloud_init_enabled || 
-        formData.advanced_config.guest_customization || 
+      {(formData.advanced_config.cloud_init_enabled ||
+        formData.advanced_config.guest_customization ||
         Object.keys(customProperties).length > 0) && (
         <StackItem>
           <Card>
@@ -288,7 +326,7 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                     Advanced Configuration
                   </Title>
                 </StackItem>
-                
+
                 <StackItem>
                   <Grid hasGutter>
                     {/* Cloud-init */}
@@ -298,8 +336,16 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                           <CardBody>
                             <Stack hasGutter>
                               <StackItem>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <Label color="green">Cloud-init Enabled</Label>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                  }}
+                                >
+                                  <Label color="green">
+                                    Cloud-init Enabled
+                                  </Label>
                                 </div>
                               </StackItem>
                               {formData.advanced_config.cloud_init_script && (
@@ -307,9 +353,11 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                                   <ExpandableSection toggleText="View cloud-init script">
                                     <CodeBlock>
                                       <CodeBlockCode>
-                                        {formData.advanced_config.cloud_init_script.length > 200
+                                        {formData.advanced_config
+                                          .cloud_init_script.length > 200
                                           ? `${formData.advanced_config.cloud_init_script.substring(0, 200)}...`
-                                          : formData.advanced_config.cloud_init_script}
+                                          : formData.advanced_config
+                                              .cloud_init_script}
                                       </CodeBlockCode>
                                     </CodeBlock>
                                   </ExpandableSection>
@@ -328,13 +376,17 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                           <CardBody>
                             <Stack hasGutter>
                               <StackItem>
-                                <Label color="blue">Guest Customization Enabled</Label>
+                                <Label color="blue">
+                                  Guest Customization Enabled
+                                </Label>
                               </StackItem>
                               <StackItem>
                                 <DescriptionList isCompact>
                                   {formData.advanced_config.computer_name && (
                                     <DescriptionListGroup>
-                                      <DescriptionListTerm>Computer Name</DescriptionListTerm>
+                                      <DescriptionListTerm>
+                                        Computer Name
+                                      </DescriptionListTerm>
                                       <DescriptionListDescription>
                                         {formData.advanced_config.computer_name}
                                       </DescriptionListDescription>
@@ -342,16 +394,22 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                                   )}
                                   {formData.advanced_config.time_zone && (
                                     <DescriptionListGroup>
-                                      <DescriptionListTerm>Time Zone</DescriptionListTerm>
+                                      <DescriptionListTerm>
+                                        Time Zone
+                                      </DescriptionListTerm>
                                       <DescriptionListDescription>
                                         {formData.advanced_config.time_zone}
                                       </DescriptionListDescription>
                                     </DescriptionListGroup>
                                   )}
                                   <DescriptionListGroup>
-                                    <DescriptionListTerm>Auto Logon</DescriptionListTerm>
+                                    <DescriptionListTerm>
+                                      Auto Logon
+                                    </DescriptionListTerm>
                                     <DescriptionListDescription>
-                                      {formData.advanced_config.auto_logon ? 'Enabled' : 'Disabled'}
+                                      {formData.advanced_config.auto_logon
+                                        ? 'Enabled'
+                                        : 'Disabled'}
                                     </DescriptionListDescription>
                                   </DescriptionListGroup>
                                 </DescriptionList>
@@ -370,12 +428,21 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                     <Divider />
                     <div>
                       <strong>Custom Properties:</strong>
-                      <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                        {Object.entries(customProperties).map(([key, value]) => (
-                          <Badge key={key} color="purple">
-                            {key}: {value}
-                          </Badge>
-                        ))}
+                      <div
+                        style={{
+                          marginTop: '8px',
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '8px',
+                        }}
+                      >
+                        {Object.entries(customProperties).map(
+                          ([key, value]) => (
+                            <Badge key={key} color="purple">
+                              {key}: {value}
+                            </Badge>
+                          )
+                        )}
                       </div>
                     </div>
                   </StackItem>
@@ -405,7 +472,9 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                           <CardBody>
                             <DescriptionList isCompact>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Disk Name</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Disk Name
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
                                   Hard disk {index + 2}
                                 </DescriptionListDescription>
@@ -417,16 +486,22 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Bus Type</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Bus Type
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
                                   {disk.bus_type}
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               {disk.storage_profile && (
                                 <DescriptionListGroup>
-                                  <DescriptionListTerm>Storage Profile</DescriptionListTerm>
+                                  <DescriptionListTerm>
+                                    Storage Profile
+                                  </DescriptionListTerm>
                                   <DescriptionListDescription>
-                                    <Label color="blue">{disk.storage_profile}</Label>
+                                    <Label color="blue">
+                                      {disk.storage_profile}
+                                    </Label>
                                   </DescriptionListDescription>
                                 </DescriptionListGroup>
                               )}
@@ -444,7 +519,8 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
       )}
 
       {/* Network Details */}
-      {(formData.network_config.ip_allocation_mode === 'STATIC' || dnsServers.length > 0) && (
+      {(formData.network_config.ip_allocation_mode === 'STATIC' ||
+        dnsServers.length > 0) && (
         <StackItem>
           <Card>
             <CardBody>
@@ -456,28 +532,39 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                 </StackItem>
                 <StackItem>
                   <Grid hasGutter>
-                    {formData.network_config.ip_allocation_mode === 'STATIC' && (
+                    {formData.network_config.ip_allocation_mode ===
+                      'STATIC' && (
                       <GridItem span={6}>
                         <Card isCompact>
                           <CardBody>
-                            <Title headingLevel="h4" size="md">Static IP Configuration</Title>
+                            <Title headingLevel="h4" size="md">
+                              Static IP Configuration
+                            </Title>
                             <DescriptionList isCompact>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>IP Address</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  IP Address
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {formData.network_config.ip_address || 'Not set'}
+                                  {formData.network_config.ip_address ||
+                                    'Not set'}
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Gateway</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Gateway
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
                                   {formData.network_config.gateway || 'Not set'}
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Subnet Mask</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Subnet Mask
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {formData.network_config.subnet_mask || 'Not set'}
+                                  {formData.network_config.subnet_mask ||
+                                    'Not set'}
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                             </DescriptionList>
@@ -485,15 +572,26 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                         </Card>
                       </GridItem>
                     )}
-                    
+
                     {dnsServers.length > 0 && (
                       <GridItem span={6}>
                         <Card isCompact>
                           <CardBody>
-                            <Title headingLevel="h4" size="md">DNS Servers</Title>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                            <Title headingLevel="h4" size="md">
+                              DNS Servers
+                            </Title>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px',
+                                marginTop: '8px',
+                              }}
+                            >
                               {dnsServers.map((server, index) => (
-                                <Badge key={index} color="blue">{server}</Badge>
+                                <Badge key={index} color="blue">
+                                  {server}
+                                </Badge>
                               ))}
                             </div>
                           </CardBody>
@@ -515,13 +613,21 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
           isInline
           title="Ready to Create Virtual Machine"
         >
-          Click "Create VM" to deploy your virtual machine with the configuration above. 
-          The VM will be created in the <strong>{selectedVDC?.name}</strong> VDC and may take a few minutes to fully initialize.
+          Click "Create VM" to deploy your virtual machine with the
+          configuration above. The VM will be created in the{' '}
+          <strong>{selectedVDC?.name}</strong> VDC and may take a few minutes to
+          fully initialize.
           {formData.advanced_config.cloud_init_enabled && (
-            <><br />Cloud-init scripts will run automatically on first boot.</>
+            <>
+              <br />
+              Cloud-init scripts will run automatically on first boot.
+            </>
           )}
           {formData.advanced_config.guest_customization && (
-            <><br />Guest OS customization will be applied during deployment.</>
+            <>
+              <br />
+              Guest OS customization will be applied during deployment.
+            </>
           )}
         </Alert>
       </StackItem>

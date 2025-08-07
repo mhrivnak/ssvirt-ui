@@ -18,11 +18,7 @@ import {
   Switch,
   Divider,
 } from '@patternfly/react-core';
-import {
-  CpuIcon,
-  ServerIcon,
-  InfoCircleIcon,
-} from '@patternfly/react-icons';
+import { CpuIcon, ServerIcon, InfoCircleIcon } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
 
 interface ResourceSpecificationStepProps {
@@ -32,10 +28,30 @@ interface ResourceSpecificationStepProps {
 
 // Common VM configurations for quick selection
 const COMMON_CONFIGS = [
-  { name: 'Small', cpu: 1, memory: 2048, description: 'Light workloads, testing' },
-  { name: 'Medium', cpu: 2, memory: 4096, description: 'Web servers, development' },
-  { name: 'Large', cpu: 4, memory: 8192, description: 'Databases, heavy applications' },
-  { name: 'Extra Large', cpu: 8, memory: 16384, description: 'High-performance workloads' },
+  {
+    name: 'Small',
+    cpu: 1,
+    memory: 2048,
+    description: 'Light workloads, testing',
+  },
+  {
+    name: 'Medium',
+    cpu: 2,
+    memory: 4096,
+    description: 'Web servers, development',
+  },
+  {
+    name: 'Large',
+    cpu: 4,
+    memory: 8192,
+    description: 'Databases, heavy applications',
+  },
+  {
+    name: 'Extra Large',
+    cpu: 8,
+    memory: 16384,
+    description: 'High-performance workloads',
+  },
 ];
 
 const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
@@ -92,7 +108,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
     handleMemoryChange(memoryMb);
   };
 
-  const handlePresetConfig = (config: typeof COMMON_CONFIGS[0]) => {
+  const handlePresetConfig = (config: (typeof COMMON_CONFIGS)[0]) => {
     updateFormData({
       cpu_count: config.cpu,
       memory_mb: config.memory,
@@ -110,23 +126,25 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
 
   const getResourceWarning = () => {
     const totalMemoryGb = formData.memory_mb / 1024;
-    
+
     if (formData.cpu_count >= 8 || totalMemoryGb >= 16) {
       return {
         variant: 'warning' as const,
         title: 'High Resource Configuration',
-        message: 'This configuration requires significant resources. Ensure your VDC has sufficient quota.',
+        message:
+          'This configuration requires significant resources. Ensure your VDC has sufficient quota.',
       };
     }
-    
+
     if (formData.cpu_count === 1 && formData.memory_mb < 2048) {
       return {
         variant: 'info' as const,
         title: 'Minimal Configuration',
-        message: 'This is a minimal configuration suitable for light workloads and testing.',
+        message:
+          'This is a minimal configuration suitable for light workloads and testing.',
       };
     }
-    
+
     return null;
   };
 
@@ -140,7 +158,8 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
           Resource Specification
         </Title>
         <p className="pf-v6-u-color-200">
-          Configure the CPU, memory, and storage resources for your virtual machine.
+          Configure the CPU, memory, and storage resources for your virtual
+          machine.
         </p>
       </StackItem>
 
@@ -178,7 +197,13 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                               </Title>
                             </StackItem>
                             <StackItem>
-                              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  gap: '8px',
+                                  marginBottom: '8px',
+                                }}
+                              >
                                 <Badge>
                                   <CpuIcon className="pf-v6-u-mr-xs" />
                                   {config.cpu} CPU
@@ -218,12 +243,9 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       CPU Cores
                     </Title>
                   </StackItem>
-                  
+
                   <StackItem>
-                    <FormGroup
-                      label="Number of CPU cores"
-                      fieldId="cpu-slider"
-                    >
+                    <FormGroup label="Number of CPU cores" fieldId="cpu-slider">
                       <Slider
                         value={formData.cpu_count}
                         onChange={(_, value) => handleCpuChange(value)}
@@ -242,7 +264,9 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       )}
                       {cpuError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{cpuError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {cpuError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
@@ -277,7 +301,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       Memory
                     </Title>
                   </StackItem>
-                  
+
                   <StackItem>
                     <FormGroup
                       label={`Memory allocation (${formatMemory(formData.memory_mb)})`}
@@ -295,20 +319,26 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       {!memoryError && (
                         <HelperText>
                           <HelperTextItem icon={<InfoCircleIcon />}>
-                            Common values: 2GB (web servers), 4GB (applications), 8GB+ (databases)
+                            Common values: 2GB (web servers), 4GB
+                            (applications), 8GB+ (databases)
                           </HelperTextItem>
                         </HelperText>
                       )}
                       {memoryError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{memoryError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {memoryError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
                   </StackItem>
 
                   <StackItem>
-                    <FormGroup label="Or enter exact value (MB)" fieldId="memory-input">
+                    <FormGroup
+                      label="Or enter exact value (MB)"
+                      fieldId="memory-input"
+                    >
                       <TextInput
                         id="memory-input"
                         type="number"
@@ -366,8 +396,9 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       isInline
                       title="Advanced Resource Options"
                     >
-                      Advanced resource configuration options will be available in a future update. 
-                      Current configuration provides CPU and memory settings suitable for most workloads.
+                      Advanced resource configuration options will be available
+                      in a future update. Current configuration provides CPU and
+                      memory settings suitable for most workloads.
                     </Alert>
                   </StackItem>
                 </>
@@ -410,9 +441,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
                         {formatMemory(formData.memory_mb)}
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Memory
-                      </div>
+                      <div className="pf-v6-u-color-200">Memory</div>
                     </div>
                   </GridItem>
                   <GridItem span={4}>
@@ -423,9 +452,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                       <div style={{ fontSize: '1.5em', fontWeight: 'bold' }}>
                         {formData.storage_config.disk_size_gb} GB
                       </div>
-                      <div className="pf-v6-u-color-200">
-                        Storage
-                      </div>
+                      <div className="pf-v6-u-color-200">Storage</div>
                     </div>
                   </GridItem>
                 </Grid>

@@ -57,11 +57,15 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
       return false;
     }
     if (!/^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$/.test(name) && name.length > 1) {
-      setNameError('VM name must start with a letter, end with alphanumeric, and contain only letters, numbers, and hyphens');
+      setNameError(
+        'VM name must start with a letter, end with alphanumeric, and contain only letters, numbers, and hyphens'
+      );
       return false;
     }
     if (!/^[a-zA-Z][a-zA-Z0-9-]*$/.test(name)) {
-      setNameError('VM name must start with a letter and contain only letters, numbers, and hyphens');
+      setNameError(
+        'VM name must start with a letter and contain only letters, numbers, and hyphens'
+      );
       return false;
     }
     setNameError('');
@@ -88,7 +92,7 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
     setIsVDCSelectOpen(false);
   };
 
-  const selectedVDC = vdcs.find(vdc => vdc.id === formData.vdc_id);
+  const selectedVDC = vdcs.find((vdc) => vdc.id === formData.vdc_id);
 
   const formatMemory = (memoryMb: number) => {
     if (memoryMb >= 1024) {
@@ -112,7 +116,8 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
           Basic Configuration
         </Title>
         <p className="pf-v6-u-color-200">
-          Configure the basic settings for your virtual machine including name, description, and target VDC.
+          Configure the basic settings for your virtual machine including name,
+          description, and target VDC.
         </p>
       </StackItem>
 
@@ -128,13 +133,9 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                       VM Details
                     </Title>
                   </StackItem>
-                  
+
                   <StackItem>
-                    <FormGroup
-                      label="VM Name"
-                      isRequired
-                      fieldId="vm-name"
-                    >
+                    <FormGroup label="VM Name" isRequired fieldId="vm-name">
                       <TextInput
                         id="vm-name"
                         value={formData.name}
@@ -145,34 +146,37 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                       {!nameError && (
                         <HelperText>
                           <HelperTextItem icon={<InfoCircleIcon />}>
-                            Must start with a letter, contain only letters, numbers, and hyphens, and be 3-63 characters long
+                            Must start with a letter, contain only letters,
+                            numbers, and hyphens, and be 3-63 characters long
                           </HelperTextItem>
                         </HelperText>
                       )}
                       {nameError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{nameError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {nameError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
                   </StackItem>
 
                   <StackItem>
-                    <FormGroup
-                      label="Description"
-                      fieldId="vm-description"
-                    >
+                    <FormGroup label="Description" fieldId="vm-description">
                       <TextArea
                         id="vm-description"
                         value={formData.description}
-                        onChange={(_, value) => updateFormData({ description: value })}
+                        onChange={(_, value) =>
+                          updateFormData({ description: value })
+                        }
                         placeholder="Enter optional description..."
                         rows={3}
                         resizeOrientation="vertical"
                       />
                       <HelperText>
                         <HelperTextItem>
-                          Optional description to help identify this VM's purpose
+                          Optional description to help identify this VM's
+                          purpose
                         </HelperTextItem>
                       </HelperText>
                     </FormGroup>
@@ -192,7 +196,7 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                       Target VDC
                     </Title>
                   </StackItem>
-                  
+
                   <StackItem>
                     <FormGroup
                       label="Virtual Data Center"
@@ -203,7 +207,9 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                         id="vdc-select"
                         isOpen={isVDCSelectOpen}
                         selected={formData.vdc_id}
-                        onSelect={(_, selection) => handleVDCChange(selection as string)}
+                        onSelect={(_, selection) =>
+                          handleVDCChange(selection as string)
+                        }
                         onOpenChange={setIsVDCSelectOpen}
                         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                           <MenuToggle
@@ -233,7 +239,9 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                       )}
                       {vdcError && (
                         <HelperText>
-                          <HelperTextItem variant="error">{vdcError}</HelperTextItem>
+                          <HelperTextItem variant="error">
+                            {vdcError}
+                          </HelperTextItem>
                         </HelperText>
                       )}
                     </FormGroup>
@@ -242,19 +250,28 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                   {/* VDC Resource Information */}
                   {selectedVDC && (
                     <StackItem>
-                      <Alert variant={AlertVariant.info} isInline isPlain title="VDC Resource Limits">
+                      <Alert
+                        variant={AlertVariant.info}
+                        isInline
+                        isPlain
+                        title="VDC Resource Limits"
+                      >
                         <Stack>
                           <StackItem>
-                            <strong>CPU Limit:</strong> {selectedVDC.cpu_limit} cores
+                            <strong>CPU Limit:</strong> {selectedVDC.cpu_limit}{' '}
+                            cores
                           </StackItem>
                           <StackItem>
-                            <strong>Memory Limit:</strong> {formatMemory(selectedVDC.memory_limit_mb)}
+                            <strong>Memory Limit:</strong>{' '}
+                            {formatMemory(selectedVDC.memory_limit_mb)}
                           </StackItem>
                           <StackItem>
-                            <strong>Storage Limit:</strong> {formatStorage(selectedVDC.storage_limit_mb)}
+                            <strong>Storage Limit:</strong>{' '}
+                            {formatStorage(selectedVDC.storage_limit_mb)}
                           </StackItem>
                           <StackItem>
-                            <strong>Allocation Model:</strong> {selectedVDC.allocation_model}
+                            <strong>Allocation Model:</strong>{' '}
+                            {selectedVDC.allocation_model}
                           </StackItem>
                         </Stack>
                       </Alert>
@@ -280,10 +297,18 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                   </Title>
                 </StackItem>
                 <StackItem>
-                  <Alert variant={AlertVariant.info} isInline isPlain title={formData.selectedTemplate.name}>
+                  <Alert
+                    variant={AlertVariant.info}
+                    isInline
+                    isPlain
+                    title={formData.selectedTemplate.name}
+                  >
                     {formData.selectedTemplate.description}
                     <br />
-                    <strong>Default specs:</strong> {formData.selectedTemplate.cpu_count} CPU, {formatMemory(formData.selectedTemplate.memory_mb)}, {formData.selectedTemplate.disk_size_gb} GB storage
+                    <strong>Default specs:</strong>{' '}
+                    {formData.selectedTemplate.cpu_count} CPU,{' '}
+                    {formatMemory(formData.selectedTemplate.memory_mb)},{' '}
+                    {formData.selectedTemplate.disk_size_gb} GB storage
                   </Alert>
                 </StackItem>
               </Stack>
