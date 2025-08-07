@@ -52,7 +52,8 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
           title: 'Power Off VM',
           icon: <PowerOffIcon />,
           variant: 'danger' as const,
-          description: 'This will forcefully shut down the virtual machine. Any unsaved data may be lost.',
+          description:
+            'This will forcefully shut down the virtual machine. Any unsaved data may be lost.',
           isDestructive: true,
         };
       case 'SUSPEND':
@@ -60,7 +61,8 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
           title: 'Suspend VM',
           icon: <PauseIcon />,
           variant: 'primary' as const,
-          description: 'This will suspend the virtual machine, saving its current state.',
+          description:
+            'This will suspend the virtual machine, saving its current state.',
           isDestructive: false,
         };
       case 'RESET':
@@ -68,7 +70,8 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
           title: 'Reset VM',
           icon: <RedoIcon />,
           variant: 'danger' as const,
-          description: 'This will forcefully restart the virtual machine. Any unsaved data may be lost.',
+          description:
+            'This will forcefully restart the virtual machine. Any unsaved data may be lost.',
           isDestructive: true,
         };
       case 'REBOOT':
@@ -84,13 +87,11 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
 
   const config = getActionConfig();
   const isBulkOperation = vmIds && vmIds.length > 1;
-  const targetDescription = isBulkOperation 
+  const targetDescription = isBulkOperation
     ? `${vmIds.length} virtual machines`
     : vm?.name || 'this virtual machine';
 
-  const title = isBulkOperation 
-    ? `${config.title}s` 
-    : config.title;
+  const title = isBulkOperation ? `${config.title}s` : config.title;
 
   return (
     <Modal
@@ -106,7 +107,8 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
             {config.icon}
             <Content>
               <strong>
-                Are you sure you want to {action.toLowerCase().replace('_', ' ')} {targetDescription}?
+                Are you sure you want to{' '}
+                {action.toLowerCase().replace('_', ' ')} {targetDescription}?
               </strong>
             </Content>
           </div>
@@ -124,30 +126,27 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
               isInline
               customIcon={<ExclamationTriangleIcon />}
             >
-              This operation cannot be undone. Make sure you have saved any important work.
+              This operation cannot be undone. Make sure you have saved any
+              important work.
             </Alert>
           </StackItem>
         )}
 
         {isBulkOperation && (
           <StackItem>
-            <Alert
-              variant={AlertVariant.info}
-              title="Bulk Operation"
-              isInline
-            >
-              This operation will be performed on {vmIds.length} virtual machines. Some operations may fail if the VMs are not in the correct state.
+            <Alert variant={AlertVariant.info} title="Bulk Operation" isInline>
+              This operation will be performed on {vmIds.length} virtual
+              machines. Some operations may fail if the VMs are not in the
+              correct state.
             </Alert>
           </StackItem>
         )}
 
         <StackItem>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <Button
-              variant="link"
-              onClick={onClose}
-              isDisabled={isLoading}
-            >
+          <div
+            style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}
+          >
+            <Button variant="link" onClick={onClose} isDisabled={isLoading}>
               Cancel
             </Button>
             <Button

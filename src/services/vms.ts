@@ -139,7 +139,9 @@ export class VMService {
   /**
    * Bulk power on multiple VMs
    */
-  static async bulkPowerOnVMs(vmIds: string[]): Promise<ApiResponse<BulkVMPowerOperation>> {
+  static async bulkPowerOnVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
       '/api/v1/vms/bulk/power-on',
       { vm_ids: vmIds }
@@ -150,7 +152,9 @@ export class VMService {
   /**
    * Bulk power off multiple VMs
    */
-  static async bulkPowerOffVMs(vmIds: string[]): Promise<ApiResponse<BulkVMPowerOperation>> {
+  static async bulkPowerOffVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
       '/api/v1/vms/bulk/power-off',
       { vm_ids: vmIds }
@@ -161,7 +165,9 @@ export class VMService {
   /**
    * Bulk reboot multiple VMs
    */
-  static async bulkRebootVMs(vmIds: string[]): Promise<ApiResponse<BulkVMPowerOperation>> {
+  static async bulkRebootVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
       '/api/v1/vms/bulk/reboot',
       { vm_ids: vmIds }
@@ -172,7 +178,9 @@ export class VMService {
   /**
    * Bulk suspend multiple VMs
    */
-  static async bulkSuspendVMs(vmIds: string[]): Promise<ApiResponse<BulkVMPowerOperation>> {
+  static async bulkSuspendVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
       '/api/v1/vms/bulk/suspend',
       { vm_ids: vmIds }
@@ -183,7 +191,9 @@ export class VMService {
   /**
    * Bulk reset multiple VMs
    */
-  static async bulkResetVMs(vmIds: string[]): Promise<ApiResponse<BulkVMPowerOperation>> {
+  static async bulkResetVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
       '/api/v1/vms/bulk/reset',
       { vm_ids: vmIds }

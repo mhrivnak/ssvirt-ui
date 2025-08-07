@@ -221,7 +221,7 @@ export const useBulkPowerOnVMs = () => {
     mutationFn: (vmIds: string[]) => VMService.bulkPowerOnVMs(vmIds),
     onSuccess: (_, vmIds) => {
       // Invalidate VM data for all affected VMs
-      vmIds.forEach(vmId => {
+      vmIds.forEach((vmId) => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
       });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
@@ -243,7 +243,7 @@ export const useBulkPowerOffVMs = () => {
     mutationFn: (vmIds: string[]) => VMService.bulkPowerOffVMs(vmIds),
     onSuccess: (_, vmIds) => {
       // Invalidate VM data for all affected VMs
-      vmIds.forEach(vmId => {
+      vmIds.forEach((vmId) => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
       });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
@@ -265,7 +265,7 @@ export const useBulkRebootVMs = () => {
     mutationFn: (vmIds: string[]) => VMService.bulkRebootVMs(vmIds),
     onSuccess: (_, vmIds) => {
       // Invalidate VM data for all affected VMs
-      vmIds.forEach(vmId => {
+      vmIds.forEach((vmId) => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
       });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
@@ -286,7 +286,7 @@ export const useBulkSuspendVMs = () => {
     mutationFn: (vmIds: string[]) => VMService.bulkSuspendVMs(vmIds),
     onSuccess: (_, vmIds) => {
       // Invalidate VM data for all affected VMs
-      vmIds.forEach(vmId => {
+      vmIds.forEach((vmId) => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
       });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
@@ -308,7 +308,7 @@ export const useBulkResetVMs = () => {
     mutationFn: (vmIds: string[]) => VMService.bulkResetVMs(vmIds),
     onSuccess: (_, vmIds) => {
       // Invalidate VM data for all affected VMs
-      vmIds.forEach(vmId => {
+      vmIds.forEach((vmId) => {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
       });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });

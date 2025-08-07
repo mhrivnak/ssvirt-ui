@@ -38,8 +38,12 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
   onDismiss,
   autoHideDelay = 5000,
 }) => {
-  const [operationStatuses, setOperationStatuses] = useState<OperationStatus[]>([]);
-  const [dismissedOperations, setDismissedOperations] = useState<Set<string>>(new Set());
+  const [operationStatuses, setOperationStatuses] = useState<OperationStatus[]>(
+    []
+  );
+  const [dismissedOperations, setDismissedOperations] = useState<Set<string>>(
+    new Set()
+  );
 
   useEffect(() => {
     const newStatuses: OperationStatus[] = operations.map((op) => ({
@@ -59,7 +63,7 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
         const successfulOps = newStatuses
           .filter((status) => status.status === 'completed')
           .map((status) => status.id);
-        
+
         setDismissedOperations((prev) => new Set([...prev, ...successfulOps]));
       }, autoHideDelay);
 
@@ -108,7 +112,9 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
       case 'reset':
         return 'Reset';
       default:
-        return action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        return action
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (l) => l.toUpperCase());
     }
   };
 
@@ -134,7 +140,15 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
   }
 
   return (
-    <div style={{ position: 'fixed', top: '80px', right: '20px', zIndex: 1000, maxWidth: '400px' }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: '80px',
+        right: '20px',
+        zIndex: 1000,
+        maxWidth: '400px',
+      }}
+    >
       <AlertGroup>
         {visibleOperations.map((status) => (
           <Alert
@@ -143,12 +157,15 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
             title={`${getActionLabel(status.action)} - VM ${status.vmId}`}
             isInline
             customIcon={getAlertIcon(status.status)}
-            actionClose={<Button variant="plain" onClick={() => handleDismissOperation(status.id)} />}
+            actionClose={
+              <Button
+                variant="plain"
+                onClick={() => handleDismissOperation(status.id)}
+              />
+            }
           >
             <Stack hasGutter>
-              <StackItem>
-                {status.message}
-              </StackItem>
+              <StackItem>{status.message}</StackItem>
               {status.status === 'running' && status.progress !== undefined && (
                 <StackItem>
                   <Progress
@@ -160,7 +177,9 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
               )}
               {status.error && (
                 <StackItem>
-                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)' }}>
+                  <div
+                    style={{ color: 'var(--pf-v6-global--danger-color--100)' }}
+                  >
                     Error: {status.error}
                   </div>
                 </StackItem>
@@ -169,7 +188,13 @@ const PowerOperationStatus: React.FC<PowerOperationStatusProps> = ({
           </Alert>
         ))}
         {visibleOperations.length > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '8px',
+            }}
+          >
             <Button variant="link" size="sm" onClick={handleDismissAll}>
               Dismiss All
             </Button>

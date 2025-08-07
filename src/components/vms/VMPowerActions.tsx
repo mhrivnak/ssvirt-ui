@@ -45,7 +45,8 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   size = 'md',
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [confirmationAction, setConfirmationAction] = useState<PowerAction | null>(null);
+  const [confirmationAction, setConfirmationAction] =
+    useState<PowerAction | null>(null);
 
   const isBulkOperation = vmIds && vmIds.length > 0;
   const targetVmIds = isBulkOperation ? vmIds : vm ? [vm.id] : [];
@@ -114,12 +115,17 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
 
   const getActionIcon = (action: PowerAction) => {
     switch (action) {
-      case 'POWER_ON': return <PlayIcon />;
-      case 'POWER_OFF': return <PowerOffIcon />;
+      case 'POWER_ON':
+        return <PlayIcon />;
+      case 'POWER_OFF':
+        return <PowerOffIcon />;
       case 'REBOOT':
-      case 'RESET': return <RedoIcon />;
-      case 'SUSPEND': return <PauseIcon />;
-      default: return null;
+      case 'RESET':
+        return <RedoIcon />;
+      case 'SUSPEND':
+        return <PauseIcon />;
+      default:
+        return null;
     }
   };
 
@@ -136,7 +142,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
 
   const isActionDisabled = (action: PowerAction) => {
     if (!vm && !isBulkOperation) return true;
-    
+
     // For single VM, check status compatibility
     if (vm && !isBulkOperation) {
       const status = vm.status;
@@ -152,26 +158,36 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
           return false;
       }
     }
-    
+
     return false;
   };
 
   const isLoading = () => {
     if (isBulkOperation) {
-      return bulkPowerOnMutation.isPending || 
-             bulkPowerOffMutation.isPending || 
-             bulkRebootMutation.isPending || 
-             bulkSuspendMutation.isPending || 
-             bulkResetMutation.isPending;
+      return (
+        bulkPowerOnMutation.isPending ||
+        bulkPowerOffMutation.isPending ||
+        bulkRebootMutation.isPending ||
+        bulkSuspendMutation.isPending ||
+        bulkResetMutation.isPending
+      );
     }
-    return powerOnMutation.isPending || 
-           powerOffMutation.isPending || 
-           rebootMutation.isPending || 
-           suspendMutation.isPending || 
-           resetMutation.isPending;
+    return (
+      powerOnMutation.isPending ||
+      powerOffMutation.isPending ||
+      rebootMutation.isPending ||
+      suspendMutation.isPending ||
+      resetMutation.isPending
+    );
   };
 
-  const actions: PowerAction[] = ['POWER_ON', 'POWER_OFF', 'REBOOT', 'SUSPEND', 'RESET'];
+  const actions: PowerAction[] = [
+    'POWER_ON',
+    'POWER_OFF',
+    'REBOOT',
+    'SUSPEND',
+    'RESET',
+  ];
 
   if (variant === 'buttons') {
     return (
@@ -180,7 +196,11 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
           {actions.map((action) => (
             <Button
               key={action}
-              variant={action === 'POWER_OFF' || action === 'RESET' ? 'danger' : 'secondary'}
+              variant={
+                action === 'POWER_OFF' || action === 'RESET'
+                  ? 'danger'
+                  : 'secondary'
+              }
               size={size === 'md' ? 'default' : size}
               icon={getActionIcon(action)}
               isDisabled={isActionDisabled(action) || isLoading()}
@@ -190,11 +210,13 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
             </Button>
           ))}
         </div>
-        
+
         <PowerConfirmationModal
           isOpen={confirmationAction !== null}
           onClose={() => setConfirmationAction(null)}
-          onConfirm={() => confirmationAction && handlePowerAction(confirmationAction)}
+          onConfirm={() =>
+            confirmationAction && handlePowerAction(confirmationAction)
+          }
           action={confirmationAction!}
           vm={vm}
           vmIds={vmIds}
@@ -210,8 +232,8 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
         isOpen={isDropdownOpen}
         onSelect={() => setIsDropdownOpen(false)}
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle 
-            ref={toggleRef} 
+          <MenuToggle
+            ref={toggleRef}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             isExpanded={isDropdownOpen}
             isDisabled={isLoading()}
@@ -239,7 +261,9 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
       <PowerConfirmationModal
         isOpen={confirmationAction !== null}
         onClose={() => setConfirmationAction(null)}
-        onConfirm={() => confirmationAction && handlePowerAction(confirmationAction)}
+        onConfirm={() =>
+          confirmationAction && handlePowerAction(confirmationAction)
+        }
         action={confirmationAction!}
         vm={vm}
         vmIds={vmIds}

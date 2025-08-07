@@ -60,7 +60,12 @@ import {
   ExclamationTriangleIcon,
 } from '@patternfly/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { useVMs, useVDCs, useOrganizations, usePowerOperationTracking } from '../../hooks';
+import {
+  useVMs,
+  useVDCs,
+  useOrganizations,
+  usePowerOperationTracking,
+} from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import type { VM, VMStatus, VMQueryParams } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
@@ -559,7 +564,10 @@ const VMs: React.FC = () => {
                   {selectedVMs.length > 0 && (
                     <ToolbarGroup>
                       <ToolbarItem>
-                        <VMPowerActions vmIds={selectedVMs} variant="dropdown" />
+                        <VMPowerActions
+                          vmIds={selectedVMs}
+                          variant="dropdown"
+                        />
                       </ToolbarItem>
                       <ToolbarItem>
                         <Dropdown
@@ -804,8 +812,18 @@ const VMs: React.FC = () => {
                         <Td>{formatMemory(vm.memory_mb)}</Td>
                         <Td>{formatDate(vm.created_at)}</Td>
                         <Td>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <VMPowerActions vm={vm} variant="dropdown" size="sm" />
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '8px',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <VMPowerActions
+                              vm={vm}
+                              variant="dropdown"
+                              size="sm"
+                            />
                             <ActionsColumn items={getVMActions(vm)} />
                           </div>
                         </Td>
