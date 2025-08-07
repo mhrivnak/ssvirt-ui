@@ -14,26 +14,45 @@ import { ROUTES } from './utils/constants';
 // Import PatternFly CSS
 import '@patternfly/react-core/dist/styles/base.css';
 
-// Create a client for React Query
+// Create a client for React Query with enhanced configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: unknown) => {
-        // Don't retry on 401 errors (authentication issues)
-        if (
-          (error as { response?: { status?: number } })?.response?.status ===
-          401
-        ) {
+        const axiosError = error as { response?: { status?: number } };
+        const status = axiosError?.response?.status;
+
+        // Don't retry on client errors (4xx) or specific server errors
+        if (status && status >= 400 && status < 500) {
           return false;
         }
-        // Retry up to 3 times for other errors
+
+        // Don't retry on network errors after 1 attempt
+        if (!status && failureCount >= 1) {
+          return false;
+        }
+
+        // Retry up to 3 times for server errors (5xx)
         return failureCount < 3;
       },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error: unknown) => {
+        const axiosError = error as { response?: { status?: number } };
+        const status = axiosError?.response?.status;
+
+        // Only retry on network errors or 5xx server errors
+        if (status && status >= 500 && failureCount < 2) {
+          return true;
+        }
+        return false;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     },
   },
 });
