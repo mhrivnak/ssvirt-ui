@@ -112,7 +112,9 @@ export interface VM {
   memory_mb: number;
   created_at: string;
   updated_at: string;
+  vdc_id: string;
   vdc_name: string;
+  org_id: string;
   org_name: string;
 }
 

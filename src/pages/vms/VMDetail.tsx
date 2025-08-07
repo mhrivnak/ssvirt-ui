@@ -370,7 +370,10 @@ const VMDetail: React.FC = () => {
                               <DescriptionListTerm>VDC</DescriptionListTerm>
                               <DescriptionListDescription>
                                 <Link
-                                  to={`/vdcs/${vm.vdc_name}`}
+                                  to={ROUTES.VDC_DETAIL.replace(
+                                    ':id',
+                                    vm.vdc_id
+                                  )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
                                   {vm.vdc_name}
@@ -383,7 +386,10 @@ const VMDetail: React.FC = () => {
                               </DescriptionListTerm>
                               <DescriptionListDescription>
                                 <Link
-                                  to={`/organizations/${vm.org_name}`}
+                                  to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                    ':id',
+                                    vm.org_id
+                                  )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
                                   {vm.org_name}

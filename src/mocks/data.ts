@@ -92,7 +92,9 @@ export const generateMockVMs = (): VM[] => [
     memory_mb: 8192,
     created_at: '2024-01-15T11:00:00Z',
     updated_at: '2024-01-15T11:00:00Z',
+    vdc_id: 'vdc-1',
     vdc_name: 'eng-dev-vdc',
+    org_id: 'org-1',
     org_name: 'Engineering',
   },
   {
@@ -107,7 +109,9 @@ export const generateMockVMs = (): VM[] => [
     memory_mb: 16384,
     created_at: '2024-01-15T12:00:00Z',
     updated_at: '2024-01-15T12:00:00Z',
+    vdc_id: 'vdc-1',
     vdc_name: 'eng-dev-vdc',
+    org_id: 'org-1',
     org_name: 'Engineering',
   },
   {
@@ -122,7 +126,9 @@ export const generateMockVMs = (): VM[] => [
     memory_mb: 4096,
     created_at: '2024-01-16T13:00:00Z',
     updated_at: '2024-01-16T13:00:00Z',
+    vdc_id: 'vdc-2',
     vdc_name: 'qa-test-vdc',
+    org_id: 'org-2',
     org_name: 'Quality Assurance',
   },
 ];
