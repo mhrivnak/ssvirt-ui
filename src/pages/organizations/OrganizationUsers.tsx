@@ -53,8 +53,13 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useOrganization } from '../../hooks';
-import { OrganizationService } from '../../services';
+import { 
+  useOrganization,
+  useOrganizationUsers,
+  useInviteUserToOrganization,
+  useUpdateOrganizationUserRole,
+  useRemoveUserFromOrganization
+} from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type {
   OrganizationUser as OrgUser,
@@ -65,42 +70,6 @@ import { ROUTES } from '../../utils/constants';
 
 // Use the OrganizationUser type from types file
 type OrganizationUser = OrgUser;
-
-const mockUsers: OrganizationUser[] = [
-  {
-    id: '1',
-    username: 'admin@example.com',
-    email: 'admin@example.com',
-    first_name: 'John',
-    last_name: 'Administrator',
-    role: 'admin',
-    joined_at: '2024-01-01T00:00:00Z',
-    last_active: '2024-01-15T10:30:00Z',
-    status: 'active',
-  },
-  {
-    id: '2',
-    username: 'user@example.com',
-    email: 'user@example.com',
-    first_name: 'Jane',
-    last_name: 'User',
-    role: 'user',
-    joined_at: '2024-01-02T00:00:00Z',
-    last_active: '2024-01-14T15:45:00Z',
-    status: 'active',
-  },
-  {
-    id: '3',
-    username: 'viewer@example.com',
-    email: 'viewer@example.com',
-    first_name: 'Bob',
-    last_name: 'Viewer',
-    role: 'viewer',
-    joined_at: '2024-01-03T00:00:00Z',
-    last_active: '2024-01-13T09:15:00Z',
-    status: 'inactive',
-  },
-];
 
 const OrganizationUsers: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -139,6 +108,10 @@ const OrganizationUsers: React.FC = () => {
 
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading } = useOrganization(id || '');
+  const { data: usersResponse, isLoading: usersLoading } = useOrganizationUsers(id || '');
+  const inviteUserMutation = useInviteUserToOrganization();
+  const updateUserRoleMutation = useUpdateOrganizationUserRole();
+  const removeUserMutation = useRemoveUserFromOrganization();
 
   // Early validation for id parameter
   if (!id) {
@@ -162,9 +135,10 @@ const OrganizationUsers: React.FC = () => {
     );
   }
   const organization = orgResponse?.data;
+  const users = usersResponse?.data || [];
 
   // Filter and sort users
-  const filteredUsers = mockUsers.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -238,32 +212,36 @@ const OrganizationUsers: React.FC = () => {
 
     if (!id) return;
 
-    try {
-      const inviteData: InviteUserRequest = {
-        email: inviteEmail,
-        role: inviteRole as 'admin' | 'user' | 'viewer',
-      };
+    const inviteData: InviteUserRequest = {
+      email: inviteEmail,
+      role: inviteRole as 'admin' | 'user' | 'viewer',
+    };
 
-      await OrganizationService.inviteUserToOrganization(id, inviteData);
+    inviteUserMutation.mutate(
+      { organizationId: id, data: inviteData },
+      {
+        onSuccess: () => {
+          // Reset form and close modal
+          setInviteEmail('');
+          setInviteRole('user');
+          setEmailError('');
+          setIsInviteModalOpen(false);
 
-      // Reset form and close modal
-      setInviteEmail('');
-      setInviteRole('user');
-      setEmailError('');
-      setIsInviteModalOpen(false);
-
-      // Show success notification and refresh user list
-      setNotification({
-        variant: 'success',
-        title: 'User Invited Successfully',
-        message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this organization.`
-      });
-      // Auto-hide notification after 5 seconds
-      setTimeout(() => setNotification(null), 5000);
-    } catch (error) {
-      console.error('Failed to invite user:', error);
-      setEmailError('Failed to send invitation. Please try again.');
-    }
+          // Show success notification (user list refreshes automatically)
+          setNotification({
+            variant: 'success',
+            title: 'User Invited Successfully',
+            message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this organization.`
+          });
+          // Auto-hide notification after 5 seconds
+          setTimeout(() => setNotification(null), 5000);
+        },
+        onError: (error) => {
+          console.error('Failed to invite user:', error);
+          setEmailError('Failed to send invitation. Please try again.');
+        }
+      }
+    );
   };
 
   const handleEditUser = (user: OrganizationUser) => {
@@ -275,38 +253,42 @@ const OrganizationUsers: React.FC = () => {
   const handleUpdateUserRole = async () => {
     if (!selectedUser || !id) return;
 
-    try {
-      const updateData: UpdateUserRoleRequest = {
-        user_id: selectedUser.id,
-        role: editRole as 'admin' | 'user' | 'viewer',
-      };
+    const updateData: UpdateUserRoleRequest = {
+      user_id: selectedUser.id,
+      role: editRole as 'admin' | 'user' | 'viewer',
+    };
 
-      await OrganizationService.updateOrganizationUserRole(id, updateData);
+    updateUserRoleMutation.mutate(
+      { organizationId: id, data: updateData },
+      {
+        onSuccess: () => {
+          // Reset and close modal
+          setSelectedUser(null);
+          setEditRole('');
+          setIsEditModalOpen(false);
 
-      // Reset and close modal
-      setSelectedUser(null);
-      setEditRole('');
-      setIsEditModalOpen(false);
-
-      // Show success notification and refresh user list
-      setNotification({
-        variant: 'success',
-        title: 'User Role Updated',
-        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`
-      });
-      // Auto-hide notification after 5 seconds
-      setTimeout(() => setNotification(null), 5000);
-    } catch (error) {
-      console.error('Failed to update user role:', error);
-      // Show error notification
-      setNotification({
-        variant: 'danger',
-        title: 'Failed to Update Role',
-        message: 'An error occurred while updating the user role. Please try again.'
-      });
-      // Auto-hide notification after 5 seconds
-      setTimeout(() => setNotification(null), 5000);
-    }
+          // Show success notification (user list refreshes automatically)
+          setNotification({
+            variant: 'success',
+            title: 'User Role Updated',
+            message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`
+          });
+          // Auto-hide notification after 5 seconds
+          setTimeout(() => setNotification(null), 5000);
+        },
+        onError: (error) => {
+          console.error('Failed to update user role:', error);
+          // Show error notification
+          setNotification({
+            variant: 'danger',
+            title: 'Failed to Update Role',
+            message: 'An error occurred while updating the user role. Please try again.'
+          });
+          // Auto-hide notification after 5 seconds
+          setTimeout(() => setNotification(null), 5000);
+        }
+      }
+    );
   };
 
   const handleRemoveUser = async (user: OrganizationUser) => {
@@ -317,27 +299,32 @@ const OrganizationUsers: React.FC = () => {
     ) {
       if (!id) return;
 
-      try {
-        await OrganizationService.removeUserFromOrganization(id, user.id);
-        // Show success notification and refresh user list
-        setNotification({
-          variant: 'success',
-          title: 'User Removed',
-          message: `${user.first_name} ${user.last_name} has been removed from this organization.`
-        });
-        // Auto-hide notification after 5 seconds
-        setTimeout(() => setNotification(null), 5000);
-      } catch (error) {
-        console.error('Failed to remove user:', error);
-        // Show error notification
-        setNotification({
-          variant: 'danger',
-          title: 'Failed to Remove User',
-          message: 'An error occurred while removing the user. Please try again.'
-        });
-        // Auto-hide notification after 5 seconds
-        setTimeout(() => setNotification(null), 5000);
-      }
+      removeUserMutation.mutate(
+        { organizationId: id, userId: user.id },
+        {
+          onSuccess: () => {
+            // Show success notification (user list refreshes automatically)
+            setNotification({
+              variant: 'success',
+              title: 'User Removed',
+              message: `${user.first_name} ${user.last_name} has been removed from this organization.`
+            });
+            // Auto-hide notification after 5 seconds
+            setTimeout(() => setNotification(null), 5000);
+          },
+          onError: (error) => {
+            console.error('Failed to remove user:', error);
+            // Show error notification
+            setNotification({
+              variant: 'danger',
+              title: 'Failed to Remove User',
+              message: 'An error occurred while removing the user. Please try again.'
+            });
+            // Auto-hide notification after 5 seconds
+            setTimeout(() => setNotification(null), 5000);
+          }
+        }
+      );
     }
   };
 
@@ -378,7 +365,7 @@ const OrganizationUsers: React.FC = () => {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || usersLoading) {
     return (
       <PageSection>
         <LoadingSpinner />

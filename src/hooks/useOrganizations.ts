@@ -5,6 +5,8 @@ import type {
   OrganizationQueryParams,
   CreateOrganizationRequest,
   UpdateOrganizationRequest,
+  InviteUserRequest,
+  UpdateUserRoleRequest,
 } from '../types';
 
 /**
@@ -116,6 +118,80 @@ export const useToggleOrganizationStatus = () => {
     },
     onError: (error) => {
       console.error('Failed to toggle organization status:', error);
+    },
+  });
+};
+
+/**
+ * Hook to fetch organization users
+ */
+export const useOrganizationUsers = (organizationId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.organizationUsers(organizationId),
+    queryFn: () => OrganizationService.getOrganizationUsers(organizationId),
+    enabled: !!organizationId,
+  });
+};
+
+/**
+ * Hook to invite a user to an organization
+ */
+export const useInviteUserToOrganization = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ organizationId, data }: { organizationId: string; data: InviteUserRequest }) =>
+      OrganizationService.inviteUserToOrganization(organizationId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate organization users list to refresh
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.organizationUsers(variables.organizationId),
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to invite user to organization:', error);
+    },
+  });
+};
+
+/**
+ * Hook to update a user's role in an organization
+ */
+export const useUpdateOrganizationUserRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ organizationId, data }: { organizationId: string; data: UpdateUserRoleRequest }) =>
+      OrganizationService.updateOrganizationUserRole(organizationId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate organization users list to refresh
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.organizationUsers(variables.organizationId),
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to update organization user role:', error);
+    },
+  });
+};
+
+/**
+ * Hook to remove a user from an organization
+ */
+export const useRemoveUserFromOrganization = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ organizationId, userId }: { organizationId: string; userId: string }) =>
+      OrganizationService.removeUserFromOrganization(organizationId, userId),
+    onSuccess: (_, variables) => {
+      // Invalidate organization users list to refresh
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.organizationUsers(variables.organizationId),
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to remove user from organization:', error);
     },
   });
 };
