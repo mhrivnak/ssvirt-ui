@@ -104,7 +104,7 @@ const mockUsers: OrganizationUser[] = [
 const OrganizationUsers: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   // Component state
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -115,12 +115,14 @@ const OrganizationUsers: React.FC = () => {
   const [perPage, setPerPage] = useState(20);
   const [isRoleFilterOpen, setIsRoleFilterOpen] = useState(false);
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
-  
+
   // Modal states
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<OrganizationUser | null>(null);
-  
+  const [selectedUser, setSelectedUser] = useState<OrganizationUser | null>(
+    null
+  );
+
   // Form states
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
@@ -131,20 +133,21 @@ const OrganizationUsers: React.FC = () => {
 
   // Filter and sort users
   const filteredUsers = mockUsers.filter((user) => {
-    const matchesSearch = 
+    const matchesSearch =
       user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    
+    const matchesStatus =
+      statusFilter === 'all' || user.status === statusFilter;
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     let aValue: string, bValue: string;
-    
+
     switch (sortBy) {
       case 'name':
         aValue = `${a.first_name} ${a.last_name}`;
@@ -166,12 +169,15 @@ const OrganizationUsers: React.FC = () => {
         aValue = a.email;
         bValue = b.email;
     }
-    
+
     const comparison = aValue.localeCompare(bValue);
     return sortDirection === 'asc' ? comparison : -comparison;
   });
 
-  const paginatedUsers = sortedUsers.slice((page - 1) * perPage, page * perPage);
+  const paginatedUsers = sortedUsers.slice(
+    (page - 1) * perPage,
+    page * perPage
+  );
 
   const handleSort = (columnKey: string) => {
     if (sortBy === columnKey) {
@@ -188,15 +194,15 @@ const OrganizationUsers: React.FC = () => {
       alert('Email is required');
       return;
     }
-    
+
     if (!inviteEmail.includes('@')) {
       alert('Please enter a valid email address');
       return;
     }
-    
+
     // TODO: Implement actual user invitation API call
     console.log('Inviting user:', { email: inviteEmail, role: inviteRole });
-    
+
     // Reset form and close modal
     setInviteEmail('');
     setInviteRole('user');
@@ -211,10 +217,13 @@ const OrganizationUsers: React.FC = () => {
 
   const handleUpdateUserRole = () => {
     if (!selectedUser) return;
-    
+
     // TODO: Implement actual user role update API call
-    console.log('Updating user role:', { userId: selectedUser.id, role: editRole });
-    
+    console.log('Updating user role:', {
+      userId: selectedUser.id,
+      role: editRole,
+    });
+
     // Reset and close modal
     setSelectedUser(null);
     setEditRole('');
@@ -222,7 +231,11 @@ const OrganizationUsers: React.FC = () => {
   };
 
   const handleRemoveUser = (user: OrganizationUser) => {
-    if (window.confirm(`Are you sure you want to remove ${user.first_name} ${user.last_name} from this organization?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to remove ${user.first_name} ${user.last_name} from this organization?`
+      )
+    ) {
       // TODO: Implement actual user removal API call
       console.log('Removing user:', user.id);
     }
@@ -230,19 +243,27 @@ const OrganizationUsers: React.FC = () => {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'red';
-      case 'user': return 'blue';
-      case 'viewer': return 'grey';
-      default: return 'grey';
+      case 'admin':
+        return 'red';
+      case 'user':
+        return 'blue';
+      case 'viewer':
+        return 'grey';
+      default:
+        return 'grey';
     }
   };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'orange';
-      case 'invited': return 'blue';
-      default: return 'grey';
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'orange';
+      case 'invited':
+        return 'blue';
+      default:
+        return 'grey';
     }
   };
 
@@ -293,7 +314,9 @@ const OrganizationUsers: React.FC = () => {
               <Link to="/organizations">Organizations</Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={`/organizations/${id}`}>{organization.display_name}</Link>
+              <Link to={`/organizations/${id}`}>
+                {organization.display_name}
+              </Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>User Management</BreadcrumbItem>
           </Breadcrumb>
@@ -349,15 +372,27 @@ const OrganizationUsers: React.FC = () => {
                           isExpanded={isRoleFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          Role: {roleFilter === 'all' ? 'All' : roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
+                          Role:{' '}
+                          {roleFilter === 'all'
+                            ? 'All'
+                            : roleFilter.charAt(0).toUpperCase() +
+                              roleFilter.slice(1)}
                         </MenuToggle>
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem onClick={() => setRoleFilter('all')}>All Roles</DropdownItem>
-                        <DropdownItem onClick={() => setRoleFilter('admin')}>Admin</DropdownItem>
-                        <DropdownItem onClick={() => setRoleFilter('user')}>User</DropdownItem>
-                        <DropdownItem onClick={() => setRoleFilter('viewer')}>Viewer</DropdownItem>
+                        <DropdownItem onClick={() => setRoleFilter('all')}>
+                          All Roles
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setRoleFilter('admin')}>
+                          Admin
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setRoleFilter('user')}>
+                          User
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setRoleFilter('viewer')}>
+                          Viewer
+                        </DropdownItem>
                       </DropdownList>
                     </Dropdown>
                   </ToolbarItem>
@@ -369,19 +404,37 @@ const OrganizationUsers: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
+                          onClick={() =>
+                            setIsStatusFilterOpen(!isStatusFilterOpen)
+                          }
                           isExpanded={isStatusFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          Status: {statusFilter === 'all' ? 'All' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                          Status:{' '}
+                          {statusFilter === 'all'
+                            ? 'All'
+                            : statusFilter.charAt(0).toUpperCase() +
+                              statusFilter.slice(1)}
                         </MenuToggle>
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem onClick={() => setStatusFilter('all')}>All Statuses</DropdownItem>
-                        <DropdownItem onClick={() => setStatusFilter('active')}>Active</DropdownItem>
-                        <DropdownItem onClick={() => setStatusFilter('inactive')}>Inactive</DropdownItem>
-                        <DropdownItem onClick={() => setStatusFilter('invited')}>Invited</DropdownItem>
+                        <DropdownItem onClick={() => setStatusFilter('all')}>
+                          All Statuses
+                        </DropdownItem>
+                        <DropdownItem onClick={() => setStatusFilter('active')}>
+                          Active
+                        </DropdownItem>
+                        <DropdownItem
+                          onClick={() => setStatusFilter('inactive')}
+                        >
+                          Inactive
+                        </DropdownItem>
+                        <DropdownItem
+                          onClick={() => setStatusFilter('invited')}
+                        >
+                          Invited
+                        </DropdownItem>
                       </DropdownList>
                     </Dropdown>
                   </ToolbarItem>
@@ -455,12 +508,14 @@ const OrganizationUsers: React.FC = () => {
                         <Td dataLabel="Email">{user.email}</Td>
                         <Td dataLabel="Role">
                           <Badge color={getRoleBadgeColor(user.role)}>
-                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            {user.role.charAt(0).toUpperCase() +
+                              user.role.slice(1)}
                           </Badge>
                         </Td>
                         <Td dataLabel="Status">
                           <Badge color={getStatusBadgeColor(user.status)}>
-                            {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                            {user.status.charAt(0).toUpperCase() +
+                              user.status.slice(1)}
                           </Badge>
                         </Td>
                         <Td dataLabel="Joined">
@@ -527,11 +582,7 @@ const OrganizationUsers: React.FC = () => {
         }}
       >
         <Form>
-          <FormGroup
-            label="Email Address"
-            isRequired
-            fieldId="invite-email"
-          >
+          <FormGroup label="Email Address" isRequired fieldId="invite-email">
             <TextInput
               isRequired
               type="email"
@@ -548,9 +599,18 @@ const OrganizationUsers: React.FC = () => {
               id="invite-role"
               aria-label="Select role"
             >
-              <FormSelectOption value="admin" label="Admin - Full organization access" />
-              <FormSelectOption value="user" label="User - Can manage resources" />
-              <FormSelectOption value="viewer" label="Viewer - Read-only access" />
+              <FormSelectOption
+                value="admin"
+                label="Admin - Full organization access"
+              />
+              <FormSelectOption
+                value="user"
+                label="User - Can manage resources"
+              />
+              <FormSelectOption
+                value="viewer"
+                label="Viewer - Read-only access"
+              />
             </FormSelect>
           </FormGroup>
           <Alert
@@ -558,7 +618,8 @@ const OrganizationUsers: React.FC = () => {
             title="Invitation details"
             isInline
           >
-            The user will receive an email invitation to join this organization with the selected role.
+            The user will receive an email invitation to join this organization
+            with the selected role.
           </Alert>
           <ActionGroup>
             <Button key="invite" variant="primary" onClick={handleInviteUser}>
@@ -593,7 +654,8 @@ const OrganizationUsers: React.FC = () => {
         <Form>
           <FormGroup label="Current Role" fieldId="current-role">
             <Badge color={getRoleBadgeColor(selectedUser?.role || '')}>
-              {selectedUser?.role?.charAt(0).toUpperCase()}{selectedUser?.role?.slice(1)}
+              {selectedUser?.role?.charAt(0).toUpperCase()}
+              {selectedUser?.role?.slice(1)}
             </Badge>
           </FormGroup>
           <FormGroup label="New Role" isRequired fieldId="edit-role">
@@ -603,9 +665,18 @@ const OrganizationUsers: React.FC = () => {
               id="edit-role"
               aria-label="Select new role"
             >
-              <FormSelectOption value="admin" label="Admin - Full organization access" />
-              <FormSelectOption value="user" label="User - Can manage resources" />
-              <FormSelectOption value="viewer" label="Viewer - Read-only access" />
+              <FormSelectOption
+                value="admin"
+                label="Admin - Full organization access"
+              />
+              <FormSelectOption
+                value="user"
+                label="User - Can manage resources"
+              />
+              <FormSelectOption
+                value="viewer"
+                label="Viewer - Read-only access"
+              />
             </FormSelect>
           </FormGroup>
           <Alert
@@ -613,10 +684,15 @@ const OrganizationUsers: React.FC = () => {
             title="Role change warning"
             isInline
           >
-            Changing a user's role will immediately affect their permissions within this organization.
+            Changing a user's role will immediately affect their permissions
+            within this organization.
           </Alert>
           <ActionGroup>
-            <Button key="update" variant="primary" onClick={handleUpdateUserRole}>
+            <Button
+              key="update"
+              variant="primary"
+              onClick={handleUpdateUserRole}
+            >
               Update Role
             </Button>
             <Button

@@ -20,10 +20,7 @@ import {
   BreadcrumbItem,
   ActionGroup,
 } from '@patternfly/react-core';
-import {
-  SaveIcon,
-  TimesIcon,
-} from '@patternfly/react-icons';
+import { SaveIcon, TimesIcon } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   useOrganization,
@@ -31,7 +28,10 @@ import {
   useUpdateOrganization,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import type { CreateOrganizationRequest, UpdateOrganizationRequest } from '../../types';
+import type {
+  CreateOrganizationRequest,
+  UpdateOrganizationRequest,
+} from '../../types';
 
 interface FormData {
   name: string;
@@ -88,12 +88,15 @@ const OrganizationForm: React.FC = () => {
   useEffect(() => {
     if (originalData) {
       const changed = Object.keys(formData).some(
-        (key) => formData[key as keyof FormData] !== originalData[key as keyof FormData]
+        (key) =>
+          formData[key as keyof FormData] !==
+          originalData[key as keyof FormData]
       );
       setHasChanges(changed);
     } else if (!isEditing) {
       // For new organizations, consider any non-empty fields as changes
-      const hasData = formData.name || formData.display_name || formData.description;
+      const hasData =
+        formData.name || formData.display_name || formData.description;
       setHasChanges(Boolean(hasData));
     }
   }, [formData, originalData, isEditing]);
@@ -109,7 +112,8 @@ const OrganizationForm: React.FC = () => {
     } else if (formData.name.length > 50) {
       newErrors.name = 'Organization name must be less than 50 characters';
     } else if (!/^[a-z0-9-]+$/.test(formData.name)) {
-      newErrors.name = 'Organization name can only contain lowercase letters, numbers, and hyphens';
+      newErrors.name =
+        'Organization name can only contain lowercase letters, numbers, and hyphens';
     }
 
     // Display name validation
@@ -130,18 +134,21 @@ const OrganizationForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+  const handleInputChange = (
+    field: keyof FormData,
+    value: string | boolean
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     // Clear field-specific errors when user starts typing
     if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -155,7 +162,7 @@ const OrganizationForm: React.FC = () => {
           description: formData.description || undefined,
           enabled: formData.enabled,
         };
-        
+
         await updateMutation.mutateAsync(updateData);
         navigate(`/organizations/${id}`);
       } else {
@@ -165,15 +172,18 @@ const OrganizationForm: React.FC = () => {
           description: formData.description || undefined,
           enabled: formData.enabled,
         };
-        
+
         const response = await createMutation.mutateAsync(createData);
         navigate(`/organizations/${response.data.id}`);
       }
     } catch (error) {
       console.error('Failed to save organization:', error);
-      const errorMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const errorMessage = (
+        error as { response?: { data?: { message?: string } } }
+      )?.response?.data?.message;
       setErrors({
-        general: errorMessage || 'Failed to save organization. Please try again.',
+        general:
+          errorMessage || 'Failed to save organization. Please try again.',
       });
     }
   };
@@ -185,14 +195,13 @@ const OrganizationForm: React.FC = () => {
       );
       if (!confirmed) return;
     }
-    
+
     if (isEditing && id) {
       navigate(`/organizations/${id}`);
     } else {
       navigate('/organizations');
     }
   };
-
 
   if (isEditing && isLoading) {
     return (
@@ -210,7 +219,8 @@ const OrganizationForm: React.FC = () => {
           title="Organization not found"
           isInline
         >
-          The organization you're trying to edit doesn't exist or you don't have permission to edit it.
+          The organization you're trying to edit doesn't exist or you don't have
+          permission to edit it.
         </Alert>
         <br />
         <Button variant="primary" onClick={() => navigate('/organizations')}>
@@ -231,7 +241,9 @@ const OrganizationForm: React.FC = () => {
             </BreadcrumbItem>
             {isEditing && organization && (
               <BreadcrumbItem>
-                <Link to={`/organizations/${id}`}>{organization.display_name}</Link>
+                <Link to={`/organizations/${id}`}>
+                  {organization.display_name}
+                </Link>
               </BreadcrumbItem>
             )}
             <BreadcrumbItem isActive>
@@ -287,7 +299,9 @@ const OrganizationForm: React.FC = () => {
                         type="text"
                         id="org-name"
                         value={formData.name}
-                        onChange={(_, value) => handleInputChange('name', value)}
+                        onChange={(_, value) =>
+                          handleInputChange('name', value)
+                        }
                         placeholder="my-organization"
                         isDisabled={isEditing} // Name cannot be changed after creation
                       />
@@ -311,7 +325,9 @@ const OrganizationForm: React.FC = () => {
                         type="text"
                         id="org-display-name"
                         value={formData.display_name}
-                        onChange={(_, value) => handleInputChange('display_name', value)}
+                        onChange={(_, value) =>
+                          handleInputChange('display_name', value)
+                        }
                         placeholder="My Organization"
                       />
                     </FormGroup>
@@ -319,14 +335,13 @@ const OrganizationForm: React.FC = () => {
 
                   {/* Description */}
                   <StackItem>
-                    <FormGroup
-                      label="Description"
-                      fieldId="org-description"
-                    >
+                    <FormGroup label="Description" fieldId="org-description">
                       <TextArea
                         id="org-description"
                         value={formData.description}
-                        onChange={(_, value) => handleInputChange('description', value)}
+                        onChange={(_, value) =>
+                          handleInputChange('description', value)
+                        }
                         placeholder="Enter a description for this organization..."
                         rows={4}
                         resizeOrientation="vertical"
@@ -339,15 +354,14 @@ const OrganizationForm: React.FC = () => {
 
                   {/* Status */}
                   <StackItem>
-                    <FormGroup
-                      label="Status"
-                      fieldId="org-enabled"
-                    >
+                    <FormGroup label="Status" fieldId="org-enabled">
                       <Switch
                         id="org-enabled"
                         label="Enabled"
                         isChecked={formData.enabled}
-                        onChange={(_, checked) => handleInputChange('enabled', checked)}
+                        onChange={(_, checked) =>
+                          handleInputChange('enabled', checked)
+                        }
                         aria-label="Organization status"
                       />
                     </FormGroup>
@@ -380,7 +394,8 @@ const OrganizationForm: React.FC = () => {
                         title="Unsaved Changes"
                         isInline
                       >
-                        You have unsaved changes. Make sure to save your changes before leaving this page.
+                        You have unsaved changes. Make sure to save your changes
+                        before leaving this page.
                       </Alert>
                     </StackItem>
                   )}
@@ -392,7 +407,9 @@ const OrganizationForm: React.FC = () => {
                         variant="primary"
                         type="submit"
                         icon={<SaveIcon />}
-                        isLoading={createMutation.isPending || updateMutation.isPending}
+                        isLoading={
+                          createMutation.isPending || updateMutation.isPending
+                        }
                         isDisabled={!hasChanges && isEditing}
                       >
                         {isEditing ? 'Save Changes' : 'Create Organization'}
@@ -401,7 +418,9 @@ const OrganizationForm: React.FC = () => {
                         variant="link"
                         onClick={handleCancel}
                         icon={<TimesIcon />}
-                        isDisabled={createMutation.isPending || updateMutation.isPending}
+                        isDisabled={
+                          createMutation.isPending || updateMutation.isPending
+                        }
                       >
                         Cancel
                       </Button>

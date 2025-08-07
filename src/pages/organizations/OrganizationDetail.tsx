@@ -100,7 +100,8 @@ const OrganizationDetail: React.FC = () => {
             Organization not found
           </Title>
           <EmptyStateBody>
-            The organization you're looking for doesn't exist or you don't have permission to view it.
+            The organization you're looking for doesn't exist or you don't have
+            permission to view it.
           </EmptyStateBody>
           <Button variant="primary" onClick={() => navigate('/organizations')}>
             Back to Organizations
@@ -119,17 +120,23 @@ const OrganizationDetail: React.FC = () => {
             <DescriptionList isHorizontal>
               <DescriptionListGroup>
                 <DescriptionListTerm>Name</DescriptionListTerm>
-                <DescriptionListDescription>{organization.name}</DescriptionListDescription>
+                <DescriptionListDescription>
+                  {organization.name}
+                </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>Display Name</DescriptionListTerm>
-                <DescriptionListDescription>{organization.display_name}</DescriptionListDescription>
+                <DescriptionListDescription>
+                  {organization.display_name}
+                </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
                 <DescriptionListTerm>Description</DescriptionListTerm>
                 <DescriptionListDescription>
                   {organization.description || (
-                    <span className="pf-v6-u-color-200">No description provided</span>
+                    <span className="pf-v6-u-color-200">
+                      No description provided
+                    </span>
                   )}
                 </DescriptionListDescription>
               </DescriptionListGroup>
@@ -182,7 +189,9 @@ const OrganizationDetail: React.FC = () => {
                     <Button
                       variant="primary"
                       icon={<EditIcon />}
-                      onClick={() => navigate(`/organizations/${organization.id}/edit`)}
+                      onClick={() =>
+                        navigate(`/organizations/${organization.id}/edit`)
+                      }
                       isBlock
                     >
                       Edit Organization
@@ -192,7 +201,9 @@ const OrganizationDetail: React.FC = () => {
                     <Button
                       variant="secondary"
                       icon={<UsersIcon />}
-                      onClick={() => navigate(`/organizations/${organization.id}/users`)}
+                      onClick={() =>
+                        navigate(`/organizations/${organization.id}/users`)
+                      }
                       isBlock
                     >
                       Manage Users
@@ -202,7 +213,11 @@ const OrganizationDetail: React.FC = () => {
                     <Button
                       variant="secondary"
                       icon={<PlusCircleIcon />}
-                      onClick={() => navigate('/vdcs/create', { state: { organizationId: organization.id } })}
+                      onClick={() =>
+                        navigate('/vdcs/create', {
+                          state: { organizationId: organization.id },
+                        })
+                      }
                       isBlock
                     >
                       Create VDC
@@ -212,7 +227,9 @@ const OrganizationDetail: React.FC = () => {
                     <Button
                       variant="link"
                       icon={<ChartAreaIcon />}
-                      onClick={() => navigate(`/organizations/${organization.id}/analytics`)}
+                      onClick={() =>
+                        navigate(`/organizations/${organization.id}/analytics`)
+                      }
                       isBlock
                     >
                       View Analytics
@@ -281,7 +298,11 @@ const OrganizationDetail: React.FC = () => {
               variant="primary"
               size="sm"
               icon={<PlusCircleIcon />}
-              onClick={() => navigate('/vdcs/create', { state: { organizationId: organization.id } })}
+              onClick={() =>
+                navigate('/vdcs/create', {
+                  state: { organizationId: organization.id },
+                })
+              }
             >
               Create VDC
             </Button>
@@ -295,12 +316,17 @@ const OrganizationDetail: React.FC = () => {
               No Virtual Data Centers
             </Title>
             <EmptyStateBody>
-              This organization doesn't have any VDCs yet. Create one to get started.
+              This organization doesn't have any VDCs yet. Create one to get
+              started.
             </EmptyStateBody>
             <Button
               variant="primary"
               icon={<PlusCircleIcon />}
-              onClick={() => navigate('/vdcs/create', { state: { organizationId: organization.id } })}
+              onClick={() =>
+                navigate('/vdcs/create', {
+                  state: { organizationId: organization.id },
+                })
+              }
             >
               Create VDC
             </Button>
@@ -433,7 +459,8 @@ const OrganizationDetail: React.FC = () => {
                         },
                         {
                           title: 'Browse Templates',
-                          onClick: () => navigate(`/catalogs/${catalog.id}/templates`),
+                          onClick: () =>
+                            navigate(`/catalogs/${catalog.id}/templates`),
                         },
                       ]}
                     />
@@ -456,7 +483,9 @@ const OrganizationDetail: React.FC = () => {
             <BreadcrumbItem>
               <Link to="/organizations">Organizations</Link>
             </BreadcrumbItem>
-            <BreadcrumbItem isActive>{organization.display_name}</BreadcrumbItem>
+            <BreadcrumbItem isActive>
+              {organization.display_name}
+            </BreadcrumbItem>
           </Breadcrumb>
         </StackItem>
 
@@ -483,7 +512,9 @@ const OrganizationDetail: React.FC = () => {
                   <Button
                     variant="secondary"
                     icon={<EditIcon />}
-                    onClick={() => navigate(`/organizations/${organization.id}/edit`)}
+                    onClick={() =>
+                      navigate(`/organizations/${organization.id}/edit`)
+                    }
                   >
                     Edit
                   </Button>
@@ -492,7 +523,9 @@ const OrganizationDetail: React.FC = () => {
                   <Button
                     variant="secondary"
                     icon={<UsersIcon />}
-                    onClick={() => navigate(`/organizations/${organization.id}/users`)}
+                    onClick={() =>
+                      navigate(`/organizations/${organization.id}/users`)
+                    }
                   >
                     Manage Users
                   </Button>
@@ -510,7 +543,8 @@ const OrganizationDetail: React.FC = () => {
               title="Organization is disabled"
               isInline
             >
-              This organization is currently disabled. Users will not be able to access resources within this organization.
+              This organization is currently disabled. Users will not be able to
+              access resources within this organization.
             </Alert>
           </StackItem>
         )}
@@ -522,10 +556,12 @@ const OrganizationDetail: React.FC = () => {
             onSelect={(_, tabIndex) => setActiveTabKey(tabIndex)}
             aria-label="Organization details tabs"
           >
-            <Tab eventKey={0} title={<TabTitleText>Overview</TabTitleText>} aria-label="Overview tab">
-              <TabContent id="overview-tab">
-                {overviewTabContent}
-              </TabContent>
+            <Tab
+              eventKey={0}
+              title={<TabTitleText>Overview</TabTitleText>}
+              aria-label="Overview tab"
+            >
+              <TabContent id="overview-tab">{overviewTabContent}</TabContent>
             </Tab>
             <Tab
               eventKey={1}
@@ -536,22 +572,14 @@ const OrganizationDetail: React.FC = () => {
               }
               aria-label="VDCs tab"
             >
-              <TabContent id="vdcs-tab">
-                {vdcsTabContent}
-              </TabContent>
+              <TabContent id="vdcs-tab">{vdcsTabContent}</TabContent>
             </Tab>
             <Tab
               eventKey={2}
-              title={
-                <TabTitleText>
-                  Catalogs ({catalogs.length})
-                </TabTitleText>
-              }
+              title={<TabTitleText>Catalogs ({catalogs.length})</TabTitleText>}
               aria-label="Catalogs tab"
             >
-              <TabContent id="catalogs-tab">
-                {catalogsTabContent}
-              </TabContent>
+              <TabContent id="catalogs-tab">{catalogsTabContent}</TabContent>
             </Tab>
           </Tabs>
         </StackItem>

@@ -42,7 +42,11 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
-import { useOrganizations, useDeleteOrganization, useToggleOrganizationStatus } from '../../hooks';
+import {
+  useOrganizations,
+  useDeleteOrganization,
+  useToggleOrganizationStatus,
+} from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Organization, OrganizationQueryParams } from '../../types';
 
@@ -59,14 +63,23 @@ const Organizations: React.FC = () => {
   // Prepare query parameters
   const queryParams: OrganizationQueryParams = {
     search: searchTerm || undefined,
-    enabled: statusFilter === 'enabled' ? true : statusFilter === 'disabled' ? false : undefined,
+    enabled:
+      statusFilter === 'enabled'
+        ? true
+        : statusFilter === 'disabled'
+          ? false
+          : undefined,
     sort_by: sortBy,
     sort_order: sortDirection,
     page,
     per_page: perPage,
   };
 
-  const { data: organizationsResponse, isLoading, error } = useOrganizations(queryParams);
+  const {
+    data: organizationsResponse,
+    isLoading,
+    error,
+  } = useOrganizations(queryParams);
   const deleteOrganizationMutation = useDeleteOrganization();
   const toggleStatusMutation = useToggleOrganizationStatus();
 
@@ -97,7 +110,11 @@ const Organizations: React.FC = () => {
   };
 
   const handleDelete = async (org: Organization) => {
-    if (window.confirm(`Are you sure you want to delete organization "${org.display_name}"?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete organization "${org.display_name}"?`
+      )
+    ) {
       try {
         await deleteOrganizationMutation.mutateAsync(org.id);
       } catch (error) {
@@ -108,9 +125,12 @@ const Organizations: React.FC = () => {
 
   const getStatusFilterLabel = (filter: string) => {
     switch (filter) {
-      case 'enabled': return 'Enabled Only';
-      case 'disabled': return 'Disabled Only';
-      default: return 'All Statuses';
+      case 'enabled':
+        return 'Enabled Only';
+      case 'disabled':
+        return 'Disabled Only';
+      default:
+        return 'All Statuses';
     }
   };
 
@@ -194,7 +214,9 @@ const Organizations: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                          onClick={() =>
+                            setIsFilterDropdownOpen(!isFilterDropdownOpen)
+                          }
                           isExpanded={isFilterDropdownOpen}
                           icon={<FilterIcon />}
                         >
@@ -263,7 +285,9 @@ const Organizations: React.FC = () => {
                 <Bullseye>
                   <EmptyState icon={searchTerm ? SearchIcon : BuildingIcon}>
                     <Title headingLevel="h4" size="lg">
-                      {searchTerm ? 'No matching organizations' : 'No organizations found'}
+                      {searchTerm
+                        ? 'No matching organizations'
+                        : 'No organizations found'}
                     </Title>
                     <EmptyStateBody>
                       {searchTerm
@@ -288,7 +312,9 @@ const Organizations: React.FC = () => {
                   <Thead>
                     <Tr>
                       <Th {...getSortableProps('name')}>Name</Th>
-                      <Th {...getSortableProps('display_name')}>Display Name</Th>
+                      <Th {...getSortableProps('display_name')}>
+                        Display Name
+                      </Th>
                       <Th>Description</Th>
                       <Th>Status</Th>
                       <Th {...getSortableProps('created_at')}>Created</Th>
@@ -310,7 +336,9 @@ const Organizations: React.FC = () => {
                         <Td dataLabel="Display Name">{org.display_name}</Td>
                         <Td dataLabel="Description">
                           {org.description || (
-                            <span className="pf-v6-u-color-200">No description</span>
+                            <span className="pf-v6-u-color-200">
+                              No description
+                            </span>
                           )}
                         </Td>
                         <Td dataLabel="Status">
@@ -324,7 +352,9 @@ const Organizations: React.FC = () => {
                               <Switch
                                 id={`status-${org.id}`}
                                 isChecked={org.enabled}
-                                onChange={(_, checked) => handleStatusChange(org, checked)}
+                                onChange={(_, checked) =>
+                                  handleStatusChange(org, checked)
+                                }
                                 isDisabled={toggleStatusMutation.isPending}
                                 aria-label={`Toggle ${org.name} status`}
                               />
@@ -339,21 +369,25 @@ const Organizations: React.FC = () => {
                             items={[
                               {
                                 title: 'View Details',
-                                onClick: () => navigate(`/organizations/${org.id}`),
+                                onClick: () =>
+                                  navigate(`/organizations/${org.id}`),
                               },
                               {
                                 title: 'Edit',
-                                onClick: () => navigate(`/organizations/${org.id}/edit`),
+                                onClick: () =>
+                                  navigate(`/organizations/${org.id}/edit`),
                               },
                               {
                                 title: 'Manage Users',
-                                onClick: () => navigate(`/organizations/${org.id}/users`),
+                                onClick: () =>
+                                  navigate(`/organizations/${org.id}/users`),
                               },
                               { isSeparator: true },
                               {
                                 title: 'Delete',
                                 onClick: () => handleDelete(org),
-                                isDisabled: deleteOrganizationMutation.isPending,
+                                isDisabled:
+                                  deleteOrganizationMutation.isPending,
                               },
                             ]}
                           />

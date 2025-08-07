@@ -4,7 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppLayout from './components/layouts/AppLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/auth/Login';
-import { Organizations, OrganizationDetail, OrganizationUsers, OrganizationForm } from './pages/organizations';
+import {
+  Organizations,
+  OrganizationDetail,
+  OrganizationUsers,
+  OrganizationForm,
+} from './pages/organizations';
 import VMs from './pages/vms/VMs';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
