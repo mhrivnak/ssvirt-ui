@@ -6,6 +6,7 @@ export const CONFIG = {
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.1',
   DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
   JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
+  LOGO_URL: import.meta.env.VITE_LOGO_URL || '/vite.svg',
 } as const;
 
 // API endpoints

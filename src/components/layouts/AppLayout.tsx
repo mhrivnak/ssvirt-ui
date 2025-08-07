@@ -68,12 +68,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <MastheadMain>
         <MastheadBrand>
           <Brand
-            src="/logo.svg"
+            src={CONFIG.LOGO_URL}
             alt={CONFIG.APP_TITLE}
             heights={{ default: '36px' }}
           >
-            <source media="(min-width: 768px)" srcSet="/logo.svg" />
-            <source media="(max-width: 767px)" srcSet="/logo-mobile.svg" />
+            <source media="(min-width: 768px)" srcSet={CONFIG.LOGO_URL} />
+            <source media="(max-width: 767px)" srcSet={CONFIG.LOGO_URL} />
           </Brand>
         </MastheadBrand>
       </MastheadMain>

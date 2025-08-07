@@ -70,7 +70,7 @@ const Login: React.FC = () => {
   return (
     <LoginPage
       footerListVariants={ListVariant.inline}
-      brandImgSrc="/logo.svg"
+      brandImgSrc={CONFIG.LOGO_URL}
       brandImgAlt={CONFIG.APP_TITLE}
       footerListItems={[
         <LoginMainFooterBandItem key="version">
