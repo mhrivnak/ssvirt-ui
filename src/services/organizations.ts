@@ -4,6 +4,9 @@ import type {
   OrganizationQueryParams,
   CreateOrganizationRequest,
   UpdateOrganizationRequest,
+  OrganizationUser,
+  InviteUserRequest,
+  UpdateUserRoleRequest,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
@@ -81,6 +84,59 @@ export class OrganizationService {
     const response = await api.patch<ApiResponse<Organization>>(
       `/api/v1/organizations/${id}`,
       { enabled }
+    );
+    return response.data;
+  }
+
+  /**
+   * Get users for an organization
+   */
+  static async getOrganizationUsers(
+    id: string
+  ): Promise<PaginatedResponse<OrganizationUser>> {
+    const response = await api.get<PaginatedResponse<OrganizationUser>>(
+      `/api/v1/organizations/${id}/users`
+    );
+    return response.data;
+  }
+
+  /**
+   * Invite a user to an organization
+   */
+  static async inviteUserToOrganization(
+    organizationId: string,
+    data: InviteUserRequest
+  ): Promise<ApiResponse<OrganizationUser>> {
+    const response = await api.post<ApiResponse<OrganizationUser>>(
+      `/api/v1/organizations/${organizationId}/users/invite`,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Update a user's role in an organization
+   */
+  static async updateOrganizationUserRole(
+    organizationId: string,
+    data: UpdateUserRoleRequest
+  ): Promise<ApiResponse<OrganizationUser>> {
+    const response = await api.put<ApiResponse<OrganizationUser>>(
+      `/api/v1/organizations/${organizationId}/users/${data.user_id}/role`,
+      { role: data.role }
+    );
+    return response.data;
+  }
+
+  /**
+   * Remove a user from an organization
+   */
+  static async removeUserFromOrganization(
+    organizationId: string,
+    userId: string
+  ): Promise<ApiResponse<null>> {
+    const response = await api.delete<ApiResponse<null>>(
+      `/api/v1/organizations/${organizationId}/users/${userId}`
     );
     return response.data;
   }
