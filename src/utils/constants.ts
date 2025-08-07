@@ -15,7 +15,7 @@ export const getConfig = () => {
 
 // Legacy CONFIG export for backward compatibility
 // Note: This will throw if runtime config is not loaded
-export const CONFIG = new Proxy({} as any, {
+export const CONFIG = new Proxy({} as ReturnType<typeof getConfig>, {
   get(_target, prop) {
     return getConfig()[prop as keyof ReturnType<typeof getConfig>];
   }
