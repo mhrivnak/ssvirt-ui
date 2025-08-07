@@ -99,9 +99,9 @@ export const useDeleteVM = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
 
       // Invalidate VDC-specific VM queries for all VDCs
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ['vms', 'vdc'],
-        type: 'all'
+        type: 'all',
       });
 
       // Invalidate dashboard stats as VM count changed
