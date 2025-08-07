@@ -61,6 +61,41 @@ Build for production:
 npm run build
 ```
 
+## Container Deployment
+
+### Building the Container Image
+
+Build the container image using Podman (or Docker):
+```bash
+podman build -t ssvirt-ui .
+```
+
+### Running the Container
+
+Run the container, mapping port 8080:
+```bash
+podman run -d -p 8080:8080 --name ssvirt-ui-container ssvirt-ui
+```
+
+The application will be available at `http://localhost:8080`
+
+### Container Environment Variables
+
+You can pass environment variables to configure the API endpoint:
+```bash
+podman run -d -p 8080:8080 \
+  -e VITE_API_BASE_URL=http://your-api-server:8080/api \
+  --name ssvirt-ui-container \
+  ssvirt-ui
+```
+
+### Stopping the Container
+
+```bash
+podman stop ssvirt-ui-container
+podman rm ssvirt-ui-container
+```
+
 ### Scripts
 
 - `npm run dev` - Start development server
