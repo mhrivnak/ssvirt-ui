@@ -243,7 +243,7 @@ const VDCUsers: React.FC = () => {
       setNotification({
         variant: 'success',
         title: 'User Invited Successfully',
-        message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this VDC.`
+        message: `Invitation sent to ${inviteEmail}. The user will receive an email to join this VDC.`,
       });
       // Auto-hide notification after 5 seconds
       setTimeout(() => setNotification(null), 5000);
@@ -279,7 +279,7 @@ const VDCUsers: React.FC = () => {
       setNotification({
         variant: 'success',
         title: 'User Role Updated',
-        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`
+        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`,
       });
       // Auto-hide notification after 5 seconds
       setTimeout(() => setNotification(null), 5000);
@@ -289,7 +289,8 @@ const VDCUsers: React.FC = () => {
       setNotification({
         variant: 'danger',
         title: 'Failed to Update Role',
-        message: 'An error occurred while updating the user role. Please try again.'
+        message:
+          'An error occurred while updating the user role. Please try again.',
       });
       // Auto-hide notification after 5 seconds
       setTimeout(() => setNotification(null), 5000);
@@ -310,7 +311,7 @@ const VDCUsers: React.FC = () => {
         setNotification({
           variant: 'success',
           title: 'User Removed',
-          message: `${user.first_name} ${user.last_name} has been removed from this VDC.`
+          message: `${user.first_name} ${user.last_name} has been removed from this VDC.`,
         });
         // Auto-hide notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);
@@ -320,7 +321,8 @@ const VDCUsers: React.FC = () => {
         setNotification({
           variant: 'danger',
           title: 'Failed to Remove User',
-          message: 'An error occurred while removing the user. Please try again.'
+          message:
+            'An error occurred while removing the user. Please try again.',
         });
         // Auto-hide notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);
