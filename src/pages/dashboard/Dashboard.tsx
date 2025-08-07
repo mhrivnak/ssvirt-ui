@@ -2,60 +2,235 @@ import React from 'react';
 import {
   PageSection,
   Title,
-  Card,
-  CardBody,
-  Gallery,
-  GalleryItem,
+  Grid,
+  GridItem,
+  Stack,
+  StackItem,
+  Button,
+  Text,
+  TextVariants,
+  Split,
+  SplitItem,
+  Flex,
+  FlexItem,
 } from '@patternfly/react-core';
+import {
+  CubeIcon,
+  BuildingIcon,
+  NetworkIcon,
+  CatalogIcon,
+  PlusCircleIcon,
+  PlayIcon,
+  StopIcon,
+  SyncAltIcon,
+  ExternalLinkAltIcon,
+} from '@patternfly/react-icons';
+import { useDashboardStats, useRecentActivity } from '../../hooks';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import {
+  ResourceCard,
+  ActivityTimeline,
+  QuickStatsCard,
+  ResourceUsageChart,
+} from '../../components/dashboard';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: activities, isLoading: activitiesLoading } = useRecentActivity({
+    per_page: 5,
+  });
+
+  const resourceCards = [
+    {
+      title: 'Virtual Machines',
+      icon: CubeIcon,
+      total: stats?.data.total_vms ?? 0,
+      running: stats?.data.running_vms ?? 0,
+      stopped: stats?.data.stopped_vms ?? 0,
+      color: 'blue' as const,
+      actions: [
+        {
+          label: 'Create VM',
+          icon: PlusCircleIcon,
+          onClick: () => navigate('/vms/create'),
+        },
+        {
+          label: 'View All VMs',
+          icon: ExternalLinkAltIcon,
+          onClick: () => navigate('/vms'),
+        },
+      ],
+    },
+    {
+      title: 'Organizations',
+      icon: BuildingIcon,
+      total: stats?.data.total_organizations ?? 0,
+      color: 'green' as const,
+      actions: [
+        {
+          label: 'View Organizations',
+          icon: ExternalLinkAltIcon,
+          onClick: () => navigate('/organizations'),
+        },
+      ],
+    },
+    {
+      title: 'Virtual Data Centers',
+      icon: NetworkIcon,
+      total: stats?.data.total_vdcs ?? 0,
+      color: 'purple' as const,
+      actions: [
+        {
+          label: 'Create VDC',
+          icon: PlusCircleIcon,
+          onClick: () => navigate('/vdcs/create'),
+        },
+        {
+          label: 'View All VDCs',
+          icon: ExternalLinkAltIcon,
+          onClick: () => navigate('/vdcs'),
+        },
+      ],
+    },
+    {
+      title: 'Catalogs',
+      icon: CatalogIcon,
+      total: stats?.data.total_catalogs ?? 0,
+      color: 'orange' as const,
+      actions: [
+        {
+          label: 'Browse Catalogs',
+          icon: ExternalLinkAltIcon,
+          onClick: () => navigate('/catalogs'),
+        },
+      ],
+    },
+  ];
+
+  const quickActions = [
+    {
+      label: 'Create Virtual Machine',
+      icon: PlusCircleIcon,
+      variant: 'primary' as const,
+      onClick: () => navigate('/vms/create'),
+    },
+    {
+      label: 'Power On All VMs',
+      icon: PlayIcon,
+      variant: 'secondary' as const,
+      onClick: () => {
+        // TODO: Implement bulk power on
+        console.log('Bulk power on VMs');
+      },
+    },
+    {
+      label: 'Power Off All VMs',
+      icon: StopIcon,
+      variant: 'secondary' as const,
+      onClick: () => {
+        // TODO: Implement bulk power off
+        console.log('Bulk power off VMs');
+      },
+    },
+    {
+      label: 'Refresh Data',
+      icon: SyncAltIcon,
+      variant: 'link' as const,
+      onClick: () => {
+        window.location.reload();
+      },
+    },
+  ];
+
+  if (statsLoading) {
+    return (
+      <PageSection>
+        <LoadingSpinner />
+      </PageSection>
+    );
+  }
+
   return (
     <PageSection>
-      <Title headingLevel="h1" size="lg">
-        Dashboard
-      </Title>
-      <Gallery hasGutter>
-        <GalleryItem>
-          <Card>
-            <CardBody>
-              <Title headingLevel="h2" size="md">
-                Virtual Machines
+      <Stack hasGutter>
+        {/* Header Section */}
+        <StackItem>
+          <Split hasGutter>
+            <SplitItem isFilled>
+              <Title headingLevel="h1" size="xl">
+                Dashboard
               </Title>
-              <p>Manage your virtual machines</p>
-            </CardBody>
-          </Card>
-        </GalleryItem>
-        <GalleryItem>
-          <Card>
-            <CardBody>
-              <Title headingLevel="h2" size="md">
-                Organizations
-              </Title>
-              <p>View and manage organizations</p>
-            </CardBody>
-          </Card>
-        </GalleryItem>
-        <GalleryItem>
-          <Card>
-            <CardBody>
-              <Title headingLevel="h2" size="md">
-                Virtual Data Centers
-              </Title>
-              <p>Manage VDCs and resources</p>
-            </CardBody>
-          </Card>
-        </GalleryItem>
-        <GalleryItem>
-          <Card>
-            <CardBody>
-              <Title headingLevel="h2" size="md">
-                Catalogs
-              </Title>
-              <p>Browse VM templates and catalogs</p>
-            </CardBody>
-          </Card>
-        </GalleryItem>
-      </Gallery>
+              <Text component={TextVariants.p} className="pf-v6-u-color-200">
+                Overview of your virtual infrastructure resources
+              </Text>
+            </SplitItem>
+            <SplitItem>
+              <Flex
+                spaceItems={{ default: 'spaceItemsSm' }}
+                direction={{ default: 'row', sm: 'column', md: 'row' }}
+              >
+                {quickActions.map((action, index) => (
+                  <FlexItem key={index}>
+                    <Button
+                      variant={action.variant}
+                      icon={<action.icon />}
+                      onClick={action.onClick}
+                      size="sm"
+                    >
+                      {action.label}
+                    </Button>
+                  </FlexItem>
+                ))}
+              </Flex>
+            </SplitItem>
+          </Split>
+        </StackItem>
+
+        {/* Resource Cards Section */}
+        <StackItem>
+          <Grid hasGutter span={12}>
+            {resourceCards.map((card, index) => (
+              <GridItem key={index} span={12} sm={6} md={6} lg={3} xl={3}>
+                <ResourceCard
+                  title={card.title}
+                  icon={card.icon}
+                  total={card.total}
+                  running={card.running}
+                  stopped={card.stopped}
+                  color={card.color}
+                  actions={card.actions}
+                />
+              </GridItem>
+            ))}
+          </Grid>
+        </StackItem>
+
+        {/* Activity and Stats Section */}
+        <StackItem>
+          <Grid hasGutter>
+            <GridItem span={12} md={12} lg={6} xl={6}>
+              <ActivityTimeline
+                activities={activities?.data}
+                isLoading={activitiesLoading}
+                onViewAll={() => navigate('/activity')}
+              />
+            </GridItem>
+
+            <GridItem span={12} md={6} lg={3} xl={3}>
+              <QuickStatsCard
+                stats={stats?.data}
+                onViewSystemHealth={() => navigate('/system/health')}
+              />
+            </GridItem>
+
+            <GridItem span={12} md={6} lg={3} xl={3}>
+              <ResourceUsageChart stats={stats?.data} />
+            </GridItem>
+          </Grid>
+        </StackItem>
+      </Stack>
     </PageSection>
   );
 };
