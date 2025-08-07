@@ -78,15 +78,13 @@ const AppBreadcrumb: React.FC = () => {
       {breadcrumbItems.map((item) => {
         if (item.isActive) {
           return (
-            <BreadcrumbHeading key={item.path} to={item.path}>
-              {item.label}
-            </BreadcrumbHeading>
+            <BreadcrumbHeading key={item.path}>{item.label}</BreadcrumbHeading>
           );
         }
 
         return (
-          <BreadcrumbItem key={item.path} to={item.path}>
-            <Link to={item.path}>{item.label}</Link>
+          <BreadcrumbItem key={item.path} to={item.path} component={Link}>
+            {item.label}
           </BreadcrumbItem>
         );
       })}

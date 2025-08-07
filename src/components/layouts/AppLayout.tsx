@@ -149,7 +149,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               variant="plainText"
             >
               <Avatar
-                src={undefined}
+                src={user?.avatar_url}
                 alt={
                   user?.first_name && user?.last_name
                     ? `${user.first_name} ${user.last_name}`
