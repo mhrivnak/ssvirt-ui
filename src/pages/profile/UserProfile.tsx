@@ -267,25 +267,31 @@ const UserProfile: React.FC = () => {
   // Auto-remove notifications after 5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
-      setNotifications(prev => prev.filter(notification => 
-        Date.now() - notification.timestamp < 5000
-      ));
+      setNotifications((prev) =>
+        prev.filter(
+          (notification) => Date.now() - notification.timestamp < 5000
+        )
+      );
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const addNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+  const addNotification = (
+    notification: Omit<Notification, 'id' | 'timestamp'>
+  ) => {
     const newNotification: Notification = {
       ...notification,
       id: `notification-${Date.now()}-${Math.random()}`,
       timestamp: Date.now(),
     };
-    setNotifications(prev => [...prev, newNotification]);
+    setNotifications((prev) => [...prev, newNotification]);
   };
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
   };
 
   const validateProfile = (): boolean => {
@@ -324,7 +330,7 @@ const UserProfile: React.FC = () => {
       errors.new_password = 'New password is required';
     } else {
       const passwordRequirements = [];
-      
+
       if (passwordData.new_password.length < 8) {
         passwordRequirements.push('at least 8 characters');
       }
@@ -337,10 +343,12 @@ const UserProfile: React.FC = () => {
       if (!/\d/.test(passwordData.new_password)) {
         passwordRequirements.push('one number');
       }
-      if (!/[!@#$%^&*()_+=[\]{};':"\\|,.<>/?]/.test(passwordData.new_password)) {
+      if (
+        !/[!@#$%^&*()_+=[\]{};':"\\|,.<>/?]/.test(passwordData.new_password)
+      ) {
         passwordRequirements.push('one special character');
       }
-      
+
       if (passwordRequirements.length > 0) {
         errors.new_password = `Password must contain ${passwordRequirements.join(', ')}`;
       }
@@ -382,7 +390,7 @@ const UserProfile: React.FC = () => {
         last_name: updatedUser.last_name,
         email: updatedUser.email,
       };
-      
+
       setOriginalProfileData(updatedProfileData);
       setProfileData(updatedProfileData);
       setProfileHasChanges(false);
@@ -507,10 +515,8 @@ const UserProfile: React.FC = () => {
     if (checks.symbols) score += 15;
 
     // Common patterns penalty
-    const commonPatterns = [
-      /123/, /abc/, /qwe/, /password/, /admin/, /user/
-    ];
-    const hasCommonPattern = commonPatterns.some(pattern => 
+    const commonPatterns = [/123/, /abc/, /qwe/, /password/, /admin/, /user/];
+    const hasCommonPattern = commonPatterns.some((pattern) =>
       pattern.test(password.toLowerCase())
     );
     if (hasCommonPattern) score -= 20;
@@ -1053,14 +1059,20 @@ const UserProfile: React.FC = () => {
                                     isChecked={setting.enabled}
                                     onChange={(_, checked) => {
                                       // Update security setting
-                                      setSecuritySettings(prev => 
-                                        prev.map(s => 
-                                          s.id === setting.id 
-                                            ? { ...s, enabled: checked, last_used: checked ? new Date().toISOString() : s.last_used }
+                                      setSecuritySettings((prev) =>
+                                        prev.map((s) =>
+                                          s.id === setting.id
+                                            ? {
+                                                ...s,
+                                                enabled: checked,
+                                                last_used: checked
+                                                  ? new Date().toISOString()
+                                                  : s.last_used,
+                                              }
                                             : s
                                         )
                                       );
-                                      
+
                                       // TODO: Call API to persist security setting change
                                       // await SecurityService.updateSetting(setting.id, checked);
                                     }}
@@ -1345,11 +1357,7 @@ const UserProfile: React.FC = () => {
 
             <StackItem>
               <ActionGroup>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  icon={<SaveIcon />}
-                >
+                <Button variant="primary" type="submit" icon={<SaveIcon />}>
                   Change Password
                 </Button>
                 <Button
