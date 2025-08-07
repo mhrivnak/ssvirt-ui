@@ -377,7 +377,9 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         isOpen={showProgress}
         onClose={handleProgressClose}
         vmName={formData.name}
-        vdcName={vdcs.find(vdc => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'}
+        vdcName={
+          vdcs.find((vdc) => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'
+        }
         error={creationError || undefined}
       />
 
