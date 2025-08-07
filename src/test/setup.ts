@@ -1,6 +1,13 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Set test environment variables for fallback configuration
+process.env.VITE_API_BASE_URL = 'http://localhost:8080/api';
+process.env.VITE_APP_TITLE = 'SSVIRT Web UI';
+process.env.VITE_APP_VERSION = '0.0.1';
+process.env.VITE_LOGO_URL = '/vite.svg';
+process.env.VITE_JWT_TOKEN_KEY = 'ssvirt_token';
+
 // Mock fetch for config loading (only needed for runtime config tests)
 global.fetch = vi.fn().mockResolvedValue({
   ok: true,
