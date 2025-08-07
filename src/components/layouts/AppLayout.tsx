@@ -15,10 +15,17 @@ import {
   NavList,
   Button,
   Brand,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  MenuToggle,
+  type MenuToggleElement,
 } from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons';
+import { BarsIcon, UserIcon } from '@patternfly/react-icons';
 import { Link, useLocation } from 'react-router-dom';
 import { CONFIG, ROUTES } from '../../utils/constants';
+import { useAuth } from '../../hooks/useAuth';
+import { useLogoutMutation } from '../../hooks/useAuthQueries';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,10 +33,29 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const logoutMutation = useLogoutMutation();
 
   const onSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const onUserMenuToggle = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
+  };
+
+  const onUserMenuSelect = () => {
+    setIsUserMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const navigation = (
@@ -77,7 +103,44 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </Brand>
         </MastheadBrand>
       </MastheadMain>
-      <MastheadContent>{/* TODO: Add user menu in PR #3 */}</MastheadContent>
+      <MastheadContent>
+        <Dropdown
+          isOpen={isUserMenuOpen}
+          onSelect={onUserMenuSelect}
+          onOpenChange={setIsUserMenuOpen}
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+            <MenuToggle
+              ref={toggleRef}
+              onClick={onUserMenuToggle}
+              isExpanded={isUserMenuOpen}
+              icon={<UserIcon />}
+            >
+              {user?.first_name && user?.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user?.username || 'User'}
+            </MenuToggle>
+          )}
+        >
+          <DropdownList>
+            <DropdownItem
+              key="profile"
+              to={ROUTES.PROFILE}
+              component={(props: React.ComponentProps<typeof Link>) => (
+                <Link {...props} />
+              )}
+            >
+              Profile
+            </DropdownItem>
+            <DropdownItem
+              key="logout"
+              onClick={handleLogout}
+              isDisabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? 'Signing out...' : 'Sign out'}
+            </DropdownItem>
+          </DropdownList>
+        </Dropdown>
+      </MastheadContent>
     </Masthead>
   );
 
