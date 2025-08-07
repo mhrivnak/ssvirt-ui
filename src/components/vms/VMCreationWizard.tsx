@@ -30,8 +30,7 @@ import StorageConfigurationStep from './wizard/StorageConfigurationStep';
 import AdvancedOptionsStep from './wizard/AdvancedOptionsStep';
 import ReviewAndCreateStep from './wizard/ReviewAndCreateStep';
 import VMTemplateManager from './wizard/VMTemplateManager';
-
-import VMCreationProgress from './VMCreationProgress';
+import * as VMCreationProgressModule from './VMCreationProgress';
 
 interface VMCreationWizardProps {
   isOpen: boolean;
@@ -374,7 +373,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         </div>
       </Wizard>
 
-      <VMCreationProgress
+      <VMCreationProgressModule.default
         isOpen={showProgress}
         onClose={handleProgressClose}
         vmName={formData.name}
