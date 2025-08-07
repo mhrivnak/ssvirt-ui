@@ -50,6 +50,7 @@ import { useVDCs, useDeleteVDC, useToggleVDCStatus } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, VDCQueryParams } from '../../types';
 import { ROUTES } from '../../utils/constants';
+import { formatBytes } from '../../utils/format';
 
 const VDCs: React.FC = () => {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ const VDCs: React.FC = () => {
         : statusFilter === 'disabled'
           ? false
           : undefined,
+    allocation_model: allocationFilter !== 'all' ? allocationFilter : undefined,
     sort_by: sortBy,
     sort_order: sortDirection,
     page,
@@ -159,14 +161,6 @@ const VDCs: React.FC = () => {
       columnIndex: 0,
     },
   });
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
 
   if (isLoading) {
     return (

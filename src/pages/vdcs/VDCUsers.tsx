@@ -209,7 +209,9 @@ const VDCUsers: React.FC = () => {
       return;
     }
 
-    if (!inviteEmail.includes('@')) {
+    // Validate email format with proper regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(inviteEmail)) {
       setEmailError('Please enter a valid email address');
       return;
     }

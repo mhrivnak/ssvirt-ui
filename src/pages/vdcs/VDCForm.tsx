@@ -44,6 +44,8 @@ import {
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { CreateVDCRequest, UpdateVDCRequest } from '../../types';
 import { ROUTES } from '../../utils/constants';
+import { handleFormError } from '../../utils/errorHandler';
+import { formatBytes } from '../../utils/format';
 
 interface FormData {
   name: string;
@@ -136,9 +138,12 @@ const VDCForm: React.FC = () => {
       newErrors.name = 'VDC name must be at least 3 characters';
     } else if (formData.name.length > 50) {
       newErrors.name = 'VDC name must be less than 50 characters';
-    } else if (!/^[a-z0-9-]+$/.test(formData.name)) {
+    } else if (
+      !/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(formData.name) ||
+      /--/.test(formData.name)
+    ) {
       newErrors.name =
-        'VDC name can only contain lowercase letters, numbers, and hyphens';
+        'VDC name must start and end with alphanumeric characters and cannot contain consecutive hyphens';
     }
 
     // Organization validation
@@ -191,14 +196,6 @@ const VDCForm: React.FC = () => {
     }
   };
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -236,12 +233,13 @@ const VDCForm: React.FC = () => {
         navigate(ROUTES.VDC_DETAIL.replace(':id', response.data.id));
       }
     } catch (error) {
-      console.error('Failed to save VDC:', error);
-      const errorMessage = (
-        error as { response?: { data?: { message?: string } } }
-      )?.response?.data?.message;
+      const errorMessage = handleFormError(
+        error,
+        isEditing ? 'VDC Update' : 'VDC Creation',
+        'Failed to save VDC. Please try again.'
+      );
       setErrors({
-        general: errorMessage || 'Failed to save VDC. Please try again.',
+        general: errorMessage,
       });
     }
   };

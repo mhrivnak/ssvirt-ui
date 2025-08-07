@@ -59,6 +59,7 @@ import { useVDC, useToggleVDCStatus, useVMs } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VM } from '../../types';
 import { ROUTES } from '../../utils/constants';
+import { formatBytes } from '../../utils/format';
 
 const VDCDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,14 +103,6 @@ const VDCDetail: React.FC = () => {
         `Failed to toggle VDC status: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
-  };
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   const getResourceUsagePercentage = (used: number, limit: number) => {
@@ -335,7 +328,7 @@ const VDCDetail: React.FC = () => {
                       variant="secondary"
                       icon={<PlusCircleIcon />}
                       onClick={() =>
-                        navigate('/vms/create', {
+                        navigate(ROUTES.VM_CREATE, {
                           state: { vdcId: vdc.id },
                         })
                       }
@@ -348,7 +341,9 @@ const VDCDetail: React.FC = () => {
                     <Button
                       variant="link"
                       icon={<ChartAreaIcon />}
-                      onClick={() => navigate(`/vdcs/${vdc.id}/monitoring`)}
+                      onClick={() =>
+                        navigate(ROUTES.VDC_MONITORING.replace(':id', vdc.id))
+                      }
                       isBlock
                     >
                       View Monitoring
@@ -511,7 +506,7 @@ const VDCDetail: React.FC = () => {
               size="sm"
               icon={<PlusCircleIcon />}
               onClick={() =>
-                navigate('/vms/create', {
+                navigate(ROUTES.VM_CREATE, {
                   state: { vdcId: vdc.id },
                 })
               }
@@ -534,7 +529,7 @@ const VDCDetail: React.FC = () => {
               variant="primary"
               icon={<PlusCircleIcon />}
               onClick={() =>
-                navigate('/vms/create', {
+                navigate(ROUTES.VM_CREATE, {
                   state: { vdcId: vdc.id },
                 })
               }
@@ -561,7 +556,9 @@ const VDCDetail: React.FC = () => {
                     <Button
                       variant="link"
                       isInline
-                      onClick={() => navigate(`/vms/${vm.id}`)}
+                      onClick={() =>
+                        navigate(ROUTES.VM_DETAIL.replace(':id', vm.id))
+                      }
                     >
                       {vm.name}
                     </Button>
@@ -583,11 +580,13 @@ const VDCDetail: React.FC = () => {
                       items={[
                         {
                           title: 'View Details',
-                          onClick: () => navigate(`/vms/${vm.id}`),
+                          onClick: () =>
+                            navigate(ROUTES.VM_DETAIL.replace(':id', vm.id)),
                         },
                         {
                           title: 'Edit',
-                          onClick: () => navigate(`/vms/${vm.id}/edit`),
+                          onClick: () =>
+                            navigate(ROUTES.VM_EDIT.replace(':id', vm.id)),
                         },
                         {
                           title: 'Power On',
