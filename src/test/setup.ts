@@ -1,6 +1,34 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Mock the runtime configuration system for tests
+vi.mock('../utils/config', () => ({
+  loadRuntimeConfig: vi.fn().mockResolvedValue({
+    apiBaseUrl: 'http://localhost:8080/api',
+    appTitle: 'SSVIRT Web UI',
+    appVersion: '0.0.1',
+    logoUrl: '/vite.svg',
+  }),
+  getRuntimeConfig: vi.fn().mockReturnValue({
+    apiBaseUrl: 'http://localhost:8080/api',
+    appTitle: 'SSVIRT Web UI',
+    appVersion: '0.0.1',
+    logoUrl: '/vite.svg',
+  }),
+  resetRuntimeConfig: vi.fn(),
+}));
+
+// Mock fetch for config loading
+global.fetch = vi.fn().mockResolvedValue({
+  ok: true,
+  json: vi.fn().mockResolvedValue({
+    apiBaseUrl: 'http://localhost:8080/api',
+    appTitle: 'SSVIRT Web UI',
+    appVersion: '0.0.1',
+    logoUrl: '/vite.svg',
+  }),
+});
+
 // Mock window.matchMedia for PatternFly components
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
