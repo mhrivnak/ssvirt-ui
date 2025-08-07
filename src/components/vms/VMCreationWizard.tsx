@@ -24,6 +24,10 @@ import NetworkConfigurationStep from './wizard/NetworkConfigurationStep';
 import StorageConfigurationStep from './wizard/StorageConfigurationStep';
 import AdvancedOptionsStep from './wizard/AdvancedOptionsStep';
 import ReviewAndCreateStep from './wizard/ReviewAndCreateStep';
+import VMTemplateManager from './wizard/VMTemplateManager';
+
+// TODO: Re-enable progress tracking after fixing TypeScript issues
+// import VMCreationProgress from './VMCreationProgress';
 
 interface VMCreationWizardProps {
   isOpen: boolean;
@@ -65,6 +69,10 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  // TODO: Re-enable progress tracking
+  // const [showProgress, setShowProgress] = useState(false);
+  // const [creationError, setCreationError] = useState<string | null>(null);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   // Initial form data
   const [formData, setFormData] = useState<WizardFormData>({
@@ -160,6 +168,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
 
     setIsCreating(true);
     setError(null);
+    // TODO: Re-enable progress tracking
+    // setCreationError(null);
 
     try {
       const createRequest: CreateVMRequest = {
@@ -174,11 +184,18 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         advanced_config: formData.advanced_config,
       };
 
+      // Start the VM creation
       await createVMMutation.mutateAsync(createRequest);
+      
+      // TODO: Show progress modal after fixing TypeScript issues
+      // setShowProgress(true);
       onClose();
     } catch (error) {
       console.error('Failed to create VM:', error);
       setError('Failed to create virtual machine. Please try again.');
+      // TODO: Show progress modal with error after fixing TypeScript issues
+      // setCreationError('Failed to create virtual machine. Please try again.');
+      // setShowProgress(true);
     } finally {
       setIsCreating(false);
     }
@@ -188,6 +205,9 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     setActiveStepIndex(0);
     setError(null);
     setIsCreating(false);
+    // TODO: Re-enable progress tracking
+    // setShowProgress(false);
+    // setCreationError(null);
     // Reset form data
     setFormData({
       name: '',
@@ -213,6 +233,20 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
       },
     });
     onClose();
+  };
+
+  // TODO: Re-enable progress tracking
+  // const handleProgressClose = () => {
+  //   setShowProgress(false);
+  //   setCreationError(null);
+  // };
+
+  const handleLoadTemplate = (templateData: Partial<WizardFormData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...templateData,
+    }));
+    setShowTemplateManager(false);
   };
 
   const steps = [
@@ -314,9 +348,18 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
           marginTop: '24px'
         }}>
-          <Button variant="link" onClick={handleClose}>
-            Cancel
-          </Button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button variant="link" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button 
+              variant="link" 
+              onClick={() => setShowTemplateManager(true)}
+              isDisabled={isCreating}
+            >
+              Templates
+            </Button>
+          </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             {activeStepIndex > 0 && (
               <Button
@@ -348,6 +391,23 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           </div>
         </div>
       </Wizard>
+
+      {/* TODO: Re-enable VM Creation Progress Modal after fixing TypeScript issues */}
+      {/* <VMCreationProgress
+        isOpen={showProgress}
+        onClose={handleProgressClose}
+        vmName={formData.name}
+        vdcName={vdcs.find(vdc => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'}
+        error={creationError || undefined}
+      /> */}
+
+      {/* VM Template Manager Modal */}
+      <VMTemplateManager
+        isOpen={showTemplateManager}
+        onClose={() => setShowTemplateManager(false)}
+        onLoadTemplate={handleLoadTemplate}
+        currentFormData={formData}
+      />
     </Modal>
   );
 };
