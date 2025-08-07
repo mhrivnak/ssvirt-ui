@@ -56,6 +56,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useOrganization } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { User } from '../../types';
+import { ROUTES } from '../../utils/constants';
 
 // Mock user data - in real implementation, this would come from API
 interface OrganizationUser extends User {
@@ -127,8 +128,29 @@ const OrganizationUsers: React.FC = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
   const [editRole, setEditRole] = useState('');
+  const [emailError, setEmailError] = useState('');
 
-  const { data: orgResponse, isLoading } = useOrganization(id!);
+  // Hooks must be called before any conditional returns
+  const { data: orgResponse, isLoading } = useOrganization(id || '');
+
+  // Early validation for id parameter
+  if (!id) {
+    return (
+      <PageSection>
+        <EmptyState icon={UsersIcon}>
+          <Title headingLevel="h4" size="lg">
+            Invalid Organization
+          </Title>
+          <EmptyStateBody>
+            No organization ID provided. Please select a valid organization.
+          </EmptyStateBody>
+          <Button variant="primary" onClick={() => navigate(ROUTES.ORGANIZATIONS)}>
+            Back to Organizations
+          </Button>
+        </EmptyState>
+      </PageSection>
+    );
+  }
   const organization = orgResponse?.data;
 
   // Filter and sort users
@@ -190,13 +212,17 @@ const OrganizationUsers: React.FC = () => {
   };
 
   const handleInviteUser = () => {
+    // Clear previous errors
+    setEmailError('');
+
+    // Validate email
     if (!inviteEmail) {
-      alert('Email is required');
+      setEmailError('Email is required');
       return;
     }
 
     if (!inviteEmail.includes('@')) {
-      alert('Please enter a valid email address');
+      setEmailError('Please enter a valid email address');
       return;
     }
 
@@ -206,6 +232,7 @@ const OrganizationUsers: React.FC = () => {
     // Reset form and close modal
     setInviteEmail('');
     setInviteRole('user');
+    setEmailError('');
     setIsInviteModalOpen(false);
   };
 
@@ -296,7 +323,7 @@ const OrganizationUsers: React.FC = () => {
           <EmptyStateBody>
             The organization you're looking for doesn't exist.
           </EmptyStateBody>
-          <Button variant="primary" onClick={() => navigate('/organizations')}>
+          <Button variant="primary" onClick={() => navigate(ROUTES.ORGANIZATIONS)}>
             Back to Organizations
           </Button>
         </EmptyState>
@@ -579,17 +606,28 @@ const OrganizationUsers: React.FC = () => {
           setIsInviteModalOpen(false);
           setInviteEmail('');
           setInviteRole('user');
+          setEmailError('');
         }}
       >
         <Form>
-          <FormGroup label="Email Address" isRequired fieldId="invite-email">
+          <FormGroup
+            label="Email Address"
+            isRequired
+            fieldId="invite-email"
+            helperTextInvalid={emailError}
+            validated={emailError ? 'error' : 'default'}
+          >
             <TextInput
               isRequired
               type="email"
               id="invite-email"
               value={inviteEmail}
-              onChange={(_, value) => setInviteEmail(value)}
+              onChange={(_, value) => {
+                setInviteEmail(value);
+                if (emailError) setEmailError(''); // Clear error on input
+              }}
               placeholder="user@example.com"
+              validated={emailError ? 'error' : 'default'}
             />
           </FormGroup>
           <FormGroup label="Role" isRequired fieldId="invite-role">
@@ -632,6 +670,7 @@ const OrganizationUsers: React.FC = () => {
                 setIsInviteModalOpen(false);
                 setInviteEmail('');
                 setInviteRole('user');
+                setEmailError('');
               }}
             >
               Cancel

@@ -32,6 +32,7 @@ import type {
   CreateOrganizationRequest,
   UpdateOrganizationRequest,
 } from '../../types';
+import { ROUTES } from '../../utils/constants';
 
 interface FormData {
   name: string;
@@ -164,7 +165,7 @@ const OrganizationForm: React.FC = () => {
         };
 
         await updateMutation.mutateAsync(updateData);
-        navigate(`/organizations/${id}`);
+        navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', id));
       } else {
         const createData: CreateOrganizationRequest = {
           name: formData.name,
@@ -174,7 +175,7 @@ const OrganizationForm: React.FC = () => {
         };
 
         const response = await createMutation.mutateAsync(createData);
-        navigate(`/organizations/${response.data.id}`);
+        navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', response.data.id));
       }
     } catch (error) {
       console.error('Failed to save organization:', error);
@@ -197,9 +198,9 @@ const OrganizationForm: React.FC = () => {
     }
 
     if (isEditing && id) {
-      navigate(`/organizations/${id}`);
+      navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', id));
     } else {
-      navigate('/organizations');
+      navigate(ROUTES.ORGANIZATIONS);
     }
   };
 
@@ -223,7 +224,10 @@ const OrganizationForm: React.FC = () => {
           permission to edit it.
         </Alert>
         <br />
-        <Button variant="primary" onClick={() => navigate('/organizations')}>
+        <Button
+          variant="primary"
+          onClick={() => navigate(ROUTES.ORGANIZATIONS)}
+        >
           Back to Organizations
         </Button>
       </PageSection>
@@ -237,11 +241,11 @@ const OrganizationForm: React.FC = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Link to="/organizations">Organizations</Link>
+              <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
             {isEditing && organization && (
               <BreadcrumbItem>
-                <Link to={`/organizations/${id}`}>
+                <Link to={ROUTES.ORGANIZATION_DETAIL.replace(':id', id!)}>
                   {organization.display_name}
                 </Link>
               </BreadcrumbItem>

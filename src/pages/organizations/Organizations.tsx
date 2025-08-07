@@ -24,6 +24,8 @@ import {
   DropdownList,
   DropdownItem,
   MenuToggle,
+  Alert,
+  AlertVariant,
 } from '@patternfly/react-core';
 import {
   Table,
@@ -49,6 +51,7 @@ import {
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Organization, OrganizationQueryParams } from '../../types';
+import { ROUTES } from '../../utils/constants';
 
 const Organizations: React.FC = () => {
   const navigate = useNavigate();
@@ -59,6 +62,7 @@ const Organizations: React.FC = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Prepare query parameters
   const queryParams: OrganizationQueryParams = {
@@ -105,7 +109,9 @@ const Organizations: React.FC = () => {
     try {
       await toggleStatusMutation.mutateAsync({ id: org.id, enabled });
     } catch (error) {
-      console.error('Failed to toggle organization status:', error);
+      setErrorMessage(
+        `Failed to toggle organization status: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   };
 
@@ -118,7 +124,9 @@ const Organizations: React.FC = () => {
       try {
         await deleteOrganizationMutation.mutateAsync(org.id);
       } catch (error) {
-        console.error('Failed to delete organization:', error);
+        setErrorMessage(
+          `Failed to delete organization: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
   };
@@ -183,13 +191,30 @@ const Organizations: React.FC = () => {
               <Button
                 variant="primary"
                 icon={<PlusCircleIcon />}
-                onClick={() => navigate('/organizations/create')}
+                onClick={() => navigate(ROUTES.ORGANIZATION_CREATE)}
               >
                 Create Organization
               </Button>
             </SplitItem>
           </Split>
         </StackItem>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <StackItem>
+            <Alert
+              variant={AlertVariant.danger}
+              title="Error"
+              actionClose={{
+                onClick: () => setErrorMessage(''),
+                'aria-label': 'Close error alert',
+              }}
+              isInline
+            >
+              {errorMessage}
+            </Alert>
+          </StackItem>
+        )}
 
         {/* Toolbar */}
         <StackItem>
@@ -299,7 +324,7 @@ const Organizations: React.FC = () => {
                         <Button
                           variant="primary"
                           icon={<PlusCircleIcon />}
-                          onClick={() => navigate('/organizations/create')}
+                          onClick={() => navigate(ROUTES.ORGANIZATION_CREATE)}
                         >
                           Create Organization
                         </Button>
@@ -328,7 +353,14 @@ const Organizations: React.FC = () => {
                           <Button
                             variant="link"
                             isInline
-                            onClick={() => navigate(`/organizations/${org.id}`)}
+                            onClick={() =>
+                              navigate(
+                                ROUTES.ORGANIZATION_DETAIL.replace(
+                                  ':id',
+                                  org.id
+                                )
+                              )
+                            }
                           >
                             {org.name}
                           </Button>
@@ -370,17 +402,32 @@ const Organizations: React.FC = () => {
                               {
                                 title: 'View Details',
                                 onClick: () =>
-                                  navigate(`/organizations/${org.id}`),
+                                  navigate(
+                                    ROUTES.ORGANIZATION_DETAIL.replace(
+                                      ':id',
+                                      org.id
+                                    )
+                                  ),
                               },
                               {
                                 title: 'Edit',
                                 onClick: () =>
-                                  navigate(`/organizations/${org.id}/edit`),
+                                  navigate(
+                                    ROUTES.ORGANIZATION_EDIT.replace(
+                                      ':id',
+                                      org.id
+                                    )
+                                  ),
                               },
                               {
                                 title: 'Manage Users',
                                 onClick: () =>
-                                  navigate(`/organizations/${org.id}/users`),
+                                  navigate(
+                                    ROUTES.ORGANIZATION_USERS.replace(
+                                      ':id',
+                                      org.id
+                                    )
+                                  ),
                               },
                               { isSeparator: true },
                               {

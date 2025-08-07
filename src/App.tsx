@@ -142,6 +142,16 @@ const App: React.FC = () => {
                 }
               />
               <Route
+                path={ROUTES.ORGANIZATION_ANALYTICS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <div>Organization Analytics - Coming in future PR</div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path={ROUTES.VMS}
                 element={
                   <ProtectedRoute>

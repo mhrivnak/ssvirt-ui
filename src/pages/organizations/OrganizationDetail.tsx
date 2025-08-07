@@ -60,16 +60,41 @@ import {
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, Catalog } from '../../types';
+import { ROUTES } from '../../utils/constants';
 
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
+  const [errorMessage, setErrorMessage] = useState('');
   const toggleStatusMutation = useToggleOrganizationStatus();
 
-  const { data: orgResponse, isLoading, error } = useOrganization(id!);
+  // Hooks must be called before any conditional returns
+  const { data: orgResponse, isLoading, error } = useOrganization(id || '');
   const { data: vdcsResponse } = useVDCs({ organization_id: id });
   const { data: catalogsResponse } = useCatalogs({ organization: id });
+
+  // Early validation for id parameter
+  if (!id) {
+    return (
+      <PageSection>
+        <EmptyState icon={BuildingIcon}>
+          <Title headingLevel="h4" size="lg">
+            Invalid Organization
+          </Title>
+          <EmptyStateBody>
+            No organization ID provided. Please select a valid organization.
+          </EmptyStateBody>
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ORGANIZATIONS)}
+          >
+            Back to Organizations
+          </Button>
+        </EmptyState>
+      </PageSection>
+    );
+  }
 
   const organization = orgResponse?.data;
   const vdcs = vdcsResponse?.data || [];
@@ -80,7 +105,9 @@ const OrganizationDetail: React.FC = () => {
     try {
       await toggleStatusMutation.mutateAsync({ id: organization.id, enabled });
     } catch (error) {
-      console.error('Failed to toggle organization status:', error);
+      setErrorMessage(
+        `Failed to toggle organization status: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   };
 
@@ -103,7 +130,10 @@ const OrganizationDetail: React.FC = () => {
             The organization you're looking for doesn't exist or you don't have
             permission to view it.
           </EmptyStateBody>
-          <Button variant="primary" onClick={() => navigate('/organizations')}>
+          <Button
+            variant="primary"
+            onClick={() => navigate(ROUTES.ORGANIZATIONS)}
+          >
             Back to Organizations
           </Button>
         </EmptyState>
@@ -190,7 +220,12 @@ const OrganizationDetail: React.FC = () => {
                       variant="primary"
                       icon={<EditIcon />}
                       onClick={() =>
-                        navigate(`/organizations/${organization.id}/edit`)
+                        navigate(
+                          ROUTES.ORGANIZATION_EDIT.replace(
+                            ':id',
+                            organization.id
+                          )
+                        )
                       }
                       isBlock
                     >
@@ -202,7 +237,12 @@ const OrganizationDetail: React.FC = () => {
                       variant="secondary"
                       icon={<UsersIcon />}
                       onClick={() =>
-                        navigate(`/organizations/${organization.id}/users`)
+                        navigate(
+                          ROUTES.ORGANIZATION_USERS.replace(
+                            ':id',
+                            organization.id
+                          )
+                        )
                       }
                       isBlock
                     >
@@ -228,7 +268,12 @@ const OrganizationDetail: React.FC = () => {
                       variant="link"
                       icon={<ChartAreaIcon />}
                       onClick={() =>
-                        navigate(`/organizations/${organization.id}/analytics`)
+                        navigate(
+                          ROUTES.ORGANIZATION_ANALYTICS.replace(
+                            ':id',
+                            organization.id
+                          )
+                        )
                       }
                       isBlock
                     >
@@ -481,7 +526,7 @@ const OrganizationDetail: React.FC = () => {
         <StackItem>
           <Breadcrumb>
             <BreadcrumbItem>
-              <Link to="/organizations">Organizations</Link>
+              <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>
               {organization.display_name}
@@ -513,7 +558,9 @@ const OrganizationDetail: React.FC = () => {
                     variant="secondary"
                     icon={<EditIcon />}
                     onClick={() =>
-                      navigate(`/organizations/${organization.id}/edit`)
+                      navigate(
+                        ROUTES.ORGANIZATION_EDIT.replace(':id', organization.id)
+                      )
                     }
                   >
                     Edit
@@ -524,7 +571,12 @@ const OrganizationDetail: React.FC = () => {
                     variant="secondary"
                     icon={<UsersIcon />}
                     onClick={() =>
-                      navigate(`/organizations/${organization.id}/users`)
+                      navigate(
+                        ROUTES.ORGANIZATION_USERS.replace(
+                          ':id',
+                          organization.id
+                        )
+                      )
                     }
                   >
                     Manage Users
@@ -534,6 +586,23 @@ const OrganizationDetail: React.FC = () => {
             </SplitItem>
           </Split>
         </StackItem>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <StackItem>
+            <Alert
+              variant={AlertVariant.danger}
+              title="Error"
+              actionClose={{
+                onClick: () => setErrorMessage(''),
+                'aria-label': 'Close error alert',
+              }}
+              isInline
+            >
+              {errorMessage}
+            </Alert>
+          </StackItem>
+        )}
 
         {/* Status Alert */}
         {!organization.enabled && (

@@ -76,6 +76,7 @@ export const ROUTES = {
   ORGANIZATION_DETAIL: '/organizations/:id',
   ORGANIZATION_EDIT: '/organizations/:id/edit',
   ORGANIZATION_USERS: '/organizations/:id/users',
+  ORGANIZATION_ANALYTICS: '/organizations/:id/analytics',
   VDCS: '/vdcs',
   VDC_DETAIL: '/vdcs/:id',
   VMS: '/vms',
