@@ -64,7 +64,7 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
 
       return matchesSearch && matchesCatalog;
     });
-  }, [catalogItems, searchTerm, selectedCatalogId, catalogs]);
+  }, [catalogItems, searchTerm, selectedCatalogId]);
 
   const handleTemplateSelect = (catalogItem: CatalogItem) => {
     updateFormData({

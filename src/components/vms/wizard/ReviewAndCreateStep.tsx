@@ -48,7 +48,6 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
     (item) => item.id === formData.catalog_item_id
   );
 
-
   const getTotalStorage = () => {
     const primarySize = formData.storage_config.disk_size_gb || 0;
     const additionalSize = (

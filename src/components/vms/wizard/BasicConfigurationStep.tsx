@@ -95,7 +95,6 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
 
   const selectedVDC = vdcs.find((vdc) => vdc.id === formData.vdc_id);
 
-
   return (
     <Stack hasGutter>
       <StackItem>

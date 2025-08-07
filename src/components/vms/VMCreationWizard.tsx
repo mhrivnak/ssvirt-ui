@@ -105,7 +105,9 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   });
 
   // Initial form data
-  const [formData, setFormData] = useState<WizardFormData>(createInitialFormData);
+  const [formData, setFormData] = useState<WizardFormData>(
+    createInitialFormData
+  );
 
   // Hooks
   const createVMMutation = useCreateVM();
