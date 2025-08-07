@@ -215,7 +215,11 @@ const VDCUsers: React.FC = () => {
     }
 
     // TODO: Implement actual user invitation API call
-    console.log('Inviting user to VDC:', { email: inviteEmail, role: inviteRole, vdcId: id });
+    console.log('Inviting user to VDC:', {
+      email: inviteEmail,
+      role: inviteRole,
+      vdcId: id,
+    });
 
     // Reset form and close modal
     setInviteEmail('');
@@ -330,9 +334,7 @@ const VDCUsers: React.FC = () => {
               <Link to={ROUTES.VDCS}>Virtual Data Centers</Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={ROUTES.VDC_DETAIL.replace(':id', id)}>
-                {vdc.name}
-              </Link>
+              <Link to={ROUTES.VDC_DETAIL.replace(':id', id)}>{vdc.name}</Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>User Management</BreadcrumbItem>
           </Breadcrumb>
@@ -650,8 +652,8 @@ const VDCUsers: React.FC = () => {
             title="Invitation details"
             isInline
           >
-            The user will receive an email invitation to join this VDC
-            with the selected role.
+            The user will receive an email invitation to join this VDC with the
+            selected role.
           </Alert>
           <ActionGroup>
             <Button key="invite" variant="primary" onClick={handleInviteUser}>

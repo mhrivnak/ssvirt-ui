@@ -42,10 +42,7 @@ import {
   useOrganizations,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import type {
-  CreateVDCRequest,
-  UpdateVDCRequest,
-} from '../../types';
+import type { CreateVDCRequest, UpdateVDCRequest } from '../../types';
 import { ROUTES } from '../../utils/constants';
 
 interface FormData {
@@ -164,14 +161,17 @@ const VDCForm: React.FC = () => {
     // Memory limit validation
     if (formData.memory_limit_mb < 512) {
       newErrors.memory_limit_mb = 'Memory limit must be at least 512 MB';
-    } else if (formData.memory_limit_mb > 1048576) { // 1TB
+    } else if (formData.memory_limit_mb > 1048576) {
+      // 1TB
       newErrors.memory_limit_mb = 'Memory limit cannot exceed 1 TB';
     }
 
     // Storage limit validation
-    if (formData.storage_limit_mb < 1024) { // 1GB
+    if (formData.storage_limit_mb < 1024) {
+      // 1GB
       newErrors.storage_limit_mb = 'Storage limit must be at least 1 GB';
-    } else if (formData.storage_limit_mb > 10485760) { // 10TB
+    } else if (formData.storage_limit_mb > 10485760) {
+      // 10TB
       newErrors.storage_limit_mb = 'Storage limit cannot exceed 10 TB';
     }
 
@@ -241,8 +241,7 @@ const VDCForm: React.FC = () => {
         error as { response?: { data?: { message?: string } } }
       )?.response?.data?.message;
       setErrors({
-        general:
-          errorMessage || 'Failed to save VDC. Please try again.',
+        general: errorMessage || 'Failed to save VDC. Please try again.',
       });
     }
   };
@@ -273,11 +272,7 @@ const VDCForm: React.FC = () => {
   if (isEditing && !vdc) {
     return (
       <PageSection>
-        <Alert
-          variant={AlertVariant.danger}
-          title="VDC not found"
-          isInline
-        >
+        <Alert variant={AlertVariant.danger} title="VDC not found" isInline>
           The VDC you're trying to edit doesn't exist or you don't have
           permission to edit it.
         </Alert>
@@ -316,7 +311,9 @@ const VDCForm: React.FC = () => {
           <Split hasGutter>
             <SplitItem isFilled>
               <Title headingLevel="h1" size="xl">
-                {isEditing ? 'Edit Virtual Data Center' : 'Create Virtual Data Center'}
+                {isEditing
+                  ? 'Edit Virtual Data Center'
+                  : 'Create Virtual Data Center'}
               </Title>
               <p className="pf-v6-u-color-200">
                 {isEditing
@@ -372,7 +369,9 @@ const VDCForm: React.FC = () => {
                             placeholder="my-vdc"
                             isDisabled={isEditing} // Name cannot be changed after creation
                             validated={errors.name ? 'error' : 'default'}
-                            aria-describedby={errors.name ? 'vdc-name-error' : undefined}
+                            aria-describedby={
+                              errors.name ? 'vdc-name-error' : undefined
+                            }
                           />
                           {errors.name && (
                             <div
@@ -407,11 +406,20 @@ const VDCForm: React.FC = () => {
                             }
                             id="vdc-organization"
                             aria-label="Select organization"
-                            validated={errors.organization_id ? 'error' : 'default'}
-                            aria-describedby={errors.organization_id ? 'vdc-organization-error' : undefined}
+                            validated={
+                              errors.organization_id ? 'error' : 'default'
+                            }
+                            aria-describedby={
+                              errors.organization_id
+                                ? 'vdc-organization-error'
+                                : undefined
+                            }
                             isDisabled={isEditing} // Organization cannot be changed after creation
                           >
-                            <FormSelectOption value="" label="Select an organization" />
+                            <FormSelectOption
+                              value=""
+                              label="Select an organization"
+                            />
                             {organizations.map((org) => (
                               <FormSelectOption
                                 key={org.id}
@@ -455,8 +463,14 @@ const VDCForm: React.FC = () => {
                         }
                         id="vdc-allocation-model"
                         aria-label="Select allocation model"
-                        validated={errors.allocation_model ? 'error' : 'default'}
-                        aria-describedby={errors.allocation_model ? 'vdc-allocation-model-error' : undefined}
+                        validated={
+                          errors.allocation_model ? 'error' : 'default'
+                        }
+                        aria-describedby={
+                          errors.allocation_model
+                            ? 'vdc-allocation-model-error'
+                            : undefined
+                        }
                       >
                         <FormSelectOption
                           value="PayAsYouGo"
@@ -507,15 +521,25 @@ const VDCForm: React.FC = () => {
                               <NumberInput
                                 value={formData.cpu_limit}
                                 onMinus={() =>
-                                  handleInputChange('cpu_limit', Math.max(1, formData.cpu_limit - 1))
+                                  handleInputChange(
+                                    'cpu_limit',
+                                    Math.max(1, formData.cpu_limit - 1)
+                                  )
                                 }
                                 onChange={(event) => {
-                                  const target = event.target as HTMLInputElement;
+                                  const target =
+                                    event.target as HTMLInputElement;
                                   const value = parseInt(target.value) || 1;
-                                  handleInputChange('cpu_limit', Math.max(1, value));
+                                  handleInputChange(
+                                    'cpu_limit',
+                                    Math.max(1, value)
+                                  );
                                 }}
                                 onPlus={() =>
-                                  handleInputChange('cpu_limit', formData.cpu_limit + 1)
+                                  handleInputChange(
+                                    'cpu_limit',
+                                    formData.cpu_limit + 1
+                                  )
                                 }
                                 inputName="cpu-limit"
                                 inputAriaLabel="CPU limit"
@@ -523,8 +547,14 @@ const VDCForm: React.FC = () => {
                                 plusBtnAriaLabel="Increase CPU limit"
                                 min={1}
                                 max={1000}
-                                validated={errors.cpu_limit ? 'error' : 'default'}
-                                aria-describedby={errors.cpu_limit ? 'vdc-cpu-limit-error' : undefined}
+                                validated={
+                                  errors.cpu_limit ? 'error' : 'default'
+                                }
+                                aria-describedby={
+                                  errors.cpu_limit
+                                    ? 'vdc-cpu-limit-error'
+                                    : undefined
+                                }
                               />
                             </FlexItem>
                             <FlexItem>
@@ -562,15 +592,28 @@ const VDCForm: React.FC = () => {
                               <NumberInput
                                 value={formData.memory_limit_mb}
                                 onMinus={() =>
-                                  handleInputChange('memory_limit_mb', Math.max(512, formData.memory_limit_mb - 512))
+                                  handleInputChange(
+                                    'memory_limit_mb',
+                                    Math.max(
+                                      512,
+                                      formData.memory_limit_mb - 512
+                                    )
+                                  )
                                 }
                                 onChange={(event) => {
-                                  const target = event.target as HTMLInputElement;
+                                  const target =
+                                    event.target as HTMLInputElement;
                                   const value = parseInt(target.value) || 512;
-                                  handleInputChange('memory_limit_mb', Math.max(512, value));
+                                  handleInputChange(
+                                    'memory_limit_mb',
+                                    Math.max(512, value)
+                                  );
                                 }}
                                 onPlus={() =>
-                                  handleInputChange('memory_limit_mb', formData.memory_limit_mb + 512)
+                                  handleInputChange(
+                                    'memory_limit_mb',
+                                    formData.memory_limit_mb + 512
+                                  )
                                 }
                                 inputName="memory-limit"
                                 inputAriaLabel="Memory limit"
@@ -578,13 +621,23 @@ const VDCForm: React.FC = () => {
                                 plusBtnAriaLabel="Increase memory limit"
                                 min={512}
                                 max={1048576}
-                                validated={errors.memory_limit_mb ? 'error' : 'default'}
-                                aria-describedby={errors.memory_limit_mb ? 'vdc-memory-limit-error' : undefined}
+                                validated={
+                                  errors.memory_limit_mb ? 'error' : 'default'
+                                }
+                                aria-describedby={
+                                  errors.memory_limit_mb
+                                    ? 'vdc-memory-limit-error'
+                                    : undefined
+                                }
                               />
                             </FlexItem>
                             <FlexItem>
                               <span className="pf-v6-u-color-200">
-                                MB ({formatBytes(formData.memory_limit_mb * 1024 * 1024)})
+                                MB (
+                                {formatBytes(
+                                  formData.memory_limit_mb * 1024 * 1024
+                                )}
+                                )
                               </span>
                             </FlexItem>
                           </Flex>
@@ -619,15 +672,28 @@ const VDCForm: React.FC = () => {
                               <NumberInput
                                 value={formData.storage_limit_mb}
                                 onMinus={() =>
-                                  handleInputChange('storage_limit_mb', Math.max(1024, formData.storage_limit_mb - 1024))
+                                  handleInputChange(
+                                    'storage_limit_mb',
+                                    Math.max(
+                                      1024,
+                                      formData.storage_limit_mb - 1024
+                                    )
+                                  )
                                 }
                                 onChange={(event) => {
-                                  const target = event.target as HTMLInputElement;
+                                  const target =
+                                    event.target as HTMLInputElement;
                                   const value = parseInt(target.value) || 1024;
-                                  handleInputChange('storage_limit_mb', Math.max(1024, value));
+                                  handleInputChange(
+                                    'storage_limit_mb',
+                                    Math.max(1024, value)
+                                  );
                                 }}
                                 onPlus={() =>
-                                  handleInputChange('storage_limit_mb', formData.storage_limit_mb + 1024)
+                                  handleInputChange(
+                                    'storage_limit_mb',
+                                    formData.storage_limit_mb + 1024
+                                  )
                                 }
                                 inputName="storage-limit"
                                 inputAriaLabel="Storage limit"
@@ -635,13 +701,23 @@ const VDCForm: React.FC = () => {
                                 plusBtnAriaLabel="Increase storage limit"
                                 min={1024}
                                 max={10485760}
-                                validated={errors.storage_limit_mb ? 'error' : 'default'}
-                                aria-describedby={errors.storage_limit_mb ? 'vdc-storage-limit-error' : undefined}
+                                validated={
+                                  errors.storage_limit_mb ? 'error' : 'default'
+                                }
+                                aria-describedby={
+                                  errors.storage_limit_mb
+                                    ? 'vdc-storage-limit-error'
+                                    : undefined
+                                }
                               />
                             </FlexItem>
                             <FlexItem>
                               <span className="pf-v6-u-color-200">
-                                MB ({formatBytes(formData.storage_limit_mb * 1024 * 1024)})
+                                MB (
+                                {formatBytes(
+                                  formData.storage_limit_mb * 1024 * 1024
+                                )}
+                                )
                               </span>
                             </FlexItem>
                           </Flex>
@@ -694,7 +770,9 @@ const VDCForm: React.FC = () => {
                         After creating the VDC, you can:
                         <ul className="pf-v6-u-mt-sm">
                           <li>Assign users and manage access permissions</li>
-                          <li>Create virtual machines within the resource limits</li>
+                          <li>
+                            Create virtual machines within the resource limits
+                          </li>
                           <li>Monitor resource usage and performance</li>
                           <li>Adjust resource quotas as needed</li>
                         </ul>

@@ -55,11 +55,7 @@ import {
   StorageDomainIcon,
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  useVDC,
-  useToggleVDCStatus,
-  useVMs,
-} from '../../hooks';
+import { useVDC, useToggleVDCStatus, useVMs } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VM } from '../../types';
 import { ROUTES } from '../../utils/constants';
@@ -201,7 +197,9 @@ const VDCDetail: React.FC = () => {
                           <Switch
                             id="vdc-status-toggle"
                             isChecked={vdc.enabled}
-                            onChange={(_, checked) => handleStatusToggle(checked)}
+                            onChange={(_, checked) =>
+                              handleStatusToggle(checked)
+                            }
                             isDisabled={toggleStatusMutation.isPending}
                             aria-label="Toggle VDC status"
                           />
@@ -350,9 +348,7 @@ const VDCDetail: React.FC = () => {
                     <Button
                       variant="link"
                       icon={<ChartAreaIcon />}
-                      onClick={() =>
-                        navigate(`/vdcs/${vdc.id}/monitoring`)
-                      }
+                      onClick={() => navigate(`/vdcs/${vdc.id}/monitoring`)}
                       isBlock
                     >
                       View Monitoring
@@ -370,10 +366,17 @@ const VDCDetail: React.FC = () => {
                 <Stack hasGutter>
                   <StackItem>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
                         <span>CPU Usage</span>
                         <span>
-                          {mockResourceUsage.cpu.used} / {mockResourceUsage.cpu.limit} cores
+                          {mockResourceUsage.cpu.used} /{' '}
+                          {mockResourceUsage.cpu.limit} cores
                         </span>
                       </div>
                       <Progress
@@ -393,10 +396,22 @@ const VDCDetail: React.FC = () => {
                   </StackItem>
                   <StackItem>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
                         <span>Memory Usage</span>
                         <span>
-                          {formatBytes(mockResourceUsage.memory.used * 1024 * 1024)} / {formatBytes(mockResourceUsage.memory.limit * 1024 * 1024)}
+                          {formatBytes(
+                            mockResourceUsage.memory.used * 1024 * 1024
+                          )}{' '}
+                          /{' '}
+                          {formatBytes(
+                            mockResourceUsage.memory.limit * 1024 * 1024
+                          )}
                         </span>
                       </div>
                       <Progress
@@ -416,10 +431,22 @@ const VDCDetail: React.FC = () => {
                   </StackItem>
                   <StackItem>
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
                         <span>Storage Usage</span>
                         <span>
-                          {formatBytes(mockResourceUsage.storage.used * 1024 * 1024)} / {formatBytes(mockResourceUsage.storage.limit * 1024 * 1024)}
+                          {formatBytes(
+                            mockResourceUsage.storage.used * 1024 * 1024
+                          )}{' '}
+                          /{' '}
+                          {formatBytes(
+                            mockResourceUsage.storage.limit * 1024 * 1024
+                          )}
                         </span>
                       </div>
                       <Progress
@@ -545,7 +572,9 @@ const VDCDetail: React.FC = () => {
                     </Badge>
                   </Td>
                   <Td dataLabel="CPU">{vm.cpu_count} cores</Td>
-                  <Td dataLabel="Memory">{formatBytes(vm.memory_mb * 1024 * 1024)}</Td>
+                  <Td dataLabel="Memory">
+                    {formatBytes(vm.memory_mb * 1024 * 1024)}
+                  </Td>
                   <Td dataLabel="Created">
                     {new Date(vm.created_at).toLocaleDateString()}
                   </Td>
@@ -662,8 +691,8 @@ const VDCDetail: React.FC = () => {
               title="VDC is disabled"
               isInline
             >
-              This Virtual Data Center is currently disabled. Users will not be able to
-              create or manage VMs within this VDC.
+              This Virtual Data Center is currently disabled. Users will not be
+              able to create or manage VMs within this VDC.
             </Alert>
           </StackItem>
         )}

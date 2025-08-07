@@ -46,11 +46,7 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
-import {
-  useVDCs,
-  useDeleteVDC,
-  useToggleVDCStatus,
-} from '../../hooks';
+import { useVDCs, useDeleteVDC, useToggleVDCStatus } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, VDCQueryParams } from '../../types';
 import { ROUTES } from '../../utils/constants';
@@ -83,11 +79,7 @@ const VDCs: React.FC = () => {
     per_page: perPage,
   };
 
-  const {
-    data: vdcsResponse,
-    isLoading,
-    error,
-  } = useVDCs(queryParams);
+  const { data: vdcsResponse, isLoading, error } = useVDCs(queryParams);
   const deleteVDCMutation = useDeleteVDC();
   const toggleStatusMutation = useToggleVDCStatus();
 
@@ -175,7 +167,6 @@ const VDCs: React.FC = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
-
 
   if (isLoading) {
     return (
@@ -304,7 +295,9 @@ const VDCs: React.FC = () => {
                     <Dropdown
                       isOpen={isAllocationFilterOpen}
                       onSelect={() => setIsAllocationFilterOpen(false)}
-                      onOpenChange={(isOpen) => setIsAllocationFilterOpen(isOpen)}
+                      onOpenChange={(isOpen) =>
+                        setIsAllocationFilterOpen(isOpen)
+                      }
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
@@ -379,9 +372,7 @@ const VDCs: React.FC = () => {
                 <Bullseye>
                   <EmptyState icon={searchTerm ? SearchIcon : NetworkIcon}>
                     <Title headingLevel="h4" size="lg">
-                      {searchTerm
-                        ? 'No matching VDCs'
-                        : 'No VDCs found'}
+                      {searchTerm ? 'No matching VDCs' : 'No VDCs found'}
                     </Title>
                     <EmptyStateBody>
                       {searchTerm
@@ -424,9 +415,7 @@ const VDCs: React.FC = () => {
                             variant="link"
                             isInline
                             onClick={() =>
-                              navigate(
-                                ROUTES.VDC_DETAIL.replace(':id', vdc.id)
-                              )
+                              navigate(ROUTES.VDC_DETAIL.replace(':id', vdc.id))
                             }
                           >
                             {vdc.name}
@@ -440,7 +429,13 @@ const VDCs: React.FC = () => {
                         </Td>
                         <Td dataLabel="CPU Usage">
                           <div style={{ minWidth: '120px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '0.875rem',
+                              }}
+                            >
                               <span>0 / {vdc.cpu_limit}</span>
                               <span>0%</span>
                             </div>
@@ -453,8 +448,17 @@ const VDCs: React.FC = () => {
                         </Td>
                         <Td dataLabel="Memory Usage">
                           <div style={{ minWidth: '120px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                              <span>0 / {formatBytes(vdc.memory_limit_mb * 1024 * 1024)}</span>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '0.875rem',
+                              }}
+                            >
+                              <span>
+                                0 /{' '}
+                                {formatBytes(vdc.memory_limit_mb * 1024 * 1024)}
+                              </span>
                               <span>0%</span>
                             </div>
                             <Progress
@@ -466,8 +470,19 @@ const VDCs: React.FC = () => {
                         </Td>
                         <Td dataLabel="Storage Usage">
                           <div style={{ minWidth: '120px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                              <span>0 / {formatBytes(vdc.storage_limit_mb * 1024 * 1024)}</span>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '0.875rem',
+                              }}
+                            >
+                              <span>
+                                0 /{' '}
+                                {formatBytes(
+                                  vdc.storage_limit_mb * 1024 * 1024
+                                )}
+                              </span>
                               <span>0%</span>
                             </div>
                             <Progress

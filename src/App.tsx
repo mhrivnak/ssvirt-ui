@@ -10,12 +10,7 @@ import {
   OrganizationUsers,
   OrganizationForm,
 } from './pages/organizations';
-import {
-  VDCs,
-  VDCDetail,
-  VDCForm,
-  VDCUsers,
-} from './pages/vdcs';
+import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import VMs from './pages/vms/VMs';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
