@@ -79,15 +79,45 @@ podman run -d -p 8080:8080 --name ssvirt-ui-container ssvirt-ui
 
 The application will be available at `http://localhost:8080`
 
-### Container Environment Variables
+### Container Runtime Configuration
 
-You can pass environment variables to configure the API endpoint:
+The application supports runtime configuration by mounting a custom `config.json` file or using environment variables that are processed at container startup.
+
+#### Option 1: Mount a custom config.json file
+
+Create a custom configuration file:
+```json
+{
+  "apiBaseUrl": "http://your-api-server:8080/api",
+  "appTitle": "Your Custom Title",
+  "appVersion": "1.0.0",
+  "logoUrl": "/your-logo.svg"
+}
+```
+
+Mount it into the container:
 ```bash
 podman run -d -p 8080:8080 \
-  -e VITE_API_BASE_URL=http://your-api-server:8080/api \
+  -v /path/to/your/config.json:/opt/app-root/src/dist/config.json:ro \
   --name ssvirt-ui-container \
   ssvirt-ui
 ```
+
+#### Option 2: Use environment variables (processed at startup)
+
+```bash
+podman run -d -p 8080:8080 \
+  -e API_BASE_URL=http://your-api-server:8080/api \
+  -e APP_TITLE="Your Custom Title" \
+  --name ssvirt-ui-container \
+  ssvirt-ui
+```
+
+Available environment variables:
+- `API_BASE_URL`: Backend API endpoint URL
+- `APP_TITLE`: Application title
+- `APP_VERSION`: Application version
+- `LOGO_URL`: Logo image URL
 
 ### Stopping the Container
 

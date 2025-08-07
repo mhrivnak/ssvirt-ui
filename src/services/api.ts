@@ -3,7 +3,7 @@ import axios, {
   type AxiosResponse,
   AxiosError,
 } from 'axios';
-import { CONFIG, API_ENDPOINTS } from '../utils/constants';
+import { getConfig, API_ENDPOINTS } from '../utils/constants';
 import { getStoredToken, removeStoredToken } from '../utils/auth';
 import type {
   ApiResponse,
@@ -15,8 +15,9 @@ import type {
 
 // Create axios instance with base configuration
 const createApiInstance = (): AxiosInstance => {
+  const config = getConfig();
   const instance = axios.create({
-    baseURL: CONFIG.API_BASE_URL,
+    baseURL: config.API_BASE_URL,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
