@@ -27,6 +27,7 @@ import {
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { VDC } from '../../../types';
+import { formatMegabytes } from '../../../utils/formatters';
 
 interface BasicConfigurationStepProps {
   formData: WizardFormData;
@@ -94,19 +95,6 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
 
   const selectedVDC = vdcs.find((vdc) => vdc.id === formData.vdc_id);
 
-  const formatMemory = (memoryMb: number) => {
-    if (memoryMb >= 1024) {
-      return `${(memoryMb / 1024).toFixed(1)} GB`;
-    }
-    return `${memoryMb} MB`;
-  };
-
-  const formatStorage = (storageMb: number) => {
-    if (storageMb >= 1024) {
-      return `${(storageMb / 1024).toFixed(1)} GB`;
-    }
-    return `${storageMb} MB`;
-  };
 
   return (
     <Stack hasGutter>
@@ -263,11 +251,11 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                           </StackItem>
                           <StackItem>
                             <strong>Memory Limit:</strong>{' '}
-                            {formatMemory(selectedVDC.memory_limit_mb)}
+                            {formatMegabytes(selectedVDC.memory_limit_mb)}
                           </StackItem>
                           <StackItem>
                             <strong>Storage Limit:</strong>{' '}
-                            {formatStorage(selectedVDC.storage_limit_mb)}
+                            {formatMegabytes(selectedVDC.storage_limit_mb)}
                           </StackItem>
                           <StackItem>
                             <strong>Allocation Model:</strong>{' '}
@@ -307,7 +295,7 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                     <br />
                     <strong>Default specs:</strong>{' '}
                     {formData.selectedTemplate.cpu_count} CPU,{' '}
-                    {formatMemory(formData.selectedTemplate.memory_mb)},{' '}
+                    {formatMegabytes(formData.selectedTemplate.memory_mb)},{' '}
                     {formData.selectedTemplate.disk_size_gb} GB storage
                   </Alert>
                 </StackItem>

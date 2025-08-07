@@ -59,11 +59,7 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
         : true;
 
       const matchesCatalog = selectedCatalogId
-        ? catalogs.find(
-            (catalog) =>
-              catalog.name === item.name.split('-')[0] ||
-              item.name.includes(catalog.name)
-          )?.id === selectedCatalogId
+        ? item.catalog_id === selectedCatalogId
         : true;
 
       return matchesSearch && matchesCatalog;

@@ -115,7 +115,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
       network_config: currentFormData.network_config,
       storage_config: currentFormData.storage_config,
       advanced_config: currentFormData.advanced_config,
-      created_by: 'current-user', // In real app, get from auth context
+      created_by: 'anonymous', // TODO: Replace with actual user from auth context when available
       created_at: new Date().toISOString(),
       is_shared: templateForm.isShared,
     };
@@ -223,7 +223,8 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
 
         const updatedTemplates = [...templates, importedTemplate];
         saveTemplates(updatedTemplates);
-      } catch {
+      } catch (error) {
+        console.error('Failed to import template:', error);
         setError('Failed to import template: Invalid JSON format');
       }
     };

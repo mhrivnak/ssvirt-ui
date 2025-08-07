@@ -250,7 +250,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                         value={formData.cpu_count}
                         onChange={(_, value) => handleCpuChange(value)}
                         min={1}
-                        max={16}
+                        max={32}
                         step={1}
                         showTicks
                         showBoundaries
@@ -311,7 +311,7 @@ const ResourceSpecificationStep: React.FC<ResourceSpecificationStepProps> = ({
                         value={formData.memory_mb}
                         onChange={(_, value) => handleMemoryChange(value)}
                         min={512}
-                        max={32768}
+                        max={65536}
                         step={512}
                         showTicks
                         showBoundaries

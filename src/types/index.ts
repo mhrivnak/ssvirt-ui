@@ -174,6 +174,7 @@ export interface CatalogItem {
   cpu_count: number;
   memory_mb: number;
   disk_size_gb: number;
+  catalog_id: string;
   created_at: string;
   updated_at: string;
 }

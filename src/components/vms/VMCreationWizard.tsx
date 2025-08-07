@@ -79,8 +79,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   // const [creationError, setCreationError] = useState<string | null>(null);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
-  // Initial form data
-  const [formData, setFormData] = useState<WizardFormData>({
+  // Function to create initial form data
+  const createInitialFormData = (): WizardFormData => ({
     name: '',
     description: '',
     vdc_id: preselectedVDC || '',
@@ -103,6 +103,9 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
       custom_properties: {},
     },
   });
+
+  // Initial form data
+  const [formData, setFormData] = useState<WizardFormData>(createInitialFormData);
 
   // Hooks
   const createVMMutation = useCreateVM();
@@ -137,7 +140,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         }
         return true;
       case 4: // Storage Configuration
-        return formData.storage_config.disk_size_gb! > 0;
+        return (formData.storage_config.disk_size_gb ?? 0) > 0;
       case 5: // Advanced Options
         if (formData.advanced_config.cloud_init_enabled) {
           return !!formData.advanced_config.cloud_init_script?.trim();
@@ -213,29 +216,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     // setShowProgress(false);
     // setCreationError(null);
     // Reset form data
-    setFormData({
-      name: '',
-      description: '',
-      vdc_id: preselectedVDC || '',
-      catalog_item_id: preselectedTemplate || '',
-      selectedTemplate: undefined,
-      cpu_count: 2,
-      memory_mb: 4096,
-      network_config: {
-        ip_allocation_mode: 'DHCP',
-        dns_servers: [],
-      },
-      storage_config: {
-        disk_size_gb: 50,
-        additional_disks: [],
-      },
-      advanced_config: {
-        cloud_init_enabled: false,
-        guest_customization: false,
-        auto_logon: false,
-        custom_properties: {},
-      },
-    });
+    setFormData(createInitialFormData());
     onClose();
   };
 

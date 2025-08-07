@@ -30,6 +30,7 @@ import {
 } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { VDC, CatalogItem } from '../../../types';
+import { formatMegabytes } from '../../../utils/formatters';
 
 interface ReviewAndCreateStepProps {
   formData: WizardFormData;
@@ -47,12 +48,6 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
     (item) => item.id === formData.catalog_item_id
   );
 
-  const formatMemory = (memoryMb: number) => {
-    if (memoryMb >= 1024) {
-      return `${(memoryMb / 1024).toFixed(1)} GB`;
-    }
-    return `${memoryMb} MB`;
-  };
 
   const getTotalStorage = () => {
     const primarySize = formData.storage_config.disk_size_gb || 0;
@@ -177,7 +172,7 @@ const ReviewAndCreateStep: React.FC<ReviewAndCreateStepProps> = ({
                       <DescriptionListGroup>
                         <DescriptionListTerm>Memory</DescriptionListTerm>
                         <DescriptionListDescription>
-                          <Badge>{formatMemory(formData.memory_mb)}</Badge>
+                          <Badge>{formatMegabytes(formData.memory_mb)}</Badge>
                         </DescriptionListDescription>
                       </DescriptionListGroup>
                     </DescriptionList>
