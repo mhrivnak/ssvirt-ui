@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
                 setNotification({
                   variant: 'success',
                   title: 'Bulk Power On Initiated',
-                  message: `Power on operation started for ${vmIds.length} VMs. This may take a few moments to complete.`
+                  message: `Power on operation started for ${vmIds.length} VMs. This may take a few moments to complete.`,
                 });
                 setTimeout(() => setNotification(null), 8000);
               },
@@ -152,16 +152,17 @@ const Dashboard: React.FC = () => {
                 setNotification({
                   variant: 'danger',
                   title: 'Bulk Power On Failed',
-                  message: 'An error occurred while starting the bulk power on operation. Please try again.'
+                  message:
+                    'An error occurred while starting the bulk power on operation. Please try again.',
                 });
                 setTimeout(() => setNotification(null), 8000);
-              }
+              },
             });
           } else {
             setNotification({
               variant: 'info',
               title: 'No VMs Found',
-              message: 'There are no VMs available to power on.'
+              message: 'There are no VMs available to power on.',
             });
             setTimeout(() => setNotification(null), 5000);
           }
@@ -181,7 +182,7 @@ const Dashboard: React.FC = () => {
                 setNotification({
                   variant: 'success',
                   title: 'Bulk Power Off Initiated',
-                  message: `Power off operation started for ${vmIds.length} VMs. This may take a few moments to complete.`
+                  message: `Power off operation started for ${vmIds.length} VMs. This may take a few moments to complete.`,
                 });
                 setTimeout(() => setNotification(null), 8000);
               },
@@ -190,16 +191,17 @@ const Dashboard: React.FC = () => {
                 setNotification({
                   variant: 'danger',
                   title: 'Bulk Power Off Failed',
-                  message: 'An error occurred while starting the bulk power off operation. Please try again.'
+                  message:
+                    'An error occurred while starting the bulk power off operation. Please try again.',
                 });
                 setTimeout(() => setNotification(null), 8000);
-              }
+              },
             });
           } else {
             setNotification({
               variant: 'info',
               title: 'No VMs Found',
-              message: 'There are no VMs available to power off.'
+              message: 'There are no VMs available to power off.',
             });
             setTimeout(() => setNotification(null), 5000);
           }
