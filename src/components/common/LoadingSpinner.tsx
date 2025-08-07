@@ -9,18 +9,16 @@ interface LoadingSpinnerProps {
 /**
  * Loading spinner component using PatternFly Spinner
  */
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'lg', 
-  message = 'Loading...' 
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'lg',
+  message = 'Loading...',
 }) => {
   return (
     <Bullseye>
       <div style={{ textAlign: 'center' }}>
         <Spinner size={size} aria-label={message} />
         {message && (
-          <div style={{ marginTop: '1rem', color: '#666' }}>
-            {message}
-          </div>
+          <div style={{ marginTop: '1rem', color: '#666' }}>{message}</div>
         )}
       </div>
     </Bullseye>

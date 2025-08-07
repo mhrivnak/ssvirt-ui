@@ -1,12 +1,16 @@
-import axios, { type AxiosInstance, type AxiosResponse, AxiosError } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosResponse,
+  AxiosError,
+} from 'axios';
 import { CONFIG, API_ENDPOINTS } from '../utils/constants';
 import { getStoredToken, removeStoredToken } from '../utils/auth';
-import type { 
-  ApiResponse, 
-  LoginRequest, 
-  LoginResponse, 
+import type {
+  ApiResponse,
+  LoginRequest,
+  LoginResponse,
   SessionInfo,
-  User 
+  User,
 } from '../types';
 
 // Create axios instance with base configuration
@@ -41,7 +45,7 @@ const createApiInstance = (): AxiosInstance => {
         // Redirect to login will be handled by the auth context
         window.location.href = '/login';
       }
-      
+
       return Promise.reject(error);
     }
   );
@@ -63,7 +67,7 @@ export class AuthService {
         API_ENDPOINTS.LOGIN,
         credentials
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
@@ -98,7 +102,7 @@ export class AuthService {
       const response = await api.get<ApiResponse<SessionInfo>>(
         API_ENDPOINTS.SESSION
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
@@ -121,7 +125,7 @@ export class AuthService {
       const response = await api.get<ApiResponse<User>>(
         API_ENDPOINTS.USER_PROFILE
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
@@ -129,7 +133,8 @@ export class AuthService {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message || 'Failed to get user profile';
+        const message =
+          error.response?.data?.message || 'Failed to get user profile';
         throw new Error(message);
       }
       throw error;
@@ -145,15 +150,18 @@ export class AuthService {
         API_ENDPOINTS.USER_PROFILE,
         userData
       );
-      
+
       if (response.data.success && response.data.data) {
         return response.data.data;
       } else {
-        throw new Error(response.data.message || 'Failed to update user profile');
+        throw new Error(
+          response.data.message || 'Failed to update user profile'
+        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.data?.message || 'Failed to update user profile';
+        const message =
+          error.response?.data?.message || 'Failed to update user profile';
         throw new Error(message);
       }
       throw error;

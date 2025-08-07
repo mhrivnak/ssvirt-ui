@@ -16,7 +16,7 @@ const Login: React.FC = () => {
   const [passwordValue, setPasswordValue] = React.useState('');
   const [isValidUsername, setIsValidUsername] = React.useState(true);
   const [isValidPassword, setIsValidPassword] = React.useState(true);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
@@ -50,7 +50,7 @@ const Login: React.FC = () => {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    
+
     // Reset validation states
     setIsValidUsername(true);
     setIsValidPassword(true);
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
     // Validate inputs
     const isUsernameValid = !!usernameValue.trim();
     const isPasswordValid = !!passwordValue.trim();
-    
+
     setIsValidUsername(isUsernameValid);
     setIsValidPassword(isPasswordValid);
 
@@ -82,9 +82,7 @@ const Login: React.FC = () => {
   const loginForm = (
     <LoginForm
       showHelperText={loginMutation.isError}
-      helperText={
-        loginMutation.error?.message || 'Invalid login credentials.'
-      }
+      helperText={loginMutation.error?.message || 'Invalid login credentials.'}
       helperTextIcon={<ExclamationCircleIcon />}
       usernameLabel="Username"
       usernameValue={usernameValue}

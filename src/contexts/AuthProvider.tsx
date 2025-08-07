@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import type { User } from '../types';
 import { AuthContext, type AuthContextType } from './AuthContext';
-import { 
-  storeToken, 
-  removeStoredToken, 
+import {
+  storeToken,
+  removeStoredToken,
   isAuthenticated as checkIsAuthenticated,
-  getCurrentUser
+  getCurrentUser,
 } from '../utils/auth';
 
 interface AuthProviderProps {
@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const authenticated = checkIsAuthenticated();
         setIsAuthenticated(authenticated);
-        
+
         if (authenticated) {
           const currentUser = getCurrentUser();
           setUser(currentUser as User | null);
@@ -86,10 +86,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     refreshUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

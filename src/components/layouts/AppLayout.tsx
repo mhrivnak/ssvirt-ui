@@ -123,7 +123,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <DropdownItem
               key="profile"
               to={ROUTES.PROFILE}
-              component={(props: React.ComponentProps<typeof Link>) => <Link {...props} />}
+              component={(props: React.ComponentProps<typeof Link>) => (
+                <Link {...props} />
+              )}
             >
               Profile
             </DropdownItem>

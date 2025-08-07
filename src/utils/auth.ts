@@ -14,13 +14,13 @@ export const getStoredToken = (): string | null => {
     if (!tokenData) return null;
 
     const { token, expiresAt }: TokenInfo = JSON.parse(tokenData);
-    
+
     // Check if token is expired
     if (new Date() >= new Date(expiresAt)) {
       removeStoredToken();
       return null;
     }
-    
+
     return token;
   } catch (error) {
     console.error('Error retrieving stored token:', error);
@@ -73,7 +73,7 @@ export const decodeToken = (token: string): Record<string, unknown> | null => {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    
+
     return JSON.parse(jsonPayload);
   } catch (error) {
     console.error('Error decoding token:', error);
@@ -87,6 +87,6 @@ export const decodeToken = (token: string): Record<string, unknown> | null => {
 export const getCurrentUser = (): Record<string, unknown> | null => {
   const token = getStoredToken();
   if (!token) return null;
-  
+
   return decodeToken(token);
 };

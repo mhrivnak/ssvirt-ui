@@ -19,7 +19,10 @@ const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error: unknown) => {
         // Don't retry on 401 errors (authentication issues)
-        if ((error as { response?: { status?: number } })?.response?.status === 401) {
+        if (
+          (error as { response?: { status?: number } })?.response?.status ===
+          401
+        ) {
           return false;
         }
         // Retry up to 3 times for other errors
@@ -42,7 +45,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Public routes */}
             <Route path={ROUTES.LOGIN} element={<Login />} />
-            
+
             {/* Protected routes */}
             <Route
               path={ROUTES.HOME}
@@ -112,7 +115,7 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
-            
+
             {/* Catch-all route */}
             <Route
               path="*"

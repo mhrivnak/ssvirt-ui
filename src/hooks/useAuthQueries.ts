@@ -21,7 +21,7 @@ export const useLoginMutation = () => {
     onSuccess: (data) => {
       // Store token and user data in auth context
       login(data.token, data.expires_at, data.user);
-      
+
       // Invalidate and refetch auth-related queries
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.session });
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.userProfile });
@@ -44,7 +44,7 @@ export const useLogoutMutation = () => {
     onSuccess: () => {
       // Clear auth context
       logout();
-      
+
       // Clear all cached data
       queryClient.clear();
     },
@@ -100,7 +100,7 @@ export const useUpdateUserProfileMutation = () => {
     onSuccess: (data) => {
       // Update the cached user profile data
       queryClient.setQueryData(AUTH_QUERY_KEYS.userProfile, data);
-      
+
       // Invalidate session to update user data in auth context
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.session });
     },
