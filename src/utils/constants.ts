@@ -1,20 +1,34 @@
 import { getRuntimeConfig } from './config';
 
-// Runtime configuration getter
+// Fallback configuration for when runtime config is not available (e.g., tests)
+const FALLBACK_CONFIG = {
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  APP_TITLE: import.meta.env.VITE_APP_TITLE || 'SSVIRT Web UI',
+  APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.1',
+  DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
+  JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
+  LOGO_URL: import.meta.env.VITE_LOGO_URL || '/vite.svg',
+} as const;
+
+// Runtime configuration getter with fallback
 export const getConfig = () => {
-  const runtimeConfig = getRuntimeConfig();
-  return {
-    API_BASE_URL: runtimeConfig.apiBaseUrl,
-    APP_TITLE: runtimeConfig.appTitle,
-    APP_VERSION: runtimeConfig.appVersion,
-    DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
-    JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
-    LOGO_URL: runtimeConfig.logoUrl,
-  } as const;
+  try {
+    const runtimeConfig = getRuntimeConfig();
+    return {
+      API_BASE_URL: runtimeConfig.apiBaseUrl,
+      APP_TITLE: runtimeConfig.appTitle,
+      APP_VERSION: runtimeConfig.appVersion,
+      DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
+      JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
+      LOGO_URL: runtimeConfig.logoUrl,
+    } as const;
+  } catch {
+    // Runtime config not loaded yet, use fallback
+    return FALLBACK_CONFIG;
+  }
 };
 
 // Legacy CONFIG export for backward compatibility
-// Note: This will throw if runtime config is not loaded
 export const CONFIG = new Proxy({} as ReturnType<typeof getConfig>, {
   get(_target, prop) {
     return getConfig()[prop as keyof ReturnType<typeof getConfig>];

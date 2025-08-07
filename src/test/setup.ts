@@ -1,48 +1,7 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Mock the runtime configuration system for tests
-vi.mock('../utils/config', () => ({
-  loadRuntimeConfig: vi.fn().mockResolvedValue({
-    apiBaseUrl: 'http://localhost:8080/api',
-    appTitle: 'SSVIRT Web UI',
-    appVersion: '0.0.1',
-    logoUrl: '/vite.svg',
-  }),
-  getRuntimeConfig: vi.fn().mockReturnValue({
-    apiBaseUrl: 'http://localhost:8080/api',
-    appTitle: 'SSVIRT Web UI',
-    appVersion: '0.0.1',
-    logoUrl: '/vite.svg',
-  }),
-  resetRuntimeConfig: vi.fn(),
-}));
-
-// Mock the constants module to prevent CONFIG proxy issues
-vi.mock('../utils/constants', async () => {
-  const actual = await vi.importActual('../utils/constants') as any;
-  return {
-    ...actual,
-    CONFIG: {
-      API_BASE_URL: 'http://localhost:8080/api',
-      APP_TITLE: 'SSVIRT Web UI',
-      APP_VERSION: '0.0.1',
-      DEV_MODE: false,
-      JWT_TOKEN_KEY: 'ssvirt_token',
-      LOGO_URL: '/vite.svg',
-    },
-    getConfig: vi.fn().mockReturnValue({
-      API_BASE_URL: 'http://localhost:8080/api',
-      APP_TITLE: 'SSVIRT Web UI',
-      APP_VERSION: '0.0.1',
-      DEV_MODE: false,
-      JWT_TOKEN_KEY: 'ssvirt_token',
-      LOGO_URL: '/vite.svg',
-    }),
-  };
-});
-
-// Mock fetch for config loading
+// Mock fetch for config loading (only needed for runtime config tests)
 global.fetch = vi.fn().mockResolvedValue({
   ok: true,
   json: vi.fn().mockResolvedValue({
