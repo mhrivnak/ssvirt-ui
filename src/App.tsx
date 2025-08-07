@@ -12,6 +12,7 @@ import {
 } from './pages/organizations';
 import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import VMs from './pages/vms/VMs';
+import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
 import { NavigationProvider } from './contexts/NavigationContext';
@@ -227,7 +228,7 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Profile - Coming in future PR</div>
+                      <UserProfile />
                     </AppLayout>
                   </ProtectedRoute>
                 }
