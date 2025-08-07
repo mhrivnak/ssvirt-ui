@@ -78,6 +78,25 @@ interface VMFilters {
   org_id: string;
 }
 
+// Default filter presets (moved outside component to avoid dependency issues)
+const defaultPresets: FilterPreset[] = [
+  {
+    id: 'running',
+    name: 'Running VMs',
+    filters: { vm_status: 'POWERED_ON' },
+  },
+  {
+    id: 'stopped',
+    name: 'Stopped VMs',
+    filters: { vm_status: 'POWERED_OFF' },
+  },
+  {
+    id: 'suspended',
+    name: 'Suspended VMs',
+    filters: { vm_status: 'SUSPENDED' },
+  },
+];
+
 const VMs: React.FC = () => {
   // State management
   const [filters, setFilters] = useState<VMFilters>({
@@ -102,23 +121,8 @@ const VMs: React.FC = () => {
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
   // Filter presets
-  const [filterPresets, setFilterPresets] = useState<FilterPreset[]>([
-    {
-      id: 'running',
-      name: 'Running VMs',
-      filters: { vm_status: 'POWERED_ON' },
-    },
-    {
-      id: 'stopped',
-      name: 'Stopped VMs',
-      filters: { vm_status: 'POWERED_OFF' },
-    },
-    {
-      id: 'suspended',
-      name: 'Suspended VMs',
-      filters: { vm_status: 'SUSPENDED' },
-    },
-  ]);
+  const [filterPresets, setFilterPresets] =
+    useState<FilterPreset[]>(defaultPresets);
 
   // Data fetching
   const queryParams: VMQueryParams = useMemo(
@@ -149,7 +153,7 @@ const VMs: React.FC = () => {
     if (savedPresets) {
       try {
         const parsed = JSON.parse(savedPresets);
-        setFilterPresets((prev) => [...prev, ...parsed]);
+        setFilterPresets([...defaultPresets, ...parsed]);
       } catch (error) {
         console.error('Failed to load saved filter presets:', error);
       }
