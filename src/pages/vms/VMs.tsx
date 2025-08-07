@@ -60,7 +60,13 @@ import {
   ExclamationTriangleIcon,
 } from '@patternfly/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { useVMs, useVDCs, useOrganizations } from '../../hooks';
+import {
+  useVMs,
+  useVDCs,
+  useOrganizations,
+  usePowerOperationTracking,
+} from '../../hooks';
+import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import type { VM, VMStatus, VMQueryParams } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
@@ -144,6 +150,7 @@ const VMs: React.FC = () => {
   const { data: vmsResponse, isLoading, error } = useVMs(queryParams);
   const { data: vdcsResponse } = useVDCs();
   const { data: orgsResponse } = useOrganizations();
+  const { operations: powerOperations } = usePowerOperationTracking();
 
   const vms = vmsResponse?.data || [];
   const vdcs = vdcsResponse?.data || [];
@@ -295,27 +302,6 @@ const VMs: React.FC = () => {
 
   const getVMActions = (vm: VM) => [
     {
-      title: 'Power On',
-      onClick: () => console.log('Power on VM:', vm.id),
-      isDisabled: vm.status === 'POWERED_ON',
-    },
-    {
-      title: 'Power Off',
-      onClick: () => console.log('Power off VM:', vm.id),
-      isDisabled: vm.status === 'POWERED_OFF',
-    },
-    {
-      title: 'Suspend',
-      onClick: () => console.log('Suspend VM:', vm.id),
-      isDisabled: vm.status !== 'POWERED_ON',
-    },
-    {
-      title: 'Reset',
-      onClick: () => console.log('Reset VM:', vm.id),
-      isDisabled: vm.status !== 'POWERED_ON',
-    },
-    { isSeparator: true },
-    {
       title: 'View Details',
       onClick: () => navigate(`/vms/${vm.id}`),
     },
@@ -332,22 +318,6 @@ const VMs: React.FC = () => {
   ];
 
   const getBulkActions = () => [
-    {
-      title: 'Power On Selected',
-      onClick: () => console.log('Bulk power on:', selectedVMs),
-      icon: <PlayIcon />,
-    },
-    {
-      title: 'Power Off Selected',
-      onClick: () => console.log('Bulk power off:', selectedVMs),
-      icon: <PowerOffIcon />,
-    },
-    {
-      title: 'Suspend Selected',
-      onClick: () => console.log('Bulk suspend:', selectedVMs),
-      icon: <PauseIcon />,
-    },
-    { isSeparator: true },
     {
       title: 'Delete Selected',
       onClick: () => console.log('Bulk delete:', selectedVMs),
@@ -594,6 +564,12 @@ const VMs: React.FC = () => {
                   {selectedVMs.length > 0 && (
                     <ToolbarGroup>
                       <ToolbarItem>
+                        <VMPowerActions
+                          vmIds={selectedVMs}
+                          variant="dropdown"
+                        />
+                      </ToolbarItem>
+                      <ToolbarItem>
                         <Dropdown
                           isOpen={isBulkActionsOpen}
                           onOpenChange={setIsBulkActionsOpen}
@@ -605,25 +581,21 @@ const VMs: React.FC = () => {
                               }
                               isExpanded={isBulkActionsOpen}
                             >
-                              Actions ({selectedVMs.length} selected)
+                              Other Actions ({selectedVMs.length} selected)
                             </MenuToggle>
                           )}
                         >
                           <DropdownList>
-                            {getBulkActions().map((action, index) =>
-                              action.isSeparator ? (
-                                <DropdownItem key={`separator-${index}`} />
-                              ) : (
-                                <DropdownItem
-                                  key={action.title}
-                                  onClick={action.onClick}
-                                  isDanger={action.isDanger}
-                                  icon={action.icon}
-                                >
-                                  {action.title}
-                                </DropdownItem>
-                              )
-                            )}
+                            {getBulkActions().map((action, index) => (
+                              <DropdownItem
+                                key={action.title || `item-${index}`}
+                                onClick={action.onClick}
+                                isDanger={action.isDanger}
+                                icon={action.icon}
+                              >
+                                {action.title}
+                              </DropdownItem>
+                            ))}
                           </DropdownList>
                         </Dropdown>
                       </ToolbarItem>
@@ -840,7 +812,20 @@ const VMs: React.FC = () => {
                         <Td>{formatMemory(vm.memory_mb)}</Td>
                         <Td>{formatDate(vm.created_at)}</Td>
                         <Td>
-                          <ActionsColumn items={getVMActions(vm)} />
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '8px',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <VMPowerActions
+                              vm={vm}
+                              variant="dropdown"
+                              size="sm"
+                            />
+                            <ActionsColumn items={getVMActions(vm)} />
+                          </div>
                         </Td>
                       </Tr>
                     ))}
@@ -943,6 +928,9 @@ const VMs: React.FC = () => {
           </StackItem>
         </Stack>
       </Modal>
+
+      {/* Power Operation Status */}
+      <PowerOperationStatus operations={powerOperations} />
     </PageSection>
   );
 };

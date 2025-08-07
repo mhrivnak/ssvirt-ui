@@ -5,6 +5,7 @@ import type {
   CreateVMRequest,
   UpdateVMRequest,
   VMPowerOperation,
+  BulkVMPowerOperation,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
@@ -131,6 +132,71 @@ export class VMService {
   ): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.get<ApiResponse<VMPowerOperation>>(
       `/api/v1/vms/${vmId}/operations/${operationId}`
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk power on multiple VMs
+   */
+  static async bulkPowerOnVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
+    const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
+      '/api/v1/vms/bulk/power-on',
+      { vm_ids: vmIds }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk power off multiple VMs
+   */
+  static async bulkPowerOffVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
+    const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
+      '/api/v1/vms/bulk/power-off',
+      { vm_ids: vmIds }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk reboot multiple VMs
+   */
+  static async bulkRebootVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
+    const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
+      '/api/v1/vms/bulk/reboot',
+      { vm_ids: vmIds }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk suspend multiple VMs
+   */
+  static async bulkSuspendVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
+    const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
+      '/api/v1/vms/bulk/suspend',
+      { vm_ids: vmIds }
+    );
+    return response.data;
+  }
+
+  /**
+   * Bulk reset multiple VMs
+   */
+  static async bulkResetVMs(
+    vmIds: string[]
+  ): Promise<ApiResponse<BulkVMPowerOperation>> {
+    const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
+      '/api/v1/vms/bulk/reset',
+      { vm_ids: vmIds }
     );
     return response.data;
   }

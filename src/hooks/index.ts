@@ -43,6 +43,11 @@ export {
   useRebootVM,
   useSuspendVM,
   useResetVM,
+  useBulkPowerOnVMs,
+  useBulkPowerOffVMs,
+  useBulkRebootVMs,
+  useBulkSuspendVMs,
+  useBulkResetVMs,
 } from './useVMs';
 
 export {
@@ -53,3 +58,5 @@ export {
 } from './useCatalogs';
 
 export { useDashboardStats, useRecentActivity } from './useDashboard';
+
+export { usePowerOperationTracking } from './usePowerOperationTracking';
