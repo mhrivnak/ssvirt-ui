@@ -65,14 +65,27 @@ export const isAuthenticated = (): boolean => {
  */
 export const decodeToken = (token: string): Record<string, unknown> | null => {
   try {
-    const base64Url = token.split('.')[1];
+    // Validate token format - JWT must have exactly 3 parts separated by dots
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Invalid token format: token must have exactly 3 parts');
+      return null;
+    }
+
+    const base64Url = parts[1];
+    if (!base64Url) {
+      console.error('Invalid token: missing payload section');
+      return null;
+    }
+
+    // Convert base64url to standard base64
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
+
+    // Add padding if necessary
+    const paddedBase64 = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+
+    // Decode base64 to get JSON payload
+    const jsonPayload = atob(paddedBase64);
 
     return JSON.parse(jsonPayload);
   } catch (error) {
@@ -82,11 +95,35 @@ export const decodeToken = (token: string): Record<string, unknown> | null => {
 };
 
 /**
- * Get user information from stored token
+ * Type guard to validate if an object matches the User interface
  */
-export const getCurrentUser = (): Record<string, unknown> | null => {
+const isValidUser = (obj: unknown): obj is import('../types').User => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as Record<string, unknown>).id === 'string' &&
+    typeof (obj as Record<string, unknown>).username === 'string' &&
+    typeof (obj as Record<string, unknown>).email === 'string' &&
+    typeof (obj as Record<string, unknown>).first_name === 'string' &&
+    typeof (obj as Record<string, unknown>).last_name === 'string'
+  );
+};
+
+/**
+ * Get user information from stored token with type validation
+ */
+export const getCurrentUser = (): import('../types').User | null => {
   const token = getStoredToken();
   if (!token) return null;
 
-  return decodeToken(token);
+  const decodedToken = decodeToken(token);
+  if (!decodedToken) return null;
+
+  // Validate that the decoded token contains valid user data
+  if (isValidUser(decodedToken)) {
+    return decodedToken;
+  }
+
+  console.error('Invalid user data in token:', decodedToken);
+  return null;
 };

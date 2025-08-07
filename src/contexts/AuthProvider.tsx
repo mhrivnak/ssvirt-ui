@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (authenticated) {
           const currentUser = getCurrentUser();
-          setUser(currentUser as User | null);
+          setUser(currentUser);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       if (checkIsAuthenticated()) {
         const currentUser = getCurrentUser();
-        setUser(currentUser as User | null);
+        setUser(currentUser);
         setIsAuthenticated(true);
       } else {
         setUser(null);

@@ -115,7 +115,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               isExpanded={isUserMenuOpen}
               icon={<UserIcon />}
             >
-              {user?.first_name} {user?.last_name}
+              {user?.first_name && user?.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user?.username || 'User'}
             </MenuToggle>
           )}
         >

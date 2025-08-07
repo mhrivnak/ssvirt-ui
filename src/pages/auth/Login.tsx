@@ -70,7 +70,7 @@ const Login: React.FC = () => {
     try {
       await loginMutation.mutateAsync({
         username: usernameValue.trim(),
-        password: passwordValue,
+        password: passwordValue.trim(),
       });
       // Navigation will be handled by the useEffect hook when isAuthenticated changes
     } catch (error) {
