@@ -105,9 +105,12 @@ const UserProfile: React.FC = () => {
     last_name: '',
     email: '',
   });
-  const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
+  const [profileErrors, setProfileErrors] = useState<Record<string, string>>(
+    {}
+  );
   const [profileHasChanges, setProfileHasChanges] = useState(false);
-  const [originalProfileData, setOriginalProfileData] = useState<UserProfileData | null>(null);
+  const [originalProfileData, setOriginalProfileData] =
+    useState<UserProfileData | null>(null);
 
   // Preferences state
   const [preferences, setPreferences] = useState<UserPreferences>({
@@ -119,7 +122,8 @@ const UserProfile: React.FC = () => {
     session_timeout: 30,
   });
   const [preferencesHasChanges, setPreferencesHasChanges] = useState(false);
-  const [originalPreferences, setOriginalPreferences] = useState<UserPreferences | null>(null);
+  const [originalPreferences, setOriginalPreferences] =
+    useState<UserPreferences | null>(null);
 
   // Password change state
   const [passwordData, setPasswordData] = useState<PasswordChangeData>({
@@ -127,7 +131,9 @@ const UserProfile: React.FC = () => {
     new_password: '',
     confirm_password: '',
   });
-  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
+    {}
+  );
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -141,7 +147,8 @@ const UserProfile: React.FC = () => {
       resource: 'Web Portal',
       timestamp: '2024-01-15T10:30:00Z',
       ip_address: '192.168.1.100',
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      user_agent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
     {
       id: '2',
@@ -149,7 +156,8 @@ const UserProfile: React.FC = () => {
       resource: 'test-vm-01',
       timestamp: '2024-01-15T09:15:00Z',
       ip_address: '192.168.1.100',
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      user_agent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
     {
       id: '3',
@@ -157,7 +165,8 @@ const UserProfile: React.FC = () => {
       resource: 'User Settings',
       timestamp: '2024-01-14T16:45:00Z',
       ip_address: '192.168.1.100',
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      user_agent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
   ]);
 
@@ -222,7 +231,9 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     if (originalProfileData) {
       const changed = Object.keys(profileData).some(
-        key => profileData[key as keyof UserProfileData] !== originalProfileData[key as keyof UserProfileData]
+        (key) =>
+          profileData[key as keyof UserProfileData] !==
+          originalProfileData[key as keyof UserProfileData]
       );
       setProfileHasChanges(changed);
     }
@@ -232,7 +243,9 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     if (originalPreferences) {
       const changed = Object.keys(preferences).some(
-        key => preferences[key as keyof UserPreferences] !== originalPreferences[key as keyof UserPreferences]
+        (key) =>
+          preferences[key as keyof UserPreferences] !==
+          originalPreferences[key as keyof UserPreferences]
       );
       setPreferencesHasChanges(changed);
     }
@@ -251,7 +264,11 @@ const UserProfile: React.FC = () => {
 
     if (!profileData.email.trim()) {
       errors.email = 'Email is required';
-    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(profileData.email)) {
+    } else if (
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+        profileData.email
+      )
+    ) {
       errors.email = 'Please enter a valid email address';
     }
 
@@ -279,7 +296,8 @@ const UserProfile: React.FC = () => {
     }
 
     if (passwordData.current_password === passwordData.new_password) {
-      errors.new_password = 'New password must be different from current password';
+      errors.new_password =
+        'New password must be different from current password';
     }
 
     setPasswordErrors(errors);
@@ -288,7 +306,7 @@ const UserProfile: React.FC = () => {
 
   const handleProfileSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!validateProfile()) {
       return;
     }
@@ -296,15 +314,19 @@ const UserProfile: React.FC = () => {
     try {
       // TODO: Call API to update profile
       console.log('Updating profile:', profileData);
-      
+
       // Simulate API success
       setOriginalProfileData({ ...profileData });
       setProfileHasChanges(false);
-      
+
       // Show success message (would be handled by a notification system)
       alert('Profile updated successfully!');
     } catch (error) {
-      const errorMessage = handleFormError(error, 'Profile Update', 'Failed to update profile');
+      const errorMessage = handleFormError(
+        error,
+        'Profile Update',
+        'Failed to update profile'
+      );
       setProfileErrors({ general: errorMessage });
     }
   };
@@ -315,23 +337,27 @@ const UserProfile: React.FC = () => {
     try {
       // TODO: Call API to update preferences
       console.log('Updating preferences:', preferences);
-      
+
       // Save to localStorage as fallback
       localStorage.setItem('user_preferences', JSON.stringify(preferences));
-      
+
       setOriginalPreferences({ ...preferences });
       setPreferencesHasChanges(false);
-      
+
       alert('Preferences updated successfully!');
     } catch (error) {
-      const errorMessage = handleFormError(error, 'Preferences Update', 'Failed to update preferences');
+      const errorMessage = handleFormError(
+        error,
+        'Preferences Update',
+        'Failed to update preferences'
+      );
       alert(errorMessage);
     }
   };
 
   const handlePasswordSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!validatePassword()) {
       return;
     }
@@ -339,7 +365,7 @@ const UserProfile: React.FC = () => {
     try {
       // TODO: Call API to change password
       console.log('Changing password...');
-      
+
       // Reset form and close modal
       setPasswordData({
         current_password: '',
@@ -348,10 +374,14 @@ const UserProfile: React.FC = () => {
       });
       setPasswordErrors({});
       setShowPasswordModal(false);
-      
+
       alert('Password changed successfully!');
     } catch (error) {
-      const errorMessage = handleFormError(error, 'Password Change', 'Failed to change password');
+      const errorMessage = handleFormError(
+        error,
+        'Password Change',
+        'Failed to change password'
+      );
       setPasswordErrors({ general: errorMessage });
     }
   };
@@ -366,11 +396,21 @@ const UserProfile: React.FC = () => {
     });
   };
 
-  const getPasswordStrength = (password: string): { score: number; label: string; variant: 'danger' | 'warning' | 'success' } => {
-    if (password.length === 0) return { score: 0, label: '', variant: 'danger' };
-    if (password.length < 6) return { score: 25, label: 'Weak', variant: 'danger' };
-    if (password.length < 8) return { score: 50, label: 'Fair', variant: 'warning' };
-    if (password.length < 12) return { score: 75, label: 'Good', variant: 'warning' };
+  const getPasswordStrength = (
+    password: string
+  ): {
+    score: number;
+    label: string;
+    variant: 'danger' | 'warning' | 'success';
+  } => {
+    if (password.length === 0)
+      return { score: 0, label: '', variant: 'danger' };
+    if (password.length < 6)
+      return { score: 25, label: 'Weak', variant: 'danger' };
+    if (password.length < 8)
+      return { score: 50, label: 'Fair', variant: 'warning' };
+    if (password.length < 12)
+      return { score: 75, label: 'Good', variant: 'warning' };
     return { score: 100, label: 'Strong', variant: 'success' };
   };
 
@@ -415,7 +455,8 @@ const UserProfile: React.FC = () => {
                 User Profile
               </Title>
               <p className="pf-v6-u-color-200">
-                Manage your personal information, preferences, and account security
+                Manage your personal information, preferences, and account
+                security
               </p>
             </SplitItem>
           </Split>
@@ -470,7 +511,11 @@ const UserProfile: React.FC = () => {
                       <Stack hasGutter>
                         {profileErrors.general && (
                           <StackItem>
-                            <Alert variant={AlertVariant.danger} title="Error" isInline>
+                            <Alert
+                              variant={AlertVariant.danger}
+                              title="Error"
+                              isInline
+                            >
                               {profileErrors.general}
                             </Alert>
                           </StackItem>
@@ -490,12 +535,26 @@ const UserProfile: React.FC = () => {
                                   id="first-name"
                                   value={profileData.first_name}
                                   onChange={(_, value) =>
-                                    setProfileData(prev => ({ ...prev, first_name: value }))
+                                    setProfileData((prev) => ({
+                                      ...prev,
+                                      first_name: value,
+                                    }))
                                   }
-                                  validated={profileErrors.first_name ? 'error' : 'default'}
+                                  validated={
+                                    profileErrors.first_name
+                                      ? 'error'
+                                      : 'default'
+                                  }
                                 />
                                 {profileErrors.first_name && (
-                                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                  <div
+                                    style={{
+                                      color:
+                                        'var(--pf-v6-global--danger-color--100)',
+                                      fontSize: '0.875rem',
+                                      marginTop: '0.25rem',
+                                    }}
+                                  >
                                     {profileErrors.first_name}
                                   </div>
                                 )}
@@ -514,12 +573,26 @@ const UserProfile: React.FC = () => {
                                   id="last-name"
                                   value={profileData.last_name}
                                   onChange={(_, value) =>
-                                    setProfileData(prev => ({ ...prev, last_name: value }))
+                                    setProfileData((prev) => ({
+                                      ...prev,
+                                      last_name: value,
+                                    }))
                                   }
-                                  validated={profileErrors.last_name ? 'error' : 'default'}
+                                  validated={
+                                    profileErrors.last_name
+                                      ? 'error'
+                                      : 'default'
+                                  }
                                 />
                                 {profileErrors.last_name && (
-                                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                  <div
+                                    style={{
+                                      color:
+                                        'var(--pf-v6-global--danger-color--100)',
+                                      fontSize: '0.875rem',
+                                      marginTop: '0.25rem',
+                                    }}
+                                  >
                                     {profileErrors.last_name}
                                   </div>
                                 )}
@@ -538,12 +611,24 @@ const UserProfile: React.FC = () => {
                                   id="email"
                                   value={profileData.email}
                                   onChange={(_, value) =>
-                                    setProfileData(prev => ({ ...prev, email: value }))
+                                    setProfileData((prev) => ({
+                                      ...prev,
+                                      email: value,
+                                    }))
                                   }
-                                  validated={profileErrors.email ? 'error' : 'default'}
+                                  validated={
+                                    profileErrors.email ? 'error' : 'default'
+                                  }
                                 />
                                 {profileErrors.email && (
-                                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                  <div
+                                    style={{
+                                      color:
+                                        'var(--pf-v6-global--danger-color--100)',
+                                      fontSize: '0.875rem',
+                                      marginTop: '0.25rem',
+                                    }}
+                                  >
                                     {profileErrors.email}
                                   </div>
                                 )}
@@ -600,13 +685,22 @@ const UserProfile: React.FC = () => {
                                 <FormSelect
                                   value={preferences.theme}
                                   onChange={(_, value) =>
-                                    setPreferences(prev => ({ ...prev, theme: value as 'light' | 'dark' | 'auto' }))
+                                    setPreferences((prev) => ({
+                                      ...prev,
+                                      theme: value as 'light' | 'dark' | 'auto',
+                                    }))
                                   }
                                   id="theme"
                                   aria-label="Select theme"
                                 >
-                                  <FormSelectOption value="auto" label="Auto (System)" />
-                                  <FormSelectOption value="light" label="Light" />
+                                  <FormSelectOption
+                                    value="auto"
+                                    label="Auto (System)"
+                                  />
+                                  <FormSelectOption
+                                    value="light"
+                                    label="Light"
+                                  />
                                   <FormSelectOption value="dark" label="Dark" />
                                 </FormSelect>
                               </FormGroup>
@@ -617,14 +711,26 @@ const UserProfile: React.FC = () => {
                                 <FormSelect
                                   value={preferences.language}
                                   onChange={(_, value) =>
-                                    setPreferences(prev => ({ ...prev, language: value }))
+                                    setPreferences((prev) => ({
+                                      ...prev,
+                                      language: value,
+                                    }))
                                   }
                                   id="language"
                                   aria-label="Select language"
                                 >
-                                  <FormSelectOption value="en" label="English" />
-                                  <FormSelectOption value="es" label="Español" />
-                                  <FormSelectOption value="fr" label="Français" />
+                                  <FormSelectOption
+                                    value="en"
+                                    label="English"
+                                  />
+                                  <FormSelectOption
+                                    value="es"
+                                    label="Español"
+                                  />
+                                  <FormSelectOption
+                                    value="fr"
+                                    label="Français"
+                                  />
                                 </FormSelect>
                               </FormGroup>
                             </GridItem>
@@ -634,16 +740,31 @@ const UserProfile: React.FC = () => {
                                 <FormSelect
                                   value={preferences.timezone}
                                   onChange={(_, value) =>
-                                    setPreferences(prev => ({ ...prev, timezone: value }))
+                                    setPreferences((prev) => ({
+                                      ...prev,
+                                      timezone: value,
+                                    }))
                                   }
                                   id="timezone"
                                   aria-label="Select timezone"
                                 >
                                   <FormSelectOption value="UTC" label="UTC" />
-                                  <FormSelectOption value="America/New_York" label="Eastern Time" />
-                                  <FormSelectOption value="America/Chicago" label="Central Time" />
-                                  <FormSelectOption value="America/Denver" label="Mountain Time" />
-                                  <FormSelectOption value="America/Los_Angeles" label="Pacific Time" />
+                                  <FormSelectOption
+                                    value="America/New_York"
+                                    label="Eastern Time"
+                                  />
+                                  <FormSelectOption
+                                    value="America/Chicago"
+                                    label="Central Time"
+                                  />
+                                  <FormSelectOption
+                                    value="America/Denver"
+                                    label="Mountain Time"
+                                  />
+                                  <FormSelectOption
+                                    value="America/Los_Angeles"
+                                    label="Pacific Time"
+                                  />
                                 </FormSelect>
                               </FormGroup>
                             </GridItem>
@@ -663,26 +784,38 @@ const UserProfile: React.FC = () => {
                         <StackItem>
                           <Grid hasGutter>
                             <GridItem span={12} md={6}>
-                              <FormGroup label="Email Notifications" fieldId="notifications-email">
+                              <FormGroup
+                                label="Email Notifications"
+                                fieldId="notifications-email"
+                              >
                                 <Switch
                                   id="notifications-email"
                                   label="Enabled"
                                   isChecked={preferences.notifications_email}
                                   onChange={(_, checked) =>
-                                    setPreferences(prev => ({ ...prev, notifications_email: checked }))
+                                    setPreferences((prev) => ({
+                                      ...prev,
+                                      notifications_email: checked,
+                                    }))
                                   }
                                 />
                               </FormGroup>
                             </GridItem>
 
                             <GridItem span={12} md={6}>
-                              <FormGroup label="Browser Notifications" fieldId="notifications-browser">
+                              <FormGroup
+                                label="Browser Notifications"
+                                fieldId="notifications-browser"
+                              >
                                 <Switch
                                   id="notifications-browser"
                                   label="Enabled"
                                   isChecked={preferences.notifications_browser}
                                   onChange={(_, checked) =>
-                                    setPreferences(prev => ({ ...prev, notifications_browser: checked }))
+                                    setPreferences((prev) => ({
+                                      ...prev,
+                                      notifications_browser: checked,
+                                    }))
                                   }
                                 />
                               </FormGroup>
@@ -771,7 +904,8 @@ const UserProfile: React.FC = () => {
                                     </p>
                                     {setting.last_used && (
                                       <p className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
-                                        Last used: {formatDate(setting.last_used)}
+                                        Last used:{' '}
+                                        {formatDate(setting.last_used)}
                                       </p>
                                     )}
                                   </div>
@@ -783,7 +917,10 @@ const UserProfile: React.FC = () => {
                                     isChecked={setting.enabled}
                                     onChange={(_, checked) => {
                                       // TODO: Update security setting
-                                      console.log(`Toggle ${setting.id}:`, checked);
+                                      console.log(
+                                        `Toggle ${setting.id}:`,
+                                        checked
+                                      );
                                     }}
                                   />
                                 </SplitItem>
@@ -829,25 +966,33 @@ const UserProfile: React.FC = () => {
                             <CardBody>
                               <DescriptionList isHorizontal>
                                 <DescriptionListGroup>
-                                  <DescriptionListTerm>Action</DescriptionListTerm>
+                                  <DescriptionListTerm>
+                                    Action
+                                  </DescriptionListTerm>
                                   <DescriptionListDescription>
                                     <Label color="blue">{item.action}</Label>
                                   </DescriptionListDescription>
                                 </DescriptionListGroup>
                                 <DescriptionListGroup>
-                                  <DescriptionListTerm>Resource</DescriptionListTerm>
+                                  <DescriptionListTerm>
+                                    Resource
+                                  </DescriptionListTerm>
                                   <DescriptionListDescription>
                                     {item.resource}
                                   </DescriptionListDescription>
                                 </DescriptionListGroup>
                                 <DescriptionListGroup>
-                                  <DescriptionListTerm>Time</DescriptionListTerm>
+                                  <DescriptionListTerm>
+                                    Time
+                                  </DescriptionListTerm>
                                   <DescriptionListDescription>
                                     {formatDate(item.timestamp)}
                                   </DescriptionListDescription>
                                 </DescriptionListGroup>
                                 <DescriptionListGroup>
-                                  <DescriptionListTerm>IP Address</DescriptionListTerm>
+                                  <DescriptionListTerm>
+                                    IP Address
+                                  </DescriptionListTerm>
                                   <DescriptionListDescription>
                                     <code>{item.ip_address}</code>
                                   </DescriptionListDescription>
@@ -905,16 +1050,25 @@ const UserProfile: React.FC = () => {
                       id="current-password"
                       value={passwordData.current_password}
                       onChange={(_, value) =>
-                        setPasswordData(prev => ({ ...prev, current_password: value }))
+                        setPasswordData((prev) => ({
+                          ...prev,
+                          current_password: value,
+                        }))
                       }
-                      validated={passwordErrors.current_password ? 'error' : 'default'}
+                      validated={
+                        passwordErrors.current_password ? 'error' : 'default'
+                      }
                     />
                   </FlexItem>
                   <FlexItem>
                     <Button
                       variant="plain"
-                      aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      aria-label={
+                        showCurrentPassword ? 'Hide password' : 'Show password'
+                      }
+                      onClick={() =>
+                        setShowCurrentPassword(!showCurrentPassword)
+                      }
                     >
                       <Icon>
                         {showCurrentPassword ? <EyeSlashIcon /> : <EyeIcon />}
@@ -923,7 +1077,13 @@ const UserProfile: React.FC = () => {
                   </FlexItem>
                 </Flex>
                 {passwordErrors.current_password && (
-                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                  <div
+                    style={{
+                      color: 'var(--pf-v6-global--danger-color--100)',
+                      fontSize: '0.875rem',
+                      marginTop: '0.25rem',
+                    }}
+                  >
                     {passwordErrors.current_password}
                   </div>
                 )}
@@ -931,11 +1091,7 @@ const UserProfile: React.FC = () => {
             </StackItem>
 
             <StackItem>
-              <FormGroup
-                label="New Password"
-                isRequired
-                fieldId="new-password"
-              >
+              <FormGroup label="New Password" isRequired fieldId="new-password">
                 <Flex alignItems={{ default: 'alignItemsCenter' }}>
                   <FlexItem flex={{ default: 'flex_1' }}>
                     <TextInput
@@ -944,15 +1100,22 @@ const UserProfile: React.FC = () => {
                       id="new-password"
                       value={passwordData.new_password}
                       onChange={(_, value) =>
-                        setPasswordData(prev => ({ ...prev, new_password: value }))
+                        setPasswordData((prev) => ({
+                          ...prev,
+                          new_password: value,
+                        }))
                       }
-                      validated={passwordErrors.new_password ? 'error' : 'default'}
+                      validated={
+                        passwordErrors.new_password ? 'error' : 'default'
+                      }
                     />
                   </FlexItem>
                   <FlexItem>
                     <Button
                       variant="plain"
-                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                      aria-label={
+                        showNewPassword ? 'Hide password' : 'Show password'
+                      }
                       onClick={() => setShowNewPassword(!showNewPassword)}
                     >
                       <Icon>
@@ -971,7 +1134,13 @@ const UserProfile: React.FC = () => {
                   />
                 )}
                 {passwordErrors.new_password && (
-                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                  <div
+                    style={{
+                      color: 'var(--pf-v6-global--danger-color--100)',
+                      fontSize: '0.875rem',
+                      marginTop: '0.25rem',
+                    }}
+                  >
                     {passwordErrors.new_password}
                   </div>
                 )}
@@ -992,16 +1161,25 @@ const UserProfile: React.FC = () => {
                       id="confirm-password"
                       value={passwordData.confirm_password}
                       onChange={(_, value) =>
-                        setPasswordData(prev => ({ ...prev, confirm_password: value }))
+                        setPasswordData((prev) => ({
+                          ...prev,
+                          confirm_password: value,
+                        }))
                       }
-                      validated={passwordErrors.confirm_password ? 'error' : 'default'}
+                      validated={
+                        passwordErrors.confirm_password ? 'error' : 'default'
+                      }
                     />
                   </FlexItem>
                   <FlexItem>
                     <Button
                       variant="plain"
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={
+                        showConfirmPassword ? 'Hide password' : 'Show password'
+                      }
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     >
                       <Icon>
                         {showConfirmPassword ? <EyeSlashIcon /> : <EyeIcon />}
@@ -1010,7 +1188,13 @@ const UserProfile: React.FC = () => {
                   </FlexItem>
                 </Flex>
                 {passwordErrors.confirm_password && (
-                  <div style={{ color: 'var(--pf-v6-global--danger-color--100)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                  <div
+                    style={{
+                      color: 'var(--pf-v6-global--danger-color--100)',
+                      fontSize: '0.875rem',
+                      marginTop: '0.25rem',
+                    }}
+                  >
                     {passwordErrors.confirm_password}
                   </div>
                 )}
