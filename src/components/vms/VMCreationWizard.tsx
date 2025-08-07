@@ -31,8 +31,7 @@ import AdvancedOptionsStep from './wizard/AdvancedOptionsStep';
 import ReviewAndCreateStep from './wizard/ReviewAndCreateStep';
 import VMTemplateManager from './wizard/VMTemplateManager';
 
-// TODO: Re-enable progress tracking after fixing TypeScript issues
-// import VMCreationProgress from './VMCreationProgress';
+import VMCreationProgress from './VMCreationProgress';
 
 interface VMCreationWizardProps {
   isOpen: boolean;
@@ -74,9 +73,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  // TODO: Re-enable progress tracking
-  // const [showProgress, setShowProgress] = useState(false);
-  // const [creationError, setCreationError] = useState<string | null>(null);
+  const [showProgress, setShowProgress] = useState(false);
+  const [creationError, setCreationError] = useState<string | null>(null);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   // Function to create initial form data
@@ -177,8 +175,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
 
     setIsCreating(true);
     setError(null);
-    // TODO: Re-enable progress tracking
-    // setCreationError(null);
+    setCreationError(null);
 
     try {
       const createRequest: CreateVMRequest = {
@@ -196,15 +193,13 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
       // Start the VM creation
       await createVMMutation.mutateAsync(createRequest);
 
-      // TODO: Show progress modal after fixing TypeScript issues
-      // setShowProgress(true);
+      setShowProgress(true);
       onClose();
     } catch (error) {
       console.error('Failed to create VM:', error);
       setError('Failed to create virtual machine. Please try again.');
-      // TODO: Show progress modal with error after fixing TypeScript issues
-      // setCreationError('Failed to create virtual machine. Please try again.');
-      // setShowProgress(true);
+      setCreationError('Failed to create virtual machine. Please try again.');
+      setShowProgress(true);
     } finally {
       setIsCreating(false);
     }
@@ -214,19 +209,17 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     setActiveStepIndex(0);
     setError(null);
     setIsCreating(false);
-    // TODO: Re-enable progress tracking
-    // setShowProgress(false);
-    // setCreationError(null);
+    setShowProgress(false);
+    setCreationError(null);
     // Reset form data
     setFormData(createInitialFormData());
     onClose();
   };
 
-  // TODO: Re-enable progress tracking
-  // const handleProgressClose = () => {
-  //   setShowProgress(false);
-  //   setCreationError(null);
-  // };
+  const handleProgressClose = () => {
+    setShowProgress(false);
+    setCreationError(null);
+  };
 
   const handleLoadTemplate = (templateData: Partial<WizardFormData>) => {
     setFormData((prev) => ({
@@ -381,14 +374,13 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         </div>
       </Wizard>
 
-      {/* TODO: Re-enable VM Creation Progress Modal after fixing TypeScript issues */}
-      {/* <VMCreationProgress
+      <VMCreationProgress
         isOpen={showProgress}
         onClose={handleProgressClose}
         vmName={formData.name}
         vdcName={vdcs.find(vdc => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'}
         error={creationError || undefined}
-      /> */}
+      />
 
       {/* VM Template Manager Modal */}
       <VMTemplateManager
