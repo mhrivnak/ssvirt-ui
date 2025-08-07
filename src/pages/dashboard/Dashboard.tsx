@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   PageSection,
   Title,
@@ -11,6 +11,7 @@ import {
   SplitItem,
   Flex,
   FlexItem,
+  Alert,
 } from '@patternfly/react-core';
 import {
   CubeIcon,
@@ -47,6 +48,13 @@ const Dashboard: React.FC = () => {
   const { data: vmsData } = useVMs();
   const bulkPowerOnMutation = useBulkPowerOnVMs();
   const bulkPowerOffMutation = useBulkPowerOffVMs();
+
+  // Notification states
+  const [notification, setNotification] = useState<{
+    variant: 'success' | 'danger' | 'info';
+    title: string;
+    message: string;
+  } | null>(null);
 
   const resourceCards = [
     {
@@ -130,7 +138,32 @@ const Dashboard: React.FC = () => {
         if (vmsData?.data) {
           const vmIds = vmsData.data.map((vm) => vm.id);
           if (vmIds.length > 0) {
-            bulkPowerOnMutation.mutate(vmIds);
+            bulkPowerOnMutation.mutate(vmIds, {
+              onSuccess: () => {
+                setNotification({
+                  variant: 'success',
+                  title: 'Bulk Power On Initiated',
+                  message: `Power on operation started for ${vmIds.length} VMs. This may take a few moments to complete.`
+                });
+                setTimeout(() => setNotification(null), 8000);
+              },
+              onError: (error) => {
+                console.error('Bulk power on failed:', error);
+                setNotification({
+                  variant: 'danger',
+                  title: 'Bulk Power On Failed',
+                  message: 'An error occurred while starting the bulk power on operation. Please try again.'
+                });
+                setTimeout(() => setNotification(null), 8000);
+              }
+            });
+          } else {
+            setNotification({
+              variant: 'info',
+              title: 'No VMs Found',
+              message: 'There are no VMs available to power on.'
+            });
+            setTimeout(() => setNotification(null), 5000);
           }
         }
       },
@@ -143,7 +176,32 @@ const Dashboard: React.FC = () => {
         if (vmsData?.data) {
           const vmIds = vmsData.data.map((vm) => vm.id);
           if (vmIds.length > 0) {
-            bulkPowerOffMutation.mutate(vmIds);
+            bulkPowerOffMutation.mutate(vmIds, {
+              onSuccess: () => {
+                setNotification({
+                  variant: 'success',
+                  title: 'Bulk Power Off Initiated',
+                  message: `Power off operation started for ${vmIds.length} VMs. This may take a few moments to complete.`
+                });
+                setTimeout(() => setNotification(null), 8000);
+              },
+              onError: (error) => {
+                console.error('Bulk power off failed:', error);
+                setNotification({
+                  variant: 'danger',
+                  title: 'Bulk Power Off Failed',
+                  message: 'An error occurred while starting the bulk power off operation. Please try again.'
+                });
+                setTimeout(() => setNotification(null), 8000);
+              }
+            });
+          } else {
+            setNotification({
+              variant: 'info',
+              title: 'No VMs Found',
+              message: 'There are no VMs available to power off.'
+            });
+            setTimeout(() => setNotification(null), 5000);
           }
         }
       },
@@ -169,6 +227,28 @@ const Dashboard: React.FC = () => {
   return (
     <PageSection>
       <Stack hasGutter>
+        {/* Notification */}
+        {notification && (
+          <StackItem>
+            <Alert
+              variant={notification.variant}
+              title={notification.title}
+              isInline
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => setNotification(null)}
+                  aria-label="Close notification"
+                >
+                  ×
+                </Button>
+              }
+            >
+              {notification.message}
+            </Alert>
+          </StackItem>
+        )}
+
         {/* Header Section */}
         <StackItem>
           <Split hasGutter>
