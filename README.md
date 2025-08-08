@@ -141,11 +141,11 @@ The application can be deployed to Kubernetes or OpenShift using the provided ma
 Deploy using the provided Kubernetes manifests:
 
 ```bash
-# Apply all manifests
-kubectl apply -f k8s/
-
-# Or using kustomize (recommended)
+# Using kustomize (recommended)
 kubectl apply -k k8s/
+
+# Or apply individual manifests explicitly
+kubectl apply -f k8s/configmap.yaml -f k8s/deployment.yaml
 ```
 
 This will create:
