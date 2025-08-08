@@ -54,8 +54,19 @@ const Catalogs: React.FC = () => {
 
   // Favorites state (using localStorage for persistence)
   const [favorites, setFavorites] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem('catalog-favorites');
-    return stored ? new Set(JSON.parse(stored)) : new Set();
+    try {
+      const stored = localStorage.getItem('catalog-favorites');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch (error) {
+      console.error('Failed to parse catalog favorites from localStorage:', error);
+      // Clear corrupted data
+      try {
+        localStorage.removeItem('catalog-favorites');
+      } catch (clearError) {
+        console.error('Failed to clear corrupted catalog favorites:', clearError);
+      }
+      return new Set();
+    }
   });
 
   // Build query parameters
@@ -98,10 +109,18 @@ const Catalogs: React.FC = () => {
       newFavorites.add(catalogId);
     }
     setFavorites(newFavorites);
-    localStorage.setItem(
-      'catalog-favorites',
-      JSON.stringify([...newFavorites])
-    );
+    
+    // Save to localStorage with error handling
+    try {
+      localStorage.setItem(
+        'catalog-favorites',
+        JSON.stringify([...newFavorites])
+      );
+    } catch (error) {
+      console.error('Failed to save catalog favorites to localStorage:', error);
+      // Note: The favorites state is still updated in memory, so the UI will reflect the change
+      // even if localStorage fails. This ensures the user sees their action was successful.
+    }
   };
 
   const handleCatalogClick = (catalog: Catalog) => {

@@ -80,16 +80,42 @@ const CatalogDetail: React.FC = () => {
   // Favorites state
   const [templateFavorites, setTemplateFavorites] = useState<Set<string>>(
     () => {
-      const stored = localStorage.getItem('template-favorites');
-      return stored ? new Set(JSON.parse(stored)) : new Set();
+      try {
+        const stored = localStorage.getItem('template-favorites');
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+      } catch (error) {
+        console.error('Failed to parse template favorites from localStorage:', error);
+        // Clear corrupted data
+        try {
+          localStorage.removeItem('template-favorites');
+        } catch (clearError) {
+          console.error('Failed to clear corrupted template favorites:', clearError);
+        }
+        return new Set();
+      }
     }
   );
+
+  // Handle missing id parameter
+  if (!id) {
+    return (
+      <PageSection>
+        <Alert
+          variant={AlertVariant.warning}
+          title="Invalid catalog ID"
+          isInline
+        >
+          No catalog ID was provided in the URL.
+        </Alert>
+      </PageSection>
+    );
+  }
 
   const {
     data: catalogResponse,
     isLoading: catalogLoading,
     error: catalogError,
-  } = useCatalog(id!);
+  } = useCatalog(id);
 
   // Build query parameters for templates
   const templateQueryParams: CatalogQueryParams = {
@@ -104,7 +130,7 @@ const CatalogDetail: React.FC = () => {
     data: templatesResponse,
     isLoading: templatesLoading,
     error: templatesError,
-  } = useCatalogItems(id!, templateQueryParams);
+  } = useCatalogItems(id, templateQueryParams);
 
   const catalog = catalogResponse?.data;
   const templates = templatesResponse?.data || [];
@@ -137,10 +163,18 @@ const CatalogDetail: React.FC = () => {
       newFavorites.add(templateId);
     }
     setTemplateFavorites(newFavorites);
-    localStorage.setItem(
-      'template-favorites',
-      JSON.stringify([...newFavorites])
-    );
+    
+    // Save to localStorage with error handling
+    try {
+      localStorage.setItem(
+        'template-favorites',
+        JSON.stringify([...newFavorites])
+      );
+    } catch (error) {
+      console.error('Failed to save template favorites to localStorage:', error);
+      // Note: The favorites state is still updated in memory, so the UI will reflect the change
+      // even if localStorage fails. This ensures the user sees their action was successful.
+    }
   };
 
   const handleTemplateSelection = (templateId: string, checked: boolean) => {
