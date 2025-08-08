@@ -63,23 +63,34 @@ const CatalogDetail: React.FC = () => {
   const [perPage, setPerPage] = useState(20);
 
   // UI state
-  const [activeTabKey, setActiveTabKey] = useState<string | number>('templates');
+  const [activeTabKey, setActiveTabKey] = useState<string | number>(
+    'templates'
+  );
   const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
   const [isOsFilterOpen, setIsOsFilterOpen] = useState(false);
-  const [showTemplateDetail, setShowTemplateDetail] = useState<CatalogItem | null>(null);
+  const [showTemplateDetail, setShowTemplateDetail] =
+    useState<CatalogItem | null>(null);
 
   // Template comparison state
-  const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(new Set());
+  const [selectedTemplates, setSelectedTemplates] = useState<Set<string>>(
+    new Set()
+  );
   const [showComparison, setShowComparison] = useState(false);
 
   // Favorites state
-  const [templateFavorites, setTemplateFavorites] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem('template-favorites');
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
+  const [templateFavorites, setTemplateFavorites] = useState<Set<string>>(
+    () => {
+      const stored = localStorage.getItem('template-favorites');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+  );
 
-  const { data: catalogResponse, isLoading: catalogLoading, error: catalogError } = useCatalog(id!);
-  
+  const {
+    data: catalogResponse,
+    isLoading: catalogLoading,
+    error: catalogError,
+  } = useCatalog(id!);
+
   // Build query parameters for templates
   const templateQueryParams: CatalogQueryParams = {
     page: currentPage,
@@ -89,7 +100,11 @@ const CatalogDetail: React.FC = () => {
     search: searchValue || undefined,
   };
 
-  const { data: templatesResponse, isLoading: templatesLoading, error: templatesError } = useCatalogItems(id!, templateQueryParams);
+  const {
+    data: templatesResponse,
+    isLoading: templatesLoading,
+    error: templatesError,
+  } = useCatalogItems(id!, templateQueryParams);
 
   const catalog = catalogResponse?.data;
   const templates = templatesResponse?.data || [];
@@ -122,7 +137,10 @@ const CatalogDetail: React.FC = () => {
       newFavorites.add(templateId);
     }
     setTemplateFavorites(newFavorites);
-    localStorage.setItem('template-favorites', JSON.stringify([...newFavorites]));
+    localStorage.setItem(
+      'template-favorites',
+      JSON.stringify([...newFavorites])
+    );
   };
 
   const handleTemplateSelection = (templateId: string, checked: boolean) => {
@@ -154,7 +172,7 @@ const CatalogDetail: React.FC = () => {
   };
 
   const getSelectedTemplateDetails = () => {
-    return templates.filter(template => selectedTemplates.has(template.id));
+    return templates.filter((template) => selectedTemplates.has(template.id));
   };
 
   if (catalogError) {
@@ -165,7 +183,8 @@ const CatalogDetail: React.FC = () => {
           title="Error loading catalog"
           isInline
         >
-          {catalogError.message || 'Failed to load catalog details. Please try again.'}
+          {catalogError.message ||
+            'Failed to load catalog details. Please try again.'}
         </Alert>
       </PageSection>
     );
@@ -194,8 +213,8 @@ const CatalogDetail: React.FC = () => {
   }
 
   // Filter templates by OS type if filter is applied
-  const filteredTemplates = filterOsType 
-    ? templates.filter(template => template.os_type.includes(filterOsType))
+  const filteredTemplates = filterOsType
+    ? templates.filter((template) => template.os_type.includes(filterOsType))
     : templates;
 
   return (
@@ -204,8 +223,12 @@ const CatalogDetail: React.FC = () => {
         {/* Breadcrumb */}
         <StackItem>
           <Breadcrumb>
-            <BreadcrumbItem component={Link} to="/dashboard">Dashboard</BreadcrumbItem>
-            <BreadcrumbItem component={Link} to="/catalogs">Catalogs</BreadcrumbItem>
+            <BreadcrumbItem component={Link} to="/dashboard">
+              Dashboard
+            </BreadcrumbItem>
+            <BreadcrumbItem component={Link} to="/catalogs">
+              Catalogs
+            </BreadcrumbItem>
             <BreadcrumbItem isActive>{catalog.name}</BreadcrumbItem>
           </Breadcrumb>
         </StackItem>
@@ -216,9 +239,7 @@ const CatalogDetail: React.FC = () => {
               <Title headingLevel="h1" size="2xl">
                 {catalog.name}
               </Title>
-              <p>
-                {catalog.description || 'No description available.'}
-              </p>
+              <p>{catalog.description || 'No description available.'}</p>
             </SplitItem>
             <SplitItem>
               <Badge color={catalog.is_shared ? 'blue' : 'grey'}>
@@ -233,7 +254,14 @@ const CatalogDetail: React.FC = () => {
             activeKey={activeTabKey}
             onSelect={(_, tabIndex) => setActiveTabKey(tabIndex)}
           >
-            <Tab eventKey="templates" title={<TabTitleText>Templates ({filteredTemplates.length})</TabTitleText>}>
+            <Tab
+              eventKey="templates"
+              title={
+                <TabTitleText>
+                  Templates ({filteredTemplates.length})
+                </TabTitleText>
+              }
+            >
               <Stack hasGutter style={{ marginTop: '1rem' }}>
                 {selectedTemplates.size > 0 && (
                   <StackItem>
@@ -268,7 +296,9 @@ const CatalogDetail: React.FC = () => {
                             <SearchInput
                               placeholder="Search templates..."
                               value={searchValue}
-                              onChange={(_event, value) => handleTemplateSearch(value)}
+                              onChange={(_event, value) =>
+                                handleTemplateSearch(value)
+                              }
                               onClear={() => handleTemplateSearch('')}
                             />
                           </ToolbarItem>
@@ -277,23 +307,38 @@ const CatalogDetail: React.FC = () => {
                             <Select
                               isOpen={isSortSelectOpen}
                               selected={`${sortBy}_${sortOrder}`}
-                              onSelect={(_, selection) => handleSortChange(selection as string)}
+                              onSelect={(_, selection) =>
+                                handleSortChange(selection as string)
+                              }
                               onOpenChange={setIsSortSelectOpen}
-                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              toggle={(
+                                toggleRef: React.Ref<MenuToggleElement>
+                              ) => (
                                 <MenuToggle
                                   ref={toggleRef}
-                                  onClick={() => setIsSortSelectOpen(!isSortSelectOpen)}
+                                  onClick={() =>
+                                    setIsSortSelectOpen(!isSortSelectOpen)
+                                  }
                                   isExpanded={isSortSelectOpen}
                                 >
-                                  Sort by {sortBy === 'name' ? 'Name' : 'Date'} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                                  Sort by {sortBy === 'name' ? 'Name' : 'Date'}{' '}
+                                  ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
                                 </MenuToggle>
                               )}
                             >
                               <SelectList>
-                                <SelectOption value="name_asc">Name (A-Z)</SelectOption>
-                                <SelectOption value="name_desc">Name (Z-A)</SelectOption>
-                                <SelectOption value="created_at_desc">Newest First</SelectOption>
-                                <SelectOption value="created_at_asc">Oldest First</SelectOption>
+                                <SelectOption value="name_asc">
+                                  Name (A-Z)
+                                </SelectOption>
+                                <SelectOption value="name_desc">
+                                  Name (Z-A)
+                                </SelectOption>
+                                <SelectOption value="created_at_desc">
+                                  Newest First
+                                </SelectOption>
+                                <SelectOption value="created_at_asc">
+                                  Oldest First
+                                </SelectOption>
                               </SelectList>
                             </Select>
                           </ToolbarItem>
@@ -302,26 +347,46 @@ const CatalogDetail: React.FC = () => {
                             <Select
                               isOpen={isOsFilterOpen}
                               selected={filterOsType}
-                              onSelect={(_, selection) => handleOsFilterChange(selection as string)}
+                              onSelect={(_, selection) =>
+                                handleOsFilterChange(selection as string)
+                              }
                               onOpenChange={setIsOsFilterOpen}
-                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              toggle={(
+                                toggleRef: React.Ref<MenuToggleElement>
+                              ) => (
                                 <MenuToggle
                                   ref={toggleRef}
-                                  onClick={() => setIsOsFilterOpen(!isOsFilterOpen)}
+                                  onClick={() =>
+                                    setIsOsFilterOpen(!isOsFilterOpen)
+                                  }
                                   isExpanded={isOsFilterOpen}
                                   icon={<FilterIcon />}
                                 >
-                                  {filterOsType ? `OS: ${filterOsType}` : 'All OS Types'}
+                                  {filterOsType
+                                    ? `OS: ${filterOsType}`
+                                    : 'All OS Types'}
                                 </MenuToggle>
                               )}
                             >
                               <SelectList>
-                                <SelectOption value="">All OS Types</SelectOption>
-                                <SelectOption value="ubuntu">Ubuntu</SelectOption>
-                                <SelectOption value="centos">CentOS</SelectOption>
-                                <SelectOption value="rhel">Red Hat Enterprise Linux</SelectOption>
-                                <SelectOption value="windows">Windows</SelectOption>
-                                <SelectOption value="debian">Debian</SelectOption>
+                                <SelectOption value="">
+                                  All OS Types
+                                </SelectOption>
+                                <SelectOption value="ubuntu">
+                                  Ubuntu
+                                </SelectOption>
+                                <SelectOption value="centos">
+                                  CentOS
+                                </SelectOption>
+                                <SelectOption value="rhel">
+                                  Red Hat Enterprise Linux
+                                </SelectOption>
+                                <SelectOption value="windows">
+                                  Windows
+                                </SelectOption>
+                                <SelectOption value="debian">
+                                  Debian
+                                </SelectOption>
                               </SelectList>
                             </Select>
                           </ToolbarItem>
@@ -407,8 +472,15 @@ const CatalogDetail: React.FC = () => {
                                   <SplitItem>
                                     <Checkbox
                                       id={`template-${template.id}`}
-                                      isChecked={selectedTemplates.has(template.id)}
-                                      onChange={(_event, checked) => handleTemplateSelection(template.id, checked)}
+                                      isChecked={selectedTemplates.has(
+                                        template.id
+                                      )}
+                                      onChange={(_event, checked) =>
+                                        handleTemplateSelection(
+                                          template.id,
+                                          checked
+                                        )
+                                      }
                                       aria-label={`Select ${template.name}`}
                                       onClick={(e) => e.stopPropagation()}
                                     />
@@ -426,7 +498,11 @@ const CatalogDetail: React.FC = () => {
                                         e.stopPropagation();
                                         toggleTemplateFavorite(template.id);
                                       }}
-                                      className={templateFavorites.has(template.id) ? 'pf-v6-u-color-yellow' : ''}
+                                      className={
+                                        templateFavorites.has(template.id)
+                                          ? 'pf-v6-u-color-yellow'
+                                          : ''
+                                      }
                                       aria-label={
                                         templateFavorites.has(template.id)
                                           ? 'Remove from favorites'
@@ -450,20 +526,25 @@ const CatalogDetail: React.FC = () => {
 
                               <StackItem>
                                 <p>
-                                  {template.description || 'No description available.'}
+                                  {template.description ||
+                                    'No description available.'}
                                 </p>
                               </StackItem>
 
                               <StackItem>
                                 <DescriptionList isHorizontal isCompact>
                                   <DescriptionListGroup>
-                                    <DescriptionListTerm>OS Type</DescriptionListTerm>
+                                    <DescriptionListTerm>
+                                      OS Type
+                                    </DescriptionListTerm>
                                     <DescriptionListDescription>
                                       <Badge>{template.os_type}</Badge>
                                     </DescriptionListDescription>
                                   </DescriptionListGroup>
                                   <DescriptionListGroup>
-                                    <DescriptionListTerm>Instance Type</DescriptionListTerm>
+                                    <DescriptionListTerm>
+                                      Instance Type
+                                    </DescriptionListTerm>
                                     <DescriptionListDescription>
                                       {template.vm_instance_type}
                                     </DescriptionListDescription>
@@ -474,13 +555,12 @@ const CatalogDetail: React.FC = () => {
                               <StackItem>
                                 <Split hasGutter>
                                   <SplitItem>
-                                    <small>
-                                      {template.cpu_count} CPU
-                                    </small>
+                                    <small>{template.cpu_count} CPU</small>
                                   </SplitItem>
                                   <SplitItem>
                                     <small>
-                                      {Math.round(template.memory_mb / 1024)} GB RAM
+                                      {Math.round(template.memory_mb / 1024)} GB
+                                      RAM
                                     </small>
                                   </SplitItem>
                                   <SplitItem>
@@ -493,7 +573,10 @@ const CatalogDetail: React.FC = () => {
 
                               <StackItem>
                                 <small className="pf-v6-u-color-200">
-                                  Created: {new Date(template.created_at).toLocaleDateString()}
+                                  Created:{' '}
+                                  {new Date(
+                                    template.created_at
+                                  ).toLocaleDateString()}
                                 </small>
                               </StackItem>
                             </Stack>
@@ -522,13 +605,18 @@ const CatalogDetail: React.FC = () => {
               </Stack>
             </Tab>
 
-            <Tab eventKey="details" title={<TabTitleText>Catalog Details</TabTitleText>}>
+            <Tab
+              eventKey="details"
+              title={<TabTitleText>Catalog Details</TabTitleText>}
+            >
               <Card style={{ marginTop: '1rem' }}>
                 <CardBody>
                   <DescriptionList>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Name</DescriptionListTerm>
-                      <DescriptionListDescription>{catalog.name}</DescriptionListDescription>
+                      <DescriptionListDescription>
+                        {catalog.name}
+                      </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Description</DescriptionListTerm>
@@ -538,7 +626,9 @@ const CatalogDetail: React.FC = () => {
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Organization</DescriptionListTerm>
-                      <DescriptionListDescription>{catalog.organization}</DescriptionListDescription>
+                      <DescriptionListDescription>
+                        {catalog.organization}
+                      </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Type</DescriptionListTerm>
@@ -592,19 +682,27 @@ const CatalogDetail: React.FC = () => {
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Instance Type</DescriptionListTerm>
-                  <DescriptionListDescription>{showTemplateDetail.vm_instance_type}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {showTemplateDetail.vm_instance_type}
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>CPU Cores</DescriptionListTerm>
-                  <DescriptionListDescription>{showTemplateDetail.cpu_count}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {showTemplateDetail.cpu_count}
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Memory</DescriptionListTerm>
-                  <DescriptionListDescription>{Math.round(showTemplateDetail.memory_mb / 1024)} GB</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {Math.round(showTemplateDetail.memory_mb / 1024)} GB
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Disk Size</DescriptionListTerm>
-                  <DescriptionListDescription>{showTemplateDetail.disk_size_gb} GB</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {showTemplateDetail.disk_size_gb} GB
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
                 <DescriptionListGroup>
                   <DescriptionListTerm>Created</DescriptionListTerm>
@@ -637,52 +735,72 @@ const CatalogDetail: React.FC = () => {
               <thead>
                 <tr>
                   <th>Specification</th>
-                  {getSelectedTemplateDetails().map(template => (
+                  {getSelectedTemplateDetails().map((template) => (
                     <th key={template.id}>{template.name}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Description</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
+                  <td>
+                    <strong>Description</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
                     <td key={template.id}>{template.description || 'N/A'}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>OS Type</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
-                    <td key={template.id}><Badge>{template.os_type}</Badge></td>
+                  <td>
+                    <strong>OS Type</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
+                    <td key={template.id}>
+                      <Badge>{template.os_type}</Badge>
+                    </td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>Instance Type</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
+                  <td>
+                    <strong>Instance Type</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
                     <td key={template.id}>{template.vm_instance_type}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>CPU Cores</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
+                  <td>
+                    <strong>CPU Cores</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
                     <td key={template.id}>{template.cpu_count}</td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>Memory</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
-                    <td key={template.id}>{Math.round(template.memory_mb / 1024)} GB</td>
+                  <td>
+                    <strong>Memory</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
+                    <td key={template.id}>
+                      {Math.round(template.memory_mb / 1024)} GB
+                    </td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>Disk Size</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
+                  <td>
+                    <strong>Disk Size</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
                     <td key={template.id}>{template.disk_size_gb} GB</td>
                   ))}
                 </tr>
                 <tr>
-                  <td><strong>Created</strong></td>
-                  {getSelectedTemplateDetails().map(template => (
-                    <td key={template.id}>{new Date(template.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <strong>Created</strong>
+                  </td>
+                  {getSelectedTemplateDetails().map((template) => (
+                    <td key={template.id}>
+                      {new Date(template.created_at).toLocaleDateString()}
+                    </td>
                   ))}
                 </tr>
               </tbody>

@@ -30,11 +30,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
 } from '@patternfly/react-core';
-import {
-  CatalogIcon,
-  FilterIcon,
-  StarIcon,
-} from '@patternfly/react-icons';
+import { CatalogIcon, FilterIcon, StarIcon } from '@patternfly/react-icons';
 import { useCatalogs } from '../../hooks/useCatalogs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Catalog, CatalogQueryParams } from '../../types';
@@ -70,7 +66,7 @@ const Catalogs: React.FC = () => {
     sort_order: sortOrder,
     search: searchValue || undefined,
     organization: filterOrganization || undefined,
-    is_shared: filterShared ? (filterShared === 'true') : undefined,
+    is_shared: filterShared ? filterShared === 'true' : undefined,
   };
 
   const { data: catalogsResponse, isLoading, error } = useCatalogs(queryParams);
@@ -102,7 +98,10 @@ const Catalogs: React.FC = () => {
       newFavorites.add(catalogId);
     }
     setFavorites(newFavorites);
-    localStorage.setItem('catalog-favorites', JSON.stringify([...newFavorites]));
+    localStorage.setItem(
+      'catalog-favorites',
+      JSON.stringify([...newFavorites])
+    );
   };
 
   const handleCatalogClick = (catalog: Catalog) => {
@@ -162,7 +161,9 @@ const Catalogs: React.FC = () => {
                 Template Catalogs
               </Title>
               <p>
-                Browse and manage VM templates organized in catalogs. Templates provide pre-configured virtual machine specifications that can be used to quickly deploy new VMs.
+                Browse and manage VM templates organized in catalogs. Templates
+                provide pre-configured virtual machine specifications that can
+                be used to quickly deploy new VMs.
               </p>
             </SplitItem>
           </Split>
@@ -186,7 +187,9 @@ const Catalogs: React.FC = () => {
                     <Select
                       isOpen={isSortSelectOpen}
                       selected={`${sortBy}_${sortOrder}`}
-                      onSelect={(_, selection) => handleSortChange(selection as string)}
+                      onSelect={(_, selection) =>
+                        handleSortChange(selection as string)
+                      }
                       onOpenChange={setIsSortSelectOpen}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
@@ -194,15 +197,22 @@ const Catalogs: React.FC = () => {
                           onClick={() => setIsSortSelectOpen(!isSortSelectOpen)}
                           isExpanded={isSortSelectOpen}
                         >
-                          Sort by {sortBy === 'name' ? 'Name' : 'Date'} ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
+                          Sort by {sortBy === 'name' ? 'Name' : 'Date'} (
+                          {sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="name_asc">Name (A-Z)</SelectOption>
-                        <SelectOption value="name_desc">Name (Z-A)</SelectOption>
-                        <SelectOption value="created_at_desc">Newest First</SelectOption>
-                        <SelectOption value="created_at_asc">Oldest First</SelectOption>
+                        <SelectOption value="name_desc">
+                          Name (Z-A)
+                        </SelectOption>
+                        <SelectOption value="created_at_desc">
+                          Newest First
+                        </SelectOption>
+                        <SelectOption value="created_at_asc">
+                          Oldest First
+                        </SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
@@ -211,16 +221,24 @@ const Catalogs: React.FC = () => {
                     <Select
                       isOpen={isSharedFilterOpen}
                       selected={filterShared}
-                      onSelect={(_, selection) => handleSharedFilterChange(selection as string)}
+                      onSelect={(_, selection) =>
+                        handleSharedFilterChange(selection as string)
+                      }
                       onOpenChange={setIsSharedFilterOpen}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsSharedFilterOpen(!isSharedFilterOpen)}
+                          onClick={() =>
+                            setIsSharedFilterOpen(!isSharedFilterOpen)
+                          }
                           isExpanded={isSharedFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          {filterShared ? (filterShared === 'true' ? 'Shared' : 'Private') : 'All Types'}
+                          {filterShared
+                            ? filterShared === 'true'
+                              ? 'Shared'
+                              : 'Private'
+                            : 'All Types'}
                         </MenuToggle>
                       )}
                     >
@@ -314,7 +332,11 @@ const Catalogs: React.FC = () => {
                                 e.stopPropagation();
                                 toggleFavorite(catalog.id);
                               }}
-                              className={favorites.has(catalog.id) ? 'pf-v6-u-color-yellow' : ''}
+                              className={
+                                favorites.has(catalog.id)
+                                  ? 'pf-v6-u-color-yellow'
+                                  : ''
+                              }
                               aria-label={
                                 favorites.has(catalog.id)
                                   ? 'Remove from favorites'
@@ -339,16 +361,15 @@ const Catalogs: React.FC = () => {
                             </Badge>
                           </SplitItem>
                           <SplitItem>
-                            <small>
-                              Organization: {catalog.organization}
-                            </small>
+                            <small>Organization: {catalog.organization}</small>
                           </SplitItem>
                         </Split>
                       </StackItem>
 
                       <StackItem>
                         <small className="pf-v6-u-color-200">
-                          Created: {new Date(catalog.created_at).toLocaleDateString()}
+                          Created:{' '}
+                          {new Date(catalog.created_at).toLocaleDateString()}
                         </small>
                       </StackItem>
                     </Stack>
