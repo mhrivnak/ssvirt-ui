@@ -451,4 +451,404 @@ export const QUERY_KEYS = {
   catalog: (id: string) => ['catalogs', id] as const,
   catalogItems: (catalogId: string) =>
     ['catalogs', catalogId, 'items'] as const,
+
+  // Resource Monitoring & Analytics
+  resourceUsage: ['monitoring', 'resource-usage'] as const,
+  resourceUsageByOrg: (orgId: string) =>
+    ['monitoring', 'resource-usage', 'org', orgId] as const,
+  resourceUsageByVdc: (vdcId: string) =>
+    ['monitoring', 'resource-usage', 'vdc', vdcId] as const,
+  costReports: ['monitoring', 'cost-reports'] as const,
+  capacityPlanning: ['monitoring', 'capacity-planning'] as const,
+  usageAlerts: ['monitoring', 'alerts'] as const,
+  customDashboards: ['monitoring', 'dashboards'] as const,
+  customDashboard: (id: string) => ['monitoring', 'dashboards', id] as const,
 } as const;
+
+// Resource Monitoring & Analytics types
+
+export interface ResourceUsageMetrics {
+  timestamp: string;
+  cpu_usage_percent: number;
+  memory_usage_percent: number;
+  storage_usage_percent: number;
+  network_in_mbps: number;
+  network_out_mbps: number;
+  disk_read_iops: number;
+  disk_write_iops: number;
+}
+
+export interface ResourceUsageSummary {
+  period: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  start_date: string;
+  end_date: string;
+  total_cpu_hours: number;
+  total_memory_gb_hours: number;
+  total_storage_gb_hours: number;
+  total_network_gb: number;
+  peak_cpu_usage: number;
+  peak_memory_usage: number;
+  peak_storage_usage: number;
+  average_cpu_usage: number;
+  average_memory_usage: number;
+  average_storage_usage: number;
+  metrics: ResourceUsageMetrics[];
+}
+
+export interface OrganizationResourceUsage {
+  organization_id: string;
+  organization_name: string;
+  current_usage: {
+    cpu_cores_allocated: number;
+    cpu_cores_used: number;
+    memory_gb_allocated: number;
+    memory_gb_used: number;
+    storage_gb_allocated: number;
+    storage_gb_used: number;
+  };
+  quota_limits: {
+    cpu_cores_limit: number;
+    memory_gb_limit: number;
+    storage_gb_limit: number;
+  };
+  usage_summary: ResourceUsageSummary;
+  vdcs: VDCResourceUsage[];
+}
+
+export interface VDCResourceUsage {
+  vdc_id: string;
+  vdc_name: string;
+  namespace: string;
+  current_usage: {
+    cpu_cores_allocated: number;
+    cpu_cores_used: number;
+    memory_gb_allocated: number;
+    memory_gb_used: number;
+    storage_gb_allocated: number;
+    storage_gb_used: number;
+    vm_count: number;
+    running_vm_count: number;
+  };
+  quota_limits: {
+    cpu_cores_limit: number;
+    memory_gb_limit: number;
+    storage_gb_limit: number;
+  };
+  usage_summary: ResourceUsageSummary;
+  vms: VMResourceUsage[];
+}
+
+export interface VMResourceUsage {
+  vm_id: string;
+  vm_name: string;
+  status: VMStatus;
+  allocated_resources: {
+    cpu_cores: number;
+    memory_gb: number;
+    storage_gb: number;
+  };
+  usage_summary: ResourceUsageSummary;
+}
+
+export interface CostReport {
+  id: string;
+  name: string;
+  description: string;
+  period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  start_date: string;
+  end_date: string;
+  currency: string;
+  total_cost: number;
+  cost_breakdown: {
+    compute_cost: number;
+    storage_cost: number;
+    network_cost: number;
+    other_cost: number;
+  };
+  cost_by_organization: OrganizationCost[];
+  cost_trends: CostTrend[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationCost {
+  organization_id: string;
+  organization_name: string;
+  total_cost: number;
+  cost_breakdown: {
+    compute_cost: number;
+    storage_cost: number;
+    network_cost: number;
+    other_cost: number;
+  };
+  vdc_costs: VDCCost[];
+}
+
+export interface VDCCost {
+  vdc_id: string;
+  vdc_name: string;
+  total_cost: number;
+  cost_breakdown: {
+    compute_cost: number;
+    storage_cost: number;
+    network_cost: number;
+    other_cost: number;
+  };
+  vm_costs: VMCost[];
+}
+
+export interface VMCost {
+  vm_id: string;
+  vm_name: string;
+  total_cost: number;
+  cost_breakdown: {
+    compute_cost: number;
+    storage_cost: number;
+    network_cost: number;
+    other_cost: number;
+  };
+  uptime_hours: number;
+}
+
+export interface CostTrend {
+  date: string;
+  total_cost: number;
+  compute_cost: number;
+  storage_cost: number;
+  network_cost: number;
+  other_cost: number;
+}
+
+export interface CapacityPlanningData {
+  current_capacity: {
+    total_cpu_cores: number;
+    used_cpu_cores: number;
+    total_memory_gb: number;
+    used_memory_gb: number;
+    total_storage_gb: number;
+    used_storage_gb: number;
+  };
+  utilization_trends: {
+    cpu_trend: UtilizationTrend[];
+    memory_trend: UtilizationTrend[];
+    storage_trend: UtilizationTrend[];
+  };
+  growth_projections: {
+    projected_cpu_usage: ProjectionData[];
+    projected_memory_usage: ProjectionData[];
+    projected_storage_usage: ProjectionData[];
+  };
+  recommendations: CapacityRecommendation[];
+}
+
+export interface UtilizationTrend {
+  date: string;
+  usage_percent: number;
+  allocated_percent: number;
+}
+
+export interface ProjectionData {
+  date: string;
+  projected_usage_percent: number;
+  confidence_interval: {
+    lower: number;
+    upper: number;
+  };
+}
+
+export interface CapacityRecommendation {
+  id: string;
+  type: 'scale_up' | 'scale_down' | 'optimize' | 'alert';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  resource_type: 'cpu' | 'memory' | 'storage' | 'network';
+  title: string;
+  description: string;
+  impact: string;
+  estimated_cost_impact: number;
+  recommended_action: string;
+  deadline: string;
+  created_at: string;
+}
+
+export interface UsageAlert {
+  id: string;
+  name: string;
+  description: string;
+  alert_type: 'threshold' | 'anomaly' | 'trend';
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  resource_type: 'cpu' | 'memory' | 'storage' | 'network' | 'cost';
+  scope: 'global' | 'organization' | 'vdc' | 'vm';
+  scope_id?: string;
+  scope_name?: string;
+  threshold_config?: {
+    metric: string;
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+    value: number;
+    duration_minutes: number;
+  };
+  status: 'active' | 'resolved' | 'suppressed';
+  triggered_at: string;
+  resolved_at?: string;
+  current_value: number;
+  message: string;
+  recommendations: string[];
+  notification_sent: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AlertRule {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  alert_type: 'threshold' | 'anomaly' | 'trend';
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  resource_type: 'cpu' | 'memory' | 'storage' | 'network' | 'cost';
+  scope: 'global' | 'organization' | 'vdc' | 'vm';
+  scope_id?: string;
+  threshold_config?: {
+    metric: string;
+    operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+    value: number;
+    duration_minutes: number;
+  };
+  notification_config: {
+    email_enabled: boolean;
+    email_recipients: string[];
+    webhook_enabled: boolean;
+    webhook_url?: string;
+  };
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomDashboard {
+  id: string;
+  name: string;
+  description: string;
+  layout: DashboardLayout;
+  widgets: DashboardWidget[];
+  is_shared: boolean;
+  is_default: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DashboardLayout {
+  columns: number;
+  row_height: number;
+  margin: [number, number];
+  container_padding: [number, number];
+  breakpoints: Record<string, number>;
+  responsive: boolean;
+}
+
+export interface DashboardWidget {
+  id: string;
+  type: 'chart' | 'metric' | 'table' | 'alert_list' | 'text';
+  title: string;
+  position: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
+  config: WidgetConfig;
+  data_source: DataSource;
+  refresh_interval: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WidgetConfig {
+  chart_type?: 'line' | 'bar' | 'pie' | 'donut' | 'area' | 'gauge';
+  display_legend?: boolean;
+  show_grid?: boolean;
+  color_scheme?: string[];
+  time_range?: string;
+  aggregation?: 'sum' | 'avg' | 'min' | 'max' | 'count';
+  format?: 'number' | 'percentage' | 'bytes' | 'currency';
+  thresholds?: {
+    warning: number;
+    critical: number;
+  };
+  custom_styling?: Record<string, unknown>;
+}
+
+export interface DataSource {
+  type: 'resource_usage' | 'cost_data' | 'alerts' | 'capacity' | 'custom_query';
+  query: string;
+  filters: Record<string, unknown>;
+  groupBy?: string[];
+  timeRange?: {
+    from: string;
+    to: string;
+  };
+}
+
+export interface ExportRequest {
+  format: 'csv' | 'xlsx' | 'pdf' | 'json';
+  data_type:
+    | 'resource_usage'
+    | 'cost_report'
+    | 'capacity_planning'
+    | 'alerts'
+    | 'dashboard';
+  filters: Record<string, unknown>;
+  time_range: {
+    from: string;
+    to: string;
+  };
+  include_charts?: boolean;
+  include_raw_data?: boolean;
+}
+
+export interface ExportJob {
+  id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress_percent: number;
+  format: 'csv' | 'xlsx' | 'pdf' | 'json';
+  data_type:
+    | 'resource_usage'
+    | 'cost_report'
+    | 'capacity_planning'
+    | 'alerts'
+    | 'dashboard';
+  file_url?: string;
+  file_size_bytes?: number;
+  error_message?: string;
+  created_at: string;
+  completed_at?: string;
+  expires_at?: string;
+}
+
+// Query parameter types for monitoring endpoints
+export interface ResourceUsageQueryParams extends PaginationParams, SortParams {
+  organization_id?: string;
+  vdc_id?: string;
+  vm_id?: string;
+  start_date?: string;
+  end_date?: string;
+  period?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  resource_type?: 'cpu' | 'memory' | 'storage' | 'network';
+}
+
+export interface CostReportQueryParams extends PaginationParams, SortParams {
+  organization_id?: string;
+  vdc_id?: string;
+  start_date?: string;
+  end_date?: string;
+  period?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  include_breakdown?: boolean;
+}
+
+export interface AlertQueryParams extends PaginationParams, SortParams {
+  status?: 'active' | 'resolved' | 'suppressed';
+  severity?: 'info' | 'warning' | 'error' | 'critical';
+  resource_type?: 'cpu' | 'memory' | 'storage' | 'network' | 'cost';
+  scope?: 'global' | 'organization' | 'vdc' | 'vm';
+  scope_id?: string;
+}

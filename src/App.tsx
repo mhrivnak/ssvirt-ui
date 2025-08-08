@@ -13,6 +13,14 @@ import {
 import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import { VMs, VMDetail } from './pages/vms';
 import { Catalogs, CatalogDetail } from './pages/catalogs';
+import {
+  ResourceMonitoring,
+  CostReports,
+  CapacityPlanning,
+  UsageAlerts,
+  ExportReports,
+  CustomDashboards,
+} from './pages/monitoring';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -244,6 +252,69 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Monitoring & Analytics Routes */}
+              <Route
+                path={ROUTES.MONITORING}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ResourceMonitoring />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.MONITORING_COSTS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <CostReports />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.MONITORING_CAPACITY}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <CapacityPlanning />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.MONITORING_ALERTS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <UsageAlerts />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.MONITORING_EXPORTS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ExportReports />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.MONITORING_DASHBOARDS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <CustomDashboards />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path={ROUTES.PROFILE}
                 element={
