@@ -20,7 +20,8 @@ export const getConfig = () => {
 
   try {
     const runtimeConfig = getRuntimeConfig();
-    return {
+    console.log('🔧 Using runtime config for API calls:', runtimeConfig);
+    const config = {
       API_BASE_URL: runtimeConfig.apiBaseUrl,
       APP_TITLE: runtimeConfig.appTitle,
       APP_VERSION: runtimeConfig.appVersion,
@@ -28,8 +29,12 @@ export const getConfig = () => {
       JWT_TOKEN_KEY: import.meta.env.VITE_JWT_TOKEN_KEY || 'ssvirt_token',
       LOGO_URL: runtimeConfig.logoUrl,
     } as const;
-  } catch {
+    console.log('🔧 Final config object:', config);
+    return config;
+  } catch (error) {
     // Runtime config not loaded yet, use fallback
+    console.warn('⚠️ Runtime config not available, using fallback:', error);
+    console.log('🔧 Using fallback config:', FALLBACK_CONFIG);
     return FALLBACK_CONFIG;
   }
 };

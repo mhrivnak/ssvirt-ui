@@ -54,8 +54,18 @@ const createApiInstance = (): AxiosInstance => {
   return instance;
 };
 
-// Create the API instance
-export const api = createApiInstance();
+// Create the API instance lazily (only when first accessed)
+let apiInstance: AxiosInstance | null = null;
+
+export const api = new Proxy({} as AxiosInstance, {
+  get(_target, prop: keyof AxiosInstance) {
+    if (!apiInstance) {
+      console.log('🚀 Creating API instance (first access)');
+      apiInstance = createApiInstance();
+    }
+    return apiInstance[prop];
+  },
+});
 
 // API service functions
 export class AuthService {
