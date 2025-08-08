@@ -27,15 +27,18 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   }
 
   console.log('Attempting to load runtime config from /config.json...');
-  
+
   try {
     const response = await fetch('/config.json');
     console.log('Config fetch response:', response.status, response.statusText);
-    
+
     if (response.ok) {
       const config = (await response.json()) as RuntimeConfig;
       runtimeConfig = { ...DEFAULT_CONFIG, ...config };
-      console.log('✅ Successfully loaded runtime configuration from /config.json:', runtimeConfig);
+      console.log(
+        '✅ Successfully loaded runtime configuration from /config.json:',
+        runtimeConfig
+      );
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

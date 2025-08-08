@@ -58,12 +58,12 @@ const createApiInstance = (): AxiosInstance => {
 let apiInstance: AxiosInstance | null = null;
 
 export const api = new Proxy({} as AxiosInstance, {
-  get(_target, prop) {
+  get(_target, prop: keyof AxiosInstance) {
     if (!apiInstance) {
       console.log('🚀 Creating API instance (first access)');
       apiInstance = createApiInstance();
     }
-    return (apiInstance as any)[prop];
+    return apiInstance[prop];
   },
 });
 
