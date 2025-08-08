@@ -29,15 +29,15 @@ images:
 #   spec:
 #     replicas: 3
 #
-# # Override environment variables
+# # Override ConfigMap values
 # patchesJson6902:
 # - target:
 #     version: v1
-#     kind: Deployment
-#     name: ssvirt-ui
+#     kind: ConfigMap
+#     name: ssvirt-ui-config
 #   patch: |-
 #     - op: replace
-#       path: /spec/template/spec/containers/0/env/0/value
+#       path: /data/API_BASE_URL
 #       value: "http://your-custom-backend:8080/api"
 #
 # # Add namespace
