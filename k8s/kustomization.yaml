@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: ssvirt-ui
+
+resources:
+- deployment.yaml
+- configmap.yaml
+
+commonLabels:
+  app.kubernetes.io/name: ssvirt-ui
+  app.kubernetes.io/component: frontend
+  app.kubernetes.io/part-of: ssvirt
+
+images:
+- name: quay.io/mhrivnak/ssvirt-ui
+  newTag: latest
+
+# Example customizations you can uncomment and modify:
+#
+# # Override replicas
+# patchesStrategicMerge:
+# - |-
+#   apiVersion: apps/v1
+#   kind: Deployment
+#   metadata:
+#     name: ssvirt-ui
+#   spec:
+#     replicas: 3
+#
+# # Override environment variables
+# patchesJson6902:
+# - target:
+#     version: v1
+#     kind: Deployment
+#     name: ssvirt-ui
+#   patch: |-
+#     - op: replace
+#       path: /spec/template/spec/containers/0/env/0/value
+#       value: "http://your-custom-backend:8080/api"
+#
+# # Add namespace
+# namespace: ssvirt-system

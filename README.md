@@ -126,6 +126,165 @@ podman stop ssvirt-ui-container
 podman rm ssvirt-ui-container
 ```
 
+## Kubernetes/OpenShift Deployment
+
+The application can be deployed to Kubernetes or OpenShift using the provided manifests.
+
+### Prerequisites
+
+- Access to a Kubernetes cluster (OpenShift 4.x or Kubernetes 1.20+)
+- `kubectl` or `oc` CLI tool configured
+- The SSVIRT backend API deployed and accessible within the cluster
+
+### Quick Deployment
+
+Deploy using the provided Kubernetes manifests:
+
+```bash
+# Apply all manifests
+kubectl apply -f k8s/
+
+# Or using kustomize (recommended)
+kubectl apply -k k8s/
+```
+
+This will create:
+- **Deployment**: 2 replicas of the SSVIRT UI using `quay.io/mhrivnak/ssvirt-ui:latest`
+- **Service**: ClusterIP service exposing port 8080
+- **Route** (OpenShift): HTTPS route with edge termination
+- **ConfigMap**: Configuration for runtime customization
+
+### Accessing the Application
+
+#### On OpenShift
+The application will be accessible via the created Route:
+
+```bash
+# Get the route URL
+oc get route ssvirt-ui -o jsonpath='{.spec.host}'
+```
+
+#### On Standard Kubernetes
+For non-OpenShift clusters, uncomment and configure the Ingress section in `k8s/deployment.yaml`, or use port forwarding for testing:
+
+```bash
+# Port forward for testing
+kubectl port-forward svc/ssvirt-ui 8080:8080
+
+# Access at http://localhost:8080
+```
+
+### Configuration
+
+#### Method 1: Environment Variables (Default)
+The deployment uses environment variables for configuration:
+
+```yaml
+env:
+- name: API_BASE_URL
+  value: "http://ssvirt-backend:8080/api"
+- name: APP_TITLE
+  value: "SSVIRT Web UI"
+```
+
+Edit the deployment to match your environment:
+
+```bash
+kubectl edit deployment ssvirt-ui
+```
+
+#### Method 2: ConfigMap (Advanced)
+For more complex configurations, use the provided ConfigMap:
+
+```bash
+# Edit the configuration
+kubectl edit configmap ssvirt-ui-config
+
+# Update the deployment to use the ConfigMap
+# (Uncomment the volumes and volumeMounts sections in deployment.yaml)
+kubectl apply -f k8s/deployment.yaml
+```
+
+### Customization Examples
+
+#### Scale the deployment:
+```bash
+kubectl scale deployment ssvirt-ui --replicas=3
+```
+
+#### Update the image:
+```bash
+kubectl set image deployment/ssvirt-ui ssvirt-ui=quay.io/mhrivnak/ssvirt-ui:v1.2.0
+```
+
+#### Using Kustomize for environment-specific deployments:
+```bash
+# Create overlays for different environments
+mkdir -p k8s/overlays/production
+cat > k8s/overlays/production/kustomization.yaml << EOF
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../
+
+patchesStrategicMerge:
+- deployment-patch.yaml
+
+images:
+- name: quay.io/mhrivnak/ssvirt-ui
+  newTag: v1.0.0
+EOF
+
+# Apply production configuration
+kubectl apply -k k8s/overlays/production/
+```
+
+### Health Checks
+
+The deployment includes health checks:
+- **Readiness Probe**: Ensures the container is ready to serve traffic
+- **Liveness Probe**: Restarts the container if it becomes unresponsive
+
+Monitor the deployment status:
+
+```bash
+kubectl get deployment ssvirt-ui
+kubectl get pods -l app=ssvirt-ui
+kubectl describe deployment ssvirt-ui
+```
+
+### Security
+
+The deployment follows security best practices:
+- Runs as non-root user
+- Drops all capabilities
+- Uses security contexts
+- Includes resource limits
+- Enables seccomp profile
+
+### Troubleshooting
+
+#### Check pod logs:
+```bash
+kubectl logs -l app=ssvirt-ui
+```
+
+#### Check service endpoints:
+```bash
+kubectl get endpoints ssvirt-ui
+```
+
+#### Test connectivity to backend:
+```bash
+kubectl exec -it deployment/ssvirt-ui -- curl http://ssvirt-backend:8080/health
+```
+
+#### Debug configuration:
+```bash
+kubectl exec -it deployment/ssvirt-ui -- cat /opt/app-root/src/dist/config.json
+```
+
 ### Scripts
 
 - `npm run dev` - Start development server
