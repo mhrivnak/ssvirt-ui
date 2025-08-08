@@ -23,7 +23,10 @@ export const BatchOperationService = {
   /**
    * Get list of batch operations
    */
-  getBatchOperations: async (params?: BatchOperationQueryParams, signal?: AbortSignal) => {
+  getBatchOperations: async (
+    params?: BatchOperationQueryParams,
+    signal?: AbortSignal
+  ) => {
     const response = await api.get<
       ApiResponse<{ operations: BatchOperation[]; total: number }>
     >('/api/v1/automation/batch-operations', { params, signal });
@@ -100,7 +103,10 @@ export const DeploymentTemplateService = {
   /**
    * Get list of deployment templates
    */
-  getDeploymentTemplates: async (params?: DeploymentTemplateQueryParams, signal?: AbortSignal) => {
+  getDeploymentTemplates: async (
+    params?: DeploymentTemplateQueryParams,
+    signal?: AbortSignal
+  ) => {
     const response = await api.get<
       ApiResponse<{ templates: DeploymentTemplate[]; total: number }>
     >('/api/v1/automation/deployment-templates', { params, signal });
@@ -188,7 +194,10 @@ export const ScheduledOperationService = {
   /**
    * Get list of scheduled operations
    */
-  getScheduledOperations: async (params?: ScheduledOperationQueryParams, signal?: AbortSignal) => {
+  getScheduledOperations: async (
+    params?: ScheduledOperationQueryParams,
+    signal?: AbortSignal
+  ) => {
     const response = await api.get<
       ApiResponse<{ operations: ScheduledOperation[]; total: number }>
     >('/api/v1/automation/scheduled-operations', { params, signal });
@@ -272,7 +281,10 @@ export const AutomationWorkflowService = {
   /**
    * Get list of automation workflows
    */
-  getAutomationWorkflows: async (params?: AutomationWorkflowQueryParams, signal?: AbortSignal) => {
+  getAutomationWorkflows: async (
+    params?: AutomationWorkflowQueryParams,
+    signal?: AbortSignal
+  ) => {
     const response = await api.get<
       ApiResponse<{ workflows: AutomationWorkflow[]; total: number }>
     >('/api/v1/automation/workflows', { params, signal });

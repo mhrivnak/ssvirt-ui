@@ -97,7 +97,12 @@ const DeploymentTemplates: React.FC = () => {
   const queryParams = {
     search: searchValue || undefined,
     template_type: templateTypeFilter as 'vm' | 'vapp' | 'vdc' | undefined,
-    category: categoryFilter as 'development' | 'testing' | 'production' | 'custom' | undefined,
+    category: categoryFilter as
+      | 'development'
+      | 'testing'
+      | 'production'
+      | 'custom'
+      | undefined,
     is_shared: isSharedFilter ? isSharedFilter === 'true' : undefined,
     page: currentPage,
     per_page: perPage,

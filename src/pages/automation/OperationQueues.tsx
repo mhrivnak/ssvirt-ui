@@ -34,11 +34,7 @@ import {
   Td,
   ActionsColumn,
 } from '@patternfly/react-table';
-import {
-  PlayIcon,
-  PauseIcon,
-  TrashIcon,
-} from '@patternfly/react-icons';
+import { PlayIcon, PauseIcon, TrashIcon } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import {
   useOperationQueues,
@@ -129,7 +125,6 @@ const OperationQueues: React.FC = () => {
     }
   };
 
-
   const formatDuration = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
@@ -140,13 +135,23 @@ const OperationQueues: React.FC = () => {
 
   const getQueueHealthStatus = (queue: OperationQueue) => {
     const errorRate =
-      (queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count) > 0
-        ? (queue.failed_operation_count / (queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count)) * 100
+      queue.current_operation_count +
+        queue.pending_operation_count +
+        queue.completed_operation_count +
+        queue.failed_operation_count >
+      0
+        ? (queue.failed_operation_count /
+            (queue.current_operation_count +
+              queue.pending_operation_count +
+              queue.completed_operation_count +
+              queue.failed_operation_count)) *
+          100
         : 0;
     if (errorRate > 20) return { status: 'error', message: 'High error rate' };
     if (queue.pending_operation_count > 100)
       return { status: 'warning', message: 'Queue backing up' };
-    if (queue.status !== 'active') return { status: 'info', message: 'Queue paused' };
+    if (queue.status !== 'active')
+      return { status: 'info', message: 'Queue paused' };
     return { status: 'success', message: 'Healthy' };
   };
 
@@ -202,9 +207,7 @@ const OperationQueues: React.FC = () => {
               </EmptyStateBody>
               <EmptyStateActions>
                 <Link to={ROUTES.AUTOMATION_BATCH_OPERATIONS}>
-                  <Button variant="primary">
-                    Create Batch Operation
-                  </Button>
+                  <Button variant="primary">Create Batch Operation</Button>
                 </Link>
               </EmptyStateActions>
             </EmptyState>
@@ -323,14 +326,16 @@ const OperationQueues: React.FC = () => {
                                 <ActionsColumn
                                   items={[
                                     {
-                                      title: queue.status === 'active'
-                                        ? 'Pause'
-                                        : 'Resume',
-                                      icon: queue.status === 'active' ? (
-                                        <PauseIcon />
-                                      ) : (
-                                        <PlayIcon />
-                                      ),
+                                      title:
+                                        queue.status === 'active'
+                                          ? 'Pause'
+                                          : 'Resume',
+                                      icon:
+                                        queue.status === 'active' ? (
+                                          <PauseIcon />
+                                        ) : (
+                                          <PlayIcon />
+                                        ),
                                       onClick: () =>
                                         queue.status === 'active'
                                           ? handlePauseQueue(queue.id)
@@ -354,15 +359,22 @@ const OperationQueues: React.FC = () => {
                           <StackItem>
                             <Progress
                               value={
-                                (queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count) > 0
+                                queue.current_operation_count +
+                                  queue.pending_operation_count +
+                                  queue.completed_operation_count +
+                                  queue.failed_operation_count >
+                                0
                                   ? Math.round(
                                       (queue.completed_operation_count /
-                                        (queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count)) *
+                                        (queue.current_operation_count +
+                                          queue.pending_operation_count +
+                                          queue.completed_operation_count +
+                                          queue.failed_operation_count)) *
                                         100
                                     )
                                   : 0
                               }
-                              title={`${queue.completed_operation_count}/${(queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count)} operations completed`}
+                              title={`${queue.completed_operation_count}/${queue.current_operation_count + queue.pending_operation_count + queue.completed_operation_count + queue.failed_operation_count} operations completed`}
                               size="sm"
                               variant={
                                 queue.failed_operation_count > 0
@@ -454,11 +466,15 @@ const OperationQueues: React.FC = () => {
                                 <Td>
                                   <Stack>
                                     <StackItem>
-                                      <strong>{operation.operation_type}</strong>
+                                      <strong>
+                                        {operation.operation_type}
+                                      </strong>
                                     </StackItem>
                                     <StackItem>
                                       <small className="pf-v6-u-color-200">
-                                        {(operation.operation_data?.target_count as number || 0)} targets
+                                        {(operation.operation_data
+                                          ?.target_count as number) || 0}{' '}
+                                        targets
                                       </small>
                                     </StackItem>
                                   </Stack>
@@ -475,8 +491,14 @@ const OperationQueues: React.FC = () => {
                                 <Td>{operation.operation_type}</Td>
                                 <Td>
                                   <Progress
-                                    value={(operation.status === 'completed' ? 100 : operation.status === 'running' ? 50 : 0)}
-                                    title={`${(operation.status === 'completed' ? 100 : operation.status === 'running' ? 50 : 0)}%`}
+                                    value={
+                                      operation.status === 'completed'
+                                        ? 100
+                                        : operation.status === 'running'
+                                          ? 50
+                                          : 0
+                                    }
+                                    title={`${operation.status === 'completed' ? 100 : operation.status === 'running' ? 50 : 0}%`}
                                     size="sm"
                                     variant={
                                       operation.status === 'failed'
@@ -487,7 +509,9 @@ const OperationQueues: React.FC = () => {
                                 </Td>
                                 <Td>
                                   {operation.actual_duration_seconds
-                                    ? formatDuration(operation.actual_duration_seconds)
+                                    ? formatDuration(
+                                        operation.actual_duration_seconds
+                                      )
                                     : 'N/A'}
                                 </Td>
                                 <Td>

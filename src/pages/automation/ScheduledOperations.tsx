@@ -98,7 +98,13 @@ const ScheduledOperations: React.FC = () => {
   // Build query parameters
   const queryParams = {
     search: searchValue || undefined,
-    operation_type: operationTypeFilter as 'power' | 'backup' | 'maintenance' | 'cleanup' | 'deployment' | undefined,
+    operation_type: operationTypeFilter as
+      | 'power'
+      | 'backup'
+      | 'maintenance'
+      | 'cleanup'
+      | 'deployment'
+      | undefined,
     is_enabled: isEnabledFilter ? isEnabledFilter === 'true' : undefined,
     page: currentPage,
     per_page: perPage,

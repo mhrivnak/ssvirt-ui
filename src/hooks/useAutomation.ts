@@ -22,14 +22,16 @@ import type {
 export const useBatchOperations = (params?: BatchOperationQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.batchOperations, params],
-    queryFn: ({ signal }) => BatchOperationService.getBatchOperations(params, signal),
+    queryFn: ({ signal }) =>
+      BatchOperationService.getBatchOperations(params, signal),
   });
 };
 
 export const useBatchOperation = (operationId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.batchOperation(operationId),
-    queryFn: ({ signal }) => BatchOperationService.getBatchOperation(operationId, signal),
+    queryFn: ({ signal }) =>
+      BatchOperationService.getBatchOperation(operationId, signal),
     enabled: !!operationId,
     refetchInterval: (query) => {
       // Poll every 5 seconds if operation is pending or running
@@ -117,14 +119,16 @@ export const useDeploymentTemplates = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.deploymentTemplates, params],
-    queryFn: ({ signal }) => DeploymentTemplateService.getDeploymentTemplates(params, signal),
+    queryFn: ({ signal }) =>
+      DeploymentTemplateService.getDeploymentTemplates(params, signal),
   });
 };
 
 export const useDeploymentTemplate = (templateId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.deploymentTemplate(templateId),
-    queryFn: ({ signal }) => DeploymentTemplateService.getDeploymentTemplate(templateId, signal),
+    queryFn: ({ signal }) =>
+      DeploymentTemplateService.getDeploymentTemplate(templateId, signal),
     enabled: !!templateId,
   });
 };
@@ -220,14 +224,16 @@ export const useScheduledOperations = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.scheduledOperations, params],
-    queryFn: ({ signal }) => ScheduledOperationService.getScheduledOperations(params, signal),
+    queryFn: ({ signal }) =>
+      ScheduledOperationService.getScheduledOperations(params, signal),
   });
 };
 
 export const useScheduledOperation = (operationId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.scheduledOperation(operationId),
-    queryFn: ({ signal }) => ScheduledOperationService.getScheduledOperation(operationId, signal),
+    queryFn: ({ signal }) =>
+      ScheduledOperationService.getScheduledOperation(operationId, signal),
     enabled: !!operationId,
   });
 };
@@ -330,14 +336,16 @@ export const useAutomationWorkflows = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.automationWorkflows, params],
-    queryFn: ({ signal }) => AutomationWorkflowService.getAutomationWorkflows(params, signal),
+    queryFn: ({ signal }) =>
+      AutomationWorkflowService.getAutomationWorkflows(params, signal),
   });
 };
 
 export const useAutomationWorkflow = (workflowId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.automationWorkflow(workflowId),
-    queryFn: ({ signal }) => AutomationWorkflowService.getAutomationWorkflow(workflowId, signal),
+    queryFn: ({ signal }) =>
+      AutomationWorkflowService.getAutomationWorkflow(workflowId, signal),
     enabled: !!workflowId,
   });
 };
@@ -466,7 +474,8 @@ export const useOperationQueues = () => {
 export const useOperationQueue = (queueId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.operationQueue(queueId),
-    queryFn: ({ signal }) => OperationQueueService.getOperationQueue(queueId, signal),
+    queryFn: ({ signal }) =>
+      OperationQueueService.getOperationQueue(queueId, signal),
     enabled: !!queueId,
     refetchInterval: 10000, // Refresh every 10 seconds
   });

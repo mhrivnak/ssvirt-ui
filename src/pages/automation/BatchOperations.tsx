@@ -80,9 +80,25 @@ const BatchOperations: React.FC = () => {
   // Build query parameters
   const queryParams = {
     search: searchValue || undefined,
-    status: statusFilter as 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | undefined,
-    operation_type: operationTypeFilter as 'power' | 'configuration' | 'deployment' | 'cleanup' | 'backup' | undefined,
-    target_type: targetTypeFilter as 'vms' | 'vdcs' | 'organizations' | undefined,
+    status: statusFilter as
+      | 'pending'
+      | 'running'
+      | 'completed'
+      | 'failed'
+      | 'cancelled'
+      | undefined,
+    operation_type: operationTypeFilter as
+      | 'power'
+      | 'configuration'
+      | 'deployment'
+      | 'cleanup'
+      | 'backup'
+      | undefined,
+    target_type: targetTypeFilter as
+      | 'vms'
+      | 'vdcs'
+      | 'organizations'
+      | undefined,
     page: currentPage,
     per_page: perPage,
   };
@@ -273,9 +289,7 @@ const BatchOperations: React.FC = () => {
             </SplitItem>
             <SplitItem>
               <Link to={`${ROUTES.AUTOMATION_BATCH_OPERATIONS}/create`}>
-                <Button variant="primary">
-                  Create Operation
-                </Button>
+                <Button variant="primary">Create Operation</Button>
               </Link>
             </SplitItem>
           </Split>
@@ -473,9 +487,7 @@ const BatchOperations: React.FC = () => {
               ) : (
                 <EmptyStateActions>
                   <Link to={`${ROUTES.AUTOMATION_BATCH_OPERATIONS}/create`}>
-                    <Button variant="primary">
-                      Create Operation
-                    </Button>
+                    <Button variant="primary">Create Operation</Button>
                   </Link>
                 </EmptyStateActions>
               )}
@@ -523,9 +535,7 @@ const BatchOperations: React.FC = () => {
                         </Badge>
                         {operation.error_message && (
                           <div className="pf-v6-u-mt-xs">
-                            <Badge color="red">
-                              Error
-                            </Badge>
+                            <Badge color="red">Error</Badge>
                           </div>
                         )}
                       </Td>
