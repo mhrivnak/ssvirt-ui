@@ -258,7 +258,6 @@ const AutomationWorkflows: React.FC = () => {
     }
   };
 
-
   const getTriggerTypeLabel = (type: string) => {
     switch (type) {
       case 'manual':
@@ -482,7 +481,9 @@ const AutomationWorkflows: React.FC = () => {
                                 )}
                               </StackItem>
                               <StackItem>
-                                <Badge color={workflow.is_enabled ? 'green' : 'grey'}>
+                                <Badge
+                                  color={workflow.is_enabled ? 'green' : 'grey'}
+                                >
                                   {workflow.is_enabled ? 'ENABLED' : 'DISABLED'}
                                 </Badge>
                                 <Badge className="pf-v6-u-ml-sm">
