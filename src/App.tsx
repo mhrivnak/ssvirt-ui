@@ -31,6 +31,7 @@ import {
 } from './pages/automation';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { ConfigLoader } from './components/common/ConfigLoader';
 import { AuthProvider } from './contexts/AuthProvider';
 import { NavigationProvider } from './contexts/NavigationContext';
 import { ROUTES } from './utils/constants';
@@ -83,10 +84,11 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <NavigationProvider>
-          <BrowserRouter>
+    <ConfigLoader>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <NavigationProvider>
+            <BrowserRouter>
             <Routes>
               {/* Public routes */}
               <Route path={ROUTES.LOGIN} element={<Login />} />
@@ -410,6 +412,7 @@ const App: React.FC = () => {
         </NavigationProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ConfigLoader>
   );
 };
 
