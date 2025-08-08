@@ -84,12 +84,18 @@ const CatalogDetail: React.FC = () => {
         const stored = localStorage.getItem('template-favorites');
         return stored ? new Set(JSON.parse(stored)) : new Set();
       } catch (error) {
-        console.error('Failed to parse template favorites from localStorage:', error);
+        console.error(
+          'Failed to parse template favorites from localStorage:',
+          error
+        );
         // Clear corrupted data
         try {
           localStorage.removeItem('template-favorites');
         } catch (clearError) {
-          console.error('Failed to clear corrupted template favorites:', clearError);
+          console.error(
+            'Failed to clear corrupted template favorites:',
+            clearError
+          );
         }
         return new Set();
       }
@@ -164,7 +170,7 @@ const CatalogDetail: React.FC = () => {
       newFavorites.add(templateId);
     }
     setTemplateFavorites(newFavorites);
-    
+
     // Save to localStorage with error handling
     try {
       localStorage.setItem(
@@ -172,7 +178,10 @@ const CatalogDetail: React.FC = () => {
         JSON.stringify([...newFavorites])
       );
     } catch (error) {
-      console.error('Failed to save template favorites to localStorage:', error);
+      console.error(
+        'Failed to save template favorites to localStorage:',
+        error
+      );
       // Note: The favorites state is still updated in memory, so the UI will reflect the change
       // even if localStorage fails. This ensures the user sees their action was successful.
     }

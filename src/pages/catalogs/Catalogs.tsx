@@ -58,12 +58,18 @@ const Catalogs: React.FC = () => {
       const stored = localStorage.getItem('catalog-favorites');
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch (error) {
-      console.error('Failed to parse catalog favorites from localStorage:', error);
+      console.error(
+        'Failed to parse catalog favorites from localStorage:',
+        error
+      );
       // Clear corrupted data
       try {
         localStorage.removeItem('catalog-favorites');
       } catch (clearError) {
-        console.error('Failed to clear corrupted catalog favorites:', clearError);
+        console.error(
+          'Failed to clear corrupted catalog favorites:',
+          clearError
+        );
       }
       return new Set();
     }
@@ -109,7 +115,7 @@ const Catalogs: React.FC = () => {
       newFavorites.add(catalogId);
     }
     setFavorites(newFavorites);
-    
+
     // Save to localStorage with error handling
     try {
       localStorage.setItem(
