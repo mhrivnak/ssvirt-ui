@@ -274,7 +274,8 @@ kubectl exec -it deployment/ssvirt-ui -- cat /opt/app-root/src/dist/config.json
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run preview` - Preview production build
+- `npm run preview` - Preview production build (Vite)
+- `npm run serve` - Serve production build (static server)
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
