@@ -96,6 +96,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   const [showAddDiskModal, setShowAddDiskModal] = useState(false);
   const [editingDisk, setEditingDisk] = useState<VMDisk | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [currentValidationErrors, setCurrentValidationErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [diskToRemove, setDiskToRemove] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -113,21 +114,52 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     useState(false);
   const [isBusTypeSelectOpen, setIsBusTypeSelectOpen] = useState(false);
 
+  // Deep equality check for disk arrays
+  const compareDisks = (currentDisks: VMDisk[], originalDisks: VMDisk[]): boolean => {
+    if (currentDisks.length !== originalDisks.length) {
+      return false;
+    }
+
+    for (let i = 0; i < currentDisks.length; i++) {
+      const current = currentDisks[i];
+      const original = originalDisks[i];
+
+      if (
+        current.id !== original.id ||
+        current.name !== original.name ||
+        current.size_gb !== original.size_gb ||
+        current.type !== original.type ||
+        current.provisioning !== original.provisioning ||
+        current.used_gb !== original.used_gb ||
+        current.usage_percent !== original.usage_percent ||
+        current.bus_type !== original.bus_type ||
+        current.removable !== original.removable
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   useEffect(() => {
     // Check if there are changes compared to original state
-    const changesDetected = JSON.stringify(disks) !== JSON.stringify(mockDisks);
+    const changesDetected = !compareDisks(disks, mockDisks);
     setHasChanges(changesDetected);
     onChangesDetected(changesDetected);
   }, [disks, onChangesDetected]);
 
-  const validateDiskConfiguration = (): string[] => {
+  const validateDiskConfiguration = (
+    diskName: string = newDiskName,
+    diskSize: number = newDiskSize
+  ): string[] => {
     const errors: string[] = [];
 
-    if (newDiskName.trim().length === 0) {
+    if (diskName.trim().length === 0) {
       errors.push('Disk name is required');
     }
 
-    if (newDiskSize < 1 || newDiskSize > 1000) {
+    if (diskSize < 1 || diskSize > 1000) {
       errors.push('Disk size must be between 1 GB and 1000 GB');
     }
 
@@ -135,13 +167,22 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     if (
       disks.some(
         (disk) =>
-          disk.name === newDiskName.trim() && disk.id !== editingDisk?.id
+          disk.name === diskName.trim() && disk.id !== editingDisk?.id
       )
     ) {
       errors.push('A disk with this name already exists');
     }
 
     return errors;
+  };
+
+  // Real-time validation function
+  const validateCurrentInput = (
+    diskName: string,
+    diskSize: number
+  ): void => {
+    const errors = validateDiskConfiguration(diskName, diskSize);
+    setCurrentValidationErrors(errors);
   };
 
   const handleAddDisk = () => {
@@ -225,6 +266,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     setNewDiskProvisioning('Thin');
     setNewDiskBusType('SCSI');
     setValidationErrors([]);
+    setCurrentValidationErrors([]);
     setEditingDisk(null);
   };
 
@@ -419,6 +461,20 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
         }}
       >
         <Form>
+          {currentValidationErrors.length > 0 && (
+            <Alert
+              variant={AlertVariant.danger}
+              title="Validation Errors"
+              isInline
+              style={{ marginBottom: '16px' }}
+            >
+              <ul>
+                {currentValidationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </Alert>
+          )}
           <Grid hasGutter>
             <GridItem span={12}>
               <FormGroup label="Disk Name" isRequired fieldId="disk-name">
@@ -427,7 +483,10 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
                   type="text"
                   id="disk-name"
                   name="disk-name"
-                  onChange={(_event, value) => setNewDiskName(value)}
+                  onChange={(_event, value) => {
+                    setNewDiskName(value);
+                    validateCurrentInput(value, newDiskSize);
+                  }}
                   placeholder="e.g., Data Disk 1"
                 />
               </FormGroup>
@@ -437,12 +496,22 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
               <FormGroup label="Size (GB)" isRequired fieldId="disk-size">
                 <NumberInput
                   value={newDiskSize}
-                  onMinus={() => setNewDiskSize(Math.max(1, newDiskSize - 1))}
-                  onPlus={() => setNewDiskSize(Math.min(1000, newDiskSize + 1))}
+                  onMinus={() => {
+                    const newValue = Math.max(1, newDiskSize - 1);
+                    setNewDiskSize(newValue);
+                    validateCurrentInput(newDiskName, newValue);
+                  }}
+                  onPlus={() => {
+                    const newValue = Math.min(1000, newDiskSize + 1);
+                    setNewDiskSize(newValue);
+                    validateCurrentInput(newDiskName, newValue);
+                  }}
                   onChange={(event) => {
                     const target = event.target as HTMLInputElement;
                     const value = parseInt(target.value) || 1;
-                    setNewDiskSize(Math.max(1, Math.min(1000, value)));
+                    const clampedValue = Math.max(1, Math.min(1000, value));
+                    setNewDiskSize(clampedValue);
+                    validateCurrentInput(newDiskName, clampedValue);
                   }}
                   inputName="disk-size"
                   inputAriaLabel="Disk size"
@@ -538,7 +607,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
           <Button
             variant="primary"
             onClick={editingDisk ? handleUpdateDisk : handleAddDisk}
-            isDisabled={validationErrors.length > 0}
+            isDisabled={currentValidationErrors.length > 0}
           >
             {editingDisk ? 'Update Disk' : 'Add Disk'}
           </Button>
