@@ -92,6 +92,8 @@ const DeploymentTemplates: React.FC = () => {
     'development' | 'testing' | 'production' | 'custom'
   >('development');
   const [templateShared, setTemplateShared] = useState(false);
+  const [isTemplateTypeOpen, setIsTemplateTypeOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   // Build query parameters
   const queryParams = {
@@ -159,6 +161,8 @@ const DeploymentTemplates: React.FC = () => {
     setTemplateType('vm');
     setTemplateCategory('development');
     setTemplateShared(false);
+    setIsTemplateTypeOpen(false);
+    setIsCategoryOpen(false);
   };
 
   const handleCreateTemplate = async () => {
@@ -662,13 +666,18 @@ const DeploymentTemplates: React.FC = () => {
 
           <FormGroup label="Template Type" isRequired fieldId="template-type">
             <Select
-              isOpen={false}
+              isOpen={isTemplateTypeOpen}
               selected={templateType}
-              onSelect={(_, selection) =>
-                setTemplateType(selection as 'vm' | 'vapp' | 'vdc')
-              }
+              onSelect={(_, selection) => {
+                setTemplateType(selection as 'vm' | 'vapp' | 'vdc');
+                setIsTemplateTypeOpen(false);
+              }}
+              onOpenChange={setIsTemplateTypeOpen}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                <MenuToggle ref={toggleRef}>
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsTemplateTypeOpen(!isTemplateTypeOpen)}
+                >
                   {templateType.toUpperCase()}
                 </MenuToggle>
               )}
@@ -683,19 +692,24 @@ const DeploymentTemplates: React.FC = () => {
 
           <FormGroup label="Category" isRequired fieldId="template-category">
             <Select
-              isOpen={false}
+              isOpen={isCategoryOpen}
               selected={templateCategory}
-              onSelect={(_, selection) =>
+              onSelect={(_, selection) => {
                 setTemplateCategory(
                   selection as
                     | 'development'
                     | 'testing'
                     | 'production'
                     | 'custom'
-                )
-              }
+                );
+                setIsCategoryOpen(false);
+              }}
+              onOpenChange={setIsCategoryOpen}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                <MenuToggle ref={toggleRef}>
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                >
                   {templateCategory.charAt(0).toUpperCase() +
                     templateCategory.slice(1)}
                 </MenuToggle>
