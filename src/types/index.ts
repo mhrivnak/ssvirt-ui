@@ -463,6 +463,20 @@ export const QUERY_KEYS = {
   usageAlerts: ['monitoring', 'alerts'] as const,
   customDashboards: ['monitoring', 'dashboards'] as const,
   customDashboard: (id: string) => ['monitoring', 'dashboards', id] as const,
+  // Batch Operations & Automation
+  batchOperations: ['automation', 'batch-operations'] as const,
+  batchOperation: (id: string) =>
+    ['automation', 'batch-operations', id] as const,
+  deploymentTemplates: ['automation', 'deployment-templates'] as const,
+  deploymentTemplate: (id: string) =>
+    ['automation', 'deployment-templates', id] as const,
+  scheduledOperations: ['automation', 'scheduled-operations'] as const,
+  scheduledOperation: (id: string) =>
+    ['automation', 'scheduled-operations', id] as const,
+  automationWorkflows: ['automation', 'workflows'] as const,
+  automationWorkflow: (id: string) => ['automation', 'workflows', id] as const,
+  operationQueues: ['automation', 'queues'] as const,
+  operationQueue: (id: string) => ['automation', 'queues', id] as const,
 } as const;
 
 // Resource Monitoring & Analytics types
@@ -851,4 +865,330 @@ export interface AlertQueryParams extends PaginationParams, SortParams {
   resource_type?: 'cpu' | 'memory' | 'storage' | 'network' | 'cost';
   scope?: 'global' | 'organization' | 'vdc' | 'vm';
   scope_id?: string;
+}
+
+// Batch Operations & Automation types
+export interface BatchOperation {
+  id: string;
+  name: string;
+  description?: string;
+  operation_type:
+    | 'power'
+    | 'configuration'
+    | 'deployment'
+    | 'cleanup'
+    | 'backup';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  target_type: 'vms' | 'vdcs' | 'organizations';
+  target_count: number;
+  completed_count: number;
+  failed_count: number;
+  progress_percent: number;
+  created_by: string;
+  created_at: string;
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  is_rollback_supported: boolean;
+  can_cancel: boolean;
+  targets: BatchOperationTarget[];
+  results?: BatchOperationResult[];
+}
+
+export interface BatchOperationTarget {
+  id: string;
+  type: 'vm' | 'vdc' | 'organization';
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  result_data?: Record<string, unknown>;
+}
+
+export interface BatchOperationResult {
+  target_id: string;
+  target_name: string;
+  success: boolean;
+  error_message?: string;
+  execution_time_ms: number;
+  rollback_data?: Record<string, unknown>;
+}
+
+export interface DeploymentTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  template_type: 'vm' | 'vapp' | 'vdc';
+  category: 'development' | 'testing' | 'production' | 'custom';
+  is_shared: boolean;
+  is_default: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  usage_count: number;
+  configuration: DeploymentTemplateConfig;
+  tags?: string[];
+}
+
+export interface DeploymentTemplateConfig {
+  vm_templates?: VMTemplateConfig[];
+  network_config?: NetworkTemplateConfig;
+  resource_allocation?: ResourceAllocationConfig;
+  automation_scripts?: AutomationScript[];
+  post_deployment_tasks?: PostDeploymentTask[];
+}
+
+export interface VMTemplateConfig {
+  catalog_item_id: string;
+  name_pattern: string;
+  count: number;
+  cpu_count: number;
+  memory_mb: number;
+  disk_size_gb?: number;
+  network_interfaces?: NetworkInterfaceConfig[];
+  custom_properties?: Record<string, string>;
+}
+
+export interface NetworkTemplateConfig {
+  network_name?: string;
+  subnet_cidr?: string;
+  gateway_ip?: string;
+  dns_servers?: string[];
+  dhcp_enabled?: boolean;
+}
+
+export interface ResourceAllocationConfig {
+  cpu_allocation_mhz?: number;
+  memory_allocation_mb?: number;
+  storage_allocation_gb?: number;
+  network_quota_mbps?: number;
+}
+
+export interface NetworkInterfaceConfig {
+  network_name: string;
+  ip_assignment: 'dhcp' | 'static' | 'pool';
+  ip_address?: string;
+  is_primary: boolean;
+}
+
+export interface AutomationScript {
+  id: string;
+  name: string;
+  script_type: 'powershell' | 'bash' | 'cloud-init' | 'ansible';
+  content: string;
+  execution_order: number;
+  timeout_seconds: number;
+}
+
+export interface PostDeploymentTask {
+  id: string;
+  name: string;
+  task_type:
+    | 'configure_networking'
+    | 'install_software'
+    | 'join_domain'
+    | 'custom_script';
+  configuration: Record<string, unknown>;
+  execution_order: number;
+  retry_count: number;
+}
+
+export interface ScheduledOperation {
+  id: string;
+  name: string;
+  description?: string;
+  operation_type: 'power' | 'backup' | 'maintenance' | 'cleanup' | 'deployment';
+  schedule_type: 'once' | 'recurring';
+  schedule_expression: string; // cron expression
+  target_type: 'vms' | 'vdcs' | 'organizations';
+  target_filters: OperationTargetFilter[];
+  operation_config: Record<string, unknown>;
+  is_enabled: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  last_run_at?: string;
+  next_run_at?: string;
+  run_count: number;
+  success_count: number;
+  failure_count: number;
+}
+
+export interface OperationTargetFilter {
+  field: string;
+  operator: 'equals' | 'contains' | 'starts_with' | 'ends_with' | 'regex';
+  value: string;
+}
+
+export interface AutomationWorkflow {
+  id: string;
+  name: string;
+  description?: string;
+  workflow_type: 'sequential' | 'parallel' | 'conditional';
+  is_enabled: boolean;
+  is_default?: boolean;
+  status: 'active' | 'disabled' | 'error';
+  trigger_type: 'manual' | 'event' | 'schedule';
+  trigger_config?: WorkflowTriggerConfig;
+  steps: WorkflowStep[];
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  execution_count: number;
+  success_count: number;
+  success_rate: number;
+  average_duration_seconds: number;
+  last_execution_at?: string;
+  last_execution_status?: 'completed' | 'failed' | 'cancelled';
+}
+
+export interface WorkflowTriggerConfig {
+  event_types?: string[];
+  schedule_expression?: string;
+  conditions?: WorkflowCondition[];
+}
+
+export interface WorkflowCondition {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
+  value: string;
+}
+
+export interface WorkflowStep {
+  id: string;
+  name: string;
+  step_type: 'batch_operation' | 'api_call' | 'script' | 'delay' | 'approval';
+  configuration: Record<string, unknown>;
+  depends_on?: string[];
+  on_failure: 'stop' | 'continue' | 'retry';
+  retry_count: number;
+  timeout_seconds: number;
+}
+
+export interface OperationQueue {
+  id: string;
+  name: string;
+  status: 'active' | 'paused' | 'stopped';
+  max_concurrent_operations: number;
+  current_operation_count: number;
+  pending_operation_count: number;
+  completed_operation_count: number;
+  failed_operation_count: number;
+  created_at: string;
+  operations: QueuedOperation[];
+}
+
+export interface QueuedOperation {
+  id: string;
+  queue_id: string;
+  operation_type: string;
+  priority: 'low' | 'normal' | 'high' | 'critical';
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+  queued_at: string;
+  started_at?: string;
+  completed_at?: string;
+  estimated_duration_seconds?: number;
+  actual_duration_seconds?: number;
+  operation_data: Record<string, unknown>;
+  dependencies?: string[];
+}
+
+// Query parameter types for batch operations
+export interface BatchOperationQueryParams
+  extends PaginationParams,
+    SortParams {
+  status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  operation_type?:
+    | 'power'
+    | 'configuration'
+    | 'deployment'
+    | 'cleanup'
+    | 'backup';
+  target_type?: 'vms' | 'vdcs' | 'organizations';
+  created_by?: string;
+  date_from?: string;
+  date_to?: string;
+}
+
+export interface DeploymentTemplateQueryParams
+  extends PaginationParams,
+    SortParams {
+  template_type?: 'vm' | 'vapp' | 'vdc';
+  category?: 'development' | 'testing' | 'production' | 'custom';
+  is_shared?: boolean;
+  created_by?: string;
+  tags?: string[];
+}
+
+export interface ScheduledOperationQueryParams
+  extends PaginationParams,
+    SortParams {
+  operation_type?:
+    | 'power'
+    | 'backup'
+    | 'maintenance'
+    | 'cleanup'
+    | 'deployment';
+  is_enabled?: boolean;
+  created_by?: string;
+}
+
+export interface AutomationWorkflowQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  workflow_type?: 'sequential' | 'parallel' | 'conditional';
+  trigger_type?: 'manual' | 'event' | 'schedule';
+  status?: 'active' | 'disabled' | 'error';
+  is_enabled?: boolean;
+  created_by?: string;
+}
+
+// Request types for creating batch operations
+export interface CreateBatchOperationRequest {
+  name: string;
+  description?: string;
+  operation_type:
+    | 'power'
+    | 'configuration'
+    | 'deployment'
+    | 'cleanup'
+    | 'backup';
+  operation_config: Record<string, unknown>;
+  target_type: 'vms' | 'vdcs' | 'organizations';
+  target_ids?: string[];
+  target_filters?: OperationTargetFilter[];
+  schedule_at?: string; // ISO datetime for scheduled execution
+}
+
+export interface CreateDeploymentTemplateRequest {
+  name: string;
+  description?: string;
+  template_type: 'vm' | 'vapp' | 'vdc';
+  category: 'development' | 'testing' | 'production' | 'custom';
+  is_shared?: boolean;
+  configuration: DeploymentTemplateConfig;
+  tags?: string[];
+}
+
+export interface CreateScheduledOperationRequest {
+  name: string;
+  description?: string;
+  operation_type: 'power' | 'backup' | 'maintenance' | 'cleanup' | 'deployment';
+  schedule_expression: string;
+  target_type: 'vms' | 'vdcs' | 'organizations';
+  target_filters: OperationTargetFilter[];
+  operation_config: Record<string, unknown>;
+  is_enabled?: boolean;
+}
+
+export interface CreateAutomationWorkflowRequest {
+  name: string;
+  description?: string;
+  workflow_type: 'sequential' | 'parallel' | 'conditional';
+  trigger_type: 'manual' | 'event' | 'schedule';
+  trigger_config?: WorkflowTriggerConfig;
+  steps: Omit<WorkflowStep, 'id'>[];
+  is_enabled?: boolean;
 }

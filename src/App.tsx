@@ -21,6 +21,14 @@ import {
   ExportReports,
   CustomDashboards,
 } from './pages/monitoring';
+import {
+  Automation,
+  BatchOperations,
+  DeploymentTemplates,
+  ScheduledOperations,
+  AutomationWorkflows,
+  OperationQueues,
+} from './pages/automation';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -310,6 +318,68 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <AppLayout>
                       <CustomDashboards />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Automation Routes */}
+              <Route
+                path={ROUTES.AUTOMATION}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Automation />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.AUTOMATION_BATCH_OPERATIONS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <BatchOperations />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.AUTOMATION_DEPLOYMENT_TEMPLATES}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <DeploymentTemplates />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.AUTOMATION_SCHEDULED_OPERATIONS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ScheduledOperations />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.AUTOMATION_WORKFLOWS}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <AutomationWorkflows />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.AUTOMATION_QUEUES}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <OperationQueues />
                     </AppLayout>
                   </ProtectedRoute>
                 }
