@@ -53,25 +53,30 @@ import {
   TimesIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../hooks';
+import {
+  useAuth,
+  useUserPreferences,
+  useUpdateUserPreferences,
+  useChangePassword,
+  useSecuritySettings,
+  useUpdateSecuritySetting,
+} from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
 import { handleFormError } from '../../utils/errorHandler';
 import { AuthService } from '../../services/api';
+import type {
+  UserPreferences,
+  UpdatePreferencesRequest,
+  ChangePasswordRequest,
+  SecuritySetting,
+  UpdateSecuritySettingRequest,
+} from '../../types';
 
 interface UserProfileData {
   first_name: string;
   last_name: string;
   email: string;
-}
-
-interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
-  timezone: string;
-  notifications_email: boolean;
-  notifications_browser: boolean;
-  session_timeout: number;
 }
 
 interface PasswordChangeData {
@@ -89,14 +94,6 @@ interface ActivityItem {
   user_agent: string;
 }
 
-interface SecuritySetting {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  last_used?: string;
-}
-
 interface Notification {
   id: string;
   variant: 'success' | 'danger' | 'warning' | 'info';
@@ -107,6 +104,14 @@ interface Notification {
 
 const UserProfile: React.FC = () => {
   const { user, isLoading } = useAuth();
+
+  // API hooks
+  const { data: userPreferencesData } = useUserPreferences();
+  const { data: securitySettingsData } = useSecuritySettings();
+  const updatePreferencesMutation = useUpdateUserPreferences();
+  const changePasswordMutation = useChangePassword();
+  const updateSecuritySettingMutation = useUpdateSecuritySetting();
+
   const [activeTabKey, setActiveTabKey] = useState<string>('profile');
 
   // Notifications state
@@ -130,9 +135,16 @@ const UserProfile: React.FC = () => {
     theme: 'auto',
     language: 'en',
     timezone: 'UTC',
-    notifications_email: true,
-    notifications_browser: false,
-    session_timeout: 30,
+    date_format: 'MM/dd/yyyy',
+    time_format: '12h',
+    notifications: {
+      email: true,
+      browser: false,
+      vm_state_changes: true,
+      system_maintenance: true,
+    },
+    default_items_per_page: 20,
+    auto_refresh_interval: 30000,
   });
   const [preferencesHasChanges, setPreferencesHasChanges] = useState(false);
   const [originalPreferences, setOriginalPreferences] =
@@ -184,27 +196,9 @@ const UserProfile: React.FC = () => {
   ]);
 
   // Security settings state
-  const [securitySettings, setSecuritySettings] = useState<SecuritySetting[]>([
-    {
-      id: 'two_factor',
-      name: 'Two-Factor Authentication',
-      description: 'Add an extra layer of security to your account',
-      enabled: false,
-    },
-    {
-      id: 'session_security',
-      name: 'Enhanced Session Security',
-      description: 'Require re-authentication for sensitive operations',
-      enabled: true,
-    },
-    {
-      id: 'login_alerts',
-      name: 'Login Alerts',
-      description: 'Get notified of new login attempts',
-      enabled: true,
-      last_used: '2024-01-15T10:30:00Z',
-    },
-  ]);
+  const [securitySettings, setSecuritySettings] = useState<SecuritySetting[]>(
+    []
+  );
 
   // Initialize profile data when user loads
   useEffect(() => {
@@ -219,26 +213,20 @@ const UserProfile: React.FC = () => {
     }
   }, [user]);
 
-  // Initialize preferences (in real app, this would come from API)
+  // Initialize preferences from API
   useEffect(() => {
-    // Load user preferences from API/localStorage
-    const savedPrefs = localStorage.getItem('user_preferences');
-    if (savedPrefs) {
-      const parsed = JSON.parse(savedPrefs);
-      setPreferences(parsed);
-      setOriginalPreferences(parsed);
-    } else {
-      const defaultPrefs = {
-        theme: 'auto' as const,
-        language: 'en',
-        timezone: 'UTC',
-        notifications_email: true,
-        notifications_browser: false,
-        session_timeout: 30,
-      };
-      setOriginalPreferences(defaultPrefs);
+    if (userPreferencesData) {
+      setPreferences(userPreferencesData);
+      setOriginalPreferences(userPreferencesData);
     }
-  }, []);
+  }, [userPreferencesData]);
+
+  // Initialize security settings from API
+  useEffect(() => {
+    if (securitySettingsData) {
+      setSecuritySettings(securitySettingsData);
+    }
+  }, [securitySettingsData]);
 
   // Track profile changes
   useEffect(() => {
@@ -415,11 +403,11 @@ const UserProfile: React.FC = () => {
     event.preventDefault();
 
     try {
-      // TODO: Call API to update preferences
-      console.log('Updating preferences:', preferences);
+      const updateRequest: UpdatePreferencesRequest = {
+        preferences: preferences,
+      };
 
-      // Save to localStorage as fallback
-      localStorage.setItem('user_preferences', JSON.stringify(preferences));
+      await updatePreferencesMutation.mutateAsync(updateRequest);
 
       setOriginalPreferences({ ...preferences });
       setPreferencesHasChanges(false);
@@ -435,7 +423,11 @@ const UserProfile: React.FC = () => {
         'Preferences Update',
         'Failed to update preferences'
       );
-      alert(errorMessage);
+      addNotification({
+        variant: 'danger',
+        title: 'Preferences Update Failed',
+        message: errorMessage,
+      });
     }
   };
 
@@ -447,8 +439,12 @@ const UserProfile: React.FC = () => {
     }
 
     try {
-      // TODO: Call API to change password
-      console.log('Changing password...');
+      const changeRequest: ChangePasswordRequest = {
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+      };
+
+      await changePasswordMutation.mutateAsync(changeRequest);
 
       // Reset form and close modal
       setPasswordData({
@@ -933,11 +929,14 @@ const UserProfile: React.FC = () => {
                                 <Switch
                                   id="notifications-email"
                                   label="Enabled"
-                                  isChecked={preferences.notifications_email}
+                                  isChecked={preferences.notifications.email}
                                   onChange={(_, checked) =>
                                     setPreferences((prev) => ({
                                       ...prev,
-                                      notifications_email: checked,
+                                      notifications: {
+                                        ...prev.notifications,
+                                        email: checked,
+                                      },
                                     }))
                                   }
                                 />
@@ -952,11 +951,14 @@ const UserProfile: React.FC = () => {
                                 <Switch
                                   id="notifications-browser"
                                   label="Enabled"
-                                  isChecked={preferences.notifications_browser}
+                                  isChecked={preferences.notifications.browser}
                                   onChange={(_, checked) =>
                                     setPreferences((prev) => ({
                                       ...prev,
-                                      notifications_browser: checked,
+                                      notifications: {
+                                        ...prev.notifications,
+                                        browser: checked,
+                                      },
                                     }))
                                   }
                                 />
@@ -1057,24 +1059,36 @@ const UserProfile: React.FC = () => {
                                     id={setting.id}
                                     label="Enabled"
                                     isChecked={setting.enabled}
-                                    onChange={(_, checked) => {
-                                      // Update security setting
-                                      setSecuritySettings((prev) =>
-                                        prev.map((s) =>
-                                          s.id === setting.id
-                                            ? {
-                                                ...s,
-                                                enabled: checked,
-                                                last_used: checked
-                                                  ? new Date().toISOString()
-                                                  : s.last_used,
-                                              }
-                                            : s
-                                        )
-                                      );
+                                    onChange={async (_, checked) => {
+                                      try {
+                                        const updateRequest: UpdateSecuritySettingRequest =
+                                          {
+                                            setting_id: setting.id,
+                                            enabled: checked,
+                                          };
 
-                                      // TODO: Call API to persist security setting change
-                                      // await SecurityService.updateSetting(setting.id, checked);
+                                        await updateSecuritySettingMutation.mutateAsync(
+                                          updateRequest
+                                        );
+
+                                        addNotification({
+                                          variant: 'success',
+                                          title: 'Security Setting Updated',
+                                          message: `${setting.name} has been ${checked ? 'enabled' : 'disabled'}.`,
+                                        });
+                                      } catch (error) {
+                                        const errorMessage = handleFormError(
+                                          error,
+                                          'Security Setting Update',
+                                          'Failed to update security setting'
+                                        );
+                                        addNotification({
+                                          variant: 'danger',
+                                          title:
+                                            'Security Setting Update Failed',
+                                          message: errorMessage,
+                                        });
+                                      }
                                     }}
                                   />
                                 </SplitItem>

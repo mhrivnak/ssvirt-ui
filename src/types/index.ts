@@ -74,6 +74,45 @@ export interface UpdateUserRoleRequest {
   role: 'admin' | 'user' | 'viewer';
 }
 
+// User profile management types
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'auto';
+  language: string;
+  timezone: string;
+  date_format: string;
+  time_format: '12h' | '24h';
+  notifications: {
+    email: boolean;
+    browser: boolean;
+    vm_state_changes: boolean;
+    system_maintenance: boolean;
+  };
+  default_items_per_page: number;
+  auto_refresh_interval: number;
+}
+
+export interface UpdatePreferencesRequest {
+  preferences: Partial<UserPreferences>;
+}
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export interface SecuritySetting {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  last_used: string;
+}
+
+export interface UpdateSecuritySettingRequest {
+  setting_id: string;
+  enabled: boolean;
+}
+
 // VDC user management types
 export interface VDCUser extends User {
   role: 'admin' | 'user' | 'viewer';
@@ -383,6 +422,8 @@ export const QUERY_KEYS = {
   // Auth
   session: ['auth', 'session'] as const,
   userProfile: ['auth', 'user'] as const,
+  userPreferences: ['auth', 'user', 'preferences'] as const,
+  securitySettings: ['auth', 'user', 'security'] as const,
 
   // Dashboard
   dashboardStats: ['dashboard', 'stats'] as const,
