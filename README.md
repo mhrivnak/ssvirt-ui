@@ -176,34 +176,25 @@ kubectl port-forward svc/ssvirt-ui 8080:8080
 
 ### Configuration
 
-#### Method 1: Environment Variables (Default)
-The deployment uses environment variables for configuration:
+The deployment uses environment variables from a ConfigMap for configuration:
 
 ```yaml
-env:
-- name: API_BASE_URL
-  value: "http://ssvirt-backend:8080/api"
-- name: APP_TITLE
-  value: "SSVIRT Web UI"
+envFrom:
+- configMapRef:
+    name: ssvirt-ui-config
 ```
 
-Edit the deployment to match your environment:
+Edit the ConfigMap to match your environment:
 
 ```bash
-kubectl edit deployment ssvirt-ui
-```
-
-#### Method 2: ConfigMap (Advanced)
-For more complex configurations, use the provided ConfigMap:
-
-```bash
-# Edit the configuration
 kubectl edit configmap ssvirt-ui-config
-
-# Update the deployment to use the ConfigMap
-# (Uncomment the volumes and volumeMounts sections in deployment.yaml)
-kubectl apply -f k8s/deployment.yaml
 ```
+
+Available configuration options:
+- `API_BASE_URL`: Backend API endpoint URL (default: "http://ssvirt-backend:8080/api")
+- `APP_TITLE`: Application title (default: "SSVIRT Web UI")
+- `APP_VERSION`: Application version (default: "1.0.0")
+- `LOGO_URL`: Logo image URL (default: "/vite.svg")
 
 ### Customization Examples
 
@@ -282,7 +273,7 @@ kubectl exec -it deployment/ssvirt-ui -- curl http://ssvirt-backend:8080/health
 
 #### Debug configuration:
 ```bash
-kubectl exec -it deployment/ssvirt-ui -- cat /opt/app-root/src/dist/config.json
+kubectl exec -it deployment/ssvirt-ui -- env | grep -E "(API_BASE_URL|APP_TITLE|APP_VERSION|LOGO_URL)"
 ```
 
 ### Scripts

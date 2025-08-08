@@ -23,11 +23,9 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
-        env:
-        - name: API_BASE_URL
-          value: "http://ssvirt-backend:8080/api"
-        - name: APP_TITLE
-          value: "SSVIRT Web UI"
+        envFrom:
+        - configMapRef:
+            name: ssvirt-ui-config
         resources:
           requests:
             memory: "128Mi"
