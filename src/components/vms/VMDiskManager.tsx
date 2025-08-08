@@ -96,7 +96,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   const [showAddDiskModal, setShowAddDiskModal] = useState(false);
   const [editingDisk, setEditingDisk] = useState<VMDisk | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [currentValidationErrors, setCurrentValidationErrors] = useState<string[]>([]);
+  const [currentValidationErrors, setCurrentValidationErrors] = useState<
+    string[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [diskToRemove, setDiskToRemove] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -115,7 +117,10 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   const [isBusTypeSelectOpen, setIsBusTypeSelectOpen] = useState(false);
 
   // Deep equality check for disk arrays
-  const compareDisks = (currentDisks: VMDisk[], originalDisks: VMDisk[]): boolean => {
+  const compareDisks = (
+    currentDisks: VMDisk[],
+    originalDisks: VMDisk[]
+  ): boolean => {
     if (currentDisks.length !== originalDisks.length) {
       return false;
     }
@@ -166,8 +171,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     // Check for duplicate names
     if (
       disks.some(
-        (disk) =>
-          disk.name === diskName.trim() && disk.id !== editingDisk?.id
+        (disk) => disk.name === diskName.trim() && disk.id !== editingDisk?.id
       )
     ) {
       errors.push('A disk with this name already exists');
@@ -177,10 +181,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   };
 
   // Real-time validation function
-  const validateCurrentInput = (
-    diskName: string,
-    diskSize: number
-  ): void => {
+  const validateCurrentInput = (diskName: string, diskSize: number): void => {
     const errors = validateDiskConfiguration(diskName, diskSize);
     setCurrentValidationErrors(errors);
   };
