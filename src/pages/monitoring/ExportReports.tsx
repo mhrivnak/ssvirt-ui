@@ -51,11 +51,11 @@ import {
   TimesIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { 
-  useExportJobs, 
-  useRequestExport, 
+import {
+  useExportJobs,
+  useRequestExport,
   useCancelExportJob,
-  useDownloadExportFile
+  useDownloadExportFile,
 } from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
@@ -73,8 +73,16 @@ const ExportReports: React.FC = () => {
   const [showCreateExportModal, setShowCreateExportModal] = useState(false);
 
   // Create export form state
-  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'pdf' | 'json'>('csv');
-  const [exportDataType, setExportDataType] = useState<'resource_usage' | 'cost_report' | 'capacity_planning' | 'alerts' | 'dashboard'>('resource_usage');
+  const [exportFormat, setExportFormat] = useState<
+    'csv' | 'xlsx' | 'pdf' | 'json'
+  >('csv');
+  const [exportDataType, setExportDataType] = useState<
+    | 'resource_usage'
+    | 'cost_report'
+    | 'capacity_planning'
+    | 'alerts'
+    | 'dashboard'
+  >('resource_usage');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [includeCharts, setIncludeCharts] = useState(false);
@@ -124,7 +132,7 @@ const ExportReports: React.FC = () => {
         include_charts: includeCharts,
         include_raw_data: includeRawData,
       });
-      
+
       // Reset form and close modal
       setStartDate('');
       setEndDate('');
@@ -149,7 +157,7 @@ const ExportReports: React.FC = () => {
   const handleDownloadFile = async (jobId: string) => {
     try {
       const blob = await downloadFileMutation.mutateAsync(jobId);
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -215,8 +223,9 @@ const ExportReports: React.FC = () => {
                 Export Reports & Data
               </Title>
               <p>
-                Export monitoring data, reports, and analytics in various formats.
-                Schedule exports and download files when processing is complete.
+                Export monitoring data, reports, and analytics in various
+                formats. Schedule exports and download files when processing is
+                complete.
               </p>
             </SplitItem>
             <SplitItem>
@@ -257,18 +266,24 @@ const ExportReports: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
+                          onClick={() =>
+                            setIsStatusFilterOpen(!isStatusFilterOpen)
+                          }
                           isExpanded={isStatusFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          {statusFilter ? `Status: ${statusFilter}` : 'All Statuses'}
+                          {statusFilter
+                            ? `Status: ${statusFilter}`
+                            : 'All Statuses'}
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="">All Statuses</SelectOption>
                         <SelectOption value="pending">Pending</SelectOption>
-                        <SelectOption value="processing">Processing</SelectOption>
+                        <SelectOption value="processing">
+                          Processing
+                        </SelectOption>
                         <SelectOption value="completed">Completed</SelectOption>
                         <SelectOption value="failed">Failed</SelectOption>
                       </SelectList>
@@ -322,7 +337,7 @@ const ExportReports: React.FC = () => {
                       ? 'No export jobs match your current filters.'
                       : 'No export jobs have been created yet. Create your first export to download monitoring data.'}
                   </EmptyStateBody>
-                  {(searchValue || statusFilter) ? (
+                  {searchValue || statusFilter ? (
                     <EmptyStateActions>
                       <Button variant="primary" onClick={clearFilters}>
                         Clear filters
@@ -330,7 +345,10 @@ const ExportReports: React.FC = () => {
                     </EmptyStateActions>
                   ) : (
                     <EmptyStateActions>
-                      <Button variant="primary" onClick={() => setShowCreateExportModal(true)}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowCreateExportModal(true)}
+                      >
                         Create Export
                       </Button>
                     </EmptyStateActions>
@@ -369,9 +387,7 @@ const ExportReports: React.FC = () => {
                         </Stack>
                       </Td>
                       <Td>
-                        <Badge 
-                          color={getStatusColor(job.status)}
-                        >
+                        <Badge color={getStatusColor(job.status)}>
                           {job.status.toUpperCase()}
                         </Badge>
                       </Td>
@@ -394,11 +410,15 @@ const ExportReports: React.FC = () => {
                         )}
                       </Td>
                       <Td>
-                        <small>{new Date(job.created_at).toLocaleString()}</small>
+                        <small>
+                          {new Date(job.created_at).toLocaleString()}
+                        </small>
                       </Td>
                       <Td>
                         {job.expires_at ? (
-                          <small>{new Date(job.expires_at).toLocaleDateString()}</small>
+                          <small>
+                            {new Date(job.expires_at).toLocaleDateString()}
+                          </small>
                         ) : (
                           <span className="pf-v6-u-color-200">-</span>
                         )}
@@ -410,18 +430,24 @@ const ExportReports: React.FC = () => {
                               title: 'Download',
                               icon: <DownloadIcon />,
                               onClick: () => handleDownloadFile(job.id),
-                              isDisabled: job.status !== 'completed' || !job.file_url,
+                              isDisabled:
+                                job.status !== 'completed' || !job.file_url,
                             },
                             {
                               title: 'Cancel',
                               icon: <TimesIcon />,
                               onClick: () => handleCancelJob(job.id),
-                              isDisabled: job.status === 'completed' || job.status === 'failed',
+                              isDisabled:
+                                job.status === 'completed' ||
+                                job.status === 'failed',
                             },
-                          ].filter(item => 
-                            job.status === 'completed' ? item.title === 'Download' : 
-                            (job.status === 'pending' || job.status === 'processing') ? item.title === 'Cancel' : 
-                            false
+                          ].filter((item) =>
+                            job.status === 'completed'
+                              ? item.title === 'Download'
+                              : job.status === 'pending' ||
+                                  job.status === 'processing'
+                                ? item.title === 'Cancel'
+                                : false
                           )}
                         />
                       </Td>
@@ -463,7 +489,16 @@ const ExportReports: React.FC = () => {
             <Select
               isOpen={false}
               selected={exportDataType}
-              onSelect={(_, selection) => setExportDataType(selection as 'resource_usage' | 'cost_report' | 'capacity_planning' | 'alerts' | 'dashboard')}
+              onSelect={(_, selection) =>
+                setExportDataType(
+                  selection as
+                    | 'resource_usage'
+                    | 'cost_report'
+                    | 'capacity_planning'
+                    | 'alerts'
+                    | 'dashboard'
+                )
+              }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {getDataTypeLabel(exportDataType)}
@@ -471,9 +506,13 @@ const ExportReports: React.FC = () => {
               )}
             >
               <SelectList>
-                <SelectOption value="resource_usage">Resource Usage</SelectOption>
+                <SelectOption value="resource_usage">
+                  Resource Usage
+                </SelectOption>
                 <SelectOption value="cost_report">Cost Reports</SelectOption>
-                <SelectOption value="capacity_planning">Capacity Planning</SelectOption>
+                <SelectOption value="capacity_planning">
+                  Capacity Planning
+                </SelectOption>
                 <SelectOption value="alerts">Usage Alerts</SelectOption>
                 <SelectOption value="dashboard">Dashboard Data</SelectOption>
               </SelectList>
@@ -484,7 +523,9 @@ const ExportReports: React.FC = () => {
             <Select
               isOpen={false}
               selected={exportFormat}
-              onSelect={(_, selection) => setExportFormat(selection as 'csv' | 'xlsx' | 'pdf' | 'json')}
+              onSelect={(_, selection) =>
+                setExportFormat(selection as 'csv' | 'xlsx' | 'pdf' | 'json')
+              }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {exportFormat.toUpperCase()}
@@ -533,7 +574,7 @@ const ExportReports: React.FC = () => {
               label="Include raw data points"
             />
           </FormGroup>
-          
+
           <div className="pf-v6-u-mt-lg">
             <Button
               variant="primary"
@@ -544,7 +585,10 @@ const ExportReports: React.FC = () => {
             >
               Create Export
             </Button>
-            <Button variant="link" onClick={() => setShowCreateExportModal(false)}>
+            <Button
+              variant="link"
+              onClick={() => setShowCreateExportModal(false)}
+            >
               Cancel
             </Button>
           </div>
@@ -569,7 +613,6 @@ function getStatusColor(status: string): string {
       return 'grey';
   }
 }
-
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';

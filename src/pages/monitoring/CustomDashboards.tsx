@@ -49,12 +49,12 @@ import {
   TrashIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { 
-  useCustomDashboards, 
+import {
+  useCustomDashboards,
   useCreateCustomDashboard,
   useUpdateCustomDashboard,
   useDeleteCustomDashboard,
-  useCloneCustomDashboard
+  useCloneCustomDashboard,
 } from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
@@ -68,7 +68,8 @@ const CustomDashboards: React.FC = () => {
   // UI state
   const [isSharedFilterOpen, setIsSharedFilterOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingDashboard, setEditingDashboard] = useState<CustomDashboard | null>(null);
+  const [editingDashboard, setEditingDashboard] =
+    useState<CustomDashboard | null>(null);
 
   // Create/edit dashboard form state
   const [dashboardName, setDashboardName] = useState('');
@@ -81,7 +82,11 @@ const CustomDashboards: React.FC = () => {
     is_shared: filterShared ? filterShared === 'true' : undefined,
   };
 
-  const { data: dashboardsResponse, isLoading, error } = useCustomDashboards(queryParams);
+  const {
+    data: dashboardsResponse,
+    isLoading,
+    error,
+  } = useCustomDashboards(queryParams);
   const createDashboardMutation = useCreateCustomDashboard();
   const updateDashboardMutation = useUpdateCustomDashboard();
   const deleteDashboardMutation = useDeleteCustomDashboard();
@@ -120,7 +125,7 @@ const CustomDashboards: React.FC = () => {
         is_shared: dashboardShared,
         is_default: dashboardDefault,
       });
-      
+
       resetForm();
       setShowCreateModal(false);
     } catch (error) {
@@ -141,7 +146,7 @@ const CustomDashboards: React.FC = () => {
           is_default: dashboardDefault,
         },
       });
-      
+
       resetForm();
       setEditingDashboard(null);
     } catch (error) {
@@ -160,11 +165,17 @@ const CustomDashboards: React.FC = () => {
   };
 
   const handleCloneDashboard = async (dashboardId: string, name: string) => {
-    const cloneName = prompt('Enter name for cloned dashboard:', `${name} (Copy)`);
+    const cloneName = prompt(
+      'Enter name for cloned dashboard:',
+      `${name} (Copy)`
+    );
     if (!cloneName) return;
 
     try {
-      await cloneDashboardMutation.mutateAsync({ dashboardId, name: cloneName });
+      await cloneDashboardMutation.mutateAsync({
+        dashboardId,
+        name: cloneName,
+      });
     } catch (error) {
       console.error('Failed to clone dashboard:', error);
     }
@@ -194,7 +205,8 @@ const CustomDashboards: React.FC = () => {
           title="Error loading custom dashboards"
           isInline
         >
-          {error.message || 'Failed to load custom dashboards. Please try again.'}
+          {error.message ||
+            'Failed to load custom dashboards. Please try again.'}
         </Alert>
       </PageSection>
     );
@@ -209,11 +221,12 @@ const CustomDashboards: React.FC = () => {
   }
 
   const dashboards = dashboardsResponse?.data || [];
-  
+
   // Filter dashboards by search term
-  const filteredDashboards = dashboards.filter(dashboard =>
-    dashboard.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-    dashboard.description.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredDashboards = dashboards.filter(
+    (dashboard) =>
+      dashboard.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      dashboard.description.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   return (
@@ -283,7 +296,9 @@ const CustomDashboards: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsSharedFilterOpen(!isSharedFilterOpen)}
+                          onClick={() =>
+                            setIsSharedFilterOpen(!isSharedFilterOpen)
+                          }
                           isExpanded={isSharedFilterOpen}
                           icon={<FilterIcon />}
                         >
@@ -333,7 +348,7 @@ const CustomDashboards: React.FC = () => {
                       ? 'No dashboards match your current filters. Try adjusting your search criteria.'
                       : 'No custom dashboards have been created yet. Create your first dashboard to get started.'}
                   </EmptyStateBody>
-                  {(searchValue || filterShared) ? (
+                  {searchValue || filterShared ? (
                     <EmptyStateActions>
                       <Button variant="primary" onClick={clearFilters}>
                         Clear filters
@@ -341,7 +356,10 @@ const CustomDashboards: React.FC = () => {
                     </EmptyStateActions>
                   ) : (
                     <EmptyStateActions>
-                      <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowCreateModal(true)}
+                      >
                         Create Dashboard
                       </Button>
                     </EmptyStateActions>
@@ -352,7 +370,11 @@ const CustomDashboards: React.FC = () => {
           ) : (
             <Gallery hasGutter minWidths={{ default: '350px' }}>
               {filteredDashboards.map((dashboard) => (
-                <Card key={dashboard.id} isSelectable style={{ cursor: 'pointer' }}>
+                <Card
+                  key={dashboard.id}
+                  isSelectable
+                  style={{ cursor: 'pointer' }}
+                >
                   <CardBody>
                     <Stack hasGutter>
                       <StackItem>
@@ -367,16 +389,16 @@ const CustomDashboards: React.FC = () => {
                               <Badge color="blue">Default</Badge>
                             )}
                             {dashboard.is_shared && (
-                              <Badge color="green">
-                                Shared
-                              </Badge>
+                              <Badge color="green">Shared</Badge>
                             )}
                           </SplitItem>
                         </Split>
                       </StackItem>
 
                       <StackItem>
-                        <p>{dashboard.description || 'No description available.'}</p>
+                        <p>
+                          {dashboard.description || 'No description available.'}
+                        </p>
                       </StackItem>
 
                       <StackItem>
@@ -398,7 +420,8 @@ const CustomDashboards: React.FC = () => {
 
                       <StackItem>
                         <small className="pf-v6-u-color-200">
-                          Created: {new Date(dashboard.created_at).toLocaleDateString()}
+                          Created:{' '}
+                          {new Date(dashboard.created_at).toLocaleDateString()}
                         </small>
                       </StackItem>
 
@@ -433,7 +456,10 @@ const CustomDashboards: React.FC = () => {
                               icon={<CopyIcon />}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleCloneDashboard(dashboard.id, dashboard.name);
+                                handleCloneDashboard(
+                                  dashboard.id,
+                                  dashboard.name
+                                );
                               }}
                               aria-label={`Clone ${dashboard.name}`}
                             />
@@ -467,9 +493,9 @@ const CustomDashboards: React.FC = () => {
             title="Dashboard Builder Coming Soon"
             isInline
           >
-            The interactive dashboard builder with drag-and-drop widgets, custom charts,
-            and advanced layout options is currently in development. For now, you can
-            create and manage basic dashboard configurations.
+            The interactive dashboard builder with drag-and-drop widgets, custom
+            charts, and advanced layout options is currently in development. For
+            now, you can create and manage basic dashboard configurations.
           </Alert>
         </StackItem>
       </Stack>
@@ -495,7 +521,7 @@ const CustomDashboards: React.FC = () => {
               placeholder="Enter dashboard name"
             />
           </FormGroup>
-          
+
           <FormGroup label="Description" fieldId="dashboard-description">
             <TextArea
               id="dashboard-description"
@@ -523,19 +549,24 @@ const CustomDashboards: React.FC = () => {
               label="Set as default dashboard"
             />
           </FormGroup>
-          
+
           <div className="pf-v6-u-mt-lg">
             <Button
               variant="primary"
-              onClick={editingDashboard ? handleUpdateDashboard : handleCreateDashboard}
-              isLoading={createDashboardMutation.isPending || updateDashboardMutation.isPending}
+              onClick={
+                editingDashboard ? handleUpdateDashboard : handleCreateDashboard
+              }
+              isLoading={
+                createDashboardMutation.isPending ||
+                updateDashboardMutation.isPending
+              }
               isDisabled={!dashboardName}
               className="pf-v6-u-mr-sm"
             >
               {editingDashboard ? 'Update Dashboard' : 'Create Dashboard'}
             </Button>
-            <Button 
-              variant="link" 
+            <Button
+              variant="link"
               onClick={() => {
                 setShowCreateModal(false);
                 setEditingDashboard(null);

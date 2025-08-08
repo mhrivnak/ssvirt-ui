@@ -43,7 +43,9 @@ import type { MenuToggleElement } from '@patternfly/react-core';
 
 const ResourceMonitoring: React.FC = () => {
   // Filter and time range state
-  const [timePeriod, setTimePeriod] = useState<'hourly' | 'daily' | 'weekly' | 'monthly'>('daily');
+  const [timePeriod, setTimePeriod] = useState<
+    'hourly' | 'daily' | 'weekly' | 'monthly'
+  >('daily');
   const [selectedOrg, setSelectedOrg] = useState<string>('');
   const [isTimePeriodOpen, setIsTimePeriodOpen] = useState(false);
   const [isOrgFilterOpen, setIsOrgFilterOpen] = useState(false);
@@ -56,7 +58,11 @@ const ResourceMonitoring: React.FC = () => {
     end_date: new Date().toISOString(),
   };
 
-  const { data: resourceData, isLoading, error } = useGlobalResourceUsage(queryParams);
+  const {
+    data: resourceData,
+    isLoading,
+    error,
+  } = useGlobalResourceUsage(queryParams);
 
   const handleTimePeriodChange = (value: string) => {
     setTimePeriod(value as 'hourly' | 'daily' | 'weekly' | 'monthly');
@@ -106,8 +112,8 @@ const ResourceMonitoring: React.FC = () => {
             No monitoring data available
           </Title>
           <EmptyStateBody>
-            Resource monitoring data is not available yet. Please check back later
-            or contact your administrator.
+            Resource monitoring data is not available yet. Please check back
+            later or contact your administrator.
           </EmptyStateBody>
           <EmptyStateActions>
             <Button variant="primary" onClick={() => window.location.reload()}>
@@ -144,15 +150,15 @@ const ResourceMonitoring: React.FC = () => {
               </Title>
               <p>
                 Monitor resource usage, track costs, and analyze capacity across
-                your infrastructure. View real-time metrics and historical trends
-                for organizations, VDCs, and virtual machines.
+                your infrastructure. View real-time metrics and historical
+                trends for organizations, VDCs, and virtual machines.
               </p>
             </SplitItem>
             <SplitItem>
               <Button
                 variant="secondary"
                 icon={<ExportIcon />}
-                onClick={() => window.location.href = '/monitoring/exports'}
+                onClick={() => (window.location.href = '/monitoring/exports')}
               >
                 Export Reports
               </Button>
@@ -185,10 +191,14 @@ const ResourceMonitoring: React.FC = () => {
                       )}
                     >
                       <SelectList>
-                        <SelectOption value="hourly">Last 24 Hours</SelectOption>
+                        <SelectOption value="hourly">
+                          Last 24 Hours
+                        </SelectOption>
                         <SelectOption value="daily">Last 7 Days</SelectOption>
                         <SelectOption value="weekly">Last 4 Weeks</SelectOption>
-                        <SelectOption value="monthly">Last 12 Months</SelectOption>
+                        <SelectOption value="monthly">
+                          Last 12 Months
+                        </SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
@@ -208,14 +218,19 @@ const ResourceMonitoring: React.FC = () => {
                           isExpanded={isOrgFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          {selectedOrg ? `Organization: ${getOrgName(organizations, selectedOrg)}` : 'All Organizations'}
+                          {selectedOrg
+                            ? `Organization: ${getOrgName(organizations, selectedOrg)}`
+                            : 'All Organizations'}
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="">All Organizations</SelectOption>
                         {organizations.map((org) => (
-                          <SelectOption key={org.organization_id} value={org.organization_id}>
+                          <SelectOption
+                            key={org.organization_id}
+                            value={org.organization_id}
+                          >
                             {org.organization_name}
                           </SelectOption>
                         ))}
@@ -235,7 +250,9 @@ const ResourceMonitoring: React.FC = () => {
                     <Button
                       variant="primary"
                       icon={<ChartLineIcon />}
-                      onClick={() => window.location.href = '/monitoring/capacity-planning'}
+                      onClick={() =>
+                        (window.location.href = '/monitoring/capacity-planning')
+                      }
                     >
                       Capacity Planning
                     </Button>
@@ -256,7 +273,11 @@ const ResourceMonitoring: React.FC = () => {
               <Grid hasGutter>
                 <GridItem span={3}>
                   <div className="pf-v6-u-text-align-center">
-                    <Title headingLevel="h4" size="2xl" className="pf-v6-u-primary-color-100">
+                    <Title
+                      headingLevel="h4"
+                      size="2xl"
+                      className="pf-v6-u-primary-color-100"
+                    >
                       {total_usage.cpu_cores_used}
                     </Title>
                     <p className="pf-v6-u-color-200">CPU Cores Used</p>
@@ -264,7 +285,11 @@ const ResourceMonitoring: React.FC = () => {
                 </GridItem>
                 <GridItem span={3}>
                   <div className="pf-v6-u-text-align-center">
-                    <Title headingLevel="h4" size="2xl" className="pf-v6-u-primary-color-100">
+                    <Title
+                      headingLevel="h4"
+                      size="2xl"
+                      className="pf-v6-u-primary-color-100"
+                    >
                       {Math.round(total_usage.memory_gb_used)}
                     </Title>
                     <p className="pf-v6-u-color-200">GB Memory Used</p>
@@ -272,7 +297,11 @@ const ResourceMonitoring: React.FC = () => {
                 </GridItem>
                 <GridItem span={3}>
                   <div className="pf-v6-u-text-align-center">
-                    <Title headingLevel="h4" size="2xl" className="pf-v6-u-primary-color-100">
+                    <Title
+                      headingLevel="h4"
+                      size="2xl"
+                      className="pf-v6-u-primary-color-100"
+                    >
                       {Math.round(total_usage.storage_gb_used)}
                     </Title>
                     <p className="pf-v6-u-color-200">GB Storage Used</p>
@@ -280,7 +309,11 @@ const ResourceMonitoring: React.FC = () => {
                 </GridItem>
                 <GridItem span={3}>
                   <div className="pf-v6-u-text-align-center">
-                    <Title headingLevel="h4" size="2xl" className="pf-v6-u-primary-color-100">
+                    <Title
+                      headingLevel="h4"
+                      size="2xl"
+                      className="pf-v6-u-primary-color-100"
+                    >
                       {total_usage.vm_count}
                     </Title>
                     <p className="pf-v6-u-color-200">Total VMs</p>
@@ -305,7 +338,9 @@ const ResourceMonitoring: React.FC = () => {
                   <Button
                     variant="link"
                     icon={<InfoCircleIcon />}
-                    onClick={() => window.location.href = '/monitoring/cost-reports'}
+                    onClick={() =>
+                      (window.location.href = '/monitoring/cost-reports')
+                    }
                   >
                     View Cost Reports
                   </Button>
@@ -338,41 +373,62 @@ const ResourceMonitoring: React.FC = () => {
                                 </Link>
                               </Title>
                               <p className="pf-v6-u-color-200">
-                                {org.vdcs.length} VDCs • {org.vdcs.reduce((sum, vdc) => sum + vdc.current_usage.vm_count, 0)} VMs
+                                {org.vdcs.length} VDCs •{' '}
+                                {org.vdcs.reduce(
+                                  (sum, vdc) =>
+                                    sum + vdc.current_usage.vm_count,
+                                  0
+                                )}{' '}
+                                VMs
                               </p>
                             </SplitItem>
                             <SplitItem>
                               <Grid hasGutter>
                                 <GridItem span={4}>
                                   <div>
-                                    <small className="pf-v6-u-color-200">CPU Usage</small>
+                                    <small className="pf-v6-u-color-200">
+                                      CPU Usage
+                                    </small>
                                     <Progress
                                       value={org.current_usage.cpu_cores_used}
                                       max={org.quota_limits.cpu_cores_limit}
                                       title={`${org.current_usage.cpu_cores_used}/${org.quota_limits.cpu_cores_limit} cores`}
-                                      variant={getUsageVariant(org.current_usage.cpu_cores_used, org.quota_limits.cpu_cores_limit)}
+                                      variant={getUsageVariant(
+                                        org.current_usage.cpu_cores_used,
+                                        org.quota_limits.cpu_cores_limit
+                                      )}
                                     />
                                   </div>
                                 </GridItem>
                                 <GridItem span={4}>
                                   <div>
-                                    <small className="pf-v6-u-color-200">Memory Usage</small>
+                                    <small className="pf-v6-u-color-200">
+                                      Memory Usage
+                                    </small>
                                     <Progress
                                       value={org.current_usage.memory_gb_used}
                                       max={org.quota_limits.memory_gb_limit}
                                       title={`${Math.round(org.current_usage.memory_gb_used)}/${org.quota_limits.memory_gb_limit} GB`}
-                                      variant={getUsageVariant(org.current_usage.memory_gb_used, org.quota_limits.memory_gb_limit)}
+                                      variant={getUsageVariant(
+                                        org.current_usage.memory_gb_used,
+                                        org.quota_limits.memory_gb_limit
+                                      )}
                                     />
                                   </div>
                                 </GridItem>
                                 <GridItem span={4}>
                                   <div>
-                                    <small className="pf-v6-u-color-200">Storage Usage</small>
+                                    <small className="pf-v6-u-color-200">
+                                      Storage Usage
+                                    </small>
                                     <Progress
                                       value={org.current_usage.storage_gb_used}
                                       max={org.quota_limits.storage_gb_limit}
                                       title={`${Math.round(org.current_usage.storage_gb_used)}/${org.quota_limits.storage_gb_limit} GB`}
-                                      variant={getUsageVariant(org.current_usage.storage_gb_used, org.quota_limits.storage_gb_limit)}
+                                      variant={getUsageVariant(
+                                        org.current_usage.storage_gb_used,
+                                        org.quota_limits.storage_gb_limit
+                                      )}
                                     />
                                   </div>
                                 </GridItem>
@@ -393,7 +449,10 @@ const ResourceMonitoring: React.FC = () => {
         <StackItem>
           <Grid hasGutter>
             <GridItem span={4}>
-              <Link to="/monitoring/alerts" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link
+                to="/monitoring/alerts"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <Card isClickable>
                   <CardBody>
                     <Split hasGutter>
@@ -405,7 +464,8 @@ const ResourceMonitoring: React.FC = () => {
                           Usage Alerts & Notifications
                         </Title>
                         <p className="pf-v6-u-color-200">
-                          Monitor and manage resource usage alerts and thresholds.
+                          Monitor and manage resource usage alerts and
+                          thresholds.
                         </p>
                       </SplitItem>
                     </Split>
@@ -414,7 +474,10 @@ const ResourceMonitoring: React.FC = () => {
               </Link>
             </GridItem>
             <GridItem span={4}>
-              <Link to="/monitoring/dashboards" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link
+                to="/monitoring/dashboards"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <Card isClickable>
                   <CardBody>
                     <Split hasGutter>
@@ -435,7 +498,10 @@ const ResourceMonitoring: React.FC = () => {
               </Link>
             </GridItem>
             <GridItem span={4}>
-              <Link to="/monitoring/exports" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link
+                to="/monitoring/exports"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <Card isClickable>
                   <CardBody>
                     <Split hasGutter>
@@ -463,7 +529,9 @@ const ResourceMonitoring: React.FC = () => {
 };
 
 // Helper functions
-function getStartDate(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): string {
+function getStartDate(
+  period: 'hourly' | 'daily' | 'weekly' | 'monthly'
+): string {
   const now = new Date();
   switch (period) {
     case 'hourly':
@@ -471,15 +539,21 @@ function getStartDate(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): string
     case 'daily':
       return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     case 'weekly':
-      return new Date(now.getTime() - 4 * 7 * 24 * 60 * 60 * 1000).toISOString();
+      return new Date(
+        now.getTime() - 4 * 7 * 24 * 60 * 60 * 1000
+      ).toISOString();
     case 'monthly':
-      return new Date(now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000).toISOString();
+      return new Date(
+        now.getTime() - 12 * 30 * 24 * 60 * 60 * 1000
+      ).toISOString();
     default:
       return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
   }
 }
 
-function getTimePeriodLabel(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): string {
+function getTimePeriodLabel(
+  period: 'hourly' | 'daily' | 'weekly' | 'monthly'
+): string {
   switch (period) {
     case 'hourly':
       return 'Last 24 Hours';
@@ -494,12 +568,18 @@ function getTimePeriodLabel(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): 
   }
 }
 
-function getOrgName(organizations: { organization_id: string; organization_name: string }[], orgId: string): string {
-  const org = organizations.find(o => o.organization_id === orgId);
+function getOrgName(
+  organizations: { organization_id: string; organization_name: string }[],
+  orgId: string
+): string {
+  const org = organizations.find((o) => o.organization_id === orgId);
   return org?.organization_name || orgId;
 }
 
-function getUsageVariant(used: number, limit: number): 'success' | 'warning' | 'danger' {
+function getUsageVariant(
+  used: number,
+  limit: number
+): 'success' | 'warning' | 'danger' {
   const percentage = (used / limit) * 100;
   if (percentage >= 90) return 'danger';
   if (percentage >= 75) return 'warning';

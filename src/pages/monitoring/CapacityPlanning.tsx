@@ -44,7 +44,10 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { useCapacityPlanningData, useCapacityRecommendations } from '../../hooks/useMonitoring';
+import {
+  useCapacityPlanningData,
+  useCapacityRecommendations,
+} from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { CapacityRecommendation } from '../../types';
@@ -70,8 +73,16 @@ const CapacityPlanning: React.FC = () => {
     vdc_id: selectedVdc || undefined,
   };
 
-  const { data: capacityData, isLoading: capacityLoading, error: capacityError } = useCapacityPlanningData(capacityParams);
-  const { data: recommendationsData, isLoading: recommendationsLoading, error: recommendationsError } = useCapacityRecommendations(recommendationParams);
+  const {
+    data: capacityData,
+    isLoading: capacityLoading,
+    error: capacityError,
+  } = useCapacityPlanningData(capacityParams);
+  const {
+    data: recommendationsData,
+    isLoading: recommendationsLoading,
+    error: recommendationsError,
+  } = useCapacityRecommendations(recommendationParams);
 
   const handleOrgFilterChange = (value: string) => {
     setSelectedOrg(value);
@@ -103,7 +114,9 @@ const CapacityPlanning: React.FC = () => {
           title="Error loading capacity planning data"
           isInline
         >
-          {capacityError?.message || recommendationsError?.message || 'Failed to load capacity planning data. Please try again.'}
+          {capacityError?.message ||
+            recommendationsError?.message ||
+            'Failed to load capacity planning data. Please try again.'}
         </Alert>
       </PageSection>
     );
@@ -169,15 +182,16 @@ const CapacityPlanning: React.FC = () => {
                 Capacity Planning & Forecasting
               </Title>
               <p>
-                Analyze current capacity utilization, forecast future needs, and receive
-                recommendations for optimal resource planning and scaling decisions.
+                Analyze current capacity utilization, forecast future needs, and
+                receive recommendations for optimal resource planning and
+                scaling decisions.
               </p>
             </SplitItem>
             <SplitItem>
               <Button
                 variant="secondary"
                 icon={<TrendUpIcon />}
-                onClick={() => window.location.href = '/monitoring/alerts'}
+                onClick={() => (window.location.href = '/monitoring/alerts')}
               >
                 Usage Alerts
               </Button>
@@ -206,15 +220,21 @@ const CapacityPlanning: React.FC = () => {
                           isExpanded={isOrgFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          {selectedOrg ? `Organization: ${selectedOrg}` : 'All Organizations'}
+                          {selectedOrg
+                            ? `Organization: ${selectedOrg}`
+                            : 'All Organizations'}
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="">All Organizations</SelectOption>
                         {/* TODO: Add organization options from data */}
-                        <SelectOption value="org-1">Example Organization 1</SelectOption>
-                        <SelectOption value="org-2">Example Organization 2</SelectOption>
+                        <SelectOption value="org-1">
+                          Example Organization 1
+                        </SelectOption>
+                        <SelectOption value="org-2">
+                          Example Organization 2
+                        </SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
@@ -299,7 +319,9 @@ const CapacityPlanning: React.FC = () => {
                 <GridItem span={4}>
                   <Panel>
                     <PanelHeader>
-                      <Title headingLevel="h4" size="md">CPU Capacity</Title>
+                      <Title headingLevel="h4" size="md">
+                        CPU Capacity
+                      </Title>
                     </PanelHeader>
                     <PanelMain>
                       <PanelMainBody>
@@ -309,22 +331,38 @@ const CapacityPlanning: React.FC = () => {
                               value={capacity.current_capacity.used_cpu_cores}
                               max={capacity.current_capacity.total_cpu_cores}
                               title={`${capacity.current_capacity.used_cpu_cores}/${capacity.current_capacity.total_cpu_cores} cores`}
-                              variant={getCapacityVariant(capacity.current_capacity.used_cpu_cores, capacity.current_capacity.total_cpu_cores)}
+                              variant={getCapacityVariant(
+                                capacity.current_capacity.used_cpu_cores,
+                                capacity.current_capacity.total_cpu_cores
+                              )}
                               size="lg"
                             />
                           </StackItem>
                           <StackItem>
                             <DescriptionList isCompact>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Available</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Available
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {capacity.current_capacity.total_cpu_cores - capacity.current_capacity.used_cpu_cores} cores
+                                  {capacity.current_capacity.total_cpu_cores -
+                                    capacity.current_capacity
+                                      .used_cpu_cores}{' '}
+                                  cores
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Utilization</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Utilization
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {Math.round((capacity.current_capacity.used_cpu_cores / capacity.current_capacity.total_cpu_cores) * 100)}%
+                                  {Math.round(
+                                    (capacity.current_capacity.used_cpu_cores /
+                                      capacity.current_capacity
+                                        .total_cpu_cores) *
+                                      100
+                                  )}
+                                  %
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                             </DescriptionList>
@@ -338,7 +376,9 @@ const CapacityPlanning: React.FC = () => {
                 <GridItem span={4}>
                   <Panel>
                     <PanelHeader>
-                      <Title headingLevel="h4" size="md">Memory Capacity</Title>
+                      <Title headingLevel="h4" size="md">
+                        Memory Capacity
+                      </Title>
                     </PanelHeader>
                     <PanelMain>
                       <PanelMainBody>
@@ -348,22 +388,39 @@ const CapacityPlanning: React.FC = () => {
                               value={capacity.current_capacity.used_memory_gb}
                               max={capacity.current_capacity.total_memory_gb}
                               title={`${Math.round(capacity.current_capacity.used_memory_gb)}/${capacity.current_capacity.total_memory_gb} GB`}
-                              variant={getCapacityVariant(capacity.current_capacity.used_memory_gb, capacity.current_capacity.total_memory_gb)}
+                              variant={getCapacityVariant(
+                                capacity.current_capacity.used_memory_gb,
+                                capacity.current_capacity.total_memory_gb
+                              )}
                               size="lg"
                             />
                           </StackItem>
                           <StackItem>
                             <DescriptionList isCompact>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Available</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Available
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {Math.round(capacity.current_capacity.total_memory_gb - capacity.current_capacity.used_memory_gb)} GB
+                                  {Math.round(
+                                    capacity.current_capacity.total_memory_gb -
+                                      capacity.current_capacity.used_memory_gb
+                                  )}{' '}
+                                  GB
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Utilization</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Utilization
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {Math.round((capacity.current_capacity.used_memory_gb / capacity.current_capacity.total_memory_gb) * 100)}%
+                                  {Math.round(
+                                    (capacity.current_capacity.used_memory_gb /
+                                      capacity.current_capacity
+                                        .total_memory_gb) *
+                                      100
+                                  )}
+                                  %
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                             </DescriptionList>
@@ -377,7 +434,9 @@ const CapacityPlanning: React.FC = () => {
                 <GridItem span={4}>
                   <Panel>
                     <PanelHeader>
-                      <Title headingLevel="h4" size="md">Storage Capacity</Title>
+                      <Title headingLevel="h4" size="md">
+                        Storage Capacity
+                      </Title>
                     </PanelHeader>
                     <PanelMain>
                       <PanelMainBody>
@@ -387,22 +446,39 @@ const CapacityPlanning: React.FC = () => {
                               value={capacity.current_capacity.used_storage_gb}
                               max={capacity.current_capacity.total_storage_gb}
                               title={`${Math.round(capacity.current_capacity.used_storage_gb)}/${capacity.current_capacity.total_storage_gb} GB`}
-                              variant={getCapacityVariant(capacity.current_capacity.used_storage_gb, capacity.current_capacity.total_storage_gb)}
+                              variant={getCapacityVariant(
+                                capacity.current_capacity.used_storage_gb,
+                                capacity.current_capacity.total_storage_gb
+                              )}
                               size="lg"
                             />
                           </StackItem>
                           <StackItem>
                             <DescriptionList isCompact>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Available</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Available
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {Math.round(capacity.current_capacity.total_storage_gb - capacity.current_capacity.used_storage_gb)} GB
+                                  {Math.round(
+                                    capacity.current_capacity.total_storage_gb -
+                                      capacity.current_capacity.used_storage_gb
+                                  )}{' '}
+                                  GB
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                               <DescriptionListGroup>
-                                <DescriptionListTerm>Utilization</DescriptionListTerm>
+                                <DescriptionListTerm>
+                                  Utilization
+                                </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {Math.round((capacity.current_capacity.used_storage_gb / capacity.current_capacity.total_storage_gb) * 100)}%
+                                  {Math.round(
+                                    (capacity.current_capacity.used_storage_gb /
+                                      capacity.current_capacity
+                                        .total_storage_gb) *
+                                      100
+                                  )}
+                                  %
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                             </DescriptionList>
@@ -427,7 +503,12 @@ const CapacityPlanning: React.FC = () => {
               {recommendations.length === 0 ? (
                 <EmptyState variant="xs">
                   <Bullseye>
-                    <CheckCircleIcon style={{ fontSize: '48px', color: 'var(--pf-v6-global--success-color--100)' }} />
+                    <CheckCircleIcon
+                      style={{
+                        fontSize: '48px',
+                        color: 'var(--pf-v6-global--success-color--100)',
+                      }}
+                    />
                   </Bullseye>
                   <Title headingLevel="h4" size="md">
                     No recommendations at this time
@@ -439,54 +520,78 @@ const CapacityPlanning: React.FC = () => {
                 </EmptyState>
               ) : (
                 <Stack hasGutter>
-                  {recommendations.map((recommendation: CapacityRecommendation) => (
-                    <StackItem key={recommendation.id}>
-                      <Alert
-                        variant={getRecommendationVariant(recommendation.priority)}
-                        title={recommendation.title}
-                        isInline
-                      >
-                        <Stack hasGutter>
-                          <StackItem>
-                            <p>{recommendation.description}</p>
-                          </StackItem>
-                          <StackItem>
-                            <DescriptionList isHorizontal isCompact>
-                              <DescriptionListGroup>
-                                <DescriptionListTerm>Resource Type</DescriptionListTerm>
-                                <DescriptionListDescription>
-                                  <Badge>{recommendation.resource_type.toUpperCase()}</Badge>
-                                </DescriptionListDescription>
-                              </DescriptionListGroup>
-                              <DescriptionListGroup>
-                                <DescriptionListTerm>Priority</DescriptionListTerm>
-                                <DescriptionListDescription>
-                                  <Badge color={getPriorityColor(recommendation.priority)}>
-                                    {recommendation.priority.toUpperCase()}
-                                  </Badge>
-                                </DescriptionListDescription>
-                              </DescriptionListGroup>
-                              <DescriptionListGroup>
-                                <DescriptionListTerm>Cost Impact</DescriptionListTerm>
-                                <DescriptionListDescription>
-                                  ${recommendation.estimated_cost_impact.toLocaleString()}
-                                </DescriptionListDescription>
-                              </DescriptionListGroup>
-                              <DescriptionListGroup>
-                                <DescriptionListTerm>Deadline</DescriptionListTerm>
-                                <DescriptionListDescription>
-                                  {new Date(recommendation.deadline).toLocaleDateString()}
-                                </DescriptionListDescription>
-                              </DescriptionListGroup>
-                            </DescriptionList>
-                          </StackItem>
-                          <StackItem>
-                            <p><strong>Recommended Action:</strong> {recommendation.recommended_action}</p>
-                          </StackItem>
-                        </Stack>
-                      </Alert>
-                    </StackItem>
-                  ))}
+                  {recommendations.map(
+                    (recommendation: CapacityRecommendation) => (
+                      <StackItem key={recommendation.id}>
+                        <Alert
+                          variant={getRecommendationVariant(
+                            recommendation.priority
+                          )}
+                          title={recommendation.title}
+                          isInline
+                        >
+                          <Stack hasGutter>
+                            <StackItem>
+                              <p>{recommendation.description}</p>
+                            </StackItem>
+                            <StackItem>
+                              <DescriptionList isHorizontal isCompact>
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>
+                                    Resource Type
+                                  </DescriptionListTerm>
+                                  <DescriptionListDescription>
+                                    <Badge>
+                                      {recommendation.resource_type.toUpperCase()}
+                                    </Badge>
+                                  </DescriptionListDescription>
+                                </DescriptionListGroup>
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>
+                                    Priority
+                                  </DescriptionListTerm>
+                                  <DescriptionListDescription>
+                                    <Badge
+                                      color={getPriorityColor(
+                                        recommendation.priority
+                                      )}
+                                    >
+                                      {recommendation.priority.toUpperCase()}
+                                    </Badge>
+                                  </DescriptionListDescription>
+                                </DescriptionListGroup>
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>
+                                    Cost Impact
+                                  </DescriptionListTerm>
+                                  <DescriptionListDescription>
+                                    $
+                                    {recommendation.estimated_cost_impact.toLocaleString()}
+                                  </DescriptionListDescription>
+                                </DescriptionListGroup>
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>
+                                    Deadline
+                                  </DescriptionListTerm>
+                                  <DescriptionListDescription>
+                                    {new Date(
+                                      recommendation.deadline
+                                    ).toLocaleDateString()}
+                                  </DescriptionListDescription>
+                                </DescriptionListGroup>
+                              </DescriptionList>
+                            </StackItem>
+                            <StackItem>
+                              <p>
+                                <strong>Recommended Action:</strong>{' '}
+                                {recommendation.recommended_action}
+                              </p>
+                            </StackItem>
+                          </Stack>
+                        </Alert>
+                      </StackItem>
+                    )
+                  )}
                 </Stack>
               )}
             </CardBody>
@@ -505,9 +610,10 @@ const CapacityPlanning: React.FC = () => {
                 title="Growth projection charts"
                 isInline
               >
-                Interactive charts showing projected CPU, memory, and storage usage
-                trends would be displayed here. These charts would visualize the
-                growth_projections data from the API with confidence intervals.
+                Interactive charts showing projected CPU, memory, and storage
+                usage trends would be displayed here. These charts would
+                visualize the growth_projections data from the API with
+                confidence intervals.
               </Alert>
             </CardBody>
           </Card>
@@ -518,14 +624,19 @@ const CapacityPlanning: React.FC = () => {
 };
 
 // Helper functions
-function getCapacityVariant(used: number, total: number): 'success' | 'warning' | 'danger' {
+function getCapacityVariant(
+  used: number,
+  total: number
+): 'success' | 'warning' | 'danger' {
   const percentage = (used / total) * 100;
   if (percentage >= 90) return 'danger';
   if (percentage >= 75) return 'warning';
   return 'success';
 }
 
-function getRecommendationVariant(priority: string): 'success' | 'info' | 'warning' | 'danger' {
+function getRecommendationVariant(
+  priority: string
+): 'success' | 'info' | 'warning' | 'danger' {
   switch (priority) {
     case 'critical':
       return 'danger';

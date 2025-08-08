@@ -49,7 +49,11 @@ import {
   EyeIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { useCostReports, useGenerateCostReport, useDeleteCostReport } from '../../hooks/useMonitoring';
+import {
+  useCostReports,
+  useGenerateCostReport,
+  useDeleteCostReport,
+} from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
 
@@ -70,7 +74,9 @@ const CostReports: React.FC = () => {
   // Create report form state
   const [reportName, setReportName] = useState('');
   const [reportDescription, setReportDescription] = useState('');
-  const [reportPeriod, setReportPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'>('monthly');
+  const [reportPeriod, setReportPeriod] = useState<
+    'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+  >('monthly');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -81,10 +87,20 @@ const CostReports: React.FC = () => {
     sort_by: sortBy,
     sort_order: sortOrder,
     search: searchValue || undefined,
-    period: (filterPeriod as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly') || undefined,
+    period:
+      (filterPeriod as
+        | 'daily'
+        | 'weekly'
+        | 'monthly'
+        | 'quarterly'
+        | 'yearly') || undefined,
   };
 
-  const { data: reportsResponse, isLoading, error } = useCostReports(queryParams);
+  const {
+    data: reportsResponse,
+    isLoading,
+    error,
+  } = useCostReports(queryParams);
   const generateReportMutation = useGenerateCostReport();
   const deleteReportMutation = useDeleteCostReport();
 
@@ -128,7 +144,7 @@ const CostReports: React.FC = () => {
         start_date: startDate,
         end_date: endDate,
       });
-      
+
       // Reset form and close modal
       setReportName('');
       setReportDescription('');
@@ -201,8 +217,9 @@ const CostReports: React.FC = () => {
                 Cost Reports & Analysis
               </Title>
               <p>
-                Track and analyze costs across organizations, VDCs, and virtual machines.
-                Generate detailed reports and monitor spending trends over time.
+                Track and analyze costs across organizations, VDCs, and virtual
+                machines. Generate detailed reports and monitor spending trends
+                over time.
               </p>
             </SplitItem>
             <SplitItem>
@@ -246,18 +263,33 @@ const CostReports: React.FC = () => {
                           onClick={() => setIsSortSelectOpen(!isSortSelectOpen)}
                           isExpanded={isSortSelectOpen}
                         >
-                          Sort by {sortBy === 'created_at' ? 'Created' : sortBy === 'total_cost' ? 'Cost' : 'Name'}{' '}
+                          Sort by{' '}
+                          {sortBy === 'created_at'
+                            ? 'Created'
+                            : sortBy === 'total_cost'
+                              ? 'Cost'
+                              : 'Name'}{' '}
                           ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
                         </MenuToggle>
                       )}
                     >
                       <SelectList>
                         <SelectOption value="name_asc">Name (A-Z)</SelectOption>
-                        <SelectOption value="name_desc">Name (Z-A)</SelectOption>
-                        <SelectOption value="created_at_desc">Newest First</SelectOption>
-                        <SelectOption value="created_at_asc">Oldest First</SelectOption>
-                        <SelectOption value="total_cost_desc">Highest Cost</SelectOption>
-                        <SelectOption value="total_cost_asc">Lowest Cost</SelectOption>
+                        <SelectOption value="name_desc">
+                          Name (Z-A)
+                        </SelectOption>
+                        <SelectOption value="created_at_desc">
+                          Newest First
+                        </SelectOption>
+                        <SelectOption value="created_at_asc">
+                          Oldest First
+                        </SelectOption>
+                        <SelectOption value="total_cost_desc">
+                          Highest Cost
+                        </SelectOption>
+                        <SelectOption value="total_cost_asc">
+                          Lowest Cost
+                        </SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
@@ -273,11 +305,15 @@ const CostReports: React.FC = () => {
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
-                          onClick={() => setIsPeriodFilterOpen(!isPeriodFilterOpen)}
+                          onClick={() =>
+                            setIsPeriodFilterOpen(!isPeriodFilterOpen)
+                          }
                           isExpanded={isPeriodFilterOpen}
                           icon={<FilterIcon />}
                         >
-                          {filterPeriod ? `Period: ${filterPeriod}` : 'All Periods'}
+                          {filterPeriod
+                            ? `Period: ${filterPeriod}`
+                            : 'All Periods'}
                         </MenuToggle>
                       )}
                     >
@@ -339,7 +375,7 @@ const CostReports: React.FC = () => {
                       ? 'No cost reports match your current filters. Try adjusting your search criteria.'
                       : 'No cost reports have been generated yet. Create your first report to analyze spending.'}
                   </EmptyStateBody>
-                  {(searchValue || filterPeriod) ? (
+                  {searchValue || filterPeriod ? (
                     <EmptyStateActions>
                       <Button variant="primary" onClick={clearFilters}>
                         Clear filters
@@ -347,7 +383,10 @@ const CostReports: React.FC = () => {
                     </EmptyStateActions>
                   ) : (
                     <EmptyStateActions>
-                      <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowCreateModal(true)}
+                      >
                         Generate Report
                       </Button>
                     </EmptyStateActions>
@@ -358,7 +397,11 @@ const CostReports: React.FC = () => {
           ) : (
             <Gallery hasGutter minWidths={{ default: '400px' }}>
               {reports.map((report) => (
-                <Card key={report.id} isSelectable style={{ cursor: 'pointer' }}>
+                <Card
+                  key={report.id}
+                  isSelectable
+                  style={{ cursor: 'pointer' }}
+                >
                   <CardBody>
                     <Stack hasGutter>
                       <StackItem>
@@ -375,21 +418,28 @@ const CostReports: React.FC = () => {
                       </StackItem>
 
                       <StackItem>
-                        <p>{report.description || 'No description available.'}</p>
+                        <p>
+                          {report.description || 'No description available.'}
+                        </p>
                       </StackItem>
 
                       <StackItem>
                         <DescriptionList isHorizontal isCompact>
                           <DescriptionListGroup>
-                            <DescriptionListTerm>Total Cost</DescriptionListTerm>
+                            <DescriptionListTerm>
+                              Total Cost
+                            </DescriptionListTerm>
                             <DescriptionListDescription>
-                              <strong>${report.total_cost.toLocaleString()}</strong>
+                              <strong>
+                                ${report.total_cost.toLocaleString()}
+                              </strong>
                             </DescriptionListDescription>
                           </DescriptionListGroup>
                           <DescriptionListGroup>
                             <DescriptionListTerm>Period</DescriptionListTerm>
                             <DescriptionListDescription>
-                              {new Date(report.start_date).toLocaleDateString()} - {new Date(report.end_date).toLocaleDateString()}
+                              {new Date(report.start_date).toLocaleDateString()}{' '}
+                              - {new Date(report.end_date).toLocaleDateString()}
                             </DescriptionListDescription>
                           </DescriptionListGroup>
                         </DescriptionList>
@@ -398,13 +448,22 @@ const CostReports: React.FC = () => {
                       <StackItem>
                         <Split hasGutter>
                           <SplitItem>
-                            <small>Compute: ${report.cost_breakdown.compute_cost.toLocaleString()}</small>
+                            <small>
+                              Compute: $
+                              {report.cost_breakdown.compute_cost.toLocaleString()}
+                            </small>
                           </SplitItem>
                           <SplitItem>
-                            <small>Storage: ${report.cost_breakdown.storage_cost.toLocaleString()}</small>
+                            <small>
+                              Storage: $
+                              {report.cost_breakdown.storage_cost.toLocaleString()}
+                            </small>
                           </SplitItem>
                           <SplitItem>
-                            <small>Network: ${report.cost_breakdown.network_cost.toLocaleString()}</small>
+                            <small>
+                              Network: $
+                              {report.cost_breakdown.network_cost.toLocaleString()}
+                            </small>
                           </SplitItem>
                         </Split>
                       </StackItem>
@@ -413,7 +472,8 @@ const CostReports: React.FC = () => {
                         <Split hasGutter>
                           <SplitItem isFilled>
                             <small className="pf-v6-u-color-200">
-                              Created: {new Date(report.created_at).toLocaleDateString()}
+                              Created:{' '}
+                              {new Date(report.created_at).toLocaleDateString()}
                             </small>
                           </SplitItem>
                           <SplitItem>
@@ -495,7 +555,7 @@ const CostReports: React.FC = () => {
               placeholder="Enter report name"
             />
           </FormGroup>
-          
+
           <FormGroup label="Description" fieldId="report-description">
             <TextArea
               id="report-description"
@@ -510,7 +570,16 @@ const CostReports: React.FC = () => {
             <Select
               isOpen={false}
               selected={reportPeriod}
-              onSelect={(_, selection) => setReportPeriod(selection as 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly')}
+              onSelect={(_, selection) =>
+                setReportPeriod(
+                  selection as
+                    | 'daily'
+                    | 'weekly'
+                    | 'monthly'
+                    | 'quarterly'
+                    | 'yearly'
+                )
+              }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {reportPeriod.charAt(0).toUpperCase() + reportPeriod.slice(1)}
@@ -542,7 +611,7 @@ const CostReports: React.FC = () => {
               placeholder="Select end date"
             />
           </FormGroup>
-          
+
           <div className="pf-v6-u-mt-lg">
             <Button
               variant="primary"

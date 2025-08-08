@@ -13,13 +13,13 @@ import {
 import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import { VMs, VMDetail } from './pages/vms';
 import { Catalogs, CatalogDetail } from './pages/catalogs';
-import { 
+import {
   ResourceMonitoring,
   CostReports,
   CapacityPlanning,
   UsageAlerts,
   ExportReports,
-  CustomDashboards
+  CustomDashboards,
 } from './pages/monitoring';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -252,7 +252,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
-              
+
               {/* Monitoring & Analytics Routes */}
               <Route
                 path={ROUTES.MONITORING}
@@ -314,7 +314,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
-              
+
               <Route
                 path={ROUTES.PROFILE}
                 element={

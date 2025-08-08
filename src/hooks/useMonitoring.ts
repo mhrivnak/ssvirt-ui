@@ -16,7 +16,8 @@ import type {
 export const useGlobalResourceUsage = (params?: ResourceUsageQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.resourceUsage, params],
-    queryFn: () => MonitoringService.ResourceUsage.getGlobalResourceUsage(params),
+    queryFn: () =>
+      MonitoringService.ResourceUsage.getGlobalResourceUsage(params),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
@@ -27,7 +28,11 @@ export const useOrganizationResourceUsage = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.resourceUsageByOrg(orgId), params],
-    queryFn: () => MonitoringService.ResourceUsage.getOrganizationResourceUsage(orgId, params),
+    queryFn: () =>
+      MonitoringService.ResourceUsage.getOrganizationResourceUsage(
+        orgId,
+        params
+      ),
     enabled: !!orgId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -39,7 +44,8 @@ export const useVDCResourceUsage = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.resourceUsageByVdc(vdcId), params],
-    queryFn: () => MonitoringService.ResourceUsage.getVDCResourceUsage(vdcId, params),
+    queryFn: () =>
+      MonitoringService.ResourceUsage.getVDCResourceUsage(vdcId, params),
     enabled: !!vdcId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -51,7 +57,8 @@ export const useVMResourceUsage = (
 ) => {
   return useQuery({
     queryKey: ['monitoring', 'resource-usage', 'vm', vmId, params],
-    queryFn: () => MonitoringService.ResourceUsage.getVMResourceUsage(vmId, params),
+    queryFn: () =>
+      MonitoringService.ResourceUsage.getVMResourceUsage(vmId, params),
     enabled: !!vmId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -79,7 +86,7 @@ export const useCostReport = (reportId: string) => {
 
 export const useGenerateCostReport = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: MonitoringService.CostReport.generateCostReport,
     onSuccess: () => {
@@ -90,7 +97,7 @@ export const useGenerateCostReport = () => {
 
 export const useDeleteCostReport = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: MonitoringService.CostReport.deleteCostReport,
     onSuccess: () => {
@@ -109,7 +116,8 @@ export const useCapacityPlanningData = (params?: {
 }) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.capacityPlanning, params],
-    queryFn: () => MonitoringService.CapacityPlanning.getCapacityPlanningData(params),
+    queryFn: () =>
+      MonitoringService.CapacityPlanning.getCapacityPlanningData(params),
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 };
@@ -121,7 +129,8 @@ export const useCapacityRecommendations = (params?: {
 }) => {
   return useQuery({
     queryKey: ['monitoring', 'capacity-planning', 'recommendations', params],
-    queryFn: () => MonitoringService.CapacityPlanning.getCapacityRecommendations(params),
+    queryFn: () =>
+      MonitoringService.CapacityPlanning.getCapacityRecommendations(params),
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 };
@@ -148,7 +157,7 @@ export const useUsageAlert = (alertId: string) => {
 
 export const useResolveAlert = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ alertId, reason }: { alertId: string; reason?: string }) =>
       MonitoringService.Alert.resolveAlert(alertId, reason),
@@ -160,17 +169,18 @@ export const useResolveAlert = () => {
 
 export const useSuppressAlert = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      alertId, 
-      duration_minutes, 
-      reason 
-    }: { 
-      alertId: string; 
-      duration_minutes?: number; 
+    mutationFn: ({
+      alertId,
+      duration_minutes,
+      reason,
+    }: {
+      alertId: string;
+      duration_minutes?: number;
       reason?: string;
-    }) => MonitoringService.Alert.suppressAlert(alertId, duration_minutes, reason),
+    }) =>
+      MonitoringService.Alert.suppressAlert(alertId, duration_minutes, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.usageAlerts });
     },
@@ -191,40 +201,49 @@ export const useAlertRules = (params?: {
 
 export const useCreateAlertRule = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>) =>
-      MonitoringService.Alert.createAlertRule(rule),
+    mutationFn: (
+      rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+    ) => MonitoringService.Alert.createAlertRule(rule),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['monitoring', 'alert-rules'] });
+      queryClient.invalidateQueries({
+        queryKey: ['monitoring', 'alert-rules'],
+      });
     },
   });
 };
 
 export const useUpdateAlertRule = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      ruleId, 
-      updates 
-    }: { 
-      ruleId: string; 
-      updates: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>>;
+    mutationFn: ({
+      ruleId,
+      updates,
+    }: {
+      ruleId: string;
+      updates: Partial<
+        Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+      >;
     }) => MonitoringService.Alert.updateAlertRule(ruleId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['monitoring', 'alert-rules'] });
+      queryClient.invalidateQueries({
+        queryKey: ['monitoring', 'alert-rules'],
+      });
     },
   });
 };
 
 export const useDeleteAlertRule = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: MonitoringService.Alert.deleteAlertRule,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['monitoring', 'alert-rules'] });
+      queryClient.invalidateQueries({
+        queryKey: ['monitoring', 'alert-rules'],
+      });
     },
   });
 };
@@ -251,10 +270,14 @@ export const useCustomDashboard = (dashboardId: string) => {
 
 export const useCreateCustomDashboard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (dashboard: Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>) =>
-      MonitoringService.Dashboard.createCustomDashboard(dashboard),
+    mutationFn: (
+      dashboard: Omit<
+        CustomDashboard,
+        'id' | 'created_at' | 'updated_at' | 'created_by'
+      >
+    ) => MonitoringService.Dashboard.createCustomDashboard(dashboard),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customDashboards });
     },
@@ -263,25 +286,30 @@ export const useCreateCustomDashboard = () => {
 
 export const useUpdateCustomDashboard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      dashboardId, 
-      updates 
-    }: { 
-      dashboardId: string; 
-      updates: Partial<Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>>;
-    }) => MonitoringService.Dashboard.updateCustomDashboard(dashboardId, updates),
+    mutationFn: ({
+      dashboardId,
+      updates,
+    }: {
+      dashboardId: string;
+      updates: Partial<
+        Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+      >;
+    }) =>
+      MonitoringService.Dashboard.updateCustomDashboard(dashboardId, updates),
     onSuccess: (_, { dashboardId }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customDashboards });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customDashboard(dashboardId) });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.customDashboard(dashboardId),
+      });
     },
   });
 };
 
 export const useDeleteCustomDashboard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: MonitoringService.Dashboard.deleteCustomDashboard,
     onSuccess: () => {
@@ -292,10 +320,15 @@ export const useDeleteCustomDashboard = () => {
 
 export const useCloneCustomDashboard = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ dashboardId, name }: { dashboardId: string; name: string }) =>
-      MonitoringService.Dashboard.cloneCustomDashboard(dashboardId, name),
+    mutationFn: ({
+      dashboardId,
+      name,
+    }: {
+      dashboardId: string;
+      name: string;
+    }) => MonitoringService.Dashboard.cloneCustomDashboard(dashboardId, name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.customDashboards });
     },
@@ -307,7 +340,7 @@ export const useCloneCustomDashboard = () => {
  */
 export const useRequestExport = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (exportRequest: ExportRequest) =>
       MonitoringService.Export.requestExport(exportRequest),
@@ -340,7 +373,7 @@ export const useExportJobs = (params?: { status?: string; limit?: number }) => {
 
 export const useCancelExportJob = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: MonitoringService.Export.cancelExportJob,
     onSuccess: () => {

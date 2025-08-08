@@ -55,14 +55,14 @@ import {
   CheckCircleIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
-import { 
-  useUsageAlerts, 
-  useAlertRules, 
-  useResolveAlert, 
+import {
+  useUsageAlerts,
+  useAlertRules,
+  useResolveAlert,
   useSuppressAlert,
   useCreateAlertRule,
   useUpdateAlertRule,
-  useDeleteAlertRule
+  useDeleteAlertRule,
 } from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
@@ -94,12 +94,22 @@ const UsageAlerts: React.FC = () => {
   const [ruleName, setRuleName] = useState('');
   const [ruleDescription, setRuleDescription] = useState('');
   const [ruleEnabled, setRuleEnabled] = useState(true);
-  const [ruleAlertType, setRuleAlertType] = useState<'threshold' | 'anomaly' | 'trend'>('threshold');
-  const [ruleSeverity, setRuleSeverity] = useState<'info' | 'warning' | 'error' | 'critical'>('warning');
-  const [ruleResourceType, setRuleResourceType] = useState<'cpu' | 'memory' | 'storage' | 'network' | 'cost'>('cpu');
-  const [ruleScope, setRuleScope] = useState<'global' | 'organization' | 'vdc' | 'vm'>('global');
+  const [ruleAlertType, setRuleAlertType] = useState<
+    'threshold' | 'anomaly' | 'trend'
+  >('threshold');
+  const [ruleSeverity, setRuleSeverity] = useState<
+    'info' | 'warning' | 'error' | 'critical'
+  >('warning');
+  const [ruleResourceType, setRuleResourceType] = useState<
+    'cpu' | 'memory' | 'storage' | 'network' | 'cost'
+  >('cpu');
+  const [ruleScope, setRuleScope] = useState<
+    'global' | 'organization' | 'vdc' | 'vm'
+  >('global');
   const [ruleThresholdValue, setRuleThresholdValue] = useState<number>(80);
-  const [ruleThresholdOperator, setRuleThresholdOperator] = useState<'gt' | 'lt' | 'eq' | 'gte' | 'lte'>('gte');
+  const [ruleThresholdOperator, setRuleThresholdOperator] = useState<
+    'gt' | 'lt' | 'eq' | 'gte' | 'lte'
+  >('gte');
   const [ruleThresholdDuration, setRuleThresholdDuration] = useState<number>(5);
 
   // Build query parameters
@@ -107,17 +117,28 @@ const UsageAlerts: React.FC = () => {
     page: alertCurrentPage,
     per_page: alertPerPage,
     search: alertSearchValue || undefined,
-    status: (alertStatusFilter as 'active' | 'resolved' | 'suppressed') || undefined,
-    severity: (alertSeverityFilter as 'info' | 'warning' | 'error' | 'critical') || undefined,
+    status:
+      (alertStatusFilter as 'active' | 'resolved' | 'suppressed') || undefined,
+    severity:
+      (alertSeverityFilter as 'info' | 'warning' | 'error' | 'critical') ||
+      undefined,
   };
 
   const ruleQueryParams = {
     enabled: ruleEnabledFilter ? ruleEnabledFilter === 'true' : undefined,
   };
 
-  const { data: alertsResponse, isLoading: alertsLoading, error: alertsError } = useUsageAlerts(alertQueryParams);
-  const { data: rulesResponse, isLoading: rulesLoading, error: rulesError } = useAlertRules(ruleQueryParams);
-  
+  const {
+    data: alertsResponse,
+    isLoading: alertsLoading,
+    error: alertsError,
+  } = useUsageAlerts(alertQueryParams);
+  const {
+    data: rulesResponse,
+    isLoading: rulesLoading,
+    error: rulesError,
+  } = useAlertRules(ruleQueryParams);
+
   const resolveAlertMutation = useResolveAlert();
   const suppressAlertMutation = useSuppressAlert();
   const createRuleMutation = useCreateAlertRule();
@@ -143,7 +164,10 @@ const UsageAlerts: React.FC = () => {
 
   const handleSuppressAlert = async (alertId: string) => {
     try {
-      await suppressAlertMutation.mutateAsync({ alertId, duration_minutes: 60 });
+      await suppressAlertMutation.mutateAsync({
+        alertId,
+        duration_minutes: 60,
+      });
     } catch (error) {
       console.error('Failed to suppress alert:', error);
     }
@@ -173,7 +197,7 @@ const UsageAlerts: React.FC = () => {
           webhook_enabled: false,
         },
       });
-      
+
       resetRuleForm();
       setShowCreateRuleModal(false);
     } catch (error) {
@@ -203,7 +227,7 @@ const UsageAlerts: React.FC = () => {
           },
         },
       });
-      
+
       resetRuleForm();
       setEditingRule(null);
     } catch (error) {
@@ -257,7 +281,9 @@ const UsageAlerts: React.FC = () => {
           title="Error loading alerts data"
           isInline
         >
-          {alertsError?.message || rulesError?.message || 'Failed to load alerts data. Please try again.'}
+          {alertsError?.message ||
+            rulesError?.message ||
+            'Failed to load alerts data. Please try again.'}
         </Alert>
       </PageSection>
     );
@@ -318,9 +344,7 @@ const UsageAlerts: React.FC = () => {
             <Tab
               eventKey="alerts"
               title={
-                <TabTitleText>
-                  Active Alerts ({alerts.length})
-                </TabTitleText>
+                <TabTitleText>Active Alerts ({alerts.length})</TabTitleText>
               }
             >
               <Stack hasGutter style={{ marginTop: '1rem' }}>
@@ -334,7 +358,9 @@ const UsageAlerts: React.FC = () => {
                             <SearchInput
                               placeholder="Search alerts..."
                               value={alertSearchValue}
-                              onChange={(_event, value) => handleAlertSearch(value)}
+                              onChange={(_event, value) =>
+                                handleAlertSearch(value)
+                              }
                               onClear={() => handleAlertSearch('')}
                             />
                           </ToolbarItem>
@@ -348,22 +374,36 @@ const UsageAlerts: React.FC = () => {
                                 setIsAlertStatusOpen(false);
                               }}
                               onOpenChange={setIsAlertStatusOpen}
-                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              toggle={(
+                                toggleRef: React.Ref<MenuToggleElement>
+                              ) => (
                                 <MenuToggle
                                   ref={toggleRef}
-                                  onClick={() => setIsAlertStatusOpen(!isAlertStatusOpen)}
+                                  onClick={() =>
+                                    setIsAlertStatusOpen(!isAlertStatusOpen)
+                                  }
                                   isExpanded={isAlertStatusOpen}
                                   icon={<FilterIcon />}
                                 >
-                                  {alertStatusFilter ? `Status: ${alertStatusFilter}` : 'All Statuses'}
+                                  {alertStatusFilter
+                                    ? `Status: ${alertStatusFilter}`
+                                    : 'All Statuses'}
                                 </MenuToggle>
                               )}
                             >
                               <SelectList>
-                                <SelectOption value="">All Statuses</SelectOption>
-                                <SelectOption value="active">Active</SelectOption>
-                                <SelectOption value="resolved">Resolved</SelectOption>
-                                <SelectOption value="suppressed">Suppressed</SelectOption>
+                                <SelectOption value="">
+                                  All Statuses
+                                </SelectOption>
+                                <SelectOption value="active">
+                                  Active
+                                </SelectOption>
+                                <SelectOption value="resolved">
+                                  Resolved
+                                </SelectOption>
+                                <SelectOption value="suppressed">
+                                  Suppressed
+                                </SelectOption>
                               </SelectList>
                             </Select>
                           </ToolbarItem>
@@ -377,22 +417,34 @@ const UsageAlerts: React.FC = () => {
                                 setIsAlertSeverityOpen(false);
                               }}
                               onOpenChange={setIsAlertSeverityOpen}
-                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              toggle={(
+                                toggleRef: React.Ref<MenuToggleElement>
+                              ) => (
                                 <MenuToggle
                                   ref={toggleRef}
-                                  onClick={() => setIsAlertSeverityOpen(!isAlertSeverityOpen)}
+                                  onClick={() =>
+                                    setIsAlertSeverityOpen(!isAlertSeverityOpen)
+                                  }
                                   isExpanded={isAlertSeverityOpen}
                                   icon={<FilterIcon />}
                                 >
-                                  {alertSeverityFilter ? `Severity: ${alertSeverityFilter}` : 'All Severities'}
+                                  {alertSeverityFilter
+                                    ? `Severity: ${alertSeverityFilter}`
+                                    : 'All Severities'}
                                 </MenuToggle>
                               )}
                             >
                               <SelectList>
-                                <SelectOption value="">All Severities</SelectOption>
-                                <SelectOption value="critical">Critical</SelectOption>
+                                <SelectOption value="">
+                                  All Severities
+                                </SelectOption>
+                                <SelectOption value="critical">
+                                  Critical
+                                </SelectOption>
                                 <SelectOption value="error">Error</SelectOption>
-                                <SelectOption value="warning">Warning</SelectOption>
+                                <SelectOption value="warning">
+                                  Warning
+                                </SelectOption>
                                 <SelectOption value="info">Info</SelectOption>
                               </SelectList>
                             </Select>
@@ -404,7 +456,9 @@ const UsageAlerts: React.FC = () => {
                                 itemCount={alertsPagination.total}
                                 perPage={alertPerPage}
                                 page={alertCurrentPage}
-                                onSetPage={(_, page) => setAlertCurrentPage(page)}
+                                onSetPage={(_, page) =>
+                                  setAlertCurrentPage(page)
+                                }
                                 onPerPageSelect={(_, newPerPage) => {
                                   setAlertPerPage(newPerPage);
                                   setAlertCurrentPage(1);
@@ -429,13 +483,21 @@ const UsageAlerts: React.FC = () => {
                       <CardBody>
                         <EmptyState>
                           <Bullseye>
-                            <CheckCircleIcon style={{ fontSize: '64px', color: 'var(--pf-v6-global--success-color--100)' }} />
+                            <CheckCircleIcon
+                              style={{
+                                fontSize: '64px',
+                                color:
+                                  'var(--pf-v6-global--success-color--100)',
+                              }}
+                            />
                           </Bullseye>
                           <Title headingLevel="h4" size="lg">
                             No alerts found
                           </Title>
                           <EmptyStateBody>
-                            {alertSearchValue || alertStatusFilter || alertSeverityFilter
+                            {alertSearchValue ||
+                            alertStatusFilter ||
+                            alertSeverityFilter
                               ? 'No alerts match your current filters.'
                               : 'Great! No active alerts at this time.'}
                           </EmptyStateBody>
@@ -464,7 +526,9 @@ const UsageAlerts: React.FC = () => {
                                     <strong>{alert.name}</strong>
                                   </StackItem>
                                   <StackItem>
-                                    <small className="pf-v6-u-color-200">{alert.message}</small>
+                                    <small className="pf-v6-u-color-200">
+                                      {alert.message}
+                                    </small>
                                   </StackItem>
                                 </Stack>
                               </Td>
@@ -474,10 +538,14 @@ const UsageAlerts: React.FC = () => {
                                 </Badge>
                               </Td>
                               <Td>
-                                <Badge>{alert.resource_type.toUpperCase()}</Badge>
+                                <Badge>
+                                  {alert.resource_type.toUpperCase()}
+                                </Badge>
                                 {alert.scope_name && (
                                   <div>
-                                    <small className="pf-v6-u-color-200">{alert.scope}: {alert.scope_name}</small>
+                                    <small className="pf-v6-u-color-200">
+                                      {alert.scope}: {alert.scope_name}
+                                    </small>
                                   </div>
                                 )}
                               </Td>
@@ -487,19 +555,25 @@ const UsageAlerts: React.FC = () => {
                                 </Badge>
                               </Td>
                               <Td>
-                                <small>{new Date(alert.triggered_at).toLocaleString()}</small>
+                                <small>
+                                  {new Date(
+                                    alert.triggered_at
+                                  ).toLocaleString()}
+                                </small>
                               </Td>
                               <Td>
                                 <ActionsColumn
                                   items={[
                                     {
                                       title: 'Resolve',
-                                      onClick: () => handleResolveAlert(alert.id),
+                                      onClick: () =>
+                                        handleResolveAlert(alert.id),
                                       isDisabled: alert.status !== 'active',
                                     },
                                     {
                                       title: 'Suppress',
-                                      onClick: () => handleSuppressAlert(alert.id),
+                                      onClick: () =>
+                                        handleSuppressAlert(alert.id),
                                       isDisabled: alert.status !== 'active',
                                     },
                                   ]}
@@ -517,11 +591,7 @@ const UsageAlerts: React.FC = () => {
 
             <Tab
               eventKey="rules"
-              title={
-                <TabTitleText>
-                  Alert Rules ({rules.length})
-                </TabTitleText>
-              }
+              title={<TabTitleText>Alert Rules ({rules.length})</TabTitleText>}
             >
               <Stack hasGutter style={{ marginTop: '1rem' }}>
                 {/* Rule Filters */}
@@ -534,7 +604,9 @@ const UsageAlerts: React.FC = () => {
                             <SearchInput
                               placeholder="Search alert rules..."
                               value={ruleSearchValue}
-                              onChange={(_event, value) => handleRuleSearch(value)}
+                              onChange={(_event, value) =>
+                                handleRuleSearch(value)
+                              }
                               onClear={() => handleRuleSearch('')}
                             />
                           </ToolbarItem>
@@ -548,21 +620,31 @@ const UsageAlerts: React.FC = () => {
                                 setIsRuleEnabledOpen(false);
                               }}
                               onOpenChange={setIsRuleEnabledOpen}
-                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              toggle={(
+                                toggleRef: React.Ref<MenuToggleElement>
+                              ) => (
                                 <MenuToggle
                                   ref={toggleRef}
-                                  onClick={() => setIsRuleEnabledOpen(!isRuleEnabledOpen)}
+                                  onClick={() =>
+                                    setIsRuleEnabledOpen(!isRuleEnabledOpen)
+                                  }
                                   isExpanded={isRuleEnabledOpen}
                                   icon={<FilterIcon />}
                                 >
-                                  {ruleEnabledFilter ? `Status: ${ruleEnabledFilter === 'true' ? 'Enabled' : 'Disabled'}` : 'All Rules'}
+                                  {ruleEnabledFilter
+                                    ? `Status: ${ruleEnabledFilter === 'true' ? 'Enabled' : 'Disabled'}`
+                                    : 'All Rules'}
                                 </MenuToggle>
                               )}
                             >
                               <SelectList>
                                 <SelectOption value="">All Rules</SelectOption>
-                                <SelectOption value="true">Enabled</SelectOption>
-                                <SelectOption value="false">Disabled</SelectOption>
+                                <SelectOption value="true">
+                                  Enabled
+                                </SelectOption>
+                                <SelectOption value="false">
+                                  Disabled
+                                </SelectOption>
                               </SelectList>
                             </Select>
                           </ToolbarItem>
@@ -587,11 +669,14 @@ const UsageAlerts: React.FC = () => {
                             No alert rules found
                           </Title>
                           <EmptyStateBody>
-                            Create alert rules to monitor resource usage and receive notifications
-                            when thresholds are exceeded.
+                            Create alert rules to monitor resource usage and
+                            receive notifications when thresholds are exceeded.
                           </EmptyStateBody>
                           <EmptyStateActions>
-                            <Button variant="primary" onClick={() => setShowCreateRuleModal(true)}>
+                            <Button
+                              variant="primary"
+                              onClick={() => setShowCreateRuleModal(true)}
+                            >
                               Create Alert Rule
                             </Button>
                           </EmptyStateActions>
@@ -621,12 +706,16 @@ const UsageAlerts: React.FC = () => {
                                     <strong>{rule.name}</strong>
                                   </StackItem>
                                   <StackItem>
-                                    <small className="pf-v6-u-color-200">{rule.description}</small>
+                                    <small className="pf-v6-u-color-200">
+                                      {rule.description}
+                                    </small>
                                   </StackItem>
                                 </Stack>
                               </Td>
                               <Td>
-                                <Badge>{rule.resource_type.toUpperCase()}</Badge>
+                                <Badge>
+                                  {rule.resource_type.toUpperCase()}
+                                </Badge>
                               </Td>
                               <Td>
                                 <Badge color={getSeverityColor(rule.severity)}>
@@ -634,7 +723,9 @@ const UsageAlerts: React.FC = () => {
                                 </Badge>
                               </Td>
                               <Td>
-                                <Badge color="grey">{rule.scope.toUpperCase()}</Badge>
+                                <Badge color="grey">
+                                  {rule.scope.toUpperCase()}
+                                </Badge>
                               </Td>
                               <Td>
                                 <Badge color={rule.enabled ? 'green' : 'grey'}>
@@ -642,7 +733,11 @@ const UsageAlerts: React.FC = () => {
                                 </Badge>
                               </Td>
                               <Td>
-                                <small>{new Date(rule.created_at).toLocaleDateString()}</small>
+                                <small>
+                                  {new Date(
+                                    rule.created_at
+                                  ).toLocaleDateString()}
+                                </small>
                               </Td>
                               <Td>
                                 <ActionsColumn
@@ -692,7 +787,7 @@ const UsageAlerts: React.FC = () => {
               placeholder="Enter rule name"
             />
           </FormGroup>
-          
+
           <FormGroup label="Description" fieldId="rule-description">
             <TextArea
               id="rule-description"
@@ -711,11 +806,19 @@ const UsageAlerts: React.FC = () => {
             />
           </FormGroup>
 
-          <FormGroup label="Resource Type" isRequired fieldId="rule-resource-type">
+          <FormGroup
+            label="Resource Type"
+            isRequired
+            fieldId="rule-resource-type"
+          >
             <Select
               isOpen={false}
               selected={ruleResourceType}
-              onSelect={(_, selection) => setRuleResourceType(selection as 'cpu' | 'memory' | 'storage' | 'network' | 'cost')}
+              onSelect={(_, selection) =>
+                setRuleResourceType(
+                  selection as 'cpu' | 'memory' | 'storage' | 'network' | 'cost'
+                )
+              }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {ruleResourceType.toUpperCase()}
@@ -736,7 +839,11 @@ const UsageAlerts: React.FC = () => {
             <Select
               isOpen={false}
               selected={ruleSeverity}
-              onSelect={(_, selection) => setRuleSeverity(selection as 'info' | 'warning' | 'error' | 'critical')}
+              onSelect={(_, selection) =>
+                setRuleSeverity(
+                  selection as 'info' | 'warning' | 'error' | 'critical'
+                )
+              }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {ruleSeverity.toUpperCase()}
@@ -752,13 +859,24 @@ const UsageAlerts: React.FC = () => {
             </Select>
           </FormGroup>
 
-          <FormGroup label="Threshold Value (%)" isRequired fieldId="rule-threshold">
+          <FormGroup
+            label="Threshold Value (%)"
+            isRequired
+            fieldId="rule-threshold"
+          >
             <NumberInput
               value={ruleThresholdValue}
-              onMinus={() => setRuleThresholdValue(Math.max(0, ruleThresholdValue - 5))}
-              onPlus={() => setRuleThresholdValue(Math.min(100, ruleThresholdValue + 5))}
+              onMinus={() =>
+                setRuleThresholdValue(Math.max(0, ruleThresholdValue - 5))
+              }
+              onPlus={() =>
+                setRuleThresholdValue(Math.min(100, ruleThresholdValue + 5))
+              }
               onChange={(event) => {
-                const value = parseInt((event.target as HTMLInputElement).value, 10);
+                const value = parseInt(
+                  (event.target as HTMLInputElement).value,
+                  10
+                );
                 if (!isNaN(value)) {
                   setRuleThresholdValue(Math.max(0, Math.min(100, value)));
                 }
@@ -770,13 +888,22 @@ const UsageAlerts: React.FC = () => {
             />
           </FormGroup>
 
-          <FormGroup label="Duration (minutes)" isRequired fieldId="rule-duration">
+          <FormGroup
+            label="Duration (minutes)"
+            isRequired
+            fieldId="rule-duration"
+          >
             <NumberInput
               value={ruleThresholdDuration}
-              onMinus={() => setRuleThresholdDuration(Math.max(1, ruleThresholdDuration - 1))}
+              onMinus={() =>
+                setRuleThresholdDuration(Math.max(1, ruleThresholdDuration - 1))
+              }
               onPlus={() => setRuleThresholdDuration(ruleThresholdDuration + 1)}
               onChange={(event) => {
-                const value = parseInt((event.target as HTMLInputElement).value, 10);
+                const value = parseInt(
+                  (event.target as HTMLInputElement).value,
+                  10
+                );
                 if (!isNaN(value)) {
                   setRuleThresholdDuration(Math.max(1, value));
                 }
@@ -786,19 +913,21 @@ const UsageAlerts: React.FC = () => {
               }}
             />
           </FormGroup>
-          
+
           <div className="pf-v6-u-mt-lg">
             <Button
               variant="primary"
               onClick={editingRule ? handleUpdateRule : handleCreateRule}
-              isLoading={createRuleMutation.isPending || updateRuleMutation.isPending}
+              isLoading={
+                createRuleMutation.isPending || updateRuleMutation.isPending
+              }
               isDisabled={!ruleName}
               className="pf-v6-u-mr-sm"
             >
               {editingRule ? 'Update Rule' : 'Create Rule'}
             </Button>
-            <Button 
-              variant="link" 
+            <Button
+              variant="link"
               onClick={() => {
                 setShowCreateRuleModal(false);
                 setEditingRule(null);

@@ -454,8 +454,10 @@ export const QUERY_KEYS = {
 
   // Resource Monitoring & Analytics
   resourceUsage: ['monitoring', 'resource-usage'] as const,
-  resourceUsageByOrg: (orgId: string) => ['monitoring', 'resource-usage', 'org', orgId] as const,
-  resourceUsageByVdc: (vdcId: string) => ['monitoring', 'resource-usage', 'vdc', vdcId] as const,
+  resourceUsageByOrg: (orgId: string) =>
+    ['monitoring', 'resource-usage', 'org', orgId] as const,
+  resourceUsageByVdc: (vdcId: string) =>
+    ['monitoring', 'resource-usage', 'vdc', vdcId] as const,
   costReports: ['monitoring', 'cost-reports'] as const,
   capacityPlanning: ['monitoring', 'capacity-planning'] as const,
   usageAlerts: ['monitoring', 'alerts'] as const,
@@ -789,7 +791,12 @@ export interface DataSource {
 
 export interface ExportRequest {
   format: 'csv' | 'xlsx' | 'pdf' | 'json';
-  data_type: 'resource_usage' | 'cost_report' | 'capacity_planning' | 'alerts' | 'dashboard';
+  data_type:
+    | 'resource_usage'
+    | 'cost_report'
+    | 'capacity_planning'
+    | 'alerts'
+    | 'dashboard';
   filters: Record<string, unknown>;
   time_range: {
     from: string;

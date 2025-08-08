@@ -241,7 +241,9 @@ export const AlertService = {
   /**
    * Create a new alert rule
    */
-  createAlertRule: async (rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>) => {
+  createAlertRule: async (
+    rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+  ) => {
     const response = await api.post<ApiResponse<AlertRule>>(
       '/api/v1/monitoring/alert-rules',
       rule
@@ -254,7 +256,9 @@ export const AlertService = {
    */
   updateAlertRule: async (
     ruleId: string,
-    updates: Partial<Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>>
+    updates: Partial<
+      Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+    >
   ) => {
     const response = await api.patch<ApiResponse<AlertRule>>(
       `/api/v1/monitoring/alert-rules/${ruleId}`,
@@ -303,7 +307,10 @@ export const DashboardService = {
    * Create a new dashboard
    */
   createCustomDashboard: async (
-    dashboard: Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+    dashboard: Omit<
+      CustomDashboard,
+      'id' | 'created_at' | 'updated_at' | 'created_by'
+    >
   ) => {
     const response = await api.post<ApiResponse<CustomDashboard>>(
       '/api/v1/monitoring/dashboards',
@@ -317,7 +324,9 @@ export const DashboardService = {
    */
   updateCustomDashboard: async (
     dashboardId: string,
-    updates: Partial<Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>>
+    updates: Partial<
+      Omit<CustomDashboard, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+    >
   ) => {
     const response = await api.patch<ApiResponse<CustomDashboard>>(
       `/api/v1/monitoring/dashboards/${dashboardId}`,
@@ -398,9 +407,12 @@ export const ExportService = {
    * Download export file
    */
   downloadExportFile: async (jobId: string) => {
-    const response = await api.get(`/api/v1/monitoring/export/${jobId}/download`, {
-      responseType: 'blob',
-    });
+    const response = await api.get(
+      `/api/v1/monitoring/export/${jobId}/download`,
+      {
+        responseType: 'blob',
+      }
+    );
     return response.data;
   },
 };
