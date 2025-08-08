@@ -67,7 +67,9 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
     const errors: string[] = [];
 
     if (cpuCores < minCpuCores || cpuCores > maxCpuCores) {
-      errors.push(`CPU cores must be between ${minCpuCores} and ${maxCpuCores}`);
+      errors.push(
+        `CPU cores must be between ${minCpuCores} and ${maxCpuCores}`
+      );
     }
 
     if (memoryMb < minMemoryMb || memoryMb > maxMemoryMb) {
@@ -111,7 +113,7 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       const updatedVM: VM = {
         ...vm,
         cpu_count: cpuCores,
@@ -121,7 +123,9 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
 
       onSave(updatedVM);
     } catch {
-      setValidationErrors(['Failed to update VM configuration. Please try again.']);
+      setValidationErrors([
+        'Failed to update VM configuration. Please try again.',
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +137,11 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
     <Stack hasGutter>
       {validationErrors.length > 0 && (
         <StackItem>
-          <Alert variant={AlertVariant.danger} title="Validation Errors" isInline>
+          <Alert
+            variant={AlertVariant.danger}
+            title="Validation Errors"
+            isInline
+          >
             <ul>
               {validationErrors.map((error, index) => (
                 <li key={index}>{error}</li>
@@ -170,10 +178,7 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
                       <Divider className="pf-v6-u-my-sm" />
                     </StackItem>
                     <StackItem>
-                      <FormGroup
-                        label="CPU Cores"
-                        fieldId="cpu-cores"
-                      >
+                      <FormGroup label="CPU Cores" fieldId="cpu-cores">
                         <NumberInput
                           value={cpuCores}
                           onMinus={() => handleCpuChange(cpuCores - 1)}
@@ -220,13 +225,12 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
                       <Divider className="pf-v6-u-my-sm" />
                     </StackItem>
                     <StackItem>
-                      <FormGroup
-                        label="Memory (GB)"
-                        fieldId="memory-slider"
-                      >
+                      <FormGroup label="Memory (GB)" fieldId="memory-slider">
                         <Slider
                           value={convertMbToGb(memoryMb)}
-                          onChange={(_event, value) => handleMemorySliderChange(value)}
+                          onChange={(_event, value) =>
+                            handleMemorySliderChange(value)
+                          }
                           min={convertMbToGb(minMemoryMb)}
                           max={convertMbToGb(maxMemoryMb)}
                           step={0.25}
@@ -234,7 +238,9 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
                           showBoundaries
                         />
                         <div className="pf-v6-u-mt-sm">
-                          <strong>{formatMemoryGb(convertMbToGb(memoryMb))} GB</strong>
+                          <strong>
+                            {formatMemoryGb(convertMbToGb(memoryMb))} GB
+                          </strong>
                           <span className="pf-v6-u-ml-sm pf-v6-u-color-200">
                             ({memoryMb} MB)
                           </span>
@@ -242,10 +248,15 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
                       </FormGroup>
                     </StackItem>
                     <StackItem>
-                      <FormGroup label="Exact Memory (MB)" fieldId="memory-input">
+                      <FormGroup
+                        label="Exact Memory (MB)"
+                        fieldId="memory-input"
+                      >
                         <NumberInput
                           value={memoryMb}
-                          onMinus={() => handleMemoryInputChange(memoryMb - 256)}
+                          onMinus={() =>
+                            handleMemoryInputChange(memoryMb - 256)
+                          }
                           onPlus={() => handleMemoryInputChange(memoryMb + 256)}
                           onChange={(event) => {
                             const target = event.target as HTMLInputElement;
@@ -297,7 +308,11 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
           <Button
             variant="primary"
             onClick={handleSave}
-            isDisabled={!hasChanges || validationErrors.length > 0 || vm.status === 'POWERED_ON'}
+            isDisabled={
+              !hasChanges ||
+              validationErrors.length > 0 ||
+              vm.status === 'POWERED_ON'
+            }
             isLoading={isLoading}
           >
             Save Changes

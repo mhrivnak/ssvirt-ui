@@ -107,16 +107,21 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
 }) => {
   const [networks, setNetworks] = useState<VMNetworkInterface[]>(mockNetworks);
   const [showAddNetworkModal, setShowAddNetworkModal] = useState(false);
-  const [editingNetwork, setEditingNetwork] = useState<VMNetworkInterface | null>(null);
+  const [editingNetwork, setEditingNetwork] =
+    useState<VMNetworkInterface | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // New network form state
   const [newNetworkName, setNewNetworkName] = useState('');
   const [selectedNetworkName, setSelectedNetworkName] = useState('VM Network');
-  const [ipAllocationMode, setIpAllocationMode] = useState<'DHCP' | 'Static' | 'Pool'>('DHCP');
+  const [ipAllocationMode, setIpAllocationMode] = useState<
+    'DHCP' | 'Static' | 'Pool'
+  >('DHCP');
   const [staticIpAddress, setStaticIpAddress] = useState('');
-  const [adapterType, setAdapterType] = useState<'VMXNET3' | 'E1000' | 'E1000E'>('VMXNET3');
+  const [adapterType, setAdapterType] = useState<
+    'VMXNET3' | 'E1000' | 'E1000E'
+  >('VMXNET3');
   const [isConnected, setIsConnected] = useState(true);
 
   // Select states
@@ -126,23 +131,29 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
 
   useEffect(() => {
     // Check if there are changes compared to original state
-    const hasChanges = JSON.stringify(networks) !== JSON.stringify(mockNetworks);
+    const hasChanges =
+      JSON.stringify(networks) !== JSON.stringify(mockNetworks);
     onChangesDetected(hasChanges);
   }, [networks, onChangesDetected]);
 
   const validateNetworkConfiguration = (): string[] => {
     const errors: string[] = [];
-    
+
     if (newNetworkName.trim().length === 0) {
       errors.push('Network adapter name is required');
     }
-    
+
     if (ipAllocationMode === 'Static' && !isValidIpAddress(staticIpAddress)) {
       errors.push('Valid IP address is required for static allocation');
     }
 
     // Check for duplicate names
-    if (networks.some(net => net.name === newNetworkName.trim() && net.id !== editingNetwork?.id)) {
+    if (
+      networks.some(
+        (net) =>
+          net.name === newNetworkName.trim() && net.id !== editingNetwork?.id
+      )
+    ) {
       errors.push('A network adapter with this name already exists');
     }
 
@@ -150,15 +161,18 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
   };
 
   const isValidIpAddress = (ip: string): boolean => {
-    const ipPattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipPattern =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipPattern.test(ip);
   };
 
   const generateMacAddress = (): string => {
     // Generate a random MAC address starting with VMware's OUI
     const oui = '00:50:56';
-    const randomPart = Array.from({ length: 3 }, () => 
-      Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+    const randomPart = Array.from({ length: 3 }, () =>
+      Math.floor(Math.random() * 256)
+        .toString(16)
+        .padStart(2, '0')
     ).join(':');
     return `${oui}:${randomPart}`;
   };
@@ -174,7 +188,8 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
       id: `nic-${Date.now()}`,
       name: newNetworkName.trim(),
       network_name: selectedNetworkName,
-      ip_address: ipAllocationMode === 'Static' ? staticIpAddress : 'Auto-assigned',
+      ip_address:
+        ipAllocationMode === 'Static' ? staticIpAddress : 'Auto-assigned',
       mac_address: generateMacAddress(),
       ip_allocation_mode: ipAllocationMode,
       connected: isConnected,
@@ -192,7 +207,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
     setNewNetworkName(network.name);
     setSelectedNetworkName(network.network_name);
     setIpAllocationMode(network.ip_allocation_mode);
-    setStaticIpAddress(network.ip_allocation_mode === 'Static' ? network.ip_address : '');
+    setStaticIpAddress(
+      network.ip_allocation_mode === 'Static' ? network.ip_address : ''
+    );
     setAdapterType(network.adapter_type);
     setIsConnected(network.connected);
     setShowAddNetworkModal(true);
@@ -207,13 +224,14 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
       return;
     }
 
-    const updatedNetworks = networks.map(network =>
+    const updatedNetworks = networks.map((network) =>
       network.id === editingNetwork.id
         ? {
             ...network,
             name: newNetworkName.trim(),
             network_name: selectedNetworkName,
-            ip_address: ipAllocationMode === 'Static' ? staticIpAddress : 'Auto-assigned',
+            ip_address:
+              ipAllocationMode === 'Static' ? staticIpAddress : 'Auto-assigned',
             ip_allocation_mode: ipAllocationMode,
             adapter_type: adapterType,
             connected: isConnected,
@@ -232,12 +250,12 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
       'Are you sure you want to remove this network adapter? This action cannot be undone.'
     );
     if (confirmed) {
-      setNetworks(networks.filter(network => network.id !== networkId));
+      setNetworks(networks.filter((network) => network.id !== networkId));
     }
   };
 
   const handleToggleConnection = (networkId: string) => {
-    const updatedNetworks = networks.map(network =>
+    const updatedNetworks = networks.map((network) =>
       network.id === networkId
         ? { ...network, connected: !network.connected }
         : network
@@ -261,7 +279,7 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // In real implementation, we would update the VM with new network configuration
       const updatedVM: VM = {
         ...vm,
@@ -270,7 +288,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
 
       onSave(updatedVM);
     } catch {
-      setValidationErrors(['Failed to update network configuration. Please try again.']);
+      setValidationErrors([
+        'Failed to update network configuration. Please try again.',
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -303,7 +323,11 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
     <Stack hasGutter>
       {validationErrors.length > 0 && (
         <StackItem>
-          <Alert variant={AlertVariant.danger} title="Validation Errors" isInline>
+          <Alert
+            variant={AlertVariant.danger}
+            title="Validation Errors"
+            isInline
+          >
             <ul>
               {validationErrors.map((error, index) => (
                 <li key={index}>{error}</li>
@@ -314,11 +338,7 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
       )}
 
       <StackItem>
-        <Alert
-          variant={AlertVariant.info}
-          title="Network Management"
-          isInline
-        >
+        <Alert variant={AlertVariant.info} title="Network Management" isInline>
           Primary network adapters cannot be removed. Additional adapters can be
           added or removed when the VM is powered off. Connection state can be
           changed while VM is running.
@@ -396,7 +416,13 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
                         <Td>
                           <Label
                             color={network.connected ? 'green' : 'red'}
-                            icon={network.connected ? <ConnectedIcon /> : <DisconnectedIcon />}
+                            icon={
+                              network.connected ? (
+                                <ConnectedIcon />
+                              ) : (
+                                <DisconnectedIcon />
+                              )
+                            }
                           >
                             {network.connected ? 'Connected' : 'Disconnected'}
                           </Label>
@@ -452,11 +478,7 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
         <Form>
           <Grid hasGutter>
             <GridItem span={12}>
-              <FormGroup
-                label="Adapter Name"
-                isRequired
-                fieldId="adapter-name"
-              >
+              <FormGroup label="Adapter Name" isRequired fieldId="adapter-name">
                 <TextInput
                   value={newNetworkName}
                   type="text"
@@ -467,13 +489,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
                 />
               </FormGroup>
             </GridItem>
-            
+
             <GridItem span={6}>
-              <FormGroup
-                label="Network"
-                isRequired
-                fieldId="network-select"
-              >
+              <FormGroup label="Network" isRequired fieldId="network-select">
                 <Select
                   isOpen={isNetworkSelectOpen}
                   selected={selectedNetworkName}
@@ -485,7 +503,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
                   toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
                       ref={toggleRef}
-                      onClick={() => setIsNetworkSelectOpen(!isNetworkSelectOpen)}
+                      onClick={() =>
+                        setIsNetworkSelectOpen(!isNetworkSelectOpen)
+                      }
                       isExpanded={isNetworkSelectOpen}
                     >
                       {selectedNetworkName}
@@ -504,15 +524,14 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
             </GridItem>
 
             <GridItem span={6}>
-              <FormGroup
-                label="IP Allocation"
-                fieldId="ip-allocation"
-              >
+              <FormGroup label="IP Allocation" fieldId="ip-allocation">
                 <Select
                   isOpen={isIpModeSelectOpen}
                   selected={ipAllocationMode}
                   onSelect={(_, selection) => {
-                    setIpAllocationMode(selection as 'DHCP' | 'Static' | 'Pool');
+                    setIpAllocationMode(
+                      selection as 'DHCP' | 'Static' | 'Pool'
+                    );
                     setIsIpModeSelectOpen(false);
                   }}
                   onOpenChange={setIsIpModeSelectOpen}
@@ -555,10 +574,7 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
             )}
 
             <GridItem span={6}>
-              <FormGroup
-                label="Adapter Type"
-                fieldId="adapter-type"
-              >
+              <FormGroup label="Adapter Type" fieldId="adapter-type">
                 <Select
                   isOpen={isAdapterTypeSelectOpen}
                   selected={adapterType}
@@ -570,7 +586,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
                   toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
                       ref={toggleRef}
-                      onClick={() => setIsAdapterTypeSelectOpen(!isAdapterTypeSelectOpen)}
+                      onClick={() =>
+                        setIsAdapterTypeSelectOpen(!isAdapterTypeSelectOpen)
+                      }
                       isExpanded={isAdapterTypeSelectOpen}
                     >
                       {adapterType}
@@ -578,7 +596,9 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
                   )}
                 >
                   <SelectList>
-                    <SelectOption value="VMXNET3">VMXNET3 (Recommended)</SelectOption>
+                    <SelectOption value="VMXNET3">
+                      VMXNET3 (Recommended)
+                    </SelectOption>
                     <SelectOption value="E1000">E1000</SelectOption>
                     <SelectOption value="E1000E">E1000E</SelectOption>
                   </SelectList>
@@ -587,10 +607,7 @@ export const VMNetworkManager: React.FC<VMNetworkManagerProps> = ({
             </GridItem>
 
             <GridItem span={6}>
-              <FormGroup
-                label="Connection State"
-                fieldId="connection-state"
-              >
+              <FormGroup label="Connection State" fieldId="connection-state">
                 <Switch
                   id="connection-state"
                   label="Connected"

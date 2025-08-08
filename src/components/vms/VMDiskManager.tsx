@@ -37,10 +37,7 @@ import {
   Td,
   ActionsColumn,
 } from '@patternfly/react-table';
-import {
-  PlusIcon,
-  ServerIcon,
-} from '@patternfly/react-icons';
+import { PlusIcon, ServerIcon } from '@patternfly/react-icons';
 import type { VM } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 
@@ -104,9 +101,14 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   // New disk form state
   const [newDiskName, setNewDiskName] = useState('');
   const [newDiskSize, setNewDiskSize] = useState(10);
-  const [newDiskProvisioning, setNewDiskProvisioning] = useState<'Thin' | 'Thick'>('Thin');
-  const [newDiskBusType, setNewDiskBusType] = useState<'SCSI' | 'IDE' | 'SATA'>('SCSI');
-  const [isProvisioningSelectOpen, setIsProvisioningSelectOpen] = useState(false);
+  const [newDiskProvisioning, setNewDiskProvisioning] = useState<
+    'Thin' | 'Thick'
+  >('Thin');
+  const [newDiskBusType, setNewDiskBusType] = useState<'SCSI' | 'IDE' | 'SATA'>(
+    'SCSI'
+  );
+  const [isProvisioningSelectOpen, setIsProvisioningSelectOpen] =
+    useState(false);
   const [isBusTypeSelectOpen, setIsBusTypeSelectOpen] = useState(false);
 
   useEffect(() => {
@@ -117,17 +119,22 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
 
   const validateDiskConfiguration = (): string[] => {
     const errors: string[] = [];
-    
+
     if (newDiskName.trim().length === 0) {
       errors.push('Disk name is required');
     }
-    
+
     if (newDiskSize < 1 || newDiskSize > 1000) {
       errors.push('Disk size must be between 1 GB and 1000 GB');
     }
 
     // Check for duplicate names
-    if (disks.some(disk => disk.name === newDiskName.trim() && disk.id !== editingDisk?.id)) {
+    if (
+      disks.some(
+        (disk) =>
+          disk.name === newDiskName.trim() && disk.id !== editingDisk?.id
+      )
+    ) {
       errors.push('A disk with this name already exists');
     }
 
@@ -176,7 +183,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
       return;
     }
 
-    const updatedDisks = disks.map(disk =>
+    const updatedDisks = disks.map((disk) =>
       disk.id === editingDisk.id
         ? {
             ...disk,
@@ -199,7 +206,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
       'Are you sure you want to remove this disk? This action cannot be undone.'
     );
     if (confirmed) {
-      setDisks(disks.filter(disk => disk.id !== diskId));
+      setDisks(disks.filter((disk) => disk.id !== diskId));
     }
   };
 
@@ -217,7 +224,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // In real implementation, we would update the VM with new disk configuration
       const updatedVM: VM = {
         ...vm,
@@ -226,7 +233,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
 
       onSave(updatedVM);
     } catch {
-      setValidationErrors(['Failed to update disk configuration. Please try again.']);
+      setValidationErrors([
+        'Failed to update disk configuration. Please try again.',
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -258,7 +267,11 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
     <Stack hasGutter>
       {validationErrors.length > 0 && (
         <StackItem>
-          <Alert variant={AlertVariant.danger} title="Validation Errors" isInline>
+          <Alert
+            variant={AlertVariant.danger}
+            title="Validation Errors"
+            isInline
+          >
             <ul>
               {validationErrors.map((error, index) => (
                 <li key={index}>{error}</li>
@@ -269,13 +282,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
       )}
 
       <StackItem>
-        <Alert
-          variant={AlertVariant.info}
-          title="Disk Management"
-          isInline
-        >
-          System disks cannot be removed. Data disks can be added or removed when
-          the VM is powered off. Disk size changes require VM restart.
+        <Alert variant={AlertVariant.info} title="Disk Management" isInline>
+          System disks cannot be removed. Data disks can be added or removed
+          when the VM is powered off. Disk size changes require VM restart.
         </Alert>
       </StackItem>
 
@@ -404,11 +413,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
         <Form>
           <Grid hasGutter>
             <GridItem span={12}>
-              <FormGroup
-                label="Disk Name"
-                isRequired
-                fieldId="disk-name"
-              >
+              <FormGroup label="Disk Name" isRequired fieldId="disk-name">
                 <TextInput
                   value={newDiskName}
                   type="text"
@@ -419,13 +424,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
                 />
               </FormGroup>
             </GridItem>
-            
+
             <GridItem span={6}>
-              <FormGroup
-                label="Size (GB)"
-                isRequired
-                fieldId="disk-size"
-              >
+              <FormGroup label="Size (GB)" isRequired fieldId="disk-size">
                 <NumberInput
                   value={newDiskSize}
                   onMinus={() => setNewDiskSize(Math.max(1, newDiskSize - 1))}
@@ -445,10 +446,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
             </GridItem>
 
             <GridItem span={6}>
-              <FormGroup
-                label="Provisioning Type"
-                fieldId="disk-provisioning"
-              >
+              <FormGroup label="Provisioning Type" fieldId="disk-provisioning">
                 <Select
                   isOpen={isProvisioningSelectOpen}
                   selected={newDiskProvisioning}
@@ -460,7 +458,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
                   toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
                       ref={toggleRef}
-                      onClick={() => setIsProvisioningSelectOpen(!isProvisioningSelectOpen)}
+                      onClick={() =>
+                        setIsProvisioningSelectOpen(!isProvisioningSelectOpen)
+                      }
                       isExpanded={isProvisioningSelectOpen}
                     >
                       {newDiskProvisioning}
@@ -476,10 +476,7 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
             </GridItem>
 
             <GridItem span={6}>
-              <FormGroup
-                label="Bus Type"
-                fieldId="disk-bus-type"
-              >
+              <FormGroup label="Bus Type" fieldId="disk-bus-type">
                 <Select
                   isOpen={isBusTypeSelectOpen}
                   selected={newDiskBusType}
@@ -491,7 +488,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
                   toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                     <MenuToggle
                       ref={toggleRef}
-                      onClick={() => setIsBusTypeSelectOpen(!isBusTypeSelectOpen)}
+                      onClick={() =>
+                        setIsBusTypeSelectOpen(!isBusTypeSelectOpen)
+                      }
                       isExpanded={isBusTypeSelectOpen}
                     >
                       {newDiskBusType}

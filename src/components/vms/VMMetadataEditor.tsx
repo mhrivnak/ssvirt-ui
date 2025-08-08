@@ -59,19 +59,27 @@ interface VMMetadataEditorProps {
 
 // Mock metadata - in real implementation this would come from API
 const mockMetadata: VMMetadata = {
-  'environment': 'production',
-  'team': 'platform',
-  'project': 'web-services',
+  environment: 'production',
+  team: 'platform',
+  project: 'web-services',
   'cost-center': '12345',
   'backup-policy': 'daily',
 };
 
 const mockAnnotations: VMAnnotation[] = [
-  { key: 'description', value: 'Web server for production workloads', editable: true },
+  {
+    key: 'description',
+    value: 'Web server for production workloads',
+    editable: true,
+  },
   { key: 'created-by', value: 'terraform', editable: false },
   { key: 'last-updated', value: '2024-01-15T10:30:00Z', editable: false },
   { key: 'maintainer', value: 'platform-team@company.com', editable: true },
-  { key: 'documentation', value: 'https://wiki.company.com/vm-web-01', editable: true },
+  {
+    key: 'documentation',
+    value: 'https://wiki.company.com/vm-web-01',
+    editable: true,
+  },
 ];
 
 export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
@@ -81,15 +89,17 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
   onChangesDetected,
 }) => {
   const [metadata, setMetadata] = useState<VMMetadata>(mockMetadata);
-  const [annotations, setAnnotations] = useState<VMAnnotation[]>(mockAnnotations);
+  const [annotations, setAnnotations] =
+    useState<VMAnnotation[]>(mockAnnotations);
   const [vmName, setVmName] = useState(vm.name);
   const [vmDescription, setVmDescription] = useState(vm.vm_name || '');
   const [enableMonitoring, setEnableMonitoring] = useState(true);
   const [enableBackup, setEnableBackup] = useState(true);
-  
+
   const [showAddMetadataModal, setShowAddMetadataModal] = useState(false);
   const [showAddAnnotationModal, setShowAddAnnotationModal] = useState(false);
-  const [editingAnnotation, setEditingAnnotation] = useState<VMAnnotation | null>(null);
+  const [editingAnnotation, setEditingAnnotation] =
+    useState<VMAnnotation | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -110,24 +120,34 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
 
   useEffect(() => {
     // Check if there are changes compared to original state
-    const hasChanges = 
-      JSON.stringify(metadata) !== JSON.stringify(originalStateRef.current.metadata) ||
-      JSON.stringify(annotations) !== JSON.stringify(originalStateRef.current.annotations) ||
+    const hasChanges =
+      JSON.stringify(metadata) !==
+        JSON.stringify(originalStateRef.current.metadata) ||
+      JSON.stringify(annotations) !==
+        JSON.stringify(originalStateRef.current.annotations) ||
       vmName !== originalStateRef.current.vmName ||
       vmDescription !== originalStateRef.current.vmDescription ||
       enableMonitoring !== originalStateRef.current.enableMonitoring ||
       enableBackup !== originalStateRef.current.enableBackup;
-    
+
     onChangesDetected(hasChanges);
-  }, [metadata, annotations, vmName, vmDescription, enableMonitoring, enableBackup, onChangesDetected]);
+  }, [
+    metadata,
+    annotations,
+    vmName,
+    vmDescription,
+    enableMonitoring,
+    enableBackup,
+    onChangesDetected,
+  ]);
 
   const validateMetadata = (key: string, value: string): string[] => {
     const errors: string[] = [];
-    
+
     if (!key.trim()) {
       errors.push('Key is required');
     }
-    
+
     if (!value.trim()) {
       errors.push('Value is required');
     }
@@ -139,13 +159,18 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     }
 
     // Check for duplicate keys
-    if (Object.prototype.hasOwnProperty.call(metadata, key) && !editingAnnotation) {
+    if (
+      Object.prototype.hasOwnProperty.call(metadata, key) &&
+      !editingAnnotation
+    ) {
       errors.push('A metadata entry with this key already exists');
     }
 
     // Key format validation (lowercase, alphanumeric, dashes, dots)
     if (!/^[a-z0-9.-]+$/.test(key)) {
-      errors.push('Key must contain only lowercase letters, numbers, dots, and dashes');
+      errors.push(
+        'Key must contain only lowercase letters, numbers, dots, and dashes'
+      );
     }
 
     return errors;
@@ -153,17 +178,23 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
 
   const validateAnnotation = (key: string, value: string): string[] => {
     const errors: string[] = [];
-    
+
     if (!key.trim()) {
       errors.push('Key is required');
     }
-    
+
     if (!value.trim()) {
       errors.push('Value is required');
     }
 
     // Check for duplicate keys
-    if (annotations.some(ann => ann.key === key && (!editingAnnotation || editingAnnotation.key !== key))) {
+    if (
+      annotations.some(
+        (ann) =>
+          ann.key === key &&
+          (!editingAnnotation || editingAnnotation.key !== key)
+      )
+    ) {
       errors.push('An annotation with this key already exists');
     }
 
@@ -235,7 +266,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
       return;
     }
 
-    const updatedAnnotations = annotations.map(ann =>
+    const updatedAnnotations = annotations.map((ann) =>
       ann.key === editingAnnotation.key
         ? { ...ann, key: newAnnotationKey, value: newAnnotationValue }
         : ann
@@ -254,7 +285,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
       `Are you sure you want to remove the annotation "${key}"?`
     );
     if (confirmed) {
-      setAnnotations(annotations.filter(ann => ann.key !== key));
+      setAnnotations(annotations.filter((ann) => ann.key !== key));
     }
   };
 
@@ -276,7 +307,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       const updatedVM: VM = {
         ...vm,
         name: vmName,
@@ -303,7 +334,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
 
   const getAnnotationActions = (annotation: VMAnnotation) => {
     const actions = [];
-    
+
     if (annotation.editable) {
       actions.push({
         title: 'Edit',
@@ -317,13 +348,15 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
         icon: <TrashIcon />,
       });
     }
-    
+
     return actions;
   };
 
-  const hasChanges = 
-    JSON.stringify(metadata) !== JSON.stringify(originalStateRef.current.metadata) ||
-    JSON.stringify(annotations) !== JSON.stringify(originalStateRef.current.annotations) ||
+  const hasChanges =
+    JSON.stringify(metadata) !==
+      JSON.stringify(originalStateRef.current.metadata) ||
+    JSON.stringify(annotations) !==
+      JSON.stringify(originalStateRef.current.annotations) ||
     vmName !== originalStateRef.current.vmName ||
     vmDescription !== originalStateRef.current.vmDescription ||
     enableMonitoring !== originalStateRef.current.enableMonitoring ||
@@ -333,7 +366,11 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     <Stack hasGutter>
       {validationErrors.length > 0 && (
         <StackItem>
-          <Alert variant={AlertVariant.danger} title="Validation Errors" isInline>
+          <Alert
+            variant={AlertVariant.danger}
+            title="Validation Errors"
+            isInline
+          >
             <ul>
               {validationErrors.map((error, index) => (
                 <li key={index}>{error}</li>
@@ -371,11 +408,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
                 <Form>
                   <Grid hasGutter>
                     <GridItem span={6}>
-                      <FormGroup
-                        label="VM Name"
-                        isRequired
-                        fieldId="vm-name"
-                      >
+                      <FormGroup label="VM Name" isRequired fieldId="vm-name">
                         <TextInput
                           value={vmName}
                           type="text"
@@ -386,10 +419,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
                       </FormGroup>
                     </GridItem>
                     <GridItem span={6}>
-                      <FormGroup
-                        label="Description"
-                        fieldId="vm-description"
-                      >
+                      <FormGroup label="Description" fieldId="vm-description">
                         <TextInput
                           value={vmDescription}
                           type="text"
@@ -409,20 +439,21 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
                           id="enable-monitoring"
                           label="Enabled"
                           isChecked={enableMonitoring}
-                          onChange={(_event, checked) => setEnableMonitoring(checked)}
+                          onChange={(_event, checked) =>
+                            setEnableMonitoring(checked)
+                          }
                         />
                       </FormGroup>
                     </GridItem>
                     <GridItem span={6}>
-                      <FormGroup
-                        label="Enable Backup"
-                        fieldId="enable-backup"
-                      >
+                      <FormGroup label="Enable Backup" fieldId="enable-backup">
                         <Switch
                           id="enable-backup"
                           label="Enabled"
                           isChecked={enableBackup}
-                          onChange={(_event, checked) => setEnableBackup(checked)}
+                          onChange={(_event, checked) =>
+                            setEnableBackup(checked)
+                          }
                         />
                       </FormGroup>
                     </GridItem>
@@ -546,12 +577,16 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
                           </Td>
                           <Td>{annotation.value}</Td>
                           <Td>
-                            <Label color={annotation.editable ? 'green' : 'grey'}>
+                            <Label
+                              color={annotation.editable ? 'green' : 'grey'}
+                            >
                               {annotation.editable ? 'Yes' : 'No'}
                             </Label>
                           </Td>
                           <Td>
-                            <ActionsColumn items={getAnnotationActions(annotation)} />
+                            <ActionsColumn
+                              items={getAnnotationActions(annotation)}
+                            />
                           </Td>
                         </Tr>
                       ))}
@@ -600,11 +635,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
         }}
       >
         <Form>
-          <FormGroup
-            label="Key"
-            isRequired
-            fieldId="metadata-key"
-          >
+          <FormGroup label="Key" isRequired fieldId="metadata-key">
             <TextInput
               value={newMetadataKey}
               type="text"
@@ -614,11 +645,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
               placeholder="e.g., environment"
             />
           </FormGroup>
-          <FormGroup
-            label="Value"
-            isRequired
-            fieldId="metadata-value"
-          >
+          <FormGroup label="Value" isRequired fieldId="metadata-value">
             <TextInput
               value={newMetadataValue}
               type="text"
@@ -668,11 +695,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
         }}
       >
         <Form>
-          <FormGroup
-            label="Key"
-            isRequired
-            fieldId="annotation-key"
-          >
+          <FormGroup label="Key" isRequired fieldId="annotation-key">
             <TextInput
               value={newAnnotationKey}
               type="text"
@@ -682,11 +705,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
               placeholder="e.g., description"
             />
           </FormGroup>
-          <FormGroup
-            label="Value"
-            isRequired
-            fieldId="annotation-value"
-          >
+          <FormGroup label="Value" isRequired fieldId="annotation-value">
             <TextArea
               value={newAnnotationValue}
               id="annotation-value"
@@ -717,7 +736,9 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
           </Button>
           <Button
             variant="primary"
-            onClick={editingAnnotation ? handleUpdateAnnotation : handleAddAnnotation}
+            onClick={
+              editingAnnotation ? handleUpdateAnnotation : handleAddAnnotation
+            }
             isDisabled={!newAnnotationKey.trim() || !newAnnotationValue.trim()}
           >
             {editingAnnotation ? 'Update Annotation' : 'Add Annotation'}

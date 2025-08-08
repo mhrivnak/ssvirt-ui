@@ -58,7 +58,11 @@ import {
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { useVMs, usePowerOperationTracking } from '../../hooks';
-import { VMPowerActions, PowerOperationStatus, VMConfigurationTab } from '../../components/vms';
+import {
+  VMPowerActions,
+  PowerOperationStatus,
+  VMConfigurationTab,
+} from '../../components/vms';
 import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -715,7 +719,10 @@ const VMDetail: React.FC = () => {
               </TabContent>
             </Tab>
 
-            <Tab eventKey={3} title={<TabTitleText>Configuration</TabTitleText>}>
+            <Tab
+              eventKey={3}
+              title={<TabTitleText>Configuration</TabTitleText>}
+            >
               <TabContent eventKey={3} id="configuration-tab">
                 <TabContentBody>
                   <VMConfigurationTab
