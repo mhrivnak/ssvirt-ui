@@ -17,11 +17,12 @@ spec:
         component: frontend
     spec:
       containers:
+      # Main UI container
       - name: ssvirt-ui
         image: quay.io/mhrivnak/ssvirt-ui:latest
         ports:
         - containerPort: 8080
-          name: http
+          name: ui
           protocol: TCP
         volumeMounts:
         - name: config-volume
@@ -35,10 +36,38 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+            - ALL
+      
+      # nginx proxy sidecar container
+      - name: nginx-proxy
+        image: registry.access.redhat.com/ubi9/nginx-126:latest
+        ports:
+        - containerPort: 8081
+          name: proxy
+          protocol: TCP
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
         livenessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 8081
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
@@ -46,7 +75,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: 8080
+            port: 8081
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
@@ -59,10 +88,14 @@ spec:
           capabilities:
             drop:
             - ALL
+      
       volumes:
       - name: config-volume
         configMap:
           name: ssvirt-ui-config
+      - name: nginx-config
+        configMap:
+          name: ssvirt-nginx-config
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -81,7 +114,7 @@ spec:
     app: ssvirt-ui
   ports:
   - port: 8080
-    targetPort: 8080
+    targetPort: 8081
     protocol: TCP
     name: http
   type: ClusterIP

@@ -8,7 +8,7 @@ metadata:
 data:
   config.json: |
     {
-      "apiBaseUrl": "http://ssvirt-backend:8080/api",
+      "apiBaseUrl": "/api",
       "appTitle": "SSVIRT Web UI",
       "appVersion": "1.0.0",
       "logoUrl": "/vite.svg"
