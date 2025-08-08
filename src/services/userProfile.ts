@@ -75,7 +75,7 @@ export class UserProfileService {
         throw new Error(response.data.message || 'Failed to change password');
       }
     } catch (error) {
-      console.error('Failed to change password:', error);
+      console.error('Failed to change password:', (error as Error).message);
       throw error;
     }
   }
