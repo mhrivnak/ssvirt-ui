@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -58,7 +58,11 @@ import {
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { useVMs, usePowerOperationTracking } from '../../hooks';
-import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
+import {
+  VMPowerActions,
+  PowerOperationStatus,
+  VMConfigurationTab,
+} from '../../components/vms';
 import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -136,8 +140,17 @@ const VMDetail: React.FC = () => {
 
   // In a real app, this would use the individual VM endpoint
   const { data: vmsResponse, isLoading, error } = useVMs({});
-  const vm = vmsResponse?.data?.find((v: VM) => v.id === id);
+  const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
+  const fetchedVM = vmsResponse?.data?.find((v: VM) => v.id === id);
+  const vm = localVM || fetchedVM;
   const { operations: powerOperations } = usePowerOperationTracking();
+
+  // Initialize local VM state when fetched VM changes
+  useEffect(() => {
+    if (fetchedVM && !localVM) {
+      setLocalVM(fetchedVM);
+    }
+  }, [fetchedVM, localVM]);
 
   const handleTabClick = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
@@ -208,6 +221,14 @@ const VMDetail: React.FC = () => {
   const handleRemoveTag = (tag: string) => {
     // In real app, would call API to remove tag
     console.log('Removing tag:', tag);
+  };
+
+  const handleConfigurationChange = (updatedVM: VM) => {
+    // Update the local VM state to reflect changes immediately
+    setLocalVM(updatedVM);
+    console.log('VM configuration updated:', updatedVM);
+    // In a real implementation, you might also trigger a data refetch here
+    // or show a success notification to the user
   };
 
   if (isLoading) {
@@ -708,8 +729,22 @@ const VMDetail: React.FC = () => {
               </TabContent>
             </Tab>
 
-            <Tab eventKey={3} title={<TabTitleText>Activity</TabTitleText>}>
-              <TabContent eventKey={3} id="activity-tab">
+            <Tab
+              eventKey={3}
+              title={<TabTitleText>Configuration</TabTitleText>}
+            >
+              <TabContent eventKey={3} id="configuration-tab">
+                <TabContentBody>
+                  <VMConfigurationTab
+                    vm={vm}
+                    onConfigurationChange={handleConfigurationChange}
+                  />
+                </TabContentBody>
+              </TabContent>
+            </Tab>
+
+            <Tab eventKey={4} title={<TabTitleText>Activity</TabTitleText>}>
+              <TabContent eventKey={4} id="activity-tab">
                 <TabContentBody>
                   <Card>
                     <CardBody>
