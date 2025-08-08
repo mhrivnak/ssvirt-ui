@@ -96,26 +96,12 @@ const CatalogDetail: React.FC = () => {
     }
   );
 
-  // Handle missing id parameter
-  if (!id) {
-    return (
-      <PageSection>
-        <Alert
-          variant={AlertVariant.warning}
-          title="Invalid catalog ID"
-          isInline
-        >
-          No catalog ID was provided in the URL.
-        </Alert>
-      </PageSection>
-    );
-  }
-
+  // Call hooks unconditionally first
   const {
     data: catalogResponse,
     isLoading: catalogLoading,
     error: catalogError,
-  } = useCatalog(id);
+  } = useCatalog(id || '');
 
   // Build query parameters for templates
   const templateQueryParams: CatalogQueryParams = {
@@ -130,7 +116,22 @@ const CatalogDetail: React.FC = () => {
     data: templatesResponse,
     isLoading: templatesLoading,
     error: templatesError,
-  } = useCatalogItems(id, templateQueryParams);
+  } = useCatalogItems(id || '', templateQueryParams);
+
+  // Handle missing id parameter after hooks
+  if (!id) {
+    return (
+      <PageSection>
+        <Alert
+          variant={AlertVariant.warning}
+          title="Invalid catalog ID"
+          isInline
+        >
+          No catalog ID was provided in the URL.
+        </Alert>
+      </PageSection>
+    );
+  }
 
   const catalog = catalogResponse?.data;
   const templates = templatesResponse?.data || [];
