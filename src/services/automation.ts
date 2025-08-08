@@ -23,19 +23,20 @@ export const BatchOperationService = {
   /**
    * Get list of batch operations
    */
-  getBatchOperations: async (params?: BatchOperationQueryParams) => {
+  getBatchOperations: async (params?: BatchOperationQueryParams, signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ operations: BatchOperation[]; total: number }>
-    >('/api/v1/automation/batch-operations', { params });
+    >('/api/v1/automation/batch-operations', { params, signal });
     return response.data;
   },
 
   /**
    * Get batch operation details
    */
-  getBatchOperation: async (operationId: string) => {
+  getBatchOperation: async (operationId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/batch-operations/${operationId}`
+      `/api/v1/automation/batch-operations/${operationId}`,
+      { signal }
     );
     return response.data;
   },
@@ -99,19 +100,20 @@ export const DeploymentTemplateService = {
   /**
    * Get list of deployment templates
    */
-  getDeploymentTemplates: async (params?: DeploymentTemplateQueryParams) => {
+  getDeploymentTemplates: async (params?: DeploymentTemplateQueryParams, signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ templates: DeploymentTemplate[]; total: number }>
-    >('/api/v1/automation/deployment-templates', { params });
+    >('/api/v1/automation/deployment-templates', { params, signal });
     return response.data;
   },
 
   /**
    * Get deployment template details
    */
-  getDeploymentTemplate: async (templateId: string) => {
+  getDeploymentTemplate: async (templateId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<DeploymentTemplate>>(
-      `/api/v1/automation/deployment-templates/${templateId}`
+      `/api/v1/automation/deployment-templates/${templateId}`,
+      { signal }
     );
     return response.data;
   },
@@ -186,19 +188,20 @@ export const ScheduledOperationService = {
   /**
    * Get list of scheduled operations
    */
-  getScheduledOperations: async (params?: ScheduledOperationQueryParams) => {
+  getScheduledOperations: async (params?: ScheduledOperationQueryParams, signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ operations: ScheduledOperation[]; total: number }>
-    >('/api/v1/automation/scheduled-operations', { params });
+    >('/api/v1/automation/scheduled-operations', { params, signal });
     return response.data;
   },
 
   /**
    * Get scheduled operation details
    */
-  getScheduledOperation: async (operationId: string) => {
+  getScheduledOperation: async (operationId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<ScheduledOperation>>(
-      `/api/v1/automation/scheduled-operations/${operationId}`
+      `/api/v1/automation/scheduled-operations/${operationId}`,
+      { signal }
     );
     return response.data;
   },
@@ -269,19 +272,20 @@ export const AutomationWorkflowService = {
   /**
    * Get list of automation workflows
    */
-  getAutomationWorkflows: async (params?: AutomationWorkflowQueryParams) => {
+  getAutomationWorkflows: async (params?: AutomationWorkflowQueryParams, signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ workflows: AutomationWorkflow[]; total: number }>
-    >('/api/v1/automation/workflows', { params });
+    >('/api/v1/automation/workflows', { params, signal });
     return response.data;
   },
 
   /**
    * Get automation workflow details
    */
-  getAutomationWorkflow: async (workflowId: string) => {
+  getAutomationWorkflow: async (workflowId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<AutomationWorkflow>>(
-      `/api/v1/automation/workflows/${workflowId}`
+      `/api/v1/automation/workflows/${workflowId}`,
+      { signal }
     );
     return response.data;
   },
@@ -367,19 +371,20 @@ export const OperationQueueService = {
   /**
    * Get list of operation queues
    */
-  getOperationQueues: async () => {
+  getOperationQueues: async (signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ queues: OperationQueue[]; total: number }>
-    >('/api/v1/automation/queues');
+    >('/api/v1/automation/queues', { signal });
     return response.data;
   },
 
   /**
    * Get operation queue details
    */
-  getOperationQueue: async (queueId: string) => {
+  getOperationQueue: async (queueId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<OperationQueue>>(
-      `/api/v1/automation/queues/${queueId}`
+      `/api/v1/automation/queues/${queueId}`,
+      { signal }
     );
     return response.data;
   },

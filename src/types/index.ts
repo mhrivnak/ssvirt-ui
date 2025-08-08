@@ -1027,6 +1027,8 @@ export interface AutomationWorkflow {
   description?: string;
   workflow_type: 'sequential' | 'parallel' | 'conditional';
   is_enabled: boolean;
+  is_default?: boolean;
+  status: 'active' | 'disabled' | 'error';
   trigger_type: 'manual' | 'event' | 'schedule';
   trigger_config?: WorkflowTriggerConfig;
   steps: WorkflowStep[];
@@ -1034,8 +1036,11 @@ export interface AutomationWorkflow {
   created_at: string;
   updated_at: string;
   execution_count: number;
+  success_count: number;
   success_rate: number;
   average_duration_seconds: number;
+  last_execution_at?: string;
+  last_execution_status?: 'completed' | 'failed' | 'cancelled';
 }
 
 export interface WorkflowTriggerConfig {
@@ -1131,9 +1136,11 @@ export interface ScheduledOperationQueryParams
 
 export interface AutomationWorkflowQueryParams
   extends PaginationParams,
-    SortParams {
+    SortParams,
+    FilterParams {
   workflow_type?: 'sequential' | 'parallel' | 'conditional';
   trigger_type?: 'manual' | 'event' | 'schedule';
+  status?: 'active' | 'disabled' | 'error';
   is_enabled?: boolean;
   created_by?: string;
 }

@@ -22,18 +22,18 @@ import type {
 export const useBatchOperations = (params?: BatchOperationQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.batchOperations, params],
-    queryFn: () => BatchOperationService.getBatchOperations(params),
+    queryFn: ({ signal }) => BatchOperationService.getBatchOperations(params, signal),
   });
 };
 
 export const useBatchOperation = (operationId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.batchOperation(operationId),
-    queryFn: () => BatchOperationService.getBatchOperation(operationId),
+    queryFn: ({ signal }) => BatchOperationService.getBatchOperation(operationId, signal),
     enabled: !!operationId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Poll every 5 seconds if operation is pending or running
-      const status = data?.data?.status;
+      const status = query.state.data?.data?.status;
       return status === 'pending' || status === 'running' ? 5000 : false;
     },
   });
@@ -102,8 +102,11 @@ export const useDeleteBatchOperation = () => {
   return useMutation({
     mutationFn: (operationId: string) =>
       BatchOperationService.deleteBatchOperation(operationId),
-    onSuccess: () => {
+    onSuccess: (_, operationId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.batchOperations });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.batchOperation(operationId),
+      });
     },
   });
 };
@@ -114,14 +117,14 @@ export const useDeploymentTemplates = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.deploymentTemplates, params],
-    queryFn: () => DeploymentTemplateService.getDeploymentTemplates(params),
+    queryFn: ({ signal }) => DeploymentTemplateService.getDeploymentTemplates(params, signal),
   });
 };
 
 export const useDeploymentTemplate = (templateId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.deploymentTemplate(templateId),
-    queryFn: () => DeploymentTemplateService.getDeploymentTemplate(templateId),
+    queryFn: ({ signal }) => DeploymentTemplateService.getDeploymentTemplate(templateId, signal),
     enabled: !!templateId,
   });
 };
@@ -200,9 +203,12 @@ export const useDeleteDeploymentTemplate = () => {
   return useMutation({
     mutationFn: (templateId: string) =>
       DeploymentTemplateService.deleteDeploymentTemplate(templateId),
-    onSuccess: () => {
+    onSuccess: (_, templateId) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.deploymentTemplates,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.deploymentTemplate(templateId),
       });
     },
   });
@@ -214,14 +220,14 @@ export const useScheduledOperations = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.scheduledOperations, params],
-    queryFn: () => ScheduledOperationService.getScheduledOperations(params),
+    queryFn: ({ signal }) => ScheduledOperationService.getScheduledOperations(params, signal),
   });
 };
 
 export const useScheduledOperation = (operationId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.scheduledOperation(operationId),
-    queryFn: () => ScheduledOperationService.getScheduledOperation(operationId),
+    queryFn: ({ signal }) => ScheduledOperationService.getScheduledOperation(operationId, signal),
     enabled: !!operationId,
   });
 };
@@ -307,9 +313,12 @@ export const useDeleteScheduledOperation = () => {
   return useMutation({
     mutationFn: (operationId: string) =>
       ScheduledOperationService.deleteScheduledOperation(operationId),
-    onSuccess: () => {
+    onSuccess: (_, operationId) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.scheduledOperations,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.scheduledOperation(operationId),
       });
     },
   });
@@ -321,14 +330,14 @@ export const useAutomationWorkflows = (
 ) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.automationWorkflows, params],
-    queryFn: () => AutomationWorkflowService.getAutomationWorkflows(params),
+    queryFn: ({ signal }) => AutomationWorkflowService.getAutomationWorkflows(params, signal),
   });
 };
 
 export const useAutomationWorkflow = (workflowId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.automationWorkflow(workflowId),
-    queryFn: () => AutomationWorkflowService.getAutomationWorkflow(workflowId),
+    queryFn: ({ signal }) => AutomationWorkflowService.getAutomationWorkflow(workflowId, signal),
     enabled: !!workflowId,
   });
 };
@@ -434,9 +443,12 @@ export const useDeleteAutomationWorkflow = () => {
   return useMutation({
     mutationFn: (workflowId: string) =>
       AutomationWorkflowService.deleteAutomationWorkflow(workflowId),
-    onSuccess: () => {
+    onSuccess: (_, workflowId) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.automationWorkflows,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.automationWorkflow(workflowId),
       });
     },
   });
@@ -446,7 +458,7 @@ export const useDeleteAutomationWorkflow = () => {
 export const useOperationQueues = () => {
   return useQuery({
     queryKey: QUERY_KEYS.operationQueues,
-    queryFn: () => OperationQueueService.getOperationQueues(),
+    queryFn: ({ signal }) => OperationQueueService.getOperationQueues(signal),
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 };
@@ -454,7 +466,7 @@ export const useOperationQueues = () => {
 export const useOperationQueue = (queueId: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.operationQueue(queueId),
-    queryFn: () => OperationQueueService.getOperationQueue(queueId),
+    queryFn: ({ signal }) => OperationQueueService.getOperationQueue(queueId, signal),
     enabled: !!queueId,
     refetchInterval: 10000, // Refresh every 10 seconds
   });

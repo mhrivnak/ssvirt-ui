@@ -196,15 +196,12 @@ const Automation: React.FC = () => {
                       </StackItem>
 
                       <StackItem>
-                        <Button
-                          variant="primary"
-                          component={Link}
-                          to={feature.route}
-                          className="pf-v6-u-w-100"
-                        >
-                          Open {feature.title}
-                          <ArrowRightIcon className="pf-v6-u-ml-sm" />
-                        </Button>
+                        <Link to={feature.route} className="pf-v6-u-w-100">
+                          <Button variant="primary" className="pf-v6-u-w-100">
+                            Open {feature.title}
+                            <ArrowRightIcon className="pf-v6-u-ml-sm" />
+                          </Button>
+                        </Link>
                       </StackItem>
                     </Stack>
                   </CardBody>
@@ -237,13 +234,11 @@ const Automation: React.FC = () => {
                         VMs simultaneously. Perfect for power management,
                         configuration updates, or maintenance tasks.
                       </p>
-                      <Button
-                        variant="secondary"
-                        component={Link}
-                        to={ROUTES.AUTOMATION_BATCH_OPERATIONS}
-                      >
-                        Create Batch Operation
-                      </Button>
+                      <Link to={ROUTES.AUTOMATION_BATCH_OPERATIONS}>
+                        <Button variant="secondary">
+                          Create Batch Operation
+                        </Button>
+                      </Link>
                     </StackItem>
                   </Stack>
                 </GridItem>
@@ -259,13 +254,9 @@ const Automation: React.FC = () => {
                         VM and vApp provisioning. Share templates across teams
                         for consistent deployments.
                       </p>
-                      <Button
-                        variant="secondary"
-                        component={Link}
-                        to={ROUTES.AUTOMATION_DEPLOYMENT_TEMPLATES}
-                      >
-                        Create Template
-                      </Button>
+                      <Link to={ROUTES.AUTOMATION_DEPLOYMENT_TEMPLATES}>
+                        <Button variant="secondary">Create Template</Button>
+                      </Link>
                     </StackItem>
                   </Stack>
                 </GridItem>
@@ -281,13 +272,9 @@ const Automation: React.FC = () => {
                         backups, power management, or maintenance operations
                         using cron expressions.
                       </p>
-                      <Button
-                        variant="secondary"
-                        component={Link}
-                        to={ROUTES.AUTOMATION_SCHEDULED_OPERATIONS}
-                      >
-                        Schedule Operations
-                      </Button>
+                      <Link to={ROUTES.AUTOMATION_SCHEDULED_OPERATIONS}>
+                        <Button variant="secondary">Schedule Operations</Button>
+                      </Link>
                     </StackItem>
                   </Stack>
                 </GridItem>
@@ -303,13 +290,9 @@ const Automation: React.FC = () => {
                         steps, dependencies, and conditional logic for advanced
                         use cases.
                       </p>
-                      <Button
-                        variant="secondary"
-                        component={Link}
-                        to={ROUTES.AUTOMATION_WORKFLOWS}
-                      >
-                        Build Workflow
-                      </Button>
+                      <Link to={ROUTES.AUTOMATION_WORKFLOWS}>
+                        <Button variant="secondary">Build Workflow</Button>
+                      </Link>
                     </StackItem>
                   </Stack>
                 </GridItem>

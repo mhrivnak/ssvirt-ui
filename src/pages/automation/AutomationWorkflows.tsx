@@ -49,8 +49,6 @@ import {
   CodeBranchIcon,
   ProjectDiagramIcon,
   TimesIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import {
@@ -89,15 +87,19 @@ const AutomationWorkflows: React.FC = () => {
   const [workflowName, setWorkflowName] = useState('');
   const [workflowDescription, setWorkflowDescription] = useState('');
   const [triggerType, setTriggerType] = useState<
-    'manual' | 'scheduled' | 'event'
+    'manual' | 'schedule' | 'event'
   >('manual');
   const [workflowEnabled, setWorkflowEnabled] = useState(true);
 
   // Build query parameters
   const queryParams = {
     search: searchValue || undefined,
-    status: statusFilter || undefined,
-    trigger_type: triggerTypeFilter || undefined,
+    status: statusFilter as 'active' | 'disabled' | 'error' | undefined,
+    trigger_type: triggerTypeFilter as
+      | 'manual'
+      | 'event'
+      | 'schedule'
+      | undefined,
     page: currentPage,
     per_page: perPage,
   };
@@ -155,28 +157,28 @@ const AutomationWorkflows: React.FC = () => {
       const workflowData: CreateAutomationWorkflowRequest = {
         name: workflowName,
         description: workflowDescription,
+        workflow_type: 'sequential',
         trigger_type: triggerType,
         trigger_config: {
           // Basic trigger config - in real implementation this would be configurable
           schedule_expression:
-            triggerType === 'scheduled' ? '0 0 * * *' : undefined,
-          event_filters: triggerType === 'event' ? {} : undefined,
+            triggerType === 'schedule' ? '0 0 * * *' : undefined,
+          event_types:
+            triggerType === 'event' ? ['vm.created', 'vm.deleted'] : undefined,
         },
         steps: [
           // Default first step - in real implementation this would be built in a visual editor
           {
-            id: 'step-1',
             name: 'Initial Step',
-            type: 'action',
-            action_type: 'power',
-            config: {
+            step_type: 'batch_operation',
+            configuration: {
+              operation_type: 'power',
               action: 'status',
             },
             depends_on: [],
-            retry_config: {
-              max_retries: 3,
-              retry_delay_seconds: 30,
-            },
+            on_failure: 'stop',
+            retry_count: 3,
+            timeout_seconds: 300,
           },
         ],
         is_enabled: workflowEnabled,
@@ -271,7 +273,7 @@ const AutomationWorkflows: React.FC = () => {
     switch (type) {
       case 'manual':
         return 'Manual';
-      case 'scheduled':
+      case 'schedule':
         return 'Scheduled';
       case 'event':
         return 'Event-driven';
@@ -298,10 +300,7 @@ const AutomationWorkflows: React.FC = () => {
 
     const success = workflow.last_execution_status === 'completed';
     return (
-      <Badge
-        color={success ? 'green' : 'red'}
-        icon={success ? <CheckCircleIcon /> : <ExclamationCircleIcon />}
-      >
+      <Badge color={success ? 'green' : 'red'}>
         {success ? 'Success' : 'Failed'}
       </Badge>
     );
@@ -422,7 +421,7 @@ const AutomationWorkflows: React.FC = () => {
                     >
                       <SelectList>
                         <SelectOption value="manual">Manual</SelectOption>
-                        <SelectOption value="scheduled">Scheduled</SelectOption>
+                        <SelectOption value="schedule">Scheduled</SelectOption>
                         <SelectOption value="event">Event-driven</SelectOption>
                       </SelectList>
                     </Select>
@@ -687,7 +686,7 @@ const AutomationWorkflows: React.FC = () => {
               isOpen={false}
               selected={triggerType}
               onSelect={(_, selection) =>
-                setTriggerType(selection as 'manual' | 'scheduled' | 'event')
+                setTriggerType(selection as 'manual' | 'schedule' | 'event')
               }
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
@@ -697,7 +696,7 @@ const AutomationWorkflows: React.FC = () => {
             >
               <SelectList>
                 <SelectOption value="manual">Manual</SelectOption>
-                <SelectOption value="scheduled">Scheduled</SelectOption>
+                <SelectOption value="schedule">Scheduled</SelectOption>
                 <SelectOption value="event">Event-driven</SelectOption>
               </SelectList>
             </Select>
