@@ -64,6 +64,8 @@ import {
   useUpdateAlertRule,
   useDeleteAlertRule,
 } from '../../hooks/useMonitoring';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '../../types';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { UsageAlert, AlertRule } from '../../types';
@@ -87,6 +89,8 @@ const UsageAlerts: React.FC = () => {
   const [isAlertStatusOpen, setIsAlertStatusOpen] = useState(false);
   const [isAlertSeverityOpen, setIsAlertSeverityOpen] = useState(false);
   const [isRuleEnabledOpen, setIsRuleEnabledOpen] = useState(false);
+  const [isRuleResourceTypeOpen, setIsRuleResourceTypeOpen] = useState(false);
+  const [isRuleSeverityOpen, setIsRuleSeverityOpen] = useState(false);
   const [showCreateRuleModal, setShowCreateRuleModal] = useState(false);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
 
@@ -125,6 +129,7 @@ const UsageAlerts: React.FC = () => {
   };
 
   const ruleQueryParams = {
+    search: ruleSearchValue || undefined,
     enabled: ruleEnabledFilter ? ruleEnabledFilter === 'true' : undefined,
   };
 
@@ -144,6 +149,7 @@ const UsageAlerts: React.FC = () => {
   const createRuleMutation = useCreateAlertRule();
   const updateRuleMutation = useUpdateAlertRule();
   const deleteRuleMutation = useDeleteAlertRule();
+  const queryClient = useQueryClient();
 
   const handleAlertSearch = (value: string) => {
     setAlertSearchValue(value);
@@ -812,15 +818,21 @@ const UsageAlerts: React.FC = () => {
             fieldId="rule-resource-type"
           >
             <Select
-              isOpen={false}
+              isOpen={isRuleResourceTypeOpen}
               selected={ruleResourceType}
-              onSelect={(_, selection) =>
+              onSelect={(_, selection) => {
                 setRuleResourceType(
                   selection as 'cpu' | 'memory' | 'storage' | 'network' | 'cost'
-                )
-              }
+                );
+                setIsRuleResourceTypeOpen(false);
+              }}
+              onOpenChange={setIsRuleResourceTypeOpen}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                <MenuToggle ref={toggleRef}>
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsRuleResourceTypeOpen(!isRuleResourceTypeOpen)}
+                  isExpanded={isRuleResourceTypeOpen}
+                >
                   {ruleResourceType.toUpperCase()}
                 </MenuToggle>
               )}
@@ -837,15 +849,21 @@ const UsageAlerts: React.FC = () => {
 
           <FormGroup label="Severity" isRequired fieldId="rule-severity">
             <Select
-              isOpen={false}
+              isOpen={isRuleSeverityOpen}
               selected={ruleSeverity}
-              onSelect={(_, selection) =>
+              onSelect={(_, selection) => {
                 setRuleSeverity(
                   selection as 'info' | 'warning' | 'error' | 'critical'
-                )
-              }
+                );
+                setIsRuleSeverityOpen(false);
+              }}
+              onOpenChange={setIsRuleSeverityOpen}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                <MenuToggle ref={toggleRef}>
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() => setIsRuleSeverityOpen(!isRuleSeverityOpen)}
+                  isExpanded={isRuleSeverityOpen}
+                >
                   {ruleSeverity.toUpperCase()}
                 </MenuToggle>
               )}

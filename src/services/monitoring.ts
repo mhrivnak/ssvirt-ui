@@ -365,11 +365,16 @@ export const ExportService = {
    * Request data export
    */
   requestExport: async (exportRequest: ExportRequest) => {
-    const response = await api.post<ApiResponse<ExportJob>>(
-      '/api/v1/monitoring/export',
-      exportRequest
-    );
-    return response.data;
+    try {
+      const response = await api.post<ApiResponse<ExportJob>>(
+        '/api/v1/monitoring/export',
+        exportRequest
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Export request failed:', error);
+      throw error;
+    }
   },
 
   /**

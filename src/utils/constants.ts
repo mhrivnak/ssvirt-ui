@@ -133,6 +133,5 @@ export const ROUTES = {
   MONITORING_ALERTS: '/monitoring/alerts',
   MONITORING_EXPORTS: '/monitoring/exports',
   MONITORING_DASHBOARDS: '/monitoring/dashboards',
-  MONITORING_ORG_DETAIL: '/monitoring/organizations/:id',
   PROFILE: '/profile',
 } as const;
