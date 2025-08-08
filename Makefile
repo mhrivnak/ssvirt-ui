@@ -1,5 +1,5 @@
 # Makefile for SSVIRT Web UI
-.PHONY: help install clean build test lint typecheck format format-check security audit ci all dev preview
+.PHONY: help install install-dev clean clean-build build test test-watch lint lint-fix typecheck format format-check security audit ci all dev preview check dev-check info
 
 # Default target
 help: ## Show this help message
@@ -24,7 +24,7 @@ clean-build: ## Clean only build artifacts
 dev: ## Start development server
 	npm run dev
 
-preview: ## Preview production build
+preview: build ## Preview production build
 	npm run preview
 
 # Building
@@ -62,33 +62,17 @@ audit: ## Run full security audit
 	npm audit
 
 # CI pipeline (matches GitHub Actions)
-ci: install lint format-check typecheck build security ## Run all CI checks (same as GitHub Actions)
+ci: install check build test security ## Run all CI checks (same as GitHub Actions)
 
 # Quality checks (without build)
 check: lint format-check typecheck ## Run code quality checks only
 
 # Complete workflow
-all: clean install ci ## Clean, install, and run all checks
+all: clean ci ## Clean, install, and run all checks
 
 # Development workflow
-dev-check: install lint format typecheck ## Quick development checks with auto-formatting
+dev-check: lint format typecheck ## Quick development checks with auto-formatting
 
 # Help for common workflows
 info: ## Show common workflow information
-	@echo ""
-	@echo "Common workflows:"
-	@echo "  make dev          - Start development server"
-	@echo "  make dev-check    - Quick development checks with formatting"
-	@echo "  make ci           - Run all CI checks (same as GitHub Actions)"
-	@echo "  make check        - Run quality checks without building"
-	@echo "  make all          - Complete clean build and test"
-	@echo ""
-	@echo "Individual commands:"
-	@echo "  make install      - Install dependencies"
-	@echo "  make build        - Build application"
-	@echo "  make test         - Run tests"
-	@echo "  make lint         - Check code style"
-	@echo "  make format       - Format code"
-	@echo "  make typecheck    - Check TypeScript types"
-	@echo "  make security     - Run security audit"
-	@echo ""
+	@printf "\nCommon workflows:\n  make dev          - Start development server\n  make dev-check    - Quick development checks with formatting\n  make ci           - Run all CI checks (same as GitHub Actions)\n  make check        - Run quality checks without building\n  make all          - Complete clean build and test\n\nIndividual commands:\n  make install      - Install dependencies\n  make build        - Build application\n  make test         - Run tests\n  make lint         - Check code style\n  make format       - Format code\n  make typecheck    - Check TypeScript types\n  make security     - Run security audit\n\n"
