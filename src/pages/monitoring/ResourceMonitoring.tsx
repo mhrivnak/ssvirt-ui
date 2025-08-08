@@ -391,7 +391,9 @@ const ResourceMonitoring: React.FC = () => {
                                     </small>
                                     <Progress
                                       value={org.current_usage.cpu_cores_used}
-                                      max={org.quota_limits.cpu_cores_limit || 1}
+                                      max={
+                                        org.quota_limits.cpu_cores_limit || 1
+                                      }
                                       title={`${org.current_usage.cpu_cores_used}/${org.quota_limits.cpu_cores_limit || 'unlimited'} cores`}
                                       variant={getUsageVariant(
                                         org.current_usage.cpu_cores_used,
@@ -407,7 +409,9 @@ const ResourceMonitoring: React.FC = () => {
                                     </small>
                                     <Progress
                                       value={org.current_usage.memory_gb_used}
-                                      max={org.quota_limits.memory_gb_limit || 1}
+                                      max={
+                                        org.quota_limits.memory_gb_limit || 1
+                                      }
                                       title={`${Math.round(org.current_usage.memory_gb_used)}/${org.quota_limits.memory_gb_limit || 'unlimited'} GB`}
                                       variant={getUsageVariant(
                                         org.current_usage.memory_gb_used,
@@ -423,7 +427,9 @@ const ResourceMonitoring: React.FC = () => {
                                     </small>
                                     <Progress
                                       value={org.current_usage.storage_gb_used}
-                                      max={org.quota_limits.storage_gb_limit || 1}
+                                      max={
+                                        org.quota_limits.storage_gb_limit || 1
+                                      }
                                       title={`${Math.round(org.current_usage.storage_gb_used)}/${org.quota_limits.storage_gb_limit || 'unlimited'} GB`}
                                       variant={getUsageVariant(
                                         org.current_usage.storage_gb_used,

@@ -61,7 +61,7 @@ import type { MenuToggleElement } from '@patternfly/react-core';
 
 const CostReports: React.FC = () => {
   const queryClient = useQueryClient();
-  
+
   // Search and filter state
   const [searchValue, setSearchValue] = useState('');
   const [sortBy, setSortBy] = useState<string>('created_at');
@@ -74,7 +74,8 @@ const CostReports: React.FC = () => {
   const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
   const [isPeriodFilterOpen, setIsPeriodFilterOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isReportPeriodSelectOpen, setIsReportPeriodSelectOpen] = useState(false);
+  const [isReportPeriodSelectOpen, setIsReportPeriodSelectOpen] =
+    useState(false);
 
   // Create report form state
   const [reportName, setReportName] = useState('');

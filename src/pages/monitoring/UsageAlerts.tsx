@@ -827,7 +827,9 @@ const UsageAlerts: React.FC = () => {
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle
                   ref={toggleRef}
-                  onClick={() => setIsRuleResourceTypeOpen(!isRuleResourceTypeOpen)}
+                  onClick={() =>
+                    setIsRuleResourceTypeOpen(!isRuleResourceTypeOpen)
+                  }
                   isExpanded={isRuleResourceTypeOpen}
                 >
                   {ruleResourceType.toUpperCase()}

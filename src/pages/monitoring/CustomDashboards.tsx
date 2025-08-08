@@ -72,9 +72,14 @@ const CustomDashboards: React.FC = () => {
   const [editingDashboard, setEditingDashboard] =
     useState<CustomDashboard | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [dashboardToDelete, setDashboardToDelete] = useState<string | null>(null);
+  const [dashboardToDelete, setDashboardToDelete] = useState<string | null>(
+    null
+  );
   const [showCloneModal, setShowCloneModal] = useState(false);
-  const [dashboardToClone, setDashboardToClone] = useState<{ id: string; name: string } | null>(null);
+  const [dashboardToClone, setDashboardToClone] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [cloneName, setCloneName] = useState('');
 
   // Create/edit dashboard form state
@@ -168,7 +173,7 @@ const CustomDashboards: React.FC = () => {
 
   const confirmDeleteDashboard = async () => {
     if (!dashboardToDelete) return;
-    
+
     try {
       await deleteDashboardMutation.mutateAsync(dashboardToDelete);
       setShowDeleteModal(false);
@@ -608,8 +613,18 @@ const CustomDashboards: React.FC = () => {
           setDashboardToDelete(null);
         }}
       >
-        <p>Are you sure you want to delete this dashboard? This action cannot be undone.</p>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+        <p>
+          Are you sure you want to delete this dashboard? This action cannot be
+          undone.
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '1rem',
+            marginTop: '1rem',
+          }}
+        >
           <Button
             variant="danger"
             onClick={confirmDeleteDashboard}
@@ -651,7 +666,14 @@ const CustomDashboards: React.FC = () => {
             />
           </FormGroup>
         </Form>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '1rem',
+            marginTop: '1rem',
+          }}
+        >
           <Button
             variant="primary"
             onClick={confirmCloneDashboard}
