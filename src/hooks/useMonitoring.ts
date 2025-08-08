@@ -355,11 +355,7 @@ export const useExportJob = (jobId: string) => {
     queryKey: ['monitoring', 'export', jobId],
     queryFn: () => MonitoringService.Export.getExportJob(jobId),
     enabled: !!jobId,
-    refetchInterval: (data) => {
-      // Poll every 5 seconds if job is pending or processing
-      const status = data?.data?.status;
-      return status === 'pending' || status === 'processing' ? 5000 : false;
-    },
+    refetchInterval: 5000, // Poll every 5 seconds for active jobs
   });
 };
 
