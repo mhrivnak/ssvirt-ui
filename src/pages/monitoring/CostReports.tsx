@@ -49,15 +49,19 @@ import {
   EyeIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useCostReports,
   useGenerateCostReport,
   useDeleteCostReport,
 } from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { QUERY_KEYS } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 
 const CostReports: React.FC = () => {
+  const queryClient = useQueryClient();
+  
   // Search and filter state
   const [searchValue, setSearchValue] = useState('');
   const [sortBy, setSortBy] = useState<string>('created_at');
@@ -70,6 +74,7 @@ const CostReports: React.FC = () => {
   const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
   const [isPeriodFilterOpen, setIsPeriodFilterOpen] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isReportPeriodSelectOpen, setIsReportPeriodSelectOpen] = useState(false);
 
   // Create report form state
   const [reportName, setReportName] = useState('');
@@ -145,6 +150,8 @@ const CostReports: React.FC = () => {
         end_date: endDate,
       });
 
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.costReports] });
+
       // Reset form and close modal
       setReportName('');
       setReportDescription('');
@@ -161,6 +168,7 @@ const CostReports: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this cost report?')) {
       try {
         await deleteReportMutation.mutateAsync(reportId);
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.costReports] });
       } catch (error) {
         console.error('Failed to delete cost report:', error);
       }
@@ -568,9 +576,9 @@ const CostReports: React.FC = () => {
 
           <FormGroup label="Report Period" isRequired fieldId="report-period">
             <Select
-              isOpen={false}
+              isOpen={isReportPeriodSelectOpen}
               selected={reportPeriod}
-              onSelect={(_, selection) =>
+              onSelect={(_, selection) => {
                 setReportPeriod(
                   selection as
                     | 'daily'
@@ -578,8 +586,10 @@ const CostReports: React.FC = () => {
                     | 'monthly'
                     | 'quarterly'
                     | 'yearly'
-                )
-              }
+                );
+                setIsReportPeriodSelectOpen(false);
+              }}
+              onOpenChange={(isOpen) => setIsReportPeriodSelectOpen(isOpen)}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {reportPeriod.charAt(0).toUpperCase() + reportPeriod.slice(1)}

@@ -628,6 +628,7 @@ function getCapacityVariant(
   used: number,
   total: number
 ): 'success' | 'warning' | 'danger' {
+  if (total === 0) return 'danger';
   const percentage = (used / total) * 100;
   if (percentage >= 90) return 'danger';
   if (percentage >= 75) return 'warning';
