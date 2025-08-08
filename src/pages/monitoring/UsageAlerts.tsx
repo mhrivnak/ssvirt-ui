@@ -64,8 +64,6 @@ import {
   useUpdateAlertRule,
   useDeleteAlertRule,
 } from '../../hooks/useMonitoring';
-import { useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS } from '../../types';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { UsageAlert, AlertRule } from '../../types';
@@ -149,7 +147,6 @@ const UsageAlerts: React.FC = () => {
   const createRuleMutation = useCreateAlertRule();
   const updateRuleMutation = useUpdateAlertRule();
   const deleteRuleMutation = useDeleteAlertRule();
-  const queryClient = useQueryClient();
 
   const handleAlertSearch = (value: string) => {
     setAlertSearchValue(value);
