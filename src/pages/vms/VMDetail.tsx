@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -140,8 +140,17 @@ const VMDetail: React.FC = () => {
 
   // In a real app, this would use the individual VM endpoint
   const { data: vmsResponse, isLoading, error } = useVMs({});
-  const vm = vmsResponse?.data?.find((v: VM) => v.id === id);
+  const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
+  const fetchedVM = vmsResponse?.data?.find((v: VM) => v.id === id);
+  const vm = localVM || fetchedVM;
   const { operations: powerOperations } = usePowerOperationTracking();
+
+  // Initialize local VM state when fetched VM changes
+  useEffect(() => {
+    if (fetchedVM && !localVM) {
+      setLocalVM(fetchedVM);
+    }
+  }, [fetchedVM, localVM]);
 
   const handleTabClick = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
@@ -215,10 +224,11 @@ const VMDetail: React.FC = () => {
   };
 
   const handleConfigurationChange = (updatedVM: VM) => {
-    // In real app, would update the VM state and refresh from API
+    // Update the local VM state to reflect changes immediately
+    setLocalVM(updatedVM);
     console.log('VM configuration updated:', updatedVM);
-    // For now, just show a success message
-    // In a real implementation, you would update the VM state here
+    // In a real implementation, you might also trigger a data refetch here
+    // or show a success notification to the user
   };
 
   if (isLoading) {

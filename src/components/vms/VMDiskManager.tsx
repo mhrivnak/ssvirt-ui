@@ -97,6 +97,8 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   const [editingDisk, setEditingDisk] = useState<VMDisk | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [diskToRemove, setDiskToRemove] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // New disk form state
   const [newDiskName, setNewDiskName] = useState('');
@@ -113,8 +115,9 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
 
   useEffect(() => {
     // Check if there are changes compared to original state
-    const hasChanges = JSON.stringify(disks) !== JSON.stringify(mockDisks);
-    onChangesDetected(hasChanges);
+    const changesDetected = JSON.stringify(disks) !== JSON.stringify(mockDisks);
+    setHasChanges(changesDetected);
+    onChangesDetected(changesDetected);
   }, [disks, onChangesDetected]);
 
   const validateDiskConfiguration = (): string[] => {
@@ -202,12 +205,18 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
   };
 
   const handleRemoveDisk = (diskId: string) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to remove this disk? This action cannot be undone.'
-    );
-    if (confirmed) {
-      setDisks(disks.filter((disk) => disk.id !== diskId));
+    setDiskToRemove(diskId);
+  };
+
+  const confirmRemoveDisk = () => {
+    if (diskToRemove) {
+      setDisks(disks.filter((disk) => disk.id !== diskToRemove));
+      setDiskToRemove(null);
     }
+  };
+
+  const cancelRemoveDisk = () => {
+    setDiskToRemove(null);
   };
 
   const resetDiskForm = () => {
@@ -232,7 +241,8 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
       };
 
       onSave(updatedVM);
-    } catch {
+    } catch (error) {
+      console.error('Failed to update disk configuration:', error);
       setValidationErrors([
         'Failed to update disk configuration. Please try again.',
       ]);
@@ -260,8 +270,6 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
       isDisabled: !disk.removable || vm.status === 'POWERED_ON',
     },
   ];
-
-  const hasChanges = JSON.stringify(disks) !== JSON.stringify(mockDisks);
 
   return (
     <Stack hasGutter>
@@ -533,6 +541,36 @@ export const VMDiskManager: React.FC<VMDiskManagerProps> = ({
             isDisabled={validationErrors.length > 0}
           >
             {editingDisk ? 'Update Disk' : 'Add Disk'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Remove Disk Confirmation Modal */}
+      <Modal
+        variant={ModalVariant.small}
+        title="Remove Disk"
+        isOpen={diskToRemove !== null}
+        onClose={cancelRemoveDisk}
+      >
+        <p>
+          Are you sure you want to remove this disk? This action cannot be
+          undone.
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '12px',
+            marginTop: '24px',
+            paddingTop: '16px',
+            borderTop: '1px solid var(--pf-v6-global--BorderColor--100)',
+          }}
+        >
+          <Button variant="link" onClick={cancelRemoveDisk}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmRemoveDisk}>
+            Remove
           </Button>
         </div>
       </Modal>

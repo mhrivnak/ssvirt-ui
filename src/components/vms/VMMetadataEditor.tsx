@@ -316,7 +316,8 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
       };
 
       onSave(updatedVM);
-    } catch {
+    } catch (error) {
+      console.error('Failed to update VM metadata:', error);
       setValidationErrors(['Failed to update VM metadata. Please try again.']);
     } finally {
       setIsLoading(false);

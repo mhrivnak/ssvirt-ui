@@ -122,7 +122,8 @@ export const VMResourceEditor: React.FC<VMResourceEditorProps> = ({
       };
 
       onSave(updatedVM);
-    } catch {
+    } catch (error) {
+      console.error('Failed to update VM configuration:', error);
       setValidationErrors([
         'Failed to update VM configuration. Please try again.',
       ]);
