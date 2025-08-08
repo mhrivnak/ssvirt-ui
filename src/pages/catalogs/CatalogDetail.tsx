@@ -149,7 +149,9 @@ const CatalogDetail: React.FC = () => {
   };
 
   const handleSortChange = (value: string) => {
-    const [newSortBy, newSortOrder] = value.split('_');
+    const lastUnderscoreIndex = value.lastIndexOf('_');
+    const newSortBy = value.slice(0, lastUnderscoreIndex);
+    const newSortOrder = value.slice(lastUnderscoreIndex + 1);
     setSortBy(newSortBy);
     setSortOrder(newSortOrder as 'asc' | 'desc');
     setCurrentPage(1);
