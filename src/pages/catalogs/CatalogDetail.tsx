@@ -102,7 +102,7 @@ const CatalogDetail: React.FC = () => {
     }
   );
 
-  // Call hooks unconditionally first
+  // Call hooks unconditionally first (hooks have built-in enabled guards)
   const {
     data: catalogResponse,
     isLoading: catalogLoading,
