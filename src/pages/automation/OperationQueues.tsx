@@ -396,11 +396,7 @@ const OperationQueues: React.FC = () => {
                                   Average Duration
                                 </DescriptionListTerm>
                                 <DescriptionListDescription>
-                                  {0
-                                    ? formatDuration(
-                                        0
-                                      )
-                                    : 'N/A'}
+                                  N/A
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
                             </DescriptionList>
