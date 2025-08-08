@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssvirt-ui
+  labels:
+    app: ssvirt-ui
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ssvirt-ui
+  template:
+    metadata:
+      labels:
+        app: ssvirt-ui
+        component: frontend
+    spec:
+      containers:
+      - name: ssvirt-ui
+        image: quay.io/mhrivnak/ssvirt-ui:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/app-root/src/dist/config.json
+          subPath: config.json
+          readOnly: true
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ssvirt-ui-config
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssvirt-ui
+  labels:
+    app: ssvirt-ui
+    component: frontend
+spec:
+  selector:
+    app: ssvirt-ui
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+# OpenShift Route (preferred for OpenShift)
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ssvirt-ui
+  labels:
+    app: ssvirt-ui
+    component: frontend
+spec:
+  to:
+    kind: Service
+    name: ssvirt-ui
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+# Alternative: Kubernetes Ingress (for non-OpenShift clusters)
+# Uncomment and configure the following if not using OpenShift Routes
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: ssvirt-ui
+#   labels:
+#     app: ssvirt-ui
+#     component: frontend
+#   annotations:
+#     # Configure your ingress controller specific annotations here
+#     # nginx.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   ingressClassName: nginx  # Adjust based on your ingress controller
+#   rules:
+#   - host: ssvirt-ui.your-domain.com  # Replace with your domain
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: ssvirt-ui
+#             port:
+#               number: 8080
+#   tls:
+#   - hosts:
+#     - ssvirt-ui.your-domain.com  # Replace with your domain
+#     secretName: ssvirt-ui-tls  # Replace with your TLS secret
