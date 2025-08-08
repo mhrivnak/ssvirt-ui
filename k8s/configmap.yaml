@@ -6,7 +6,10 @@ metadata:
     app: ssvirt-ui
     component: frontend
 data:
-  API_BASE_URL: "http://ssvirt-backend:8080/api"
-  APP_TITLE: "SSVIRT Web UI"
-  APP_VERSION: "1.0.0"
-  LOGO_URL: "/vite.svg"
+  config.json: |
+    {
+      "apiBaseUrl": "http://ssvirt-backend:8080/api",
+      "appTitle": "SSVIRT Web UI",
+      "appVersion": "1.0.0",
+      "logoUrl": "/vite.svg"
+    }

@@ -23,9 +23,11 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
-        envFrom:
-        - configMapRef:
-            name: ssvirt-ui-config
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/app-root/src/dist/config.json
+          subPath: config.json
+          readOnly: true
         resources:
           requests:
             memory: "128Mi"
@@ -57,6 +59,10 @@ spec:
           capabilities:
             drop:
             - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ssvirt-ui-config
       securityContext:
         runAsNonRoot: true
         seccompProfile:
