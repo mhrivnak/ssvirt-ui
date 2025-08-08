@@ -94,15 +94,14 @@ const OperationQueues: React.FC = () => {
     }
   };
 
-  const getQueueStatusColor = (status: string, isActive: boolean) => {
-    if (!isActive) return 'grey';
+  const getQueueStatusColor = (status: string) => {
     switch (status) {
-      case 'running':
+      case 'active':
         return 'blue';
       case 'paused':
         return 'orange';
-      case 'error':
-        return 'red';
+      case 'stopped':
+        return 'grey';
       default:
         return 'grey';
     }
@@ -116,7 +115,7 @@ const OperationQueues: React.FC = () => {
         return 'blue';
       case 'failed':
         return 'red';
-      case 'pending':
+      case 'queued':
         return 'orange';
       case 'cancelled':
         return 'grey';
@@ -243,13 +242,10 @@ const OperationQueues: React.FC = () => {
                                       <SplitItem>
                                         <Badge
                                           color={getQueueStatusColor(
-                                            queue.status,
-                                            queue.status === 'active'
+                                            queue.status
                                           )}
                                         >
-                                          {queue.status === 'active'
-                                            ? queue.status.toUpperCase()
-                                            : 'PAUSED'}
+                                          {queue.status.toUpperCase()}
                                         </Badge>
                                       </SplitItem>
                                       <SplitItem>
@@ -259,7 +255,9 @@ const OperationQueues: React.FC = () => {
                                               ? 'green'
                                               : health.status === 'warning'
                                                 ? 'orange'
-                                                : 'red'
+                                                : health.status === 'info'
+                                                  ? 'grey'
+                                                  : 'red'
                                           }
                                         >
                                           {health.message}

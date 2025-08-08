@@ -48,7 +48,7 @@ import {
   PauseIcon,
   CodeBranchIcon,
   ProjectDiagramIcon,
-  TimesIcon,
+  ClockIcon,
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import {
@@ -90,6 +90,7 @@ const AutomationWorkflows: React.FC = () => {
     'manual' | 'schedule' | 'event'
   >('manual');
   const [workflowEnabled, setWorkflowEnabled] = useState(true);
+  const [isTriggerTypeSelectOpen, setIsTriggerTypeSelectOpen] = useState(false);
 
   // Build query parameters
   const queryParams = {
@@ -148,6 +149,7 @@ const AutomationWorkflows: React.FC = () => {
     setWorkflowDescription('');
     setTriggerType('manual');
     setWorkflowEnabled(true);
+    setIsTriggerTypeSelectOpen(false);
   };
 
   const handleCreateWorkflow = async () => {
@@ -256,18 +258,6 @@ const AutomationWorkflows: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'green';
-      case 'disabled':
-        return 'grey';
-      case 'error':
-        return 'red';
-      default:
-        return 'grey';
-    }
-  };
 
   const getTriggerTypeLabel = (type: string) => {
     switch (type) {
@@ -286,8 +276,8 @@ const AutomationWorkflows: React.FC = () => {
     switch (type) {
       case 'manual':
         return <PlayIcon />;
-      case 'scheduled':
-        return <TimesIcon />;
+      case 'schedule':
+        return <ClockIcon />;
       case 'event':
         return <CodeBranchIcon />;
       default:
@@ -492,7 +482,7 @@ const AutomationWorkflows: React.FC = () => {
                                 )}
                               </StackItem>
                               <StackItem>
-                                <Badge color={getStatusColor(workflow.status)}>
+                                <Badge color={workflow.is_enabled ? 'green' : 'grey'}>
                                   {workflow.is_enabled ? 'ENABLED' : 'DISABLED'}
                                 </Badge>
                                 <Badge className="pf-v6-u-ml-sm">
@@ -683,13 +673,20 @@ const AutomationWorkflows: React.FC = () => {
 
           <FormGroup label="Trigger Type" isRequired fieldId="trigger-type">
             <Select
-              isOpen={false}
+              isOpen={isTriggerTypeSelectOpen}
               selected={triggerType}
-              onSelect={(_, selection) =>
-                setTriggerType(selection as 'manual' | 'schedule' | 'event')
-              }
+              onSelect={(_, selection) => {
+                setTriggerType(selection as 'manual' | 'schedule' | 'event');
+                setIsTriggerTypeSelectOpen(false);
+              }}
+              onOpenChange={setIsTriggerTypeSelectOpen}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                <MenuToggle ref={toggleRef}>
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={() =>
+                    setIsTriggerTypeSelectOpen(!isTriggerTypeSelectOpen)
+                  }
+                >
                   {getTriggerTypeLabel(triggerType)}
                 </MenuToggle>
               )}
