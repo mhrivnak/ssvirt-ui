@@ -118,17 +118,39 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     enableBackup: true,
   });
 
+  // Helper function to detect changes
+  const detectChanges = (
+    currentMetadata: VMMetadata,
+    currentAnnotations: VMAnnotation[],
+    currentVmName: string,
+    currentVmDescription: string,
+    currentEnableMonitoring: boolean,
+    currentEnableBackup: boolean,
+    originalState: typeof originalStateRef.current
+  ): boolean => {
+    return (
+      JSON.stringify(currentMetadata) !==
+        JSON.stringify(originalState.metadata) ||
+      JSON.stringify(currentAnnotations) !==
+        JSON.stringify(originalState.annotations) ||
+      currentVmName !== originalState.vmName ||
+      currentVmDescription !== originalState.vmDescription ||
+      currentEnableMonitoring !== originalState.enableMonitoring ||
+      currentEnableBackup !== originalState.enableBackup
+    );
+  };
+
   useEffect(() => {
     // Check if there are changes compared to original state
-    const hasChanges =
-      JSON.stringify(metadata) !==
-        JSON.stringify(originalStateRef.current.metadata) ||
-      JSON.stringify(annotations) !==
-        JSON.stringify(originalStateRef.current.annotations) ||
-      vmName !== originalStateRef.current.vmName ||
-      vmDescription !== originalStateRef.current.vmDescription ||
-      enableMonitoring !== originalStateRef.current.enableMonitoring ||
-      enableBackup !== originalStateRef.current.enableBackup;
+    const hasChanges = detectChanges(
+      metadata,
+      annotations,
+      vmName,
+      vmDescription,
+      enableMonitoring,
+      enableBackup,
+      originalStateRef.current
+    );
 
     onChangesDetected(hasChanges);
   }, [
@@ -159,10 +181,7 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     }
 
     // Check for duplicate keys
-    if (
-      Object.prototype.hasOwnProperty.call(metadata, key) &&
-      !editingAnnotation
-    ) {
+    if (Object.prototype.hasOwnProperty.call(metadata, key)) {
       errors.push('A metadata entry with this key already exists');
     }
 
@@ -353,15 +372,15 @@ export const VMMetadataEditor: React.FC<VMMetadataEditorProps> = ({
     return actions;
   };
 
-  const hasChanges =
-    JSON.stringify(metadata) !==
-      JSON.stringify(originalStateRef.current.metadata) ||
-    JSON.stringify(annotations) !==
-      JSON.stringify(originalStateRef.current.annotations) ||
-    vmName !== originalStateRef.current.vmName ||
-    vmDescription !== originalStateRef.current.vmDescription ||
-    enableMonitoring !== originalStateRef.current.enableMonitoring ||
-    enableBackup !== originalStateRef.current.enableBackup;
+  const hasChanges = detectChanges(
+    metadata,
+    annotations,
+    vmName,
+    vmDescription,
+    enableMonitoring,
+    enableBackup,
+    originalStateRef.current
+  );
 
   return (
     <Stack hasGutter>
