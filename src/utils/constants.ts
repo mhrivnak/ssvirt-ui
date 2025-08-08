@@ -133,5 +133,12 @@ export const ROUTES = {
   MONITORING_ALERTS: '/monitoring/alerts',
   MONITORING_EXPORTS: '/monitoring/exports',
   MONITORING_DASHBOARDS: '/monitoring/dashboards',
+  // Batch Operations & Automation
+  AUTOMATION: '/automation',
+  AUTOMATION_BATCH_OPERATIONS: '/automation/batch-operations',
+  AUTOMATION_DEPLOYMENT_TEMPLATES: '/automation/deployment-templates',
+  AUTOMATION_SCHEDULED_OPERATIONS: '/automation/scheduled-operations',
+  AUTOMATION_WORKFLOWS: '/automation/workflows',
+  AUTOMATION_QUEUES: '/automation/queues',
   PROFILE: '/profile',
 } as const;
