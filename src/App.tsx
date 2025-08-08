@@ -12,6 +12,7 @@ import {
 } from './pages/organizations';
 import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
 import { VMs, VMDetail } from './pages/vms';
+import { Catalogs, CatalogDetail } from './pages/catalogs';
 import { UserProfile } from './pages/profile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthProvider';
@@ -228,7 +229,17 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <div>Catalogs - Coming in future PR</div>
+                      <Catalogs />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTES.CATALOG_DETAIL}
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <CatalogDetail />
                     </AppLayout>
                   </ProtectedRoute>
                 }
