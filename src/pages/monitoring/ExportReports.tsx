@@ -71,6 +71,8 @@ const ExportReports: React.FC = () => {
   // UI state
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [showCreateExportModal, setShowCreateExportModal] = useState(false);
+  const [isDataTypeSelectOpen, setIsDataTypeSelectOpen] = useState(false);
+  const [isFormatSelectOpen, setIsFormatSelectOpen] = useState(false);
 
   // Create export form state
   const [exportFormat, setExportFormat] = useState<
@@ -93,6 +95,7 @@ const ExportReports: React.FC = () => {
     search: searchValue || undefined,
     status: statusFilter || undefined,
     limit: perPage,
+    page: currentPage,
   };
 
   const { data: jobsResponse, isLoading, error } = useExportJobs(queryParams);
@@ -154,16 +157,16 @@ const ExportReports: React.FC = () => {
     }
   };
 
-  const handleDownloadFile = async (jobId: string) => {
+  const handleDownloadFile = async (job: ExportJob) => {
     try {
-      const blob = await downloadFileMutation.mutateAsync(jobId);
+      const blob = await downloadFileMutation.mutateAsync(job.id);
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `export-${jobId}.${exportFormat}`;
+      a.download = `export-${job.id}.${job.format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -429,7 +432,7 @@ const ExportReports: React.FC = () => {
                             {
                               title: 'Download',
                               icon: <DownloadIcon />,
-                              onClick: () => handleDownloadFile(job.id),
+                              onClick: () => handleDownloadFile(job),
                               isDisabled:
                                 job.status !== 'completed' || !job.file_url,
                             },
@@ -487,9 +490,9 @@ const ExportReports: React.FC = () => {
         <Form>
           <FormGroup label="Data Type" isRequired fieldId="export-data-type">
             <Select
-              isOpen={false}
+              isOpen={isDataTypeSelectOpen}
               selected={exportDataType}
-              onSelect={(_, selection) =>
+              onSelect={(_, selection) => {
                 setExportDataType(
                   selection as
                     | 'resource_usage'
@@ -497,8 +500,10 @@ const ExportReports: React.FC = () => {
                     | 'capacity_planning'
                     | 'alerts'
                     | 'dashboard'
-                )
-              }
+                );
+                setIsDataTypeSelectOpen(false);
+              }}
+              onOpenChange={(isOpen) => setIsDataTypeSelectOpen(isOpen)}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {getDataTypeLabel(exportDataType)}
@@ -521,11 +526,13 @@ const ExportReports: React.FC = () => {
 
           <FormGroup label="Export Format" isRequired fieldId="export-format">
             <Select
-              isOpen={false}
+              isOpen={isFormatSelectOpen}
               selected={exportFormat}
-              onSelect={(_, selection) =>
-                setExportFormat(selection as 'csv' | 'xlsx' | 'pdf' | 'json')
-              }
+              onSelect={(_, selection) => {
+                setExportFormat(selection as 'csv' | 'xlsx' | 'pdf' | 'json');
+                setIsFormatSelectOpen(false);
+              }}
+              onOpenChange={(isOpen) => setIsFormatSelectOpen(isOpen)}
               toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                 <MenuToggle ref={toggleRef}>
                   {exportFormat.toUpperCase()}

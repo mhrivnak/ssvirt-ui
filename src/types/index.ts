@@ -810,6 +810,13 @@ export interface ExportJob {
   id: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress_percent: number;
+  format: 'csv' | 'xlsx' | 'pdf' | 'json';
+  data_type:
+    | 'resource_usage'
+    | 'cost_report'
+    | 'capacity_planning'
+    | 'alerts'
+    | 'dashboard';
   file_url?: string;
   file_size_bytes?: number;
   error_message?: string;

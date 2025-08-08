@@ -57,6 +57,7 @@ import {
   useCloneCustomDashboard,
 } from '../../hooks/useMonitoring';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { ROUTES } from '../../utils/constants';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { CustomDashboard } from '../../types';
 
@@ -70,6 +71,11 @@ const CustomDashboards: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingDashboard, setEditingDashboard] =
     useState<CustomDashboard | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dashboardToDelete, setDashboardToDelete] = useState<string | null>(null);
+  const [showCloneModal, setShowCloneModal] = useState(false);
+  const [dashboardToClone, setDashboardToClone] = useState<{ id: string; name: string } | null>(null);
+  const [cloneName, setCloneName] = useState('');
 
   // Create/edit dashboard form state
   const [dashboardName, setDashboardName] = useState('');
@@ -149,33 +155,46 @@ const CustomDashboards: React.FC = () => {
 
       resetForm();
       setEditingDashboard(null);
+      setShowCreateModal(false);
     } catch (error) {
       console.error('Failed to update dashboard:', error);
     }
   };
 
-  const handleDeleteDashboard = async (dashboardId: string) => {
-    if (window.confirm('Are you sure you want to delete this dashboard?')) {
-      try {
-        await deleteDashboardMutation.mutateAsync(dashboardId);
-      } catch (error) {
-        console.error('Failed to delete dashboard:', error);
-      }
+  const handleDeleteDashboard = (dashboardId: string) => {
+    setDashboardToDelete(dashboardId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteDashboard = async () => {
+    if (!dashboardToDelete) return;
+    
+    try {
+      await deleteDashboardMutation.mutateAsync(dashboardToDelete);
+      setShowDeleteModal(false);
+      setDashboardToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete dashboard:', error);
     }
   };
 
-  const handleCloneDashboard = async (dashboardId: string, name: string) => {
-    const cloneName = prompt(
-      'Enter name for cloned dashboard:',
-      `${name} (Copy)`
-    );
-    if (!cloneName) return;
+  const handleCloneDashboard = (dashboardId: string, name: string) => {
+    setDashboardToClone({ id: dashboardId, name });
+    setCloneName(`${name} (Copy)`);
+    setShowCloneModal(true);
+  };
+
+  const confirmCloneDashboard = async () => {
+    if (!dashboardToClone || !cloneName) return;
 
     try {
       await cloneDashboardMutation.mutateAsync({
-        dashboardId,
+        dashboardId: dashboardToClone.id,
         name: cloneName,
       });
+      setShowCloneModal(false);
+      setDashboardToClone(null);
+      setCloneName('');
     } catch (error) {
       console.error('Failed to clone dashboard:', error);
     }
@@ -226,7 +245,7 @@ const CustomDashboards: React.FC = () => {
   const filteredDashboards = dashboards.filter(
     (dashboard) =>
       dashboard.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      dashboard.description.toLowerCase().includes(searchValue.toLowerCase())
+      dashboard.description?.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   return (
@@ -235,10 +254,10 @@ const CustomDashboards: React.FC = () => {
         {/* Breadcrumb */}
         <StackItem>
           <Breadcrumb>
-            <BreadcrumbItem component={Link} to="/dashboard">
+            <BreadcrumbItem component={Link} to={ROUTES.DASHBOARD}>
               Dashboard
             </BreadcrumbItem>
-            <BreadcrumbItem component={Link} to="/monitoring">
+            <BreadcrumbItem component={Link} to={ROUTES.MONITORING}>
               Resource Monitoring
             </BreadcrumbItem>
             <BreadcrumbItem isActive>Custom Dashboards</BreadcrumbItem>
@@ -577,6 +596,81 @@ const CustomDashboards: React.FC = () => {
             </Button>
           </div>
         </Form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        variant={ModalVariant.small}
+        title="Delete Dashboard"
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setDashboardToDelete(null);
+        }}
+      >
+        <p>Are you sure you want to delete this dashboard? This action cannot be undone.</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+          <Button
+            variant="danger"
+            onClick={confirmDeleteDashboard}
+            isDisabled={deleteDashboardMutation.isPending}
+            isLoading={deleteDashboardMutation.isPending}
+          >
+            Delete
+          </Button>
+          <Button
+            variant="link"
+            onClick={() => {
+              setShowDeleteModal(false);
+              setDashboardToDelete(null);
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Clone Dashboard Modal */}
+      <Modal
+        variant={ModalVariant.small}
+        title="Clone Dashboard"
+        isOpen={showCloneModal}
+        onClose={() => {
+          setShowCloneModal(false);
+          setDashboardToClone(null);
+          setCloneName('');
+        }}
+      >
+        <Form>
+          <FormGroup label="Clone Name" isRequired fieldId="clone-name">
+            <TextInput
+              id="clone-name"
+              value={cloneName}
+              onChange={(_, value) => setCloneName(value)}
+              placeholder="Enter name for cloned dashboard"
+            />
+          </FormGroup>
+        </Form>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+          <Button
+            variant="primary"
+            onClick={confirmCloneDashboard}
+            isDisabled={cloneDashboardMutation.isPending || !cloneName}
+            isLoading={cloneDashboardMutation.isPending}
+          >
+            Clone
+          </Button>
+          <Button
+            variant="link"
+            onClick={() => {
+              setShowCloneModal(false);
+              setDashboardToClone(null);
+              setCloneName('');
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
       </Modal>
     </PageSection>
   );
