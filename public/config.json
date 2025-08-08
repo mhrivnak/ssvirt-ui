@@ -1,6 +1,0 @@
-{
-  "apiBaseUrl": "http://localhost:8080/api",
-  "appTitle": "SSVIRT Web UI",
-  "appVersion": "0.0.1",
-  "logoUrl": "/vite.svg"
-}

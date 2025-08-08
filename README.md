@@ -81,9 +81,9 @@ The application will be available at `http://localhost:8080`
 
 ### Container Runtime Configuration
 
-The application supports runtime configuration by mounting a custom `config.json` file:
+The application requires runtime configuration via a mounted `config.json` file:
 
-Create a custom configuration file:
+Create a configuration file:
 ```json
 {
   "apiBaseUrl": "http://your-api-server:8080/api",
