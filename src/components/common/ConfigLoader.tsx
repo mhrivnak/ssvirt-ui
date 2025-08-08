@@ -14,13 +14,13 @@ const getConfigResource = () => {
   if (configLoaded) {
     return;
   }
-  
+
   if (!configPromise) {
     configPromise = loadRuntimeConfig().then(() => {
       configLoaded = true;
     });
   }
-  
+
   if (!configLoaded) {
     throw configPromise;
   }
@@ -29,7 +29,9 @@ const getConfigResource = () => {
 /**
  * Component that ensures configuration is loaded before children
  */
-const ConfigValidator: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ConfigValidator: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   getConfigResource();
   return <>{children}</>;
 };
