@@ -2,3 +2,8 @@ export { default as PowerConfirmationModal } from './PowerConfirmationModal';
 export { default as PowerOperationStatus } from './PowerOperationStatus';
 export { default as VMPowerActions } from './VMPowerActions';
 export { default as VMCreationWizard } from './VMCreationWizard';
+export { default as VMConfigurationTab } from './VMConfigurationTab';
+export { default as VMResourceEditor } from './VMResourceEditor';
+export { default as VMDiskManager } from './VMDiskManager';
+export { default as VMNetworkManager } from './VMNetworkManager';
+export { default as VMMetadataEditor } from './VMMetadataEditor';

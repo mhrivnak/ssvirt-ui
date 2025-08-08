@@ -58,7 +58,7 @@ import {
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { useVMs, usePowerOperationTracking } from '../../hooks';
-import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
+import { VMPowerActions, PowerOperationStatus, VMConfigurationTab } from '../../components/vms';
 import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -208,6 +208,13 @@ const VMDetail: React.FC = () => {
   const handleRemoveTag = (tag: string) => {
     // In real app, would call API to remove tag
     console.log('Removing tag:', tag);
+  };
+
+  const handleConfigurationChange = (updatedVM: VM) => {
+    // In real app, would update the VM state and refresh from API
+    console.log('VM configuration updated:', updatedVM);
+    // For now, just show a success message
+    // In a real implementation, you would update the VM state here
   };
 
   if (isLoading) {
@@ -708,8 +715,19 @@ const VMDetail: React.FC = () => {
               </TabContent>
             </Tab>
 
-            <Tab eventKey={3} title={<TabTitleText>Activity</TabTitleText>}>
-              <TabContent eventKey={3} id="activity-tab">
+            <Tab eventKey={3} title={<TabTitleText>Configuration</TabTitleText>}>
+              <TabContent eventKey={3} id="configuration-tab">
+                <TabContentBody>
+                  <VMConfigurationTab
+                    vm={vm}
+                    onConfigurationChange={handleConfigurationChange}
+                  />
+                </TabContentBody>
+              </TabContent>
+            </Tab>
+
+            <Tab eventKey={4} title={<TabTitleText>Activity</TabTitleText>}>
+              <TabContent eventKey={4} id="activity-tab">
                 <TabContentBody>
                   <Card>
                     <CardBody>
