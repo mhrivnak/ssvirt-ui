@@ -8,3 +8,4 @@ export { VMService } from './vms';
 export { CatalogService } from './catalogs';
 export { DashboardService } from './dashboard';
 export { UserProfileService } from './userProfile';
+export { MonitoringService } from './monitoring';

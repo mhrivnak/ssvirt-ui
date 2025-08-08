@@ -126,5 +126,13 @@ export const ROUTES = {
   VDC_MONITORING: '/vdcs/:id/monitoring',
   CATALOGS: '/catalogs',
   CATALOG_DETAIL: '/catalogs/:id',
+  // Monitoring & Analytics
+  MONITORING: '/monitoring',
+  MONITORING_COSTS: '/monitoring/cost-reports',
+  MONITORING_CAPACITY: '/monitoring/capacity-planning',
+  MONITORING_ALERTS: '/monitoring/alerts',
+  MONITORING_EXPORTS: '/monitoring/exports',
+  MONITORING_DASHBOARDS: '/monitoring/dashboards',
+  MONITORING_ORG_DETAIL: '/monitoring/organizations/:id',
   PROFILE: '/profile',
 } as const;
