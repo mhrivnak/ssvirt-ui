@@ -456,8 +456,10 @@ const VMs: React.FC = () => {
                           isExpanded={isVDCSelectOpen}
                         >
                           {filters.vdc_id
-                            ? vdcs.find((vdc: { id: string; name: string }) => vdc.id === filters.vdc_id)
-                                ?.name || 'Unknown VDC'
+                            ? vdcs.find(
+                                (vdc: { id: string; name: string }) =>
+                                  vdc.id === filters.vdc_id
+                              )?.name || 'Unknown VDC'
                             : 'All VDCs'}
                         </MenuToggle>
                       )}
@@ -897,7 +899,15 @@ const VMs: React.FC = () => {
                 <li>Status: {VM_STATUS_LABELS[filters.status as VMStatus]}</li>
               )}
               {filters.vdc_id && (
-                <li>VDC: {vdcs.find((v: { id: string; name: string }) => v.id === filters.vdc_id)?.name}</li>
+                <li>
+                  VDC:{' '}
+                  {
+                    vdcs.find(
+                      (v: { id: string; name: string }) =>
+                        v.id === filters.vdc_id
+                    )?.name
+                  }
+                </li>
               )}
               {filters.org_id && (
                 <li>

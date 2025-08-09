@@ -40,10 +40,7 @@ export class VDCService {
    * Create a new VDC
    */
   static async createVDC(orgId: string, data: CreateVDCRequest): Promise<VDC> {
-    const response = await api.post<VDC>(
-      `/api/admin/org/${orgId}/vdcs`,
-      data
-    );
+    const response = await api.post<VDC>(`/api/admin/org/${orgId}/vdcs`, data);
     return response.data;
   }
 

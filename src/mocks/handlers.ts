@@ -124,9 +124,7 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const perPage = parseInt(url.searchParams.get('per_page') || '10');
 
-    const vdcs = generateMockVDCs().filter(
-      (vdc) => vdc.org?.id === orgId
-    );
+    const vdcs = generateMockVDCs().filter((vdc) => vdc.org?.id === orgId);
     return HttpResponse.json(createPaginatedResponse(vdcs, page, perPage));
   }),
 

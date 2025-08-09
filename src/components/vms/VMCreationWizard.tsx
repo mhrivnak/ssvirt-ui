@@ -7,11 +7,7 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import {
-  useCreateVM,
-  useCatalogs,
-  useAllCatalogItems,
-} from '../../hooks';
+import { useCreateVM, useCatalogs, useAllCatalogItems } from '../../hooks';
 import type {
   CreateVMRequest,
   VMNetworkConfig,
@@ -377,7 +373,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         onClose={handleProgressClose}
         vmName={formData.name}
         vdcName={
-          vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'
+          vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)?.name ||
+          'Unknown VDC'
         }
         error={creationError || undefined}
       />

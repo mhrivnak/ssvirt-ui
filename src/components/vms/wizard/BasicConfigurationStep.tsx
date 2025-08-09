@@ -245,16 +245,25 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                       >
                         <Stack>
                           <StackItem>
-                            <strong>CPU Limit:</strong> {selectedVDC.computeCapacity.cpu.limit}{' '}
+                            <strong>CPU Limit:</strong>{' '}
+                            {selectedVDC.computeCapacity.cpu.limit}{' '}
                             {selectedVDC.computeCapacity.cpu.units}
                           </StackItem>
                           <StackItem>
                             <strong>Memory Limit:</strong>{' '}
-                            {selectedVDC.computeCapacity.memory.limit} {selectedVDC.computeCapacity.memory.units}
+                            {selectedVDC.computeCapacity.memory.limit}{' '}
+                            {selectedVDC.computeCapacity.memory.units}
                           </StackItem>
                           <StackItem>
                             <strong>Storage Limit:</strong>{' '}
-                            {selectedVDC.vdcStorageProfiles.providerVdcStorageProfile.limit} {selectedVDC.vdcStorageProfiles.providerVdcStorageProfile.units}
+                            {
+                              selectedVDC.vdcStorageProfiles
+                                .providerVdcStorageProfile.limit
+                            }{' '}
+                            {
+                              selectedVDC.vdcStorageProfiles
+                                .providerVdcStorageProfile.units
+                            }
                           </StackItem>
                           <StackItem>
                             <strong>Allocation Model:</strong>{' '}
