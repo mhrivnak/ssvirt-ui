@@ -202,7 +202,7 @@ const NetworkConfigurationStep: React.FC<NetworkConfigurationStepProps> = ({
             title="VDC Network Information"
           >
             This VM will be deployed in the <strong>{selectedVDC.name}</strong>{' '}
-            VDC network namespace: <code>{selectedVDC.namespace}</code>
+            VDC with ID: <code>{selectedVDC.id}</code>
           </Alert>
         </StackItem>
       )}

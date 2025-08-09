@@ -14,7 +14,6 @@ import {
   Split,
   SplitItem,
   Badge,
-  Switch,
   Pagination,
   EmptyState,
   EmptyStateBody,
@@ -26,8 +25,8 @@ import {
   MenuToggle,
   Alert,
   AlertVariant,
-  Progress,
-  ProgressSize,
+  Breadcrumb,
+  BreadcrumbItem,
 } from '@patternfly/react-core';
 import {
   Table,
@@ -42,18 +41,19 @@ import type { MenuToggleElement } from '@patternfly/react-core';
 import {
   NetworkIcon,
   PlusCircleIcon,
-  SearchIcon,
   FilterIcon,
 } from '@patternfly/react-icons';
-import { useNavigate } from 'react-router-dom';
-import { useVDCs, useDeleteVDC, useToggleVDCStatus } from '../../hooks';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useVDCs, useDeleteVDC } from '../../hooks';
+import { useRole } from '../../hooks/useRole';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, VDCQueryParams } from '../../types';
 import { ROUTES } from '../../utils/constants';
-import { formatBytes } from '../../utils/format';
 
 const VDCs: React.FC = () => {
   const navigate = useNavigate();
+  const { orgId } = useParams<{ orgId: string }>();
+  const { capabilities } = useRole();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [allocationFilter, setAllocationFilter] = useState<string>('all');
@@ -67,26 +67,60 @@ const VDCs: React.FC = () => {
 
   // Prepare query parameters
   const queryParams: VDCQueryParams = {
-    search: searchTerm || undefined,
-    enabled:
-      statusFilter === 'enabled'
-        ? true
-        : statusFilter === 'disabled'
-          ? false
-          : undefined,
-    allocation_model: allocationFilter !== 'all' ? allocationFilter : undefined,
-    sort_by: sortBy,
-    sort_order: sortDirection,
+    filter: searchTerm || undefined,
+    sortAsc: sortDirection === 'asc' ? sortBy : undefined,
+    sortDesc: sortDirection === 'desc' ? sortBy : undefined,
     page,
-    per_page: perPage,
+    pageSize: perPage,
+    status:
+      statusFilter !== 'all'
+        ? (statusFilter as 'enabled' | 'disabled')
+        : undefined,
+    allocationModel:
+      allocationFilter !== 'all'
+        ? (allocationFilter as
+            | 'PayAsYouGo'
+            | 'AllocationPool'
+            | 'ReservationPool'
+            | 'Flex')
+        : undefined,
   };
 
-  const { data: vdcsResponse, isLoading, error } = useVDCs(queryParams);
+  // Call hooks before any early returns
+  const {
+    data: vdcsResponse,
+    isLoading,
+    error,
+  } = useVDCs(orgId || '', queryParams);
   const deleteVDCMutation = useDeleteVDC();
-  const toggleStatusMutation = useToggleVDCStatus();
 
-  const vdcs = vdcsResponse?.data || [];
-  const pagination = vdcsResponse?.pagination;
+  // Check if user has system admin privileges
+  if (!capabilities.canManageSystem) {
+    return (
+      <PageSection>
+        <Alert variant={AlertVariant.warning} title="Access Denied" isInline>
+          Only System Administrators can manage Virtual Data Centers.
+        </Alert>
+      </PageSection>
+    );
+  }
+
+  if (!orgId) {
+    return (
+      <PageSection>
+        <Alert
+          variant={AlertVariant.danger}
+          title="Invalid Organization"
+          isInline
+        >
+          Organization ID is required to view VDCs.
+        </Alert>
+      </PageSection>
+    );
+  }
+
+  const vdcs = vdcsResponse?.values || [];
+  const totalCount = vdcsResponse?.resultTotal || 0;
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -103,16 +137,6 @@ const VDCs: React.FC = () => {
     setPage(1);
   };
 
-  const handleStatusChange = async (vdc: VDC, enabled: boolean) => {
-    try {
-      await toggleStatusMutation.mutateAsync({ id: vdc.id, enabled });
-    } catch (error) {
-      setErrorMessage(
-        `Failed to toggle VDC status: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    }
-  };
-
   const handleDelete = async (vdc: VDC) => {
     if (
       window.confirm(
@@ -120,7 +144,7 @@ const VDCs: React.FC = () => {
       )
     ) {
       try {
-        await deleteVDCMutation.mutateAsync(vdc.id);
+        await deleteVDCMutation.mutateAsync({ orgId, vdcId: vdc.id });
       } catch (error) {
         setErrorMessage(
           `Failed to delete VDC: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -146,21 +170,22 @@ const VDCs: React.FC = () => {
         return 'Pay As You Go Only';
       case 'AllocationPool':
         return 'Allocation Pool Only';
+      case 'ReservationPool':
+        return 'Reservation Pool Only';
+      case 'Flex':
+        return 'Flex Only';
       default:
-        return 'All Models';
+        return 'All Allocation Models';
     }
   };
 
-  const getSortableProps = (columnKey: string) => ({
-    sort: {
-      sortBy: {
-        index: sortBy === columnKey ? 0 : undefined,
-        direction: sortDirection,
-      },
-      onSort: () => handleSort(columnKey),
-      columnIndex: 0,
-    },
-  });
+  const formatResourceCapacity = (capacity: {
+    allocated: number;
+    limit: number;
+    units: string;
+  }) => {
+    return `${capacity.allocated.toLocaleString()} / ${capacity.limit.toLocaleString()} ${capacity.units}`;
+  };
 
   if (isLoading) {
     return (
@@ -173,18 +198,47 @@ const VDCs: React.FC = () => {
   if (error) {
     return (
       <PageSection>
-        <EmptyState icon={NetworkIcon}>
-          <EmptyStateBody>
-            Failed to load VDCs. Please try again.
-          </EmptyStateBody>
-        </EmptyState>
+        <Alert
+          variant={AlertVariant.danger}
+          title="Error Loading VDCs"
+          isInline
+        >
+          {error instanceof Error ? error.message : 'Unknown error occurred'}
+        </Alert>
       </PageSection>
     );
   }
 
+  const statusFilterItems = [
+    { key: 'all', label: 'All Statuses' },
+    { key: 'enabled', label: 'Enabled Only' },
+    { key: 'disabled', label: 'Disabled Only' },
+  ];
+
+  const allocationFilterItems = [
+    { key: 'all', label: 'All Allocation Models' },
+    { key: 'PayAsYouGo', label: 'Pay As You Go' },
+    { key: 'AllocationPool', label: 'Allocation Pool' },
+    { key: 'ReservationPool', label: 'Reservation Pool' },
+    { key: 'Flex', label: 'Flex' },
+  ];
+
   return (
     <PageSection>
       <Stack hasGutter>
+        {/* Breadcrumb */}
+        <StackItem>
+          <Breadcrumb>
+            <BreadcrumbItem>
+              <Link to={ROUTES.DASHBOARD}>Dashboard</Link>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
+            </BreadcrumbItem>
+            <BreadcrumbItem isActive>Virtual Data Centers</BreadcrumbItem>
+          </Breadcrumb>
+        </StackItem>
+
         {/* Header */}
         <StackItem>
           <Split hasGutter>
@@ -193,14 +247,16 @@ const VDCs: React.FC = () => {
                 Virtual Data Centers
               </Title>
               <p className="pf-v6-u-color-200">
-                Manage virtual data centers and their resource allocations
+                Manage virtual data centers for the organization
               </p>
             </SplitItem>
             <SplitItem>
               <Button
                 variant="primary"
                 icon={<PlusCircleIcon />}
-                onClick={() => navigate(ROUTES.VDC_CREATE)}
+                onClick={() =>
+                  navigate(`${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/new`)
+                }
               >
                 Create VDC
               </Button>
@@ -208,15 +264,24 @@ const VDCs: React.FC = () => {
           </Split>
         </StackItem>
 
-        {/* Error Alert */}
+        {/* Error Message */}
         {errorMessage && (
           <StackItem>
-            <Alert variant={AlertVariant.danger} title="Error" isInline>
+            <Alert
+              variant={AlertVariant.danger}
+              title="Operation Failed"
+              isInline
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => setErrorMessage('')}
+                  aria-label="Close error message"
+                >
+                  ×
+                </Button>
+              }
+            >
               {errorMessage}
-              <br />
-              <Button variant="link" onClick={() => setErrorMessage('')}>
-                Dismiss
-              </Button>
             </Alert>
           </StackItem>
         )}
@@ -227,27 +292,28 @@ const VDCs: React.FC = () => {
             <CardBody>
               <Toolbar>
                 <ToolbarContent>
-                  <ToolbarItem width="300px">
+                  <ToolbarItem>
                     <SearchInput
                       placeholder="Search VDCs..."
                       value={searchTerm}
                       onChange={(_, value) => handleSearch(value)}
                       onClear={() => handleSearch('')}
-                      aria-label="Search VDCs"
                     />
                   </ToolbarItem>
                   <ToolbarItem>
                     <Dropdown
                       isOpen={isStatusFilterOpen}
-                      onSelect={() => setIsStatusFilterOpen(false)}
-                      onOpenChange={(isOpen) => setIsStatusFilterOpen(isOpen)}
+                      onSelect={(_, selection) => {
+                        setStatusFilter(selection as string);
+                        setIsStatusFilterOpen(false);
+                        setPage(1);
+                      }}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
                           onClick={() =>
                             setIsStatusFilterOpen(!isStatusFilterOpen)
                           }
-                          isExpanded={isStatusFilterOpen}
                           icon={<FilterIcon />}
                         >
                           {getStatusFilterLabel(statusFilter)}
@@ -255,50 +321,28 @@ const VDCs: React.FC = () => {
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem
-                          key="all"
-                          onClick={() => {
-                            setStatusFilter('all');
-                            setPage(1);
-                          }}
-                        >
-                          All Statuses
-                        </DropdownItem>
-                        <DropdownItem
-                          key="enabled"
-                          onClick={() => {
-                            setStatusFilter('enabled');
-                            setPage(1);
-                          }}
-                        >
-                          Enabled Only
-                        </DropdownItem>
-                        <DropdownItem
-                          key="disabled"
-                          onClick={() => {
-                            setStatusFilter('disabled');
-                            setPage(1);
-                          }}
-                        >
-                          Disabled Only
-                        </DropdownItem>
+                        {statusFilterItems.map((item) => (
+                          <DropdownItem key={item.key} value={item.key}>
+                            {item.label}
+                          </DropdownItem>
+                        ))}
                       </DropdownList>
                     </Dropdown>
                   </ToolbarItem>
                   <ToolbarItem>
                     <Dropdown
                       isOpen={isAllocationFilterOpen}
-                      onSelect={() => setIsAllocationFilterOpen(false)}
-                      onOpenChange={(isOpen) =>
-                        setIsAllocationFilterOpen(isOpen)
-                      }
+                      onSelect={(_, selection) => {
+                        setAllocationFilter(selection as string);
+                        setIsAllocationFilterOpen(false);
+                        setPage(1);
+                      }}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
                           ref={toggleRef}
                           onClick={() =>
                             setIsAllocationFilterOpen(!isAllocationFilterOpen)
                           }
-                          isExpanded={isAllocationFilterOpen}
                           icon={<FilterIcon />}
                         >
                           {getAllocationFilterLabel(allocationFilter)}
@@ -306,51 +350,13 @@ const VDCs: React.FC = () => {
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem
-                          key="all"
-                          onClick={() => {
-                            setAllocationFilter('all');
-                            setPage(1);
-                          }}
-                        >
-                          All Allocation Models
-                        </DropdownItem>
-                        <DropdownItem
-                          key="PayAsYouGo"
-                          onClick={() => {
-                            setAllocationFilter('PayAsYouGo');
-                            setPage(1);
-                          }}
-                        >
-                          Pay As You Go
-                        </DropdownItem>
-                        <DropdownItem
-                          key="AllocationPool"
-                          onClick={() => {
-                            setAllocationFilter('AllocationPool');
-                            setPage(1);
-                          }}
-                        >
-                          Allocation Pool
-                        </DropdownItem>
+                        {allocationFilterItems.map((item) => (
+                          <DropdownItem key={item.key} value={item.key}>
+                            {item.label}
+                          </DropdownItem>
+                        ))}
                       </DropdownList>
                     </Dropdown>
-                  </ToolbarItem>
-                  <ToolbarItem align={{ default: 'alignEnd' }}>
-                    {pagination && (
-                      <Pagination
-                        page={page}
-                        perPage={perPage}
-                        itemCount={pagination.total}
-                        onSetPage={(_, newPage) => setPage(newPage)}
-                        onPerPageSelect={(_, newPerPage) => {
-                          setPerPage(newPerPage);
-                          setPage(1);
-                        }}
-                        variant="top"
-                        isCompact
-                      />
-                    )}
                   </ToolbarItem>
                 </ToolbarContent>
               </Toolbar>
@@ -364,40 +370,52 @@ const VDCs: React.FC = () => {
             <CardBody>
               {vdcs.length === 0 ? (
                 <Bullseye>
-                  <EmptyState icon={searchTerm ? SearchIcon : NetworkIcon}>
-                    <Title headingLevel="h4" size="lg">
-                      {searchTerm ? 'No matching VDCs' : 'No VDCs found'}
+                  <EmptyState>
+                    <NetworkIcon />
+                    <Title headingLevel="h2" size="lg">
+                      No VDCs Found
                     </Title>
                     <EmptyStateBody>
-                      {searchTerm
-                        ? 'Try adjusting your search criteria or filters.'
-                        : 'Get started by creating your first Virtual Data Center.'}
+                      {searchTerm ||
+                      statusFilter !== 'all' ||
+                      allocationFilter !== 'all'
+                        ? 'No VDCs match your current filters. Try adjusting your search criteria.'
+                        : 'No virtual data centers have been created yet.'}
                     </EmptyStateBody>
-                    {!searchTerm && (
-                      <EmptyStateActions>
-                        <Button
-                          variant="primary"
-                          icon={<PlusCircleIcon />}
-                          onClick={() => navigate(ROUTES.VDC_CREATE)}
-                        >
-                          Create VDC
-                        </Button>
-                      </EmptyStateActions>
-                    )}
+                    <EmptyStateActions>
+                      <Button
+                        variant="primary"
+                        icon={<PlusCircleIcon />}
+                        onClick={() =>
+                          navigate(`${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/new`)
+                        }
+                      >
+                        Create VDC
+                      </Button>
+                    </EmptyStateActions>
                   </EmptyState>
                 </Bullseye>
               ) : (
-                <Table aria-label="VDCs table" variant="compact">
+                <Table aria-label="VDCs table">
                   <Thead>
                     <Tr>
-                      <Th {...getSortableProps('name')}>Name</Th>
-                      <Th>Namespace</Th>
+                      <Th
+                        sort={{
+                          sortBy: {
+                            index: sortBy === 'name' ? 0 : undefined,
+                            direction: sortDirection,
+                          },
+                          onSort: () => handleSort('name'),
+                          columnIndex: 0,
+                        }}
+                      >
+                        Name
+                      </Th>
                       <Th>Allocation Model</Th>
-                      <Th>CPU Usage</Th>
-                      <Th>Memory Usage</Th>
-                      <Th>Storage Usage</Th>
+                      <Th>CPU Capacity</Th>
+                      <Th>Memory Capacity</Th>
                       <Th>Status</Th>
-                      <Th {...getSortableProps('created_at')}>Created</Th>
+                      <Th>Quotas</Th>
                       <Th>Actions</Th>
                     </Tr>
                   </Thead>
@@ -405,140 +423,65 @@ const VDCs: React.FC = () => {
                     {vdcs.map((vdc) => (
                       <Tr key={vdc.id}>
                         <Td dataLabel="Name">
-                          <Button
-                            variant="link"
-                            isInline
-                            onClick={() =>
-                              navigate(ROUTES.VDC_DETAIL.replace(':id', vdc.id))
-                            }
-                          >
-                            {vdc.name}
-                          </Button>
-                        </Td>
-                        <Td dataLabel="Namespace">
-                          <code>{vdc.namespace}</code>
-                        </Td>
-                        <Td dataLabel="Allocation Model">
-                          <Badge color="blue">{vdc.allocation_model}</Badge>
-                        </Td>
-                        <Td dataLabel="CPU Usage">
-                          <div style={{ minWidth: '120px' }}>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                fontSize: '0.875rem',
-                              }}
-                            >
-                              <span>0 / {vdc.cpu_limit}</span>
-                              <span>0%</span>
-                            </div>
-                            <Progress
-                              value={0}
-                              size={ProgressSize.sm}
-                              variant="success"
-                            />
-                          </div>
-                        </Td>
-                        <Td dataLabel="Memory Usage">
-                          <div style={{ minWidth: '120px' }}>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                fontSize: '0.875rem',
-                              }}
-                            >
-                              <span>
-                                0 /{' '}
-                                {formatBytes(vdc.memory_limit_mb * 1024 * 1024)}
-                              </span>
-                              <span>0%</span>
-                            </div>
-                            <Progress
-                              value={0}
-                              size={ProgressSize.sm}
-                              variant="success"
-                            />
-                          </div>
-                        </Td>
-                        <Td dataLabel="Storage Usage">
-                          <div style={{ minWidth: '120px' }}>
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                fontSize: '0.875rem',
-                              }}
-                            >
-                              <span>
-                                0 /{' '}
-                                {formatBytes(
-                                  vdc.storage_limit_mb * 1024 * 1024
-                                )}
-                              </span>
-                              <span>0%</span>
-                            </div>
-                            <Progress
-                              value={0}
-                              size={ProgressSize.sm}
-                              variant="success"
-                            />
-                          </div>
-                        </Td>
-                        <Td dataLabel="Status">
                           <Split hasGutter>
                             <SplitItem>
-                              <Badge color={vdc.enabled ? 'green' : 'red'}>
-                                {vdc.enabled ? 'Enabled' : 'Disabled'}
-                              </Badge>
+                              <NetworkIcon />
                             </SplitItem>
                             <SplitItem>
-                              <Switch
-                                id={`status-${vdc.id}`}
-                                isChecked={vdc.enabled}
-                                onChange={(_, checked) =>
-                                  handleStatusChange(vdc, checked)
-                                }
-                                isDisabled={toggleStatusMutation.isPending}
-                                aria-label={`Toggle ${vdc.name} status`}
-                              />
+                              <div>
+                                <div className="pf-v6-u-font-weight-bold">
+                                  <Link
+                                    to={`${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}`}
+                                    className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                                  >
+                                    {vdc.name}
+                                  </Link>
+                                </div>
+                                {vdc.description && (
+                                  <div className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
+                                    {vdc.description}
+                                  </div>
+                                )}
+                              </div>
                             </SplitItem>
                           </Split>
                         </Td>
-                        <Td dataLabel="Created">
-                          {vdc.created_at
-                            ? new Date(vdc.created_at).toLocaleDateString()
-                            : 'N/A'}
+                        <Td dataLabel="Allocation Model">
+                          <Badge color="blue">{vdc.allocationModel}</Badge>
                         </Td>
-                        <Td dataLabel="Actions">
+                        <Td dataLabel="CPU Capacity">
+                          {formatResourceCapacity(vdc.computeCapacity.cpu)}
+                        </Td>
+                        <Td dataLabel="Memory Capacity">
+                          {formatResourceCapacity(vdc.computeCapacity.memory)}
+                        </Td>
+                        <Td dataLabel="Status">
+                          <Badge color={vdc.isEnabled ? 'green' : 'red'}>
+                            {vdc.isEnabled ? 'Enabled' : 'Disabled'}
+                          </Badge>
+                        </Td>
+                        <Td dataLabel="Quotas">
+                          <div className="pf-v6-u-font-size-sm">
+                            <div>NIC: {vdc.nicQuota}</div>
+                            <div>Network: {vdc.networkQuota}</div>
+                          </div>
+                        </Td>
+                        <Td>
                           <ActionsColumn
                             items={[
                               {
                                 title: 'View Details',
                                 onClick: () =>
                                   navigate(
-                                    ROUTES.VDC_DETAIL.replace(':id', vdc.id)
+                                    `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}`
                                   ),
                               },
                               {
                                 title: 'Edit',
                                 onClick: () =>
                                   navigate(
-                                    ROUTES.VDC_EDIT.replace(':id', vdc.id)
+                                    `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}/edit`
                                   ),
-                              },
-                              {
-                                title: 'Manage Users',
-                                onClick: () =>
-                                  navigate(
-                                    ROUTES.VDC_USERS.replace(':id', vdc.id)
-                                  ),
-                              },
-                              {
-                                title: 'View VMs',
-                                onClick: () =>
-                                  navigate(`${ROUTES.VMS}?vdc=${vdc.id}`),
                               },
                               { isSeparator: true },
                               {
@@ -558,13 +501,13 @@ const VDCs: React.FC = () => {
           </Card>
         </StackItem>
 
-        {/* Bottom Pagination */}
-        {vdcs.length > 0 && pagination && (
+        {/* Pagination */}
+        {totalCount > 0 && (
           <StackItem>
             <Pagination
-              page={page}
+              itemCount={totalCount}
               perPage={perPage}
-              itemCount={pagination.total}
+              page={page}
               onSetPage={(_, newPage) => setPage(newPage)}
               onPerPageSelect={(_, newPerPage) => {
                 setPerPage(newPerPage);

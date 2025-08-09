@@ -7,17 +7,13 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import {
-  useCreateVM,
-  useVDCs,
-  useCatalogs,
-  useAllCatalogItems,
-} from '../../hooks';
+import { useCreateVM, useCatalogs, useAllCatalogItems } from '../../hooks';
 import type {
   CreateVMRequest,
   VMNetworkConfig,
   VMStorageConfig,
   VMAdvancedConfig,
+  VDC,
   CatalogItem,
 } from '../../types';
 
@@ -108,11 +104,10 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
 
   // Hooks
   const createVMMutation = useCreateVM();
-  const { data: vdcsResponse } = useVDCs();
+  // TODO: VDCs now require organization ID - this needs proper implementation
+  const vdcs: VDC[] = [];
   const { data: catalogsResponse } = useCatalogs();
   const { data: catalogItemsResponse } = useAllCatalogItems();
-
-  const vdcs = vdcsResponse?.data || [];
   const catalogs = catalogsResponse?.data || [];
   const catalogItems = catalogItemsResponse?.data || [];
 
@@ -265,7 +260,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         <NetworkConfigurationStep
           formData={formData}
           updateFormData={updateFormData}
-          selectedVDC={vdcs.find((vdc) => vdc.id === formData.vdc_id)}
+          selectedVDC={vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)}
         />
       ),
     },
@@ -378,7 +373,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         onClose={handleProgressClose}
         vmName={formData.name}
         vdcName={
-          vdcs.find((vdc) => vdc.id === formData.vdc_id)?.name || 'Unknown VDC'
+          vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)?.name ||
+          'Unknown VDC'
         }
         error={creationError || undefined}
       />

@@ -179,24 +179,6 @@ export interface UpdateSecuritySettingRequest {
   enabled: boolean;
 }
 
-// VDC user management types
-export interface VDCUser extends User {
-  role: 'admin' | 'user' | 'viewer';
-  joined_at: string;
-  last_active: string;
-  status: 'active' | 'inactive' | 'invited';
-}
-
-export interface InviteVDCUserRequest {
-  email: string;
-  role: 'admin' | 'user' | 'viewer';
-}
-
-export interface UpdateVDCUserRoleRequest {
-  user_id: string;
-  role: 'admin' | 'user' | 'viewer';
-}
-
 export interface LoginRequest {
   username: string;
   password: string;
@@ -258,19 +240,46 @@ export interface Organization {
   directlyManagedOrgCount: number;
 }
 
-// VDC types
+// VDC types - VMware Cloud Director compliant
 export interface VDC {
-  id: string;
+  id: string; // URN format: urn:vcloud:vdc:uuid
   name: string;
-  organization_id: string;
-  namespace: string;
-  allocation_model: string;
-  cpu_limit: number;
-  memory_limit_mb: number;
-  storage_limit_mb: number;
-  enabled: boolean;
-  created_at: string;
-  updated_at: string;
+  description?: string;
+  allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
+  computeCapacity: {
+    cpu: {
+      allocated: number;
+      limit: number;
+      units: 'MHz';
+    };
+    memory: {
+      allocated: number;
+      limit: number;
+      units: 'MB';
+    };
+  };
+  providerVdc: {
+    id: string; // URN of provider VDC
+  };
+  nicQuota: number; // Default: 100
+  networkQuota: number; // Default: 50
+  vdcStorageProfiles: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
+  isThinProvision: boolean;
+  isEnabled: boolean;
+  // Standard CloudAPI fields
+  org?: {
+    name: string;
+    id: string;
+  };
+  creationDate?: string;
+  lastModified?: string;
+  status?: number;
+  tasks?: unknown[];
 }
 
 // VM types
@@ -394,12 +403,18 @@ export interface OrganizationQueryParams
   // Organization-specific filters
 }
 
-export interface VDCQueryParams
-  extends PaginationParams,
-    SortParams,
-    FilterParams {
-  // VDC-specific filters
-  allocation_model?: string;
+export interface VDCQueryParams {
+  page?: number;
+  pageSize?: number;
+  sortAsc?: string;
+  sortDesc?: string;
+  filter?: string;
+  status?: 'enabled' | 'disabled';
+  allocationModel?:
+    | 'PayAsYouGo'
+    | 'AllocationPool'
+    | 'ReservationPool'
+    | 'Flex';
 }
 
 export interface CatalogQueryParams
@@ -441,16 +456,68 @@ export interface UpdateOrganizationRequest
 
 export interface CreateVDCRequest {
   name: string;
-  organization_id: string;
-  allocation_model: string;
-  cpu_limit: number;
-  memory_limit_mb: number;
-  storage_limit_mb: number;
-  enabled?: boolean;
+  description?: string;
+  allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
+  computeCapacity: {
+    cpu: {
+      allocated: number;
+      limit: number;
+      units: 'MHz';
+    };
+    memory: {
+      allocated: number;
+      limit: number;
+      units: 'MB';
+    };
+  };
+  providerVdc: {
+    id: string;
+  };
+  nicQuota?: number; // Optional, defaults to 100
+  networkQuota?: number; // Optional, defaults to 50
+  vdcStorageProfiles: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
+  isThinProvision: boolean;
+  isEnabled: boolean;
 }
 
-export interface UpdateVDCRequest extends Partial<CreateVDCRequest> {
-  id: string;
+export interface UpdateVDCRequest {
+  name?: string;
+  description?: string;
+  allocationModel?:
+    | 'PayAsYouGo'
+    | 'AllocationPool'
+    | 'ReservationPool'
+    | 'Flex';
+  computeCapacity?: {
+    cpu?: {
+      allocated?: number;
+      limit?: number;
+      units?: 'MHz';
+    };
+    memory?: {
+      allocated?: number;
+      limit?: number;
+      units?: 'MB';
+    };
+  };
+  providerVdc?: {
+    id: string;
+  };
+  nicQuota?: number;
+  networkQuota?: number;
+  vdcStorageProfiles?: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
+  isThinProvision?: boolean;
+  isEnabled?: boolean;
 }
 
 export interface CreateVMRequest {
