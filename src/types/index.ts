@@ -22,12 +22,12 @@ export interface PaginatedResponse<T> {
 
 // VMware Cloud Director pagination envelope structure
 export interface VCloudPaginatedResponse<T> {
-  resultTotal: number;    // Total number of results across all pages
-  pageCount: number;      // Total number of pages  
-  page: number;           // Current page number
-  pageSize: number;       // Number of results per page
-  associations?: Record<string, unknown>[];   // Optional association metadata
-  values: T[];            // Array of actual data objects
+  resultTotal: number; // Total number of results across all pages
+  pageCount: number; // Total number of pages
+  page: number; // Current page number
+  pageSize: number; // Number of results per page
+  associations?: Record<string, unknown>[]; // Optional association metadata
+  values: T[]; // Array of actual data objects
 }
 
 export interface ApiError {
