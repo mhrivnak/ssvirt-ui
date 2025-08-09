@@ -56,15 +56,18 @@ export const API_ENDPOINTS = {
   // CloudAPI Users
   CLOUDAPI_USERS: '/cloudapi/1.0.0/users',
   CLOUDAPI_CURRENT_USER: '/cloudapi/1.0.0/users/current',
-  CLOUDAPI_USER_BY_ID: (id: string) => `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
+  CLOUDAPI_USER_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
 
   // CloudAPI Roles
   CLOUDAPI_ROLES: '/cloudapi/1.0.0/roles',
-  CLOUDAPI_ROLE_BY_ID: (id: string) => `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`,
+  CLOUDAPI_ROLE_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`,
 
   // CloudAPI Organizations
   CLOUDAPI_ORGANIZATIONS: '/cloudapi/1.0.0/orgs',
-  CLOUDAPI_ORGANIZATION_BY_ID: (id: string) => `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`,
+  CLOUDAPI_ORGANIZATION_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`,
 
   // User
   USER_PROFILE: '/v1/user/profile',

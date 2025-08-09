@@ -133,7 +133,9 @@ export class AuthService {
    */
   static async getCurrentUser(): Promise<User> {
     try {
-      const response = await api.get<ApiResponse<User>>(API_ENDPOINTS.CLOUDAPI_CURRENT_USER);
+      const response = await api.get<ApiResponse<User>>(
+        API_ENDPOINTS.CLOUDAPI_CURRENT_USER
+      );
       if (!response.data.success || !response.data.data) {
         throw new Error('Failed to get current user: Invalid response');
       }
