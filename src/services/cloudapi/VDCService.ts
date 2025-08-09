@@ -1,4 +1,4 @@
-import { cloudApi } from '../api';
+import { api } from '../api';
 import type {
   VDC,
   VDCQueryParams,
@@ -19,7 +19,7 @@ export class VDCService {
     orgId: string,
     params?: VDCQueryParams
   ): Promise<VCloudPaginatedResponse<VDC>> {
-    const response = await cloudApi.get<VCloudPaginatedResponse<VDC>>(
+    const response = await api.get<VCloudPaginatedResponse<VDC>>(
       `/api/admin/org/${orgId}/vdcs`,
       { params }
     );
@@ -30,7 +30,7 @@ export class VDCService {
    * Get a single VDC by ID
    */
   static async getVDC(orgId: string, vdcId: string): Promise<VDC> {
-    const response = await cloudApi.get<VDC>(
+    const response = await api.get<VDC>(
       `/api/admin/org/${orgId}/vdcs/${vdcId}`
     );
     return response.data;
@@ -40,7 +40,7 @@ export class VDCService {
    * Create a new VDC
    */
   static async createVDC(orgId: string, data: CreateVDCRequest): Promise<VDC> {
-    const response = await cloudApi.post<VDC>(
+    const response = await api.post<VDC>(
       `/api/admin/org/${orgId}/vdcs`,
       data
     );
@@ -55,7 +55,7 @@ export class VDCService {
     vdcId: string,
     data: UpdateVDCRequest
   ): Promise<VDC> {
-    const response = await cloudApi.put<VDC>(
+    const response = await api.put<VDC>(
       `/api/admin/org/${orgId}/vdcs/${vdcId}`,
       data
     );
@@ -66,6 +66,6 @@ export class VDCService {
    * Delete a VDC
    */
   static async deleteVDC(orgId: string, vdcId: string): Promise<void> {
-    await cloudApi.delete(`/api/admin/org/${orgId}/vdcs/${vdcId}`);
+    await api.delete(`/api/admin/org/${orgId}/vdcs/${vdcId}`);
   }
 }

@@ -62,7 +62,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import {
   useVMs,
-  useVDCs,
   useOrganizations,
   usePowerOperationTracking,
 } from '../../hooks';
@@ -153,12 +152,13 @@ const VMs: React.FC = () => {
   );
 
   const { data: vmsResponse, isLoading, error } = useVMs(queryParams);
-  const { data: vdcsResponse } = useVDCs();
+  // TODO: VDCs require organization ID - temporary empty array until proper implementation
+  const vdcsResponse = { values: [] as Array<{ id: string; name: string }> };
   const { data: orgsResponse } = useOrganizations();
   const { operations: powerOperations } = usePowerOperationTracking();
 
   const vms = vmsResponse?.data || [];
-  const vdcs = vdcsResponse?.data || [];
+  const vdcs = vdcsResponse?.values || [];
   const organizations = orgsResponse?.data || [];
 
   // Load saved presets from localStorage
@@ -456,7 +456,7 @@ const VMs: React.FC = () => {
                           isExpanded={isVDCSelectOpen}
                         >
                           {filters.vdc_id
-                            ? vdcs.find((vdc) => vdc.id === filters.vdc_id)
+                            ? vdcs.find((vdc: { id: string; name: string }) => vdc.id === filters.vdc_id)
                                 ?.name || 'Unknown VDC'
                             : 'All VDCs'}
                         </MenuToggle>
@@ -464,7 +464,7 @@ const VMs: React.FC = () => {
                     >
                       <SelectList>
                         <SelectOption value="">All VDCs</SelectOption>
-                        {vdcs.map((vdc) => (
+                        {vdcs.map((vdc: { id: string; name: string }) => (
                           <SelectOption key={vdc.id} value={vdc.id}>
                             {vdc.name}
                           </SelectOption>
@@ -653,7 +653,7 @@ const VMs: React.FC = () => {
                 filters.status &&
                   `status: ${VM_STATUS_LABELS[filters.status as VMStatus]}`,
                 filters.vdc_id &&
-                  `VDC: ${vdcs.find((v) => v.id === filters.vdc_id)?.name}`,
+                  `VDC: ${vdcs.find((v: { id: string; name: string }) => v.id === filters.vdc_id)?.name}`,
                 filters.org_id &&
                   `org: ${organizations.find((o) => o.id === filters.org_id)?.displayName}`,
               ]
@@ -897,7 +897,7 @@ const VMs: React.FC = () => {
                 <li>Status: {VM_STATUS_LABELS[filters.status as VMStatus]}</li>
               )}
               {filters.vdc_id && (
-                <li>VDC: {vdcs.find((v) => v.id === filters.vdc_id)?.name}</li>
+                <li>VDC: {vdcs.find((v: { id: string; name: string }) => v.id === filters.vdc_id)?.name}</li>
               )}
               {filters.org_id && (
                 <li>

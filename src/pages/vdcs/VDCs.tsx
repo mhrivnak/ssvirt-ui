@@ -259,10 +259,15 @@ const VDCs: React.FC = () => {
               variant={AlertVariant.danger}
               title="Operation Failed"
               isInline
-              actionClose={{
-                'aria-label': 'Close error message',
-                onClose: () => setErrorMessage(''),
-              }}
+              actionClose={
+                <Button
+                  variant="plain"
+                  onClick={() => setErrorMessage('')}
+                  aria-label="Close error message"
+                >
+                  ×
+                </Button>
+              }
             >
               {errorMessage}
             </Alert>

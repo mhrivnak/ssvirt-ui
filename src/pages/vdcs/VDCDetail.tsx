@@ -120,7 +120,7 @@ const VDCDetail: React.FC = () => {
         <StackItem>
           <Split hasGutter>
             <SplitItem>
-              <NetworkIcon size="xl" />
+              <NetworkIcon />
             </SplitItem>
             <SplitItem isFilled>
               <Title headingLevel="h1" size="xl">

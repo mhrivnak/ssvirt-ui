@@ -112,7 +112,7 @@ export const handlers = [
 
     // Apply organization filter
     if (organizationId) {
-      vdcs = vdcs.filter((vdc) => vdc.organization_id === organizationId);
+      vdcs = vdcs.filter((vdc) => vdc.org?.id === organizationId);
     }
 
     return HttpResponse.json(createPaginatedResponse(vdcs, page, perPage));
@@ -125,7 +125,7 @@ export const handlers = [
     const perPage = parseInt(url.searchParams.get('per_page') || '10');
 
     const vdcs = generateMockVDCs().filter(
-      (vdc) => vdc.organization_id === orgId
+      (vdc) => vdc.org?.id === orgId
     );
     return HttpResponse.json(createPaginatedResponse(vdcs, page, perPage));
   }),
@@ -172,11 +172,11 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const perPage = parseInt(url.searchParams.get('per_page') || '10');
 
-    // For demo purposes, return VMs that belong to the VDC namespace
+    // For demo purposes, return VMs that belong to the VDC
     const vdcs = generateMockVDCs();
     const vdc = vdcs.find((v) => v.id === vdcId);
     const vms = vdc
-      ? generateMockVMs().filter((vm) => vm.namespace === vdc.namespace)
+      ? generateMockVMs().filter((vm) => vm.vdc_id === vdcId)
       : [];
 
     return HttpResponse.json(createPaginatedResponse(vms, page, perPage));

@@ -71,7 +71,7 @@ const OrganizationDetail: React.FC = () => {
 
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading, error } = useOrganization(id || '');
-  const { data: vdcsResponse } = useVDCs({ organization_id: id });
+  const { data: vdcsResponse } = useVDCs(id || '');
   const { data: catalogsResponse } = useCatalogs({ organization: id });
 
   // Early validation for id parameter
@@ -97,7 +97,7 @@ const OrganizationDetail: React.FC = () => {
   }
 
   const organization = orgResponse?.data;
-  const vdcs = vdcsResponse?.data || [];
+  const vdcs = vdcsResponse?.values || [];
   const catalogs = catalogsResponse?.data || [];
 
   const handleStatusToggle = async (enabled: boolean) => {
@@ -389,17 +389,17 @@ const OrganizationDetail: React.FC = () => {
                     </Button>
                   </Td>
                   <Td dataLabel="Namespace">
-                    <code>{vdc.namespace}</code>
+                    <code>{vdc.id}</code>
                   </Td>
-                  <Td dataLabel="Allocation Model">{vdc.allocation_model}</Td>
+                  <Td dataLabel="Allocation Model">{vdc.allocationModel}</Td>
                   <Td dataLabel="Status">
-                    <Badge color={vdc.enabled ? 'green' : 'red'}>
-                      {vdc.enabled ? 'Enabled' : 'Disabled'}
+                    <Badge color={vdc.isEnabled ? 'green' : 'red'}>
+                      {vdc.isEnabled ? 'Enabled' : 'Disabled'}
                     </Badge>
                   </Td>
                   <Td dataLabel="Created">
-                    {vdc.created_at
-                      ? new Date(vdc.created_at).toLocaleDateString()
+                    {vdc.creationDate
+                      ? new Date(vdc.creationDate).toLocaleDateString()
                       : 'N/A'}
                   </Td>
                   <Td dataLabel="Actions">

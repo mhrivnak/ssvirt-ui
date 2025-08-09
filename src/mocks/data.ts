@@ -90,30 +90,82 @@ export const generateMockOrganizations = (): Organization[] => [
 
 export const generateMockVDCs = (): VDC[] => [
   {
-    id: 'vdc-1',
+    id: 'urn:vcloud:vdc:eng-dev-vdc',
     name: 'eng-dev-vdc',
-    organization_id: 'org-1',
-    namespace: 'engineering-dev',
-    allocation_model: 'AllocationVApp',
-    cpu_limit: 100,
-    memory_limit_mb: 102400,
-    storage_limit_mb: 1048576,
-    enabled: true,
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-15T10:30:00Z',
+    description: 'Engineering development environment',
+    allocationModel: 'AllocationPool',
+    computeCapacity: {
+      cpu: {
+        allocated: 8000,
+        limit: 16000,
+        units: 'MHz',
+      },
+      memory: {
+        allocated: 8192,
+        limit: 16384,
+        units: 'MB',
+      },
+    },
+    providerVdc: {
+      id: 'urn:vcloud:providervdc:provider-1',
+    },
+    nicQuota: 100,
+    networkQuota: 50,
+    vdcStorageProfiles: {
+      providerVdcStorageProfile: {
+        id: 'urn:vcloud:storageprofile:standard',
+        limit: 1048576,
+        units: 'MB',
+        default: true,
+      },
+    },
+    isThinProvision: true,
+    isEnabled: true,
+    org: {
+      name: 'Engineering',
+      id: 'urn:vcloud:org:engineering',
+    },
+    creationDate: '2024-01-15T10:30:00Z',
+    lastModified: '2024-01-15T10:30:00Z',
   },
   {
-    id: 'vdc-2',
+    id: 'urn:vcloud:vdc:qa-test-vdc',
     name: 'qa-test-vdc',
-    organization_id: 'org-2',
-    namespace: 'qa-testing',
-    allocation_model: 'AllocationPool',
-    cpu_limit: 50,
-    memory_limit_mb: 51200,
-    storage_limit_mb: 524288,
-    enabled: true,
-    created_at: '2024-01-16T11:30:00Z',
-    updated_at: '2024-01-16T11:30:00Z',
+    description: 'QA testing environment',
+    allocationModel: 'Flex',
+    computeCapacity: {
+      cpu: {
+        allocated: 4000,
+        limit: 8000,
+        units: 'MHz',
+      },
+      memory: {
+        allocated: 4096,
+        limit: 8192,
+        units: 'MB',
+      },
+    },
+    providerVdc: {
+      id: 'urn:vcloud:providervdc:provider-1',
+    },
+    nicQuota: 75,
+    networkQuota: 25,
+    vdcStorageProfiles: {
+      providerVdcStorageProfile: {
+        id: 'urn:vcloud:storageprofile:standard',
+        limit: 524288,
+        units: 'MB',
+        default: true,
+      },
+    },
+    isThinProvision: false,
+    isEnabled: true,
+    org: {
+      name: 'QA',
+      id: 'urn:vcloud:org:qa',
+    },
+    creationDate: '2024-01-16T11:30:00Z',
+    lastModified: '2024-01-16T11:30:00Z',
   },
 ];
 
