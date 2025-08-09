@@ -26,7 +26,7 @@ export interface VCloudPaginatedResponse<T> {
   pageCount: number;      // Total number of pages  
   page: number;           // Current page number
   pageSize: number;       // Number of results per page
-  associations?: any[];   // Optional association metadata
+  associations?: Record<string, unknown>[];   // Optional association metadata
   values: T[];            // Array of actual data objects
 }
 
