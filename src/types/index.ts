@@ -359,6 +359,12 @@ export interface CatalogItem {
   name: string;
   description: string;
   catalogId: string; // Parent catalog URN
+  catalog_id: string; // Legacy property name for backward compatibility
+  os_type: string; // Operating system type
+  cpu_count: number; // Number of CPUs
+  memory_mb: number; // Memory in MB
+  disk_size_gb: number; // Disk size in GB
+  vm_instance_type: string; // VM instance type
 }
 
 export interface Catalog {

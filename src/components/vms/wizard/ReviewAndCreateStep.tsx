@@ -29,7 +29,7 @@ import {
   CogIcon,
 } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
-import type { VDC } from '../../../types';
+import type { VDC, CatalogItem } from '../../../types';
 import { formatMegabytes } from '../../../utils/formatters';
 
 interface ReviewAndCreateStepProps {
