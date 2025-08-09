@@ -248,7 +248,7 @@ const VDCDetail: React.FC = () => {
                   <DescriptionListTerm>Storage Profile ID</DescriptionListTerm>
                   <DescriptionListDescription>
                     <code>
-                      {vdc.vdcStorageProfiles.providerVdcStorageProfile.id}
+                      {vdc.vdcStorageProfiles[0]?.id || 'N/A'}
                     </code>
                   </DescriptionListDescription>
                 </DescriptionListGroup>
@@ -256,8 +256,8 @@ const VDCDetail: React.FC = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Storage Limit</DescriptionListTerm>
                   <DescriptionListDescription>
-                    {vdc.vdcStorageProfiles.providerVdcStorageProfile.limit.toLocaleString()}{' '}
-                    {vdc.vdcStorageProfiles.providerVdcStorageProfile.units}
+                    {vdc.vdcStorageProfiles[0]?.limit.toLocaleString() || 'N/A'}{' '}
+                    {vdc.vdcStorageProfiles[0]?.units || ''}
                   </DescriptionListDescription>
                 </DescriptionListGroup>
 
@@ -266,12 +266,12 @@ const VDCDetail: React.FC = () => {
                   <DescriptionListDescription>
                     <Badge
                       color={
-                        vdc.vdcStorageProfiles.providerVdcStorageProfile.default
+                        vdc.vdcStorageProfiles[0]?.default
                           ? 'green'
                           : 'grey'
                       }
                     >
-                      {vdc.vdcStorageProfiles.providerVdcStorageProfile.default
+                      {vdc.vdcStorageProfiles[0]?.default
                         ? 'Yes'
                         : 'No'}
                     </Badge>

@@ -72,6 +72,8 @@ const VDCs: React.FC = () => {
     sortDesc: sortDirection === 'desc' ? sortBy : undefined,
     page,
     pageSize: perPage,
+    status: statusFilter !== 'all' ? (statusFilter as 'enabled' | 'disabled') : undefined,
+    allocationModel: allocationFilter !== 'all' ? (allocationFilter as 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex') : undefined,
   };
 
   // Call hooks before any early returns

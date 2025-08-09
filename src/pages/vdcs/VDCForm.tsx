@@ -42,7 +42,7 @@ const VDCForm: React.FC = () => {
               <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={`${ROUTES.ORGANIZATIONS}/${orgId}/vdcs`}>
+              <Link to={ROUTES.ORGANIZATION_VDCS.replace(':id', orgId || '')}>
                 Virtual Data Centers
               </Link>
             </BreadcrumbItem>

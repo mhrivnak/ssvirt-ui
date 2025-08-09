@@ -263,14 +263,12 @@ export interface VDC {
   };
   nicQuota: number; // Default: 100
   networkQuota: number; // Default: 50
-  vdcStorageProfiles: {
-    providerVdcStorageProfile: {
-      id: string;
-      limit: number;
-      units: 'MB';
-      default: boolean;
-    };
-  };
+  vdcStorageProfiles: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
   isThinProvision: boolean;
   isEnabled: boolean;
   // Standard CloudAPI fields
@@ -411,6 +409,8 @@ export interface VDCQueryParams {
   sortAsc?: string;
   sortDesc?: string;
   filter?: string;
+  status?: 'enabled' | 'disabled';
+  allocationModel?: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
 }
 
 export interface CatalogQueryParams
@@ -471,14 +471,12 @@ export interface CreateVDCRequest {
   };
   nicQuota?: number; // Optional, defaults to 100
   networkQuota?: number; // Optional, defaults to 50
-  vdcStorageProfiles: {
-    providerVdcStorageProfile: {
-      id: string;
-      limit: number;
-      units: 'MB';
-      default: boolean;
-    };
-  };
+  vdcStorageProfiles: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
   isThinProvision: boolean;
   isEnabled: boolean;
 }
@@ -508,14 +506,12 @@ export interface UpdateVDCRequest {
   };
   nicQuota?: number;
   networkQuota?: number;
-  vdcStorageProfiles?: {
-    providerVdcStorageProfile: {
-      id: string;
-      limit: number;
-      units: 'MB';
-      default: boolean;
-    };
-  };
+  vdcStorageProfiles?: Array<{
+    id: string;
+    limit: number;
+    units: 'MB';
+    default: boolean;
+  }>;
   isThinProvision?: boolean;
   isEnabled?: boolean;
 }

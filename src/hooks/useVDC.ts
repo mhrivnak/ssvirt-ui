@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { VDCService } from '../services/cloudapi/VDCService';
 import { QUERY_KEYS } from '../types';
 import { useRole } from './useRole';
@@ -14,8 +15,13 @@ import type {
 export const useVDCs = (orgId: string, params?: VDCQueryParams) => {
   const { capabilities } = useRole();
 
+  // Serialize params to ensure stable queryKey
+  const serializedParams = useMemo(() => {
+    return params ? JSON.stringify(params) : '';
+  }, [params]);
+
   return useQuery({
-    queryKey: [...QUERY_KEYS.vdcsByOrg(orgId), params],
+    queryKey: [...QUERY_KEYS.vdcsByOrg(orgId), serializedParams],
     queryFn: () => VDCService.getVDCs(orgId, params),
     enabled: !!orgId && capabilities.canManageSystem,
   });

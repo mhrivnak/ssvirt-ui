@@ -256,14 +256,8 @@ const BasicConfigurationStep: React.FC<BasicConfigurationStepProps> = ({
                           </StackItem>
                           <StackItem>
                             <strong>Storage Limit:</strong>{' '}
-                            {
-                              selectedVDC.vdcStorageProfiles
-                                .providerVdcStorageProfile.limit
-                            }{' '}
-                            {
-                              selectedVDC.vdcStorageProfiles
-                                .providerVdcStorageProfile.units
-                            }
+                            {selectedVDC.vdcStorageProfiles[0]?.limit || 'N/A'}{' '}
+                            {selectedVDC.vdcStorageProfiles[0]?.units || ''}
                           </StackItem>
                           <StackItem>
                             <strong>Allocation Model:</strong>{' '}

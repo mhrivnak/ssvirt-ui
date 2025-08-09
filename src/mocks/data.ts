@@ -111,14 +111,14 @@ export const generateMockVDCs = (): VDC[] => [
     },
     nicQuota: 100,
     networkQuota: 50,
-    vdcStorageProfiles: {
-      providerVdcStorageProfile: {
+    vdcStorageProfiles: [
+      {
         id: 'urn:vcloud:storageprofile:standard',
         limit: 1048576,
         units: 'MB',
         default: true,
       },
-    },
+    ],
     isThinProvision: true,
     isEnabled: true,
     org: {
@@ -150,14 +150,14 @@ export const generateMockVDCs = (): VDC[] => [
     },
     nicQuota: 75,
     networkQuota: 25,
-    vdcStorageProfiles: {
-      providerVdcStorageProfile: {
+    vdcStorageProfiles: [
+      {
         id: 'urn:vcloud:storageprofile:standard',
         limit: 524288,
         units: 'MB',
         default: true,
       },
-    },
+    ],
     isThinProvision: false,
     isEnabled: true,
     org: {

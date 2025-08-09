@@ -135,6 +135,7 @@ export const ROUTES = {
   ORGANIZATION_EDIT: '/organizations/:id/edit',
   ORGANIZATION_USERS: '/organizations/:id/users',
   ORGANIZATION_ANALYTICS: '/organizations/:id/analytics',
+  ORGANIZATION_VDCS: '/organizations/:id/vdcs',
   VDCS: '/vdcs',
   VDC_CREATE: '/vdcs/create',
   VDC_DETAIL: '/vdcs/:id',
