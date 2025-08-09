@@ -48,8 +48,9 @@ export {
 export {
   useCatalogs,
   useCatalog,
-  useCatalogItems,
-  useAllCatalogItems,
+  useCreateCatalog,
+  useUpdateCatalog,
+  useDeleteCatalog,
 } from './useCatalogs';
 
 export { useDashboardStats, useRecentActivity } from './useDashboard';

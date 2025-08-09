@@ -7,7 +7,7 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import { useCreateVM, useCatalogs, useAllCatalogItems } from '../../hooks';
+import { useCreateVM, useCatalogs } from '../../hooks';
 import type {
   CreateVMRequest,
   VMNetworkConfig,
@@ -107,9 +107,9 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   // TODO: VDCs now require organization ID - this needs proper implementation
   const vdcs: VDC[] = [];
   const { data: catalogsResponse } = useCatalogs();
-  const { data: catalogItemsResponse } = useAllCatalogItems();
-  const catalogs = catalogsResponse?.data || [];
-  const catalogItems = catalogItemsResponse?.data || [];
+  const catalogs = catalogsResponse?.values || [];
+  // Note: Catalog items (vApp templates) are not implemented in this CloudAPI version
+  const catalogItems: CatalogItem[] = [];
 
   const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));

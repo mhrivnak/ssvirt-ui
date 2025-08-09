@@ -1,11 +1,14 @@
 import { http, HttpResponse } from 'msw';
-import type { PaginatedResponse, ApiResponse } from '../types';
+import type {
+  PaginatedResponse,
+  ApiResponse,
+  VCloudPaginatedResponse,
+} from '../types';
 import {
   generateMockOrganizations,
   generateMockVDCs,
   generateMockVMs,
   generateMockCatalogs,
-  generateMockCatalogItems,
   generateMockDashboardStats,
   generateMockRecentActivity,
   generateMockUser,
@@ -40,6 +43,25 @@ const createApiResponse = <T>(data: T): ApiResponse<T> => ({
   success: true,
   data,
 });
+
+// Helper function to create CloudAPI paginated response
+const createCloudApiPaginatedResponse = <T>(
+  data: T[],
+  page: number = 1,
+  pageSize: number = 25
+): VCloudPaginatedResponse<T> => {
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = data.slice(startIndex, endIndex);
+
+  return {
+    resultTotal: data.length,
+    pageCount: Math.ceil(data.length / pageSize),
+    page,
+    pageSize,
+    values: paginatedData,
+  };
+};
 
 export const handlers = [
   // Auth endpoints
@@ -232,46 +254,139 @@ export const handlers = [
     );
   }),
 
-  // Catalogs endpoints
-  http.get(`${BASE_URL}/catalogs`, ({ request }) => {
+  // CloudAPI Catalogs endpoints
+  http.get('/cloudapi/1.0.0/catalogs', ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '10');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
 
     const catalogs = generateMockCatalogs();
-    return HttpResponse.json(createPaginatedResponse(catalogs, page, perPage));
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(catalogs, page, pageSize)
+    );
   }),
 
-  http.get(`${BASE_URL}/catalogs/:id`, ({ params }) => {
-    const { id } = params;
+  http.get('/cloudapi/1.0.0/catalogs/:catalogUrn', ({ params }) => {
+    const { catalogUrn } = params;
     const catalogs = generateMockCatalogs();
-    const catalog = catalogs.find((c) => c.id === id);
+    const catalog = catalogs.find(
+      (c) => c.id === decodeURIComponent(catalogUrn as string)
+    );
 
     if (!catalog) {
       return HttpResponse.json(
-        { success: false, error: 'Catalog not found' },
+        {
+          error: 'Catalog not found',
+          message: 'The requested catalog could not be found',
+          details: `Catalog with URN ${catalogUrn} not found`,
+        },
         { status: 404 }
       );
     }
 
-    return HttpResponse.json(createApiResponse(catalog));
+    return HttpResponse.json(catalog);
   }),
 
-  http.get(`${BASE_URL}/catalogs/:catalogId/items`, ({ request }) => {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '10');
+  http.post('/cloudapi/1.0.0/catalogs', async ({ request }) => {
+    const body = (await request.json()) as {
+      name: string;
+      description?: string;
+      orgId: string;
+      isPublished?: boolean;
+    };
 
-    const items = generateMockCatalogItems();
-    return HttpResponse.json(createPaginatedResponse(items, page, perPage));
+    // Create a new catalog with CloudAPI structure
+    const newCatalog = {
+      id: `urn:vcloud:catalog:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: body.name,
+      description: body.description || '',
+      org: {
+        id: body.orgId,
+      },
+      isPublished: body.isPublished || false,
+      isSubscribed: false,
+      creationDate: new Date().toISOString(),
+      numberOfVAppTemplates: 0,
+      numberOfMedia: 0,
+      catalogStorageProfiles: [],
+      publishConfig: {
+        isPublished: body.isPublished || false,
+      },
+      subscriptionConfig: {
+        isSubscribed: false,
+      },
+      distributedCatalogConfig: {},
+      owner: {
+        id: '',
+      },
+      isLocal: true,
+      version: 1,
+    };
+
+    return HttpResponse.json(newCatalog, { status: 201 });
   }),
 
-  http.get(`${BASE_URL}/catalog-items`, ({ request }) => {
-    const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const perPage = parseInt(url.searchParams.get('per_page') || '10');
+  http.put(
+    '/cloudapi/1.0.0/catalogs/:catalogUrn',
+    async ({ params, request }) => {
+      const { catalogUrn } = params;
+      const body = (await request.json()) as {
+        name?: string;
+        description?: string;
+        isPublished?: boolean;
+      };
+      const catalogs = generateMockCatalogs();
+      const catalog = catalogs.find(
+        (c) => c.id === decodeURIComponent(catalogUrn as string)
+      );
 
-    const items = generateMockCatalogItems();
-    return HttpResponse.json(createPaginatedResponse(items, page, perPage));
+      if (!catalog) {
+        return HttpResponse.json(
+          {
+            error: 'Catalog not found',
+            message: 'The requested catalog could not be found',
+            details: `Catalog with URN ${catalogUrn} not found`,
+          },
+          { status: 404 }
+        );
+      }
+
+      // Update catalog with provided fields
+      const updatedCatalog = {
+        ...catalog,
+        ...(body.name && { name: body.name }),
+        ...(body.description !== undefined && {
+          description: body.description,
+        }),
+        ...(body.isPublished !== undefined && {
+          isPublished: body.isPublished,
+          publishConfig: { isPublished: body.isPublished },
+        }),
+      };
+
+      return HttpResponse.json(updatedCatalog);
+    }
+  ),
+
+  http.delete('/cloudapi/1.0.0/catalogs/:catalogUrn', ({ params }) => {
+    const { catalogUrn } = params;
+    const catalogs = generateMockCatalogs();
+    const catalog = catalogs.find(
+      (c) => c.id === decodeURIComponent(catalogUrn as string)
+    );
+
+    if (!catalog) {
+      return HttpResponse.json(
+        {
+          error: 'Catalog not found',
+          message: 'The requested catalog could not be found',
+          details: `Catalog with URN ${catalogUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    // For demo purposes, just return 204 No Content
+    return new HttpResponse(null, { status: 204 });
   }),
 ];

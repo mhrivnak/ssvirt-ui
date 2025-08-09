@@ -31,12 +31,12 @@ import {
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import type { WizardFormData } from '../VMCreationWizard';
-import type { CatalogItem, Catalog } from '../../../types';
+import type { Catalog, CatalogItem } from '../../../types';
 
 interface TemplateSelectionStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
-  catalogItems: CatalogItem[];
+  catalogItems: CatalogItem[]; // Templates not implemented in CloudAPI version
   catalogs: Catalog[];
 }
 
