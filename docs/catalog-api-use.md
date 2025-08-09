@@ -116,7 +116,24 @@
   Response: 201 Created
   Returns the complete catalog object (same structure as GET response).
 
-  4. Delete Catalog
+  4. Update Catalog
+
+  PUT /cloudapi/1.0.0/catalogs/{catalogUrn}
+
+  Path Parameters:
+  - catalogUrn: Catalog URN to update
+
+  Request Body:
+  {
+    "name": "Updated Catalog Name",      // Optional: new catalog name
+    "description": "Updated description", // Optional: new description
+    "isPublished": true                  // Optional: update publish status
+  }
+
+  Response: 200 OK
+  Returns the complete updated catalog object (same structure as GET response).
+
+  5. Delete Catalog
 
   DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}
 

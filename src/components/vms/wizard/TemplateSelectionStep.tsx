@@ -20,8 +20,6 @@ import {
   EmptyState,
   EmptyStateVariant,
   EmptyStateBody,
-  Spinner,
-  Bullseye,
 } from '@patternfly/react-core';
 import {
   VirtualMachineIcon,
@@ -102,9 +100,24 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
 
   if (!catalogItems.length) {
     return (
-      <Bullseye>
-        <Spinner size="xl" />
-      </Bullseye>
+      <EmptyState variant={EmptyStateVariant.lg}>
+        <VirtualMachineIcon style={{ fontSize: '64px' }} />
+        <Title headingLevel="h2" size="lg">
+          Templates not available
+        </Title>
+        <EmptyStateBody>
+          VM templates are not implemented in the current CloudAPI version.
+          Please contact your administrator for template availability or use
+          custom VM specifications for now.
+        </EmptyStateBody>
+        <Alert
+          variant={AlertVariant.info}
+          title="CloudAPI Implementation Note"
+          isInline
+        >
+          This feature will be available in a future CloudAPI update.
+        </Alert>
+      </EmptyState>
     );
   }
 

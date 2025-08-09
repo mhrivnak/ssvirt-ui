@@ -10,8 +10,8 @@ endpoints, data structures, and patterns.
 ## Current State
 
 ### Legacy Implementation
-- **Service**: `src/services/catalogs.ts` - uses `/api/v1/catalogs` endpoints
-- **Hooks**: `src/hooks/useCatalogs.ts` - React Query hooks for legacy API
+- **Service**: Legacy service (removed) - used `/api/v1/catalogs` endpoints
+- **Hooks**: `src/hooks/useCatalogs.ts` - React Query hooks (now updated for CloudAPI)
 - **Types**: `src/types/index.ts:341-363` - custom catalog types
 - **UI Components**: 
   - `src/pages/catalogs/Catalogs.tsx` - catalog listing page
@@ -38,7 +38,8 @@ endpoints, data structures, and patterns.
 1. `GET /cloudapi/1.0.0/catalogs` - list catalogs with pagination
 2. `GET /cloudapi/1.0.0/catalogs/{catalogUrn}` - get single catalog
 3. `POST /cloudapi/1.0.0/catalogs` - create catalog
-4. `DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}` - delete catalog
+4. `PUT /cloudapi/1.0.0/catalogs/{catalogUrn}` - update catalog
+5. `DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}` - delete catalog
 
 ## Implementation Plan
 
@@ -67,9 +68,9 @@ endpoints, data structures, and patterns.
    - Handle CloudAPI pagination format
    - Include proper error handling and TypeScript types
 
-2. **Remove legacy service**
-   - Delete `src/services/catalogs.ts`
-   - Update `src/services/index.ts` exports
+2. **Remove legacy service** ✅ Complete
+   - ✅ Deleted `src/services/catalogs.ts`
+   - ✅ Updated `src/services/index.ts` exports to use CloudAPI `CatalogService`
 
 ### Phase 3: Hook Reimplementation  
 1. **Rewrite `src/hooks/useCatalogs.ts`**

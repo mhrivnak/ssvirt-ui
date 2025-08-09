@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { CatalogService } from '../services';
 import { QUERY_KEYS } from '../types';
+import { logger } from '../utils/logger';
 import type {
   CatalogQueryParams,
   CreateCatalogRequest,
@@ -51,7 +52,7 @@ export const useCreateCatalog = () => {
       });
     },
     onError: (error) => {
-      console.error('Failed to create catalog:', error);
+      logger.error('Failed to create catalog:', error);
     },
   });
 };
@@ -83,7 +84,7 @@ export const useUpdateCatalog = () => {
       });
     },
     onError: (error) => {
-      console.error('Failed to update catalog:', error);
+      logger.error('Failed to update catalog:', error);
     },
   });
 };
@@ -106,7 +107,7 @@ export const useDeleteCatalog = () => {
       });
     },
     onError: (error) => {
-      console.error('Failed to delete catalog:', error);
+      logger.error('Failed to delete catalog:', error);
     },
   });
 };
