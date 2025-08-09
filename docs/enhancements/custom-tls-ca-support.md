@@ -86,7 +86,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: ssvirt-config
+          name: ssvirt-ui-config
       - name: nginx-config
         configMap:
           name: ssvirt-nginx-config
@@ -166,7 +166,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ssvirt-config
+  name: ssvirt-ui-config
 data:
   config.json: |
     {
