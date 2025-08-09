@@ -1,10 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Nav,
-  NavList,
-  NavItem,
-  NavExpandable,
-} from '@patternfly/react-core';
+import { Nav, NavList, NavItem, NavExpandable } from '@patternfly/react-core';
 import { Link, useLocation } from 'react-router-dom';
 import { useRole } from '../../hooks/useRole';
 import { getNavigationForRole } from '../../utils/roleBasedNavigation';
@@ -15,21 +10,24 @@ interface RoleAwareNavItemProps {
   isActive?: boolean;
 }
 
-const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({ item, isActive = false }) => {
+const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({
+  item,
+  isActive = false,
+}) => {
   const location = useLocation();
-  
+
   if (item.children && item.children.length > 0) {
-    const hasActiveChild = item.children.some(child => 
-      child.to && location.pathname.startsWith(child.to)
+    const hasActiveChild = item.children.some(
+      (child) => child.to && location.pathname.startsWith(child.to)
     );
-    
+
     return (
       <NavExpandable
         title={item.label}
         isActive={hasActiveChild}
         isExpanded={hasActiveChild}
       >
-        {item.children.map(child => (
+        {item.children.map((child) => (
           <RoleAwareNavItem key={child.id} item={child} />
         ))}
       </NavExpandable>
@@ -37,11 +35,12 @@ const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({ item, isActive = fa
   }
 
   if (item.to) {
-    const itemIsActive = location.pathname === item.to || 
-                        (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
-    
+    const itemIsActive =
+      location.pathname === item.to ||
+      (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
+
     return (
-      <NavItem 
+      <NavItem
         isActive={itemIsActive}
         component={({ children, ...props }) => (
           <Link to={item.to!} {...props}>
@@ -54,11 +53,7 @@ const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({ item, isActive = fa
     );
   }
 
-  return (
-    <NavItem isActive={isActive}>
-      {item.label}
-    </NavItem>
-  );
+  return <NavItem isActive={isActive}>{item.label}</NavItem>;
 };
 
 export const RoleAwareNavigation: React.FC = () => {
@@ -82,7 +77,7 @@ export const RoleAwareNavigation: React.FC = () => {
   return (
     <Nav>
       <NavList>
-        {navigationItems.map(item => (
+        {navigationItems.map((item) => (
           <RoleAwareNavItem key={item.id} item={item} />
         ))}
       </NavList>

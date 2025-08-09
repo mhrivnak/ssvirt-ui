@@ -61,28 +61,30 @@ const mockOrgStats: OrganizationStats = {
   vdcCount: 3,
   vmCount: 42,
   userCount: 15,
-  catalogCount: 8
+  catalogCount: 8,
 };
 
 const mockResourceUsage: ResourceUsage = {
   cpu: {
     used: 24,
     allocated: 48,
-    percentage: 50
+    percentage: 50,
   },
   memory: {
     used: 64,
     allocated: 128,
-    percentage: 50
+    percentage: 50,
   },
   storage: {
     used: 2.5,
     allocated: 10,
-    percentage: 25
-  }
+    percentage: 25,
+  },
 };
 
-const ResourceUsageOverview: React.FC<{ usage: ResourceUsage }> = ({ usage }) => {
+const ResourceUsageOverview: React.FC<{ usage: ResourceUsage }> = ({
+  usage,
+}) => {
   return (
     <Card>
       <CardBody>
@@ -92,7 +94,7 @@ const ResourceUsageOverview: React.FC<{ usage: ResourceUsage }> = ({ usage }) =>
               Resource Usage Overview
             </Title>
           </StackItem>
-          
+
           <StackItem>
             <Grid hasGutter>
               <GridItem span={4}>
@@ -108,7 +110,7 @@ const ResourceUsageOverview: React.FC<{ usage: ResourceUsage }> = ({ usage }) =>
                   />
                 </div>
               </GridItem>
-              
+
               <GridItem span={4}>
                 <div>
                   <div className="pf-v6-u-mb-sm">
@@ -122,7 +124,7 @@ const ResourceUsageOverview: React.FC<{ usage: ResourceUsage }> = ({ usage }) =>
                   />
                 </div>
               </GridItem>
-              
+
               <GridItem span={4}>
                 <div>
                   <div className="pf-v6-u-mb-sm">
@@ -232,7 +234,7 @@ const OrganizationActivityPanel: React.FC<{ orgId: string }> = ({ orgId }) => {
 
 export const OrgAdminDashboard: React.FC = () => {
   const { sessionData, capabilities, isLoading } = useRole();
-  
+
   if (isLoading) {
     return (
       <PageSection>
@@ -251,8 +253,10 @@ export const OrgAdminDashboard: React.FC = () => {
     );
   }
 
-  const organizationId = capabilities.operatingOrganization || capabilities.primaryOrganization;
-  const organizationName = sessionData.operatingOrg?.name || sessionData.org.name;
+  const organizationId =
+    capabilities.operatingOrganization || capabilities.primaryOrganization;
+  const organizationName =
+    sessionData.operatingOrg?.name || sessionData.org.name;
 
   return (
     <PageSection>

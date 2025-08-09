@@ -25,14 +25,16 @@ export interface NavigationItem {
 /**
  * Get navigation structure based on user capabilities
  */
-export const getNavigationForRole = (capabilities: RoleCapabilities): NavigationItem[] => {
+export const getNavigationForRole = (
+  capabilities: RoleCapabilities
+): NavigationItem[] => {
   const baseNavigation: NavigationItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       to: '/dashboard',
       icon: TachometerAltIcon,
-    }
+    },
   ];
 
   // System Administrator Navigation
@@ -57,9 +59,17 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
         icon: CogIcon,
         children: [
           { id: 'roles', label: 'Roles & Permissions', to: '/admin/roles' },
-          { id: 'system-settings', label: 'System Settings', to: '/admin/settings' },
-          { id: 'system-monitoring', label: 'System Monitoring', to: '/admin/monitoring' }
-        ]
+          {
+            id: 'system-settings',
+            label: 'System Settings',
+            to: '/admin/settings',
+          },
+          {
+            id: 'system-monitoring',
+            label: 'System Monitoring',
+            to: '/admin/monitoring',
+          },
+        ],
       },
       {
         id: 'vms',
@@ -72,7 +82,7 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
         label: 'Reports & Analytics',
         to: '/reports',
         icon: ChartLineIcon,
-      }
+      },
     ];
   }
 
@@ -109,11 +119,15 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
         label: 'Resource Management',
         icon: ChartBarIcon,
         children: [
-          { id: 'capacity', label: 'Capacity Planning', to: '/resources/capacity' },
+          {
+            id: 'capacity',
+            label: 'Capacity Planning',
+            to: '/resources/capacity',
+          },
           { id: 'usage', label: 'Usage Reports', to: '/resources/usage' },
-          { id: 'cost', label: 'Cost Reports', to: '/resources/cost' }
-        ]
-      }
+          { id: 'cost', label: 'Cost Reports', to: '/resources/cost' },
+        ],
+      },
     ];
   }
 
@@ -131,7 +145,7 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
       label: 'Available Catalogs',
       to: '/catalogs',
       icon: BookIcon,
-    }
+    },
   ];
 };
 
@@ -139,18 +153,20 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
  * Check if a navigation item should be visible based on capabilities
  */
 export const isNavigationItemVisible = (
-  item: NavigationItem, 
+  item: NavigationItem,
   capabilities: RoleCapabilities
 ): boolean => {
   if (item.requiredCapabilities) {
-    return item.requiredCapabilities.every(capability => capabilities[capability]);
+    return item.requiredCapabilities.every(
+      (capability) => capabilities[capability]
+    );
   }
-  
+
   if (item.roles) {
     // This would need the actual role information, but capabilities work better
     return true;
   }
-  
+
   return true;
 };
 
@@ -158,15 +174,15 @@ export const isNavigationItemVisible = (
  * Filter navigation items based on capabilities
  */
 export const filterNavigationItems = (
-  items: NavigationItem[], 
+  items: NavigationItem[],
   capabilities: RoleCapabilities
 ): NavigationItem[] => {
   return items
-    .filter(item => isNavigationItemVisible(item, capabilities))
-    .map(item => ({
+    .filter((item) => isNavigationItemVisible(item, capabilities))
+    .map((item) => ({
       ...item,
-      children: item.children 
+      children: item.children
         ? filterNavigationItems(item.children, capabilities)
-        : undefined
+        : undefined,
     }));
 };

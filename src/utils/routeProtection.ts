@@ -15,14 +15,14 @@ export interface RouteConfig {
  * Check if user has required roles for a route
  */
 export const hasRequiredRoles = (
-  userRoles: string[], 
+  userRoles: string[],
   requiredRoles?: string[]
 ): boolean => {
   if (!requiredRoles || requiredRoles.length === 0) {
     return true;
   }
-  
-  return requiredRoles.some(role => userRoles.includes(role));
+
+  return requiredRoles.some((role) => userRoles.includes(role));
 };
 
 /**
@@ -35,8 +35,8 @@ export const hasRequiredCapabilities = (
   if (!requiredCapabilities || requiredCapabilities.length === 0) {
     return true;
   }
-  
-  return requiredCapabilities.every(capability => capabilities[capability]);
+
+  return requiredCapabilities.every((capability) => capabilities[capability]);
 };
 
 /**
@@ -48,8 +48,11 @@ export const canAccessRoute = (
   capabilities: RoleCapabilities
 ): boolean => {
   const hasRoles = hasRequiredRoles(userRoles, route.requiredRoles);
-  const hasCapabilities = hasRequiredCapabilities(capabilities, route.requiredCapabilities);
-  
+  const hasCapabilities = hasRequiredCapabilities(
+    capabilities,
+    route.requiredCapabilities
+  );
+
   return hasRoles && hasCapabilities;
 };
 
@@ -60,15 +63,15 @@ export const getDefaultRouteForUser = (userRoles: string[]): string => {
   if (userRoles.includes(ROLE_NAMES.SYSTEM_ADMIN)) {
     return '/dashboard';
   }
-  
+
   if (userRoles.includes(ROLE_NAMES.ORG_ADMIN)) {
     return '/dashboard';
   }
-  
+
   if (userRoles.includes(ROLE_NAMES.VAPP_USER)) {
     return '/dashboard';
   }
-  
+
   // Fallback
   return '/dashboard';
 };
@@ -80,86 +83,98 @@ export const roleBasedRoutes: RouteConfig[] = [
   // Dashboard - all authenticated users
   {
     path: '/dashboard',
-    component: React.lazy(() => import('../pages/dashboard/RoleBasedDashboard').then(m => ({ default: m.RoleBasedDashboard }))),
+    component: React.lazy(() =>
+      import('../pages/dashboard/RoleBasedDashboard').then((m) => ({
+        default: m.RoleBasedDashboard,
+      }))
+    ),
   },
-  
+
   // System Admin routes
   {
     path: '/admin/*',
     component: React.lazy(() => import('../pages/admin/AdminRoutes')),
-    requiredRoles: [ROLE_NAMES.SYSTEM_ADMIN]
+    requiredRoles: [ROLE_NAMES.SYSTEM_ADMIN],
   },
   {
     path: '/organizations',
     component: React.lazy(() => import('../pages/organizations/Organizations')),
-    requiredCapabilities: ['canManageOrganizations']
+    requiredCapabilities: ['canManageOrganizations'],
   },
   {
     path: '/organizations/:id',
-    component: React.lazy(() => import('../pages/organizations/OrganizationDetail')),
-    requiredCapabilities: ['canManageOrganizations']
+    component: React.lazy(
+      () => import('../pages/organizations/OrganizationDetail')
+    ),
+    requiredCapabilities: ['canManageOrganizations'],
   },
-  
+
   // Organization Admin routes
   {
     path: '/vdcs',
     component: React.lazy(() => import('../pages/vdcs/VDCs')),
-    requiredCapabilities: ['canManageOrganizations']
+    requiredCapabilities: ['canManageOrganizations'],
   },
   {
     path: '/vdcs/:id',
     component: React.lazy(() => import('../pages/vdcs/VDCDetail')),
-    requiredCapabilities: ['canManageOrganizations']
+    requiredCapabilities: ['canManageOrganizations'],
   },
   {
     path: '/org-users',
-    component: React.lazy(() => import('../pages/organizations/OrganizationUsers')),
-    requiredCapabilities: ['canManageUsers']
+    component: React.lazy(
+      () => import('../pages/organizations/OrganizationUsers')
+    ),
+    requiredCapabilities: ['canManageUsers'],
   },
-  
+
   // Shared routes (multiple roles)
   {
     path: '/vms',
     component: React.lazy(() => import('../pages/vms/VMs')),
-    requiredCapabilities: ['canManageVMs']
+    requiredCapabilities: ['canManageVMs'],
   },
   {
     path: '/vms/:id',
     component: React.lazy(() => import('../pages/vms/VMDetail')),
-    requiredCapabilities: ['canManageVMs']
+    requiredCapabilities: ['canManageVMs'],
   },
-  
+
   // vApp User specific routes
   {
     path: '/my-vms',
     component: React.lazy(() => import('../pages/vms/UserVMs')),
-    requiredRoles: [ROLE_NAMES.VAPP_USER, ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.SYSTEM_ADMIN]
+    requiredRoles: [
+      ROLE_NAMES.VAPP_USER,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.SYSTEM_ADMIN,
+    ],
   },
-  
+
   // Catalogs (available to org admins and vApp users)
   {
     path: '/catalogs',
     component: React.lazy(() => import('../pages/catalogs/Catalogs')),
-    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER]
+    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER],
   },
   {
     path: '/catalogs/:id',
     component: React.lazy(() => import('../pages/catalogs/CatalogDetail')),
-    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER]
+    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER],
   },
-  
+
   // Profile (all authenticated users)
   {
     path: '/profile',
     component: React.lazy(() => import('../pages/profile/UserProfile')),
   },
-  
+
   // Reports (system and org admins)
   {
     path: '/reports/*',
     component: React.lazy(() => import('../pages/monitoring/MonitoringRoutes')),
-    requiredCapabilities: ['canViewReports']
-  }
+    requiredCapabilities: ['canViewReports'],
+  },
 ];
 
 /**
@@ -169,7 +184,7 @@ export const getAccessibleRoutes = (
   userRoles: string[],
   capabilities: RoleCapabilities
 ): RouteConfig[] => {
-  return roleBasedRoutes.filter(route =>
+  return roleBasedRoutes.filter((route) =>
     canAccessRoute(route, userRoles, capabilities)
   );
 };

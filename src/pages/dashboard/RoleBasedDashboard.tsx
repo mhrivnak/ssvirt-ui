@@ -4,12 +4,12 @@ import { SystemAdminDashboard } from './SystemAdminDashboard';
 import { OrgAdminDashboard } from './OrgAdminDashboard';
 import { VAppUserDashboard } from './VAppUserDashboard';
 import { ROLE_NAMES } from '../../types';
-import { 
+import {
   PageSection,
   Alert,
   AlertVariant,
   Spinner,
-  Bullseye 
+  Bullseye,
 } from '@patternfly/react-core';
 
 /**
@@ -43,7 +43,10 @@ export const RoleBasedDashboard: React.FC = () => {
     return <SystemAdminDashboard />;
   }
 
-  if (activeRole === ROLE_NAMES.ORG_ADMIN && capabilities.canManageOrganizations) {
+  if (
+    activeRole === ROLE_NAMES.ORG_ADMIN &&
+    capabilities.canManageOrganizations
+  ) {
     return <OrgAdminDashboard />;
   }
 
@@ -55,7 +58,8 @@ export const RoleBasedDashboard: React.FC = () => {
   return (
     <PageSection>
       <Alert variant={AlertVariant.warning} title="Unknown Role">
-        Your role "{activeRole}" is not recognized. Please contact your administrator.
+        Your role "{activeRole}" is not recognized. Please contact your
+        administrator.
       </Alert>
     </PageSection>
   );

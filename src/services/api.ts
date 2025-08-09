@@ -4,11 +4,7 @@ import axios, {
   AxiosError,
 } from 'axios';
 import { getConfig } from '../utils/constants';
-import type {
-  LoginRequest,
-  SessionResponse,
-  User,
-} from '../types';
+import type { LoginRequest, SessionResponse, User } from '../types';
 
 // Session storage key for VMware Cloud Director session data
 const VCD_SESSION_KEY = 'vcd-session';
@@ -21,7 +17,7 @@ const createApiInstance = (): AxiosInstance => {
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json',
     },
   });
 
@@ -97,7 +93,7 @@ export class AuthService {
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
       });
 
@@ -106,22 +102,23 @@ export class AuthService {
         {},
         {
           headers: {
-            'Authorization': `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`
-          }
+            Authorization: `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`,
+          },
         }
       );
 
       const sessionData = response.data;
-      
+
       // Store session data for role-based routing
       setSessionData(sessionData);
-      
+
       return sessionData;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const message = error.response?.status === 401 
-          ? 'Invalid username or password'
-          : error.response?.data?.message || 'Login failed';
+        const message =
+          error.response?.status === 401
+            ? 'Invalid username or password'
+            : error.response?.data?.message || 'Login failed';
         throw new Error(message);
       }
       throw error;
@@ -178,7 +175,7 @@ export class AuthService {
       roleEntityRefs: sessionData.roleRefs,
       orgEntityRef: {
         name: sessionData.org.name,
-        id: sessionData.org.id
+        id: sessionData.org.id,
       },
       deployedVmQuota: 0, // Will be fetched from actual API if needed
       storedVmQuota: 0,
@@ -186,7 +183,7 @@ export class AuthService {
       isGroupRole: false,
       providerType: 'INTEGRATED',
       locked: false,
-      stranded: false
+      stranded: false,
     };
   }
 

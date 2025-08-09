@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { determineUserCapabilities, getHighestPriorityRole } from '../utils/roleDetection';
+import {
+  determineUserCapabilities,
+  getHighestPriorityRole,
+} from '../utils/roleDetection';
 import { getSessionData } from '../services/api';
 import { RoleContext, type RoleContextValue } from './RoleContextDef';
 
@@ -17,19 +20,22 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     const loadSessionData = () => {
       const session = getSessionData();
       setSessionData(session);
-      
+
       if (session && session.roles.length > 0 && !activeRole) {
         const highestRole = getHighestPriorityRole(session.roles);
         setActiveRole(highestRole);
       }
-      
+
       setIsLoading(false);
     };
 
     loadSessionData();
   }, [activeRole]);
 
-  const availableRoles = useMemo(() => sessionData?.roles || [], [sessionData?.roles]);
+  const availableRoles = useMemo(
+    () => sessionData?.roles || [],
+    [sessionData?.roles]
+  );
   const isMultiRole = availableRoles.length > 1;
 
   const capabilities = useMemo(() => {
@@ -42,19 +48,22 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         canManageVMs: false,
         canViewReports: false,
         primaryOrganization: '',
-        operatingOrganization: undefined
+        operatingOrganization: undefined,
       };
     }
     return determineUserCapabilities(sessionData);
   }, [sessionData]);
 
-  const switchRole = useCallback((roleName: string) => {
-    if (availableRoles.includes(roleName)) {
-      setActiveRole(roleName);
-      // Store the active role preference
-      localStorage.setItem('active-role', roleName);
-    }
-  }, [availableRoles]);
+  const switchRole = useCallback(
+    (roleName: string) => {
+      if (availableRoles.includes(roleName)) {
+        setActiveRole(roleName);
+        // Store the active role preference
+        localStorage.setItem('active-role', roleName);
+      }
+    },
+    [availableRoles]
+  );
 
   // Load active role preference from localStorage
   useEffect(() => {
@@ -76,12 +85,8 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     sessionData,
     switchRole,
     isMultiRole,
-    isLoading
+    isLoading,
   };
 
-  return (
-    <RoleContext.Provider value={value}>
-      {children}
-    </RoleContext.Provider>
-  );
+  return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>;
 };

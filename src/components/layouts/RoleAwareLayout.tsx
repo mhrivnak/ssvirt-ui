@@ -13,11 +13,7 @@ import {
   Flex,
   FlexItem,
 } from '@patternfly/react-core';
-import {
-  UserIcon,
-  BellIcon,
-  SignOutAltIcon,
-} from '@patternfly/react-icons';
+import { UserIcon, BellIcon, SignOutAltIcon } from '@patternfly/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRole } from '../../hooks/useRole';
 import { RoleSelector } from '../common/RoleSelector';
@@ -30,7 +26,7 @@ interface RoleAwareLayoutProps {
 
 const RoleContextIndicator: React.FC = () => {
   const { activeRole, sessionData } = useRole();
-  
+
   if (!sessionData) return null;
 
   return (
@@ -90,17 +86,15 @@ const UserDropdown: React.FC = () => {
 
 const NotificationsDropdown: React.FC = () => {
   return (
-    <Button
-      variant="plain"
-      icon={<BellIcon />}
-      aria-label="Notifications"
-    >
+    <Button variant="plain" icon={<BellIcon />} aria-label="Notifications">
       {/* Notification count badge would go here */}
     </Button>
   );
 };
 
-export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({ children }) => {
+export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
+  children,
+}) => {
   const { sessionData, isLoading, isMultiRole } = useRole();
 
   if (isLoading) {
@@ -128,8 +122,8 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({ children }) =>
   const header = (
     <PageHeader
       logo={
-        <Brand 
-          src="/logo.svg" 
+        <Brand
+          src="/logo.svg"
           alt="VMware Cloud Director"
           component={Link}
           to="/dashboard"

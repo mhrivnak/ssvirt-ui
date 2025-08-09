@@ -83,7 +83,11 @@ const Login: React.FC = () => {
       navigate(from !== ROUTES.LOGIN ? from : defaultRoute, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'Login failed. Please try again.');
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Login failed. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }

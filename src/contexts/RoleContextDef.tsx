@@ -11,4 +11,6 @@ export interface RoleContextValue {
   isLoading: boolean;
 }
 
-export const RoleContext = createContext<RoleContextValue | undefined>(undefined);
+export const RoleContext = createContext<RoleContextValue | undefined>(
+  undefined
+);

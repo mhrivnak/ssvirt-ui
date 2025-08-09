@@ -4,25 +4,32 @@ import { ROLE_NAMES } from '../types';
 /**
  * Determine user capabilities based on VMware Cloud Director session response
  */
-export function determineUserCapabilities(sessionResponse: SessionResponse): RoleCapabilities {
+export function determineUserCapabilities(
+  sessionResponse: SessionResponse
+): RoleCapabilities {
   const roles = sessionResponse.roles;
-  
+
   return {
     canManageSystem: roles.includes(ROLE_NAMES.SYSTEM_ADMIN),
-    canManageOrganizations: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) || 
-                            roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageOrganizations:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
     canCreateOrganizations: roles.includes(ROLE_NAMES.SYSTEM_ADMIN),
-    canManageUsers: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) || 
-                    roles.includes(ROLE_NAMES.ORG_ADMIN),
-    canManageVMs: roles.some(role => [
-      ROLE_NAMES.SYSTEM_ADMIN,
-      ROLE_NAMES.ORG_ADMIN, 
-      ROLE_NAMES.VAPP_USER
-    ].includes(role)),
-    canViewReports: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
-                    roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageUsers:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageVMs: roles.some((role) =>
+      [
+        ROLE_NAMES.SYSTEM_ADMIN,
+        ROLE_NAMES.ORG_ADMIN,
+        ROLE_NAMES.VAPP_USER,
+      ].includes(role)
+    ),
+    canViewReports:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
     primaryOrganization: sessionResponse.org.id,
-    operatingOrganization: sessionResponse.operatingOrg?.id
+    operatingOrganization: sessionResponse.operatingOrg?.id,
   };
 }
 
@@ -30,8 +37,12 @@ export function determineUserCapabilities(sessionResponse: SessionResponse): Rol
  * Get the highest priority role for initial role selection
  */
 export function getHighestPriorityRole(roles: string[]): string {
-  const priorityOrder = [ROLE_NAMES.SYSTEM_ADMIN, ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER];
-  return priorityOrder.find(role => roles.includes(role)) || roles[0];
+  const priorityOrder = [
+    ROLE_NAMES.SYSTEM_ADMIN,
+    ROLE_NAMES.ORG_ADMIN,
+    ROLE_NAMES.VAPP_USER,
+  ];
+  return priorityOrder.find((role) => roles.includes(role)) || roles[0];
 }
 
 /**

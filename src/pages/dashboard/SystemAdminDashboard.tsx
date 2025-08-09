@@ -59,7 +59,7 @@ const mockSystemStats: SystemStats = {
   organizationGrowth: 12,
   userGrowth: 8,
   vmGrowth: 23,
-  resourceTrend: 5
+  resourceTrend: 5,
 };
 
 const mockSystemAlerts: SystemAlert[] = [
@@ -68,15 +68,15 @@ const mockSystemAlerts: SystemAlert[] = [
     type: 'warning',
     title: 'High Resource Utilization',
     message: 'CPU utilization is at 85% across the datacenter',
-    timestamp: '2024-01-15T10:30:00Z'
+    timestamp: '2024-01-15T10:30:00Z',
   },
   {
     id: '2',
     type: 'info',
     title: 'Scheduled Maintenance',
     message: 'System maintenance scheduled for tonight at 2:00 AM',
-    timestamp: '2024-01-15T09:15:00Z'
-  }
+    timestamp: '2024-01-15T09:15:00Z',
+  },
 ];
 
 const SystemAlertsPanel: React.FC<{ alerts: SystemAlert[] }> = ({ alerts }) => {
@@ -111,7 +111,7 @@ const SystemAlertsPanel: React.FC<{ alerts: SystemAlert[] }> = ({ alerts }) => {
               System Alerts ({alerts.length})
             </Title>
           </StackItem>
-          {alerts.map(alert => (
+          {alerts.map((alert) => (
             <StackItem key={alert.id}>
               <Alert
                 variant={alert.type as AlertVariant}
@@ -142,7 +142,10 @@ const SystemHealthPanel: React.FC = () => {
             <Grid hasGutter>
               <GridItem span={6}>
                 <div className="pf-v6-u-text-align-center">
-                  <Icon size="lg" color="var(--pf-v6-global--success-color--100)">
+                  <Icon
+                    size="lg"
+                    color="var(--pf-v6-global--success-color--100)"
+                  >
                     <CheckCircleIcon />
                   </Icon>
                   <div className="pf-v6-u-font-size-sm pf-v6-u-color-200">
@@ -152,7 +155,10 @@ const SystemHealthPanel: React.FC = () => {
               </GridItem>
               <GridItem span={6}>
                 <div className="pf-v6-u-text-align-center">
-                  <Icon size="lg" color="var(--pf-v6-global--success-color--100)">
+                  <Icon
+                    size="lg"
+                    color="var(--pf-v6-global--success-color--100)"
+                  >
                     <CheckCircleIcon />
                   </Icon>
                   <div className="pf-v6-u-font-size-sm pf-v6-u-color-200">
@@ -162,7 +168,10 @@ const SystemHealthPanel: React.FC = () => {
               </GridItem>
               <GridItem span={6}>
                 <div className="pf-v6-u-text-align-center">
-                  <Icon size="lg" color="var(--pf-v6-global--warning-color--100)">
+                  <Icon
+                    size="lg"
+                    color="var(--pf-v6-global--warning-color--100)"
+                  >
                     <ExclamationTriangleIcon />
                   </Icon>
                   <div className="pf-v6-u-font-size-sm pf-v6-u-color-200">
@@ -172,7 +181,10 @@ const SystemHealthPanel: React.FC = () => {
               </GridItem>
               <GridItem span={6}>
                 <div className="pf-v6-u-text-align-center">
-                  <Icon size="lg" color="var(--pf-v6-global--success-color--100)">
+                  <Icon
+                    size="lg"
+                    color="var(--pf-v6-global--success-color--100)"
+                  >
                     <CheckCircleIcon />
                   </Icon>
                   <div className="pf-v6-u-font-size-sm pf-v6-u-color-200">
@@ -272,7 +284,8 @@ export const SystemAdminDashboard: React.FC = () => {
                 System Administration Dashboard
               </Title>
               <p className="pf-v6-u-color-200">
-                Welcome, {sessionData.user.name} - Managing {sessionData.site.name}
+                Welcome, {sessionData.user.name} - Managing{' '}
+                {sessionData.site.name}
               </p>
             </SplitItem>
           </Split>

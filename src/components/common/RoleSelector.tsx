@@ -58,7 +58,7 @@ export const RoleSelector: React.FC = () => {
       )}
     >
       <DropdownList>
-        {availableRoles.map(role => (
+        {availableRoles.map((role) => (
           <DropdownItem
             key={role}
             onClick={() => {

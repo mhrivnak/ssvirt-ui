@@ -35,7 +35,8 @@ import { QuickStatsCard } from '../../components/dashboard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VM } from '../../types';
 
-interface UserVM extends Pick<VM, 'id' | 'name' | 'status' | 'cpu_count' | 'memory_mb'> {
+interface UserVM
+  extends Pick<VM, 'id' | 'name' | 'status' | 'cpu_count' | 'memory_mb'> {
   vdc_name: string;
 }
 
@@ -56,7 +57,7 @@ const mockUserVMs: UserVM[] = [
     status: 'POWERED_ON',
     cpu_count: 2,
     memory_mb: 4096,
-    vdc_name: 'Development VDC'
+    vdc_name: 'Development VDC',
   },
   {
     id: 'vm-2',
@@ -64,7 +65,7 @@ const mockUserVMs: UserVM[] = [
     status: 'POWERED_OFF',
     cpu_count: 1,
     memory_mb: 2048,
-    vdc_name: 'Development VDC'
+    vdc_name: 'Development VDC',
   },
   {
     id: 'vm-3',
@@ -72,8 +73,8 @@ const mockUserVMs: UserVM[] = [
     status: 'SUSPENDED',
     cpu_count: 4,
     memory_mb: 8192,
-    vdc_name: 'Staging VDC'
-  }
+    vdc_name: 'Staging VDC',
+  },
 ];
 
 const mockAvailableTemplates: CatalogTemplate[] = [
@@ -83,7 +84,7 @@ const mockAvailableTemplates: CatalogTemplate[] = [
     description: 'Standard Ubuntu development environment',
     os_type: 'Linux',
     cpu_count: 2,
-    memory_mb: 4096
+    memory_mb: 4096,
   },
   {
     id: 'template-2',
@@ -91,7 +92,7 @@ const mockAvailableTemplates: CatalogTemplate[] = [
     description: 'Windows Server for development and testing',
     os_type: 'Windows',
     cpu_count: 2,
-    memory_mb: 8192
+    memory_mb: 8192,
   },
   {
     id: 'template-3',
@@ -99,8 +100,8 @@ const mockAvailableTemplates: CatalogTemplate[] = [
     description: 'Enterprise Linux for production workloads',
     os_type: 'Linux',
     cpu_count: 4,
-    memory_mb: 8192
-  }
+    memory_mb: 8192,
+  },
 ];
 
 const getStatusIcon = (status: string) => {
@@ -116,7 +117,9 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-const getStatusColor = (status: string): 'green' | 'red' | 'orange' | 'grey' => {
+const getStatusColor = (
+  status: string
+): 'green' | 'red' | 'orange' | 'grey' => {
   switch (status) {
     case 'POWERED_ON':
       return 'green';
@@ -149,7 +152,8 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                   No Virtual Machines
                 </Title>
                 <p className="pf-v6-u-color-200 pf-v6-u-mb-lg">
-                  You don't have any virtual machines yet. Get started by creating your first VM.
+                  You don't have any virtual machines yet. Get started by
+                  creating your first VM.
                 </p>
                 <Button
                   component={Link}
@@ -192,7 +196,7 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
           </StackItem>
           <StackItem>
             <Grid hasGutter>
-              {vms.slice(0, 3).map(vm => (
+              {vms.slice(0, 3).map((vm) => (
                 <GridItem key={vm.id} span={4}>
                   <Card isSelectableRaised>
                     <CardBody>
@@ -212,7 +216,8 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                             {vm.vdc_name}
                           </div>
                           <div className="pf-v6-u-font-size-sm">
-                            {vm.cpu_count} CPU, {(vm.memory_mb / 1024).toFixed(1)} GB RAM
+                            {vm.cpu_count} CPU,{' '}
+                            {(vm.memory_mb / 1024).toFixed(1)} GB RAM
                           </div>
                         </StackItem>
                         <StackItem>
@@ -251,20 +256,20 @@ const GettingStartedPanel: React.FC = () => {
           <StackItem>
             <List>
               <ListItem>
-                <Link to="/catalogs">Browse available VM templates</Link> - 
+                <Link to="/catalogs">Browse available VM templates</Link> -
                 Start with pre-configured environments
               </ListItem>
               <ListItem>
-                <Link to="/my-vms/new">Create your first virtual machine</Link> - 
-                Deploy a VM for development or testing
+                <Link to="/my-vms/new">Create your first virtual machine</Link>{' '}
+                - Deploy a VM for development or testing
               </ListItem>
               <ListItem>
-                <Link to="/profile">Configure your profile</Link> - 
-                Set preferences and notification settings
+                <Link to="/profile">Configure your profile</Link> - Set
+                preferences and notification settings
               </ListItem>
               <ListItem>
-                <Link to="/help">View documentation</Link> - 
-                Learn about platform features and best practices
+                <Link to="/help">View documentation</Link> - Learn about
+                platform features and best practices
               </ListItem>
             </List>
           </StackItem>
@@ -274,7 +279,9 @@ const GettingStartedPanel: React.FC = () => {
   );
 };
 
-const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({ templates }) => {
+const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({
+  templates,
+}) => {
   return (
     <Card>
       <CardBody>
@@ -300,7 +307,7 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({ templ
           </StackItem>
           <StackItem>
             <Stack hasGutter>
-              {templates.slice(0, 3).map(template => (
+              {templates.slice(0, 3).map((template) => (
                 <StackItem key={template.id}>
                   <Card isSelectableRaised>
                     <CardBody>
@@ -312,7 +319,8 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({ templ
                               {template.description}
                             </div>
                             <div className="pf-v6-u-font-size-sm">
-                              {template.cpu_count} CPU, {(template.memory_mb / 1024).toFixed(1)} GB RAM
+                              {template.cpu_count} CPU,{' '}
+                              {(template.memory_mb / 1024).toFixed(1)} GB RAM
                             </div>
                           </div>
                         </FlexItem>
@@ -360,7 +368,9 @@ export const VAppUserDashboard: React.FC = () => {
     );
   }
 
-  const runningVMs = mockUserVMs.filter(vm => vm.status === 'POWERED_ON').length;
+  const runningVMs = mockUserVMs.filter(
+    (vm) => vm.status === 'POWERED_ON'
+  ).length;
 
   return (
     <PageSection>
@@ -370,7 +380,8 @@ export const VAppUserDashboard: React.FC = () => {
             Welcome, {sessionData.user.name}
           </Title>
           <p className="pf-v6-u-color-200">
-            Manage your virtual machines and applications in {sessionData.org.name}
+            Manage your virtual machines and applications in{' '}
+            {sessionData.org.name}
           </p>
         </StackItem>
 
