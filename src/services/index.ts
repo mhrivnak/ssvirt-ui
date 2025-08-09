@@ -7,12 +7,12 @@ export {
   CloudApiRoleService,
   CloudApiOrganizationService,
   VDCService,
+  CatalogService,
 } from './cloudapi';
 
 // Export domain services
 export { OrganizationService } from './organizations';
 export { VMService } from './vms';
-export { CatalogService } from './catalogs';
 export { DashboardService } from './dashboard';
 export { UserProfileService } from './userProfile';
 export { MonitoringService } from './monitoring';

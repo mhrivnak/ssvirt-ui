@@ -8,11 +8,6 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
-  SearchInput,
-  Select,
-  SelectOption,
-  SelectList,
-  MenuToggle,
   Button,
   Pagination,
   Stack,
@@ -25,32 +20,21 @@ import {
   AlertVariant,
   EmptyState,
   EmptyStateBody,
-  EmptyStateActions,
   Bullseye,
   Breadcrumb,
   BreadcrumbItem,
 } from '@patternfly/react-core';
-import { CatalogIcon, FilterIcon, StarIcon } from '@patternfly/react-icons';
+import { CatalogIcon, StarIcon } from '@patternfly/react-icons';
 import { useCatalogs } from '../../hooks/useCatalogs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Catalog, CatalogQueryParams } from '../../types';
-import type { MenuToggleElement } from '@patternfly/react-core';
 
 const Catalogs: React.FC = () => {
   const navigate = useNavigate();
 
   // Search and filter state
-  const [searchValue, setSearchValue] = useState('');
-  const [sortBy, setSortBy] = useState<string>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filterOrganization, setFilterOrganization] = useState<string>('');
-  const [filterShared, setFilterShared] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
-
-  // Select state
-  const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
-  const [isSharedFilterOpen, setIsSharedFilterOpen] = useState(false);
+  const [perPage, setPerPage] = useState(25);
 
   // Favorites state (using localStorage for persistence)
   const [favorites, setFavorites] = useState<Set<string>>(() => {
@@ -62,15 +46,7 @@ const Catalogs: React.FC = () => {
         'Failed to parse catalog favorites from localStorage:',
         error
       );
-      // Clear corrupted data
-      try {
-        localStorage.removeItem('catalog-favorites');
-      } catch (clearError) {
-        console.error(
-          'Failed to clear corrupted catalog favorites:',
-          clearError
-        );
-      }
+      localStorage.removeItem('catalog-favorites');
       return new Set();
     }
   });
@@ -78,36 +54,10 @@ const Catalogs: React.FC = () => {
   // Build query parameters
   const queryParams: CatalogQueryParams = {
     page: currentPage,
-    per_page: perPage,
-    sort_by: sortBy,
-    sort_order: sortOrder,
-    search: searchValue || undefined,
-    organization: filterOrganization || undefined,
-    is_shared: filterShared ? filterShared === 'true' : undefined,
+    pageSize: perPage,
   };
 
   const { data: catalogsResponse, isLoading, error } = useCatalogs(queryParams);
-
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-    setCurrentPage(1);
-  };
-
-  const handleSortChange = (value: string) => {
-    const lastUnderscoreIndex = value.lastIndexOf('_');
-    const newSortBy = value.slice(0, lastUnderscoreIndex);
-    const newSortOrder = value.slice(lastUnderscoreIndex + 1);
-    setSortBy(newSortBy);
-    setSortOrder(newSortOrder as 'asc' | 'desc');
-    setCurrentPage(1);
-    setIsSortSelectOpen(false);
-  };
-
-  const handleSharedFilterChange = (value: string) => {
-    setFilterShared(value);
-    setCurrentPage(1);
-    setIsSharedFilterOpen(false);
-  };
 
   const toggleFavorite = (catalogId: string) => {
     const newFavorites = new Set(favorites);
@@ -126,22 +76,11 @@ const Catalogs: React.FC = () => {
       );
     } catch (error) {
       console.error('Failed to save catalog favorites to localStorage:', error);
-      // Note: The favorites state is still updated in memory, so the UI will reflect the change
-      // even if localStorage fails. This ensures the user sees their action was successful.
     }
   };
 
   const handleCatalogClick = (catalog: Catalog) => {
     navigate(`/catalogs/${catalog.id}`);
-  };
-
-  const clearFilters = () => {
-    setSearchValue('');
-    setSortBy('name');
-    setSortOrder('asc');
-    setFilterOrganization('');
-    setFilterShared('');
-    setCurrentPage(1);
   };
 
   if (error) {
@@ -166,8 +105,8 @@ const Catalogs: React.FC = () => {
     );
   }
 
-  const catalogs = catalogsResponse?.data || [];
-  const pagination = catalogsResponse?.pagination;
+  const catalogs = catalogsResponse?.values || [];
+  const totalCount = catalogsResponse?.resultTotal || 0;
 
   return (
     <PageSection>
@@ -201,94 +140,10 @@ const Catalogs: React.FC = () => {
             <CardBody>
               <Toolbar>
                 <ToolbarContent>
-                  <ToolbarItem width="300px">
-                    <SearchInput
-                      placeholder="Search catalogs..."
-                      value={searchValue}
-                      onChange={(_event, value) => handleSearch(value)}
-                      onClear={() => handleSearch('')}
-                    />
-                  </ToolbarItem>
-
-                  <ToolbarItem>
-                    <Select
-                      isOpen={isSortSelectOpen}
-                      selected={`${sortBy}_${sortOrder}`}
-                      onSelect={(_, selection) =>
-                        handleSortChange(selection as string)
-                      }
-                      onOpenChange={setIsSortSelectOpen}
-                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                        <MenuToggle
-                          ref={toggleRef}
-                          onClick={() => setIsSortSelectOpen(!isSortSelectOpen)}
-                          isExpanded={isSortSelectOpen}
-                        >
-                          Sort by {sortBy === 'name' ? 'Name' : 'Date'} (
-                          {sortOrder === 'asc' ? 'A-Z' : 'Z-A'})
-                        </MenuToggle>
-                      )}
-                    >
-                      <SelectList>
-                        <SelectOption value="name_asc">Name (A-Z)</SelectOption>
-                        <SelectOption value="name_desc">
-                          Name (Z-A)
-                        </SelectOption>
-                        <SelectOption value="created_at_desc">
-                          Newest First
-                        </SelectOption>
-                        <SelectOption value="created_at_asc">
-                          Oldest First
-                        </SelectOption>
-                      </SelectList>
-                    </Select>
-                  </ToolbarItem>
-
-                  <ToolbarItem>
-                    <Select
-                      isOpen={isSharedFilterOpen}
-                      selected={filterShared}
-                      onSelect={(_, selection) =>
-                        handleSharedFilterChange(selection as string)
-                      }
-                      onOpenChange={setIsSharedFilterOpen}
-                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                        <MenuToggle
-                          ref={toggleRef}
-                          onClick={() =>
-                            setIsSharedFilterOpen(!isSharedFilterOpen)
-                          }
-                          isExpanded={isSharedFilterOpen}
-                          icon={<FilterIcon />}
-                        >
-                          {filterShared
-                            ? filterShared === 'true'
-                              ? 'Shared'
-                              : 'Private'
-                            : 'All Types'}
-                        </MenuToggle>
-                      )}
-                    >
-                      <SelectList>
-                        <SelectOption value="">All Types</SelectOption>
-                        <SelectOption value="true">Shared Only</SelectOption>
-                        <SelectOption value="false">Private Only</SelectOption>
-                      </SelectList>
-                    </Select>
-                  </ToolbarItem>
-
-                  {(searchValue || filterOrganization || filterShared) && (
-                    <ToolbarItem>
-                      <Button variant="link" onClick={clearFilters}>
-                        Clear filters
-                      </Button>
-                    </ToolbarItem>
-                  )}
-
                   <ToolbarItem align={{ default: 'alignEnd' }}>
-                    {pagination && (
+                    {totalCount > 0 && (
                       <Pagination
-                        itemCount={pagination.total}
+                        itemCount={totalCount}
                         perPage={perPage}
                         page={currentPage}
                         onSetPage={(_, page) => setCurrentPage(page)}
@@ -319,17 +174,9 @@ const Catalogs: React.FC = () => {
                     No catalogs found
                   </Title>
                   <EmptyStateBody>
-                    {searchValue || filterOrganization || filterShared
-                      ? 'No catalogs match your current filters. Try adjusting your search criteria.'
-                      : 'No catalogs are available. Contact your administrator to create catalogs and add templates.'}
+                    No catalogs are available. Contact your administrator to
+                    create catalogs and add templates.
                   </EmptyStateBody>
-                  {(searchValue || filterOrganization || filterShared) && (
-                    <EmptyStateActions>
-                      <Button variant="primary" onClick={clearFilters}>
-                        Clear filters
-                      </Button>
-                    </EmptyStateActions>
-                  )}
                 </EmptyState>
               </CardBody>
             </Card>
@@ -383,12 +230,16 @@ const Catalogs: React.FC = () => {
                       <StackItem>
                         <Split hasGutter>
                           <SplitItem>
-                            <Badge color={catalog.is_shared ? 'blue' : 'grey'}>
-                              {catalog.is_shared ? 'Shared' : 'Private'}
+                            <Badge
+                              color={catalog.isPublished ? 'blue' : 'grey'}
+                            >
+                              {catalog.isPublished ? 'Published' : 'Private'}
                             </Badge>
                           </SplitItem>
                           <SplitItem>
-                            <small>Organization: {catalog.organization}</small>
+                            <Badge color="green">
+                              {catalog.numberOfVAppTemplates} Templates
+                            </Badge>
                           </SplitItem>
                         </Split>
                       </StackItem>
@@ -396,7 +247,7 @@ const Catalogs: React.FC = () => {
                       <StackItem>
                         <small className="pf-v6-u-color-200">
                           Created:{' '}
-                          {new Date(catalog.created_at).toLocaleDateString()}
+                          {new Date(catalog.creationDate).toLocaleDateString()}
                         </small>
                       </StackItem>
                     </Stack>
@@ -407,10 +258,10 @@ const Catalogs: React.FC = () => {
           )}
         </StackItem>
 
-        {pagination && pagination.total > perPage && (
+        {totalCount > perPage && (
           <StackItem>
             <Pagination
-              itemCount={pagination.total}
+              itemCount={totalCount}
               perPage={perPage}
               page={currentPage}
               onSetPage={(_, page) => setCurrentPage(page)}

@@ -337,29 +337,53 @@ export interface PowerOperationResult {
   error?: string;
 }
 
-// Catalog types
-export interface Catalog {
-  id: string;
-  name: string;
-  organization: string;
-  description: string;
-  is_shared: boolean;
-  created_at: string;
-  updated_at: string;
+// Catalog types - VMware Cloud Director CloudAPI compliant
+export interface OrgReference {
+  id: string; // URN format: urn:vcloud:org:uuid
+}
+
+export interface OwnerReference {
+  id: string; // Owner URN (currently empty)
+}
+
+export interface PublishConfig {
+  isPublished: boolean; // Matches catalog.isPublished
+}
+
+export interface SubscriptionConfig {
+  isSubscribed: boolean; // Matches catalog.isSubscribed
 }
 
 export interface CatalogItem {
-  id: string;
+  id: string; // URN format: urn:vcloud:catalogitem:uuid
   name: string;
   description: string;
-  os_type: string;
-  vm_instance_type: string;
-  cpu_count: number;
-  memory_mb: number;
-  disk_size_gb: number;
-  catalog_id: string;
-  created_at: string;
-  updated_at: string;
+  catalogId: string; // Parent catalog URN
+  catalog_id: string; // Legacy property name for backward compatibility
+  os_type: string; // Operating system type
+  cpu_count: number; // Number of CPUs
+  memory_mb: number; // Memory in MB
+  disk_size_gb: number; // Disk size in GB
+  vm_instance_type: string; // VM instance type
+}
+
+export interface Catalog {
+  id: string; // URN format: urn:vcloud:catalog:uuid
+  name: string; // Catalog name
+  description: string; // Catalog description
+  org: OrgReference; // Organization reference
+  isPublished: boolean; // Whether catalog is published externally
+  isSubscribed: boolean; // Whether catalog is subscribed from external source
+  creationDate: string; // ISO-8601 timestamp
+  numberOfVAppTemplates: number; // Count of vApp templates in catalog
+  numberOfMedia: number; // Count of media items (always 0 currently)
+  catalogStorageProfiles: unknown[]; // Storage profiles (always empty array)
+  publishConfig: PublishConfig; // Publish configuration
+  subscriptionConfig: SubscriptionConfig; // Subscription configuration
+  distributedCatalogConfig: object; // Distributed catalog config (always empty)
+  owner: OwnerReference; // Owner reference
+  isLocal: boolean; // Whether catalog is local (always true)
+  version: number; // Catalog version (always 1)
 }
 
 // Dashboard types
@@ -417,12 +441,9 @@ export interface VDCQueryParams {
     | 'Flex';
 }
 
-export interface CatalogQueryParams
-  extends PaginationParams,
-    SortParams,
-    FilterParams {
-  organization?: string;
-  is_shared?: boolean;
+export interface CatalogQueryParams {
+  page?: number; // Page number, starts at 1 (default: 1)
+  pageSize?: number; // Items per page, max 128 (default: 25)
 }
 
 // CloudAPI Query Parameters
@@ -518,6 +539,19 @@ export interface UpdateVDCRequest {
   }>;
   isThinProvision?: boolean;
   isEnabled?: boolean;
+}
+
+export interface CreateCatalogRequest {
+  name: string; // Required: Catalog name
+  description?: string; // Optional: Catalog description
+  orgId: string; // Required: Organization URN
+  isPublished?: boolean; // Optional: Publish status (default: false)
+}
+
+export interface UpdateCatalogRequest {
+  name?: string;
+  description?: string;
+  isPublished?: boolean;
 }
 
 export interface CreateVMRequest {
@@ -636,11 +670,9 @@ export const QUERY_KEYS = {
   vm: (id: string) => ['vms', id] as const,
   vmsByVdc: (vdcId: string) => ['vms', 'vdc', vdcId] as const,
 
-  // Catalogs
-  catalogs: ['catalogs'] as const,
-  catalog: (id: string) => ['catalogs', id] as const,
-  catalogItems: (catalogId: string) =>
-    ['catalogs', catalogId, 'items'] as const,
+  // Catalogs (CloudAPI)
+  catalogs: ['cloudapi', 'catalogs'] as const,
+  catalog: (id: string) => ['cloudapi', 'catalogs', id] as const,
 
   // Resource Monitoring & Analytics
   resourceUsage: ['monitoring', 'resource-usage'] as const,

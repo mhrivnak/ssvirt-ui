@@ -72,7 +72,7 @@ const OrganizationDetail: React.FC = () => {
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading, error } = useOrganization(id || '');
   const { data: vdcsResponse } = useVDCs(id || '');
-  const { data: catalogsResponse } = useCatalogs({ organization: id });
+  const { data: catalogsResponse } = useCatalogs();
 
   // Early validation for id parameter
   if (!id) {
@@ -98,7 +98,7 @@ const OrganizationDetail: React.FC = () => {
 
   const organization = orgResponse?.data;
   const vdcs = vdcsResponse?.values || [];
-  const catalogs = catalogsResponse?.data || [];
+  const catalogs = catalogsResponse?.values || [];
 
   const handleStatusToggle = async (enabled: boolean) => {
     if (!organization) return;
@@ -455,7 +455,7 @@ const OrganizationDetail: React.FC = () => {
               <Tr>
                 <Th>Name</Th>
                 <Th>Description</Th>
-                <Th>Shared</Th>
+                <Th>Published</Th>
                 <Th>Created</Th>
                 <Th>Actions</Th>
               </Tr>
@@ -477,14 +477,14 @@ const OrganizationDetail: React.FC = () => {
                       <span className="pf-v6-u-color-200">No description</span>
                     )}
                   </Td>
-                  <Td dataLabel="Shared">
-                    <Badge color={catalog.is_shared ? 'blue' : 'grey'}>
-                      {catalog.is_shared ? 'Shared' : 'Private'}
+                  <Td dataLabel="Published">
+                    <Badge color={catalog.isPublished ? 'blue' : 'grey'}>
+                      {catalog.isPublished ? 'Published' : 'Private'}
                     </Badge>
                   </Td>
                   <Td dataLabel="Created">
-                    {catalog.created_at
-                      ? new Date(catalog.created_at).toLocaleDateString()
+                    {catalog.creationDate
+                      ? new Date(catalog.creationDate).toLocaleDateString()
                       : 'N/A'}
                   </Td>
                   <Td dataLabel="Actions">
