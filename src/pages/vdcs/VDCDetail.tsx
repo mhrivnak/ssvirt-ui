@@ -247,9 +247,7 @@ const VDCDetail: React.FC = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Storage Profile ID</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <code>
-                      {vdc.vdcStorageProfiles[0]?.id || 'N/A'}
-                    </code>
+                    <code>{vdc.vdcStorageProfiles[0]?.id || 'N/A'}</code>
                   </DescriptionListDescription>
                 </DescriptionListGroup>
 
@@ -266,14 +264,10 @@ const VDCDetail: React.FC = () => {
                   <DescriptionListDescription>
                     <Badge
                       color={
-                        vdc.vdcStorageProfiles[0]?.default
-                          ? 'green'
-                          : 'grey'
+                        vdc.vdcStorageProfiles[0]?.default ? 'green' : 'grey'
                       }
                     >
-                      {vdc.vdcStorageProfiles[0]?.default
-                        ? 'Yes'
-                        : 'No'}
+                      {vdc.vdcStorageProfiles[0]?.default ? 'Yes' : 'No'}
                     </Badge>
                   </DescriptionListDescription>
                 </DescriptionListGroup>

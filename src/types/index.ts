@@ -410,7 +410,11 @@ export interface VDCQueryParams {
   sortDesc?: string;
   filter?: string;
   status?: 'enabled' | 'disabled';
-  allocationModel?: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
+  allocationModel?:
+    | 'PayAsYouGo'
+    | 'AllocationPool'
+    | 'ReservationPool'
+    | 'Flex';
 }
 
 export interface CatalogQueryParams
