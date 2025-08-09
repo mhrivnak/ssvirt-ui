@@ -177,7 +177,6 @@ func GenerateRoleURN(uuid string) string {
         "name": "string", 
         "id": "string"
     },
-    "password": "string",
     "deployedVmQuota": 0,
     "storedVmQuota": 0,
     "email": "string",

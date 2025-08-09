@@ -131,10 +131,13 @@ export class AuthService {
   /**
    * Get current user profile from CloudAPI
    */
-  static async getCurrentUser(): Promise<ApiResponse<User>> {
+  static async getCurrentUser(): Promise<User> {
     try {
-      const response = await api.get<ApiResponse<User>>(API_ENDPOINTS.SESSION);
-      return response.data;
+      const response = await api.get<ApiResponse<User>>(API_ENDPOINTS.CLOUDAPI_CURRENT_USER);
+      if (!response.data.success || !response.data.data) {
+        throw new Error('Failed to get current user: Invalid response');
+      }
+      return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message =

@@ -42,7 +42,7 @@ export class CloudApiOrganizationService {
   static async getOrganization(id: string): Promise<ApiResponse<Organization>> {
     try {
       const response = await api.get<ApiResponse<Organization>>(
-        `/cloudapi/1.0.0/orgs/${id}`
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {
@@ -99,7 +99,7 @@ export class CloudApiOrganizationService {
         updateData.isEnabled = orgData.isEnabled;
 
       const response = await api.put<ApiResponse<Organization>>(
-        `/cloudapi/1.0.0/orgs/${orgData.id}`,
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(orgData.id)}`,
         updateData
       );
       return response.data;
@@ -119,7 +119,7 @@ export class CloudApiOrganizationService {
   static async deleteOrganization(id: string): Promise<ApiResponse<void>> {
     try {
       const response = await api.delete<ApiResponse<void>>(
-        `/cloudapi/1.0.0/orgs/${id}`
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {
@@ -141,7 +141,7 @@ export class CloudApiOrganizationService {
   ): Promise<ApiResponse<Organization>> {
     try {
       const response = await api.patch<ApiResponse<Organization>>(
-        `/cloudapi/1.0.0/orgs/${id}`,
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`,
         { isEnabled: enabled }
       );
       return response.data;
@@ -164,7 +164,7 @@ export class CloudApiOrganizationService {
   ): Promise<VCloudPaginatedResponse<User>> {
     try {
       const response = await api.get<VCloudPaginatedResponse<User>>(
-        `/cloudapi/1.0.0/orgs/${orgId}/users`
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(orgId)}/users`
       );
       return response.data;
     } catch (error) {
@@ -186,7 +186,7 @@ export class CloudApiOrganizationService {
   ): Promise<ApiResponse<void>> {
     try {
       const response = await api.post<ApiResponse<void>>(
-        `/cloudapi/1.0.0/orgs/${orgId}/users`,
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(orgId)}/users`,
         { userId }
       );
       return response.data;
@@ -209,7 +209,7 @@ export class CloudApiOrganizationService {
   ): Promise<ApiResponse<void>> {
     try {
       const response = await api.delete<ApiResponse<void>>(
-        `/cloudapi/1.0.0/orgs/${orgId}/users/${userId}`
+        `/cloudapi/1.0.0/orgs/${encodeURIComponent(orgId)}/users/${encodeURIComponent(userId)}`
       );
       return response.data;
     } catch (error) {

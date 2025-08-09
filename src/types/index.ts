@@ -52,6 +52,7 @@ export interface SortParams {
 export interface FilterParams {
   search?: string;
   status?: string;
+  /** @deprecated Use orgId instead for consistency with CloudAPI */
   organization_id?: string;
   enabled?: boolean;
 }
@@ -376,7 +377,6 @@ export interface UserQueryParams
     FilterParams {
   orgId?: string;
   roleId?: string;
-  enabled?: boolean;
 }
 
 export interface RoleQueryParams

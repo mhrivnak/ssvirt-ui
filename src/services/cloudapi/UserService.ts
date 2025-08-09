@@ -39,7 +39,7 @@ export class CloudApiUserService {
   static async getUser(id: string): Promise<ApiResponse<User>> {
     try {
       const response = await api.get<ApiResponse<User>>(
-        `/cloudapi/1.0.0/users/${id}`
+        `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {
@@ -82,7 +82,7 @@ export class CloudApiUserService {
   ): Promise<ApiResponse<User>> {
     try {
       const response = await api.put<ApiResponse<User>>(
-        `/cloudapi/1.0.0/users/${id}`,
+        `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
         userData
       );
       return response.data;
@@ -102,7 +102,7 @@ export class CloudApiUserService {
   static async deleteUser(id: string): Promise<ApiResponse<void>> {
     try {
       const response = await api.delete<ApiResponse<void>>(
-        `/cloudapi/1.0.0/users/${id}`
+        `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {
@@ -124,7 +124,7 @@ export class CloudApiUserService {
   ): Promise<ApiResponse<User>> {
     try {
       const response = await api.patch<ApiResponse<User>>(
-        `/cloudapi/1.0.0/users/${id}`,
+        `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
         { enabled }
       );
       return response.data;
@@ -147,7 +147,7 @@ export class CloudApiUserService {
   ): Promise<ApiResponse<User>> {
     try {
       const response = await api.patch<ApiResponse<User>>(
-        `/cloudapi/1.0.0/users/${id}`,
+        `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
         { roleEntityRefs }
       );
       return response.data;
