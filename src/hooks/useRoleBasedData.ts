@@ -3,7 +3,7 @@ import { useRole } from './useRole';
 import { OrganizationService } from '../services/cloudapi/OrganizationService';
 import { UserService } from '../services/cloudapi/UserService';
 import { VMService } from '../services/vms';
-import { VDCService } from '../services/vdcs';
+import { VDCService } from '../services/cloudapi/VDCService';
 import type {
   Organization,
   User,
@@ -141,34 +141,45 @@ export const useRoleBasedVMs = (
 };
 
 /**
- * Get VDCs based on user role and scope
+ * Get VDCs based on user role and scope (System Admin only)
  */
-export const useRoleBasedVDCs = (): UseQueryResult<ApiResponse<VDC[]>> => {
-  const { capabilities, activeRole, sessionData } = useRole();
+export const useRoleBasedVDCs = (
+  orgId?: string
+): UseQueryResult<VCloudPaginatedResponse<VDC>> => {
+  const { capabilities, sessionData } = useRole();
 
   return useQuery({
     queryKey: [
-      ...QUERY_KEYS.vdcs,
-      activeRole,
+      ...QUERY_KEYS.vdcsByOrg(orgId || ''),
       ...getCapabilitiesKey(capabilities),
     ],
     queryFn: async () => {
-      if (activeRole === ROLE_NAMES.SYSTEM_ADMIN) {
-        // System admin sees all VDCs
-        return VDCService.getVDCs();
-      } else if (activeRole === ROLE_NAMES.ORG_ADMIN) {
-        // Org admin sees only their organization's VDCs
-        const orgId =
-          capabilities.operatingOrganization ||
-          capabilities.primaryOrganization;
-        return VDCService.getVDCsByOrganization(orgId);
+      if (!orgId) {
+        // Return empty result if no orgId provided
+        return {
+          resultTotal: 0,
+          pageCount: 0,
+          page: 1,
+          pageSize: 0,
+          values: [],
+        };
       }
 
-      // vApp users might see VDCs they have access to
-      const orgId = capabilities.primaryOrganization;
-      return VDCService.getVDCsByOrganization(orgId);
+      // Only system admins can access VDC API
+      if (capabilities.canManageSystem) {
+        return VDCService.getVDCs(orgId);
+      }
+
+      // Non-system admins get empty result
+      return {
+        resultTotal: 0,
+        pageCount: 0,
+        page: 1,
+        pageSize: 0,
+        values: [],
+      };
     },
-    enabled: capabilities.canManageOrganizations && !!sessionData,
+    enabled: capabilities.canManageSystem && !!sessionData && !!orgId,
   });
 };
 

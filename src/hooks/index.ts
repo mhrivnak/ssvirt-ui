@@ -20,13 +20,11 @@ export {
 
 export {
   useVDCs,
-  useVDCsByOrganization,
   useVDC,
   useCreateVDC,
   useUpdateVDC,
   useDeleteVDC,
-  useToggleVDCStatus,
-} from './useVDCs';
+} from './useVDC';
 
 export {
   useVMs,
