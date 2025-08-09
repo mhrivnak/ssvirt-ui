@@ -104,8 +104,7 @@ const isValidUser = (obj: unknown): obj is import('../types').User => {
     typeof (obj as Record<string, unknown>).id === 'string' &&
     typeof (obj as Record<string, unknown>).username === 'string' &&
     typeof (obj as Record<string, unknown>).email === 'string' &&
-    typeof (obj as Record<string, unknown>).first_name === 'string' &&
-    typeof (obj as Record<string, unknown>).last_name === 'string'
+    typeof (obj as Record<string, unknown>).fullName === 'string'
   );
 };
 

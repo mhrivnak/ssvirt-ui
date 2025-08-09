@@ -39,6 +39,7 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   DescriptionListDescription,
+  Badge,
 } from '@patternfly/react-core';
 import {
   SaveIcon,
@@ -60,6 +61,8 @@ import {
   useChangePassword,
   useSecuritySettings,
   useUpdateSecuritySetting,
+  useUserRoleNames,
+  useUserOrganization,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
@@ -74,8 +77,7 @@ import type {
 } from '../../types';
 
 interface UserProfileData {
-  first_name: string;
-  last_name: string;
+  fullName: string;
   email: string;
 }
 
@@ -112,6 +114,10 @@ const UserProfile: React.FC = () => {
   const changePasswordMutation = useChangePassword();
   const updateSecuritySettingMutation = useUpdateSecuritySetting();
 
+  // Permission and role hooks
+  const userRoleNames = useUserRoleNames();
+  const userOrganization = useUserOrganization();
+
   const [activeTabKey, setActiveTabKey] = useState<string>('profile');
 
   // Notifications state
@@ -119,8 +125,7 @@ const UserProfile: React.FC = () => {
 
   // Profile form state
   const [profileData, setProfileData] = useState<UserProfileData>({
-    first_name: '',
-    last_name: '',
+    fullName: '',
     email: '',
   });
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>(
@@ -204,8 +209,7 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     if (user) {
       const data = {
-        first_name: user.first_name,
-        last_name: user.last_name,
+        fullName: user.fullName,
         email: user.email,
       };
       setProfileData(data);
@@ -285,12 +289,8 @@ const UserProfile: React.FC = () => {
   const validateProfile = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!profileData.first_name.trim()) {
-      errors.first_name = 'First name is required';
-    }
-
-    if (!profileData.last_name.trim()) {
-      errors.last_name = 'Last name is required';
+    if (!profileData.fullName.trim()) {
+      errors.fullName = 'Full name is required';
     }
 
     if (!profileData.email.trim()) {
@@ -367,15 +367,13 @@ const UserProfile: React.FC = () => {
     try {
       // Call API to update profile
       const updatedUser = await AuthService.updateUserProfile({
-        first_name: profileData.first_name,
-        last_name: profileData.last_name,
+        fullName: profileData.fullName,
         email: profileData.email,
       });
 
       // Update form state with successful response
       const updatedProfileData = {
-        first_name: updatedUser.first_name,
-        last_name: updatedUser.last_name,
+        fullName: updatedUser.fullName,
         email: updatedUser.email,
       };
 
@@ -604,22 +602,57 @@ const UserProfile: React.FC = () => {
         <StackItem>
           <Card>
             <CardBody>
-              <Flex alignItems={{ default: 'alignItemsCenter' }}>
-                <FlexItem>
-                  <Icon size="xl">
-                    <UserIcon />
-                  </Icon>
-                </FlexItem>
-                <FlexItem>
-                  <Title headingLevel="h2" size="lg">
-                    {user.first_name} {user.last_name}
-                  </Title>
-                  <p className="pf-v6-u-color-200">{user.email}</p>
-                  <p className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
-                    User ID: {user.id}
-                  </p>
-                </FlexItem>
-              </Flex>
+              <Stack hasGutter>
+                <StackItem>
+                  <Flex alignItems={{ default: 'alignItemsCenter' }}>
+                    <FlexItem>
+                      <Icon size="xl">
+                        <UserIcon />
+                      </Icon>
+                    </FlexItem>
+                    <FlexItem>
+                      <Title headingLevel="h2" size="lg">
+                        {user.fullName}
+                      </Title>
+                      <p className="pf-v6-u-color-200">{user.email}</p>
+                      <p className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
+                        User ID: {user.id}
+                      </p>
+                    </FlexItem>
+                  </Flex>
+                </StackItem>
+
+                <StackItem>
+                  <DescriptionList isHorizontal>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>Organization</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        {userOrganization?.name || 'Unknown'}
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>Roles</DescriptionListTerm>
+                      <DescriptionListDescription>
+                        <Stack>
+                          {userRoleNames.map((roleName) => (
+                            <StackItem key={roleName}>
+                              <Badge color="blue">{roleName}</Badge>
+                            </StackItem>
+                          ))}
+                          {userRoleNames.length === 0 && (
+                            <StackItem>
+                              <span className="pf-v6-u-color-200">
+                                No roles assigned
+                              </span>
+                            </StackItem>
+                          )}
+                        </Stack>
+                      </DescriptionListDescription>
+                    </DescriptionListGroup>
+                  </DescriptionList>
+                </StackItem>
+              </Stack>
             </CardBody>
           </Card>
         </StackItem>
@@ -661,30 +694,28 @@ const UserProfile: React.FC = () => {
 
                         <StackItem>
                           <Grid hasGutter>
-                            <GridItem span={12} md={6}>
+                            <GridItem span={12}>
                               <FormGroup
-                                label="First Name"
+                                label="Full Name"
                                 isRequired
-                                fieldId="first-name"
+                                fieldId="full-name"
                               >
                                 <TextInput
                                   isRequired
                                   type="text"
-                                  id="first-name"
-                                  value={profileData.first_name}
+                                  id="full-name"
+                                  value={profileData.fullName}
                                   onChange={(_, value) =>
                                     setProfileData((prev) => ({
                                       ...prev,
-                                      first_name: value,
+                                      fullName: value,
                                     }))
                                   }
                                   validated={
-                                    profileErrors.first_name
-                                      ? 'error'
-                                      : 'default'
+                                    profileErrors.fullName ? 'error' : 'default'
                                   }
                                 />
-                                {profileErrors.first_name && (
+                                {profileErrors.fullName && (
                                   <div
                                     style={{
                                       color:
@@ -693,45 +724,7 @@ const UserProfile: React.FC = () => {
                                       marginTop: '0.25rem',
                                     }}
                                   >
-                                    {profileErrors.first_name}
-                                  </div>
-                                )}
-                              </FormGroup>
-                            </GridItem>
-
-                            <GridItem span={12} md={6}>
-                              <FormGroup
-                                label="Last Name"
-                                isRequired
-                                fieldId="last-name"
-                              >
-                                <TextInput
-                                  isRequired
-                                  type="text"
-                                  id="last-name"
-                                  value={profileData.last_name}
-                                  onChange={(_, value) =>
-                                    setProfileData((prev) => ({
-                                      ...prev,
-                                      last_name: value,
-                                    }))
-                                  }
-                                  validated={
-                                    profileErrors.last_name
-                                      ? 'error'
-                                      : 'default'
-                                  }
-                                />
-                                {profileErrors.last_name && (
-                                  <div
-                                    style={{
-                                      color:
-                                        'var(--pf-v6-global--danger-color--100)',
-                                      fontSize: '0.875rem',
-                                      marginTop: '0.25rem',
-                                    }}
-                                  >
-                                    {profileErrors.last_name}
+                                    {profileErrors.fullName}
                                   </div>
                                 )}
                               </FormGroup>

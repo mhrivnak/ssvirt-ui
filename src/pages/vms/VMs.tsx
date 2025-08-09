@@ -493,7 +493,7 @@ const VMs: React.FC = () => {
                           {filters.org_id
                             ? organizations.find(
                                 (org) => org.id === filters.org_id
-                              )?.display_name || 'Unknown Org'
+                              )?.displayName || 'Unknown Org'
                             : 'All Organizations'}
                         </MenuToggle>
                       )}
@@ -502,7 +502,7 @@ const VMs: React.FC = () => {
                         <SelectOption value="">All Organizations</SelectOption>
                         {organizations.map((org) => (
                           <SelectOption key={org.id} value={org.id}>
-                            {org.display_name}
+                            {org.displayName}
                           </SelectOption>
                         ))}
                       </SelectList>
@@ -655,7 +655,7 @@ const VMs: React.FC = () => {
                 filters.vdc_id &&
                   `VDC: ${vdcs.find((v) => v.id === filters.vdc_id)?.name}`,
                 filters.org_id &&
-                  `org: ${organizations.find((o) => o.id === filters.org_id)?.display_name}`,
+                  `org: ${organizations.find((o) => o.id === filters.org_id)?.displayName}`,
               ]
                 .filter(Boolean)
                 .join(', ')}
@@ -904,7 +904,7 @@ const VMs: React.FC = () => {
                   Organization:{' '}
                   {
                     organizations.find((o) => o.id === filters.org_id)
-                      ?.display_name
+                      ?.displayName
                   }
                 </li>
               )}

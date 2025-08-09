@@ -37,6 +37,7 @@ import { CONFIG, ROUTES } from '../../utils/constants';
 import { useAuth } from '../../hooks/useAuth';
 import { useLogoutMutation } from '../../hooks/useAuthQueries';
 import { useNavigation } from '../../hooks/useNavigation';
+import { useCanAccessOrganizations, useUserRoleNames } from '../../hooks';
 import AppBreadcrumb from '../common/AppBreadcrumb';
 import ErrorBoundary from '../common/ErrorBoundary';
 
@@ -51,6 +52,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { user } = useAuth();
   const logoutMutation = useLogoutMutation();
   const { isSidebarOpen, toggleSidebar, isMobile } = useNavigation();
+
+  // Permission checks
+  const canAccessOrganizations = useCanAccessOrganizations();
+  const userRoleNames = useUserRoleNames();
 
   const onUserMenuToggle = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
@@ -92,14 +97,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           isExpanded={isManageNavOpen}
           onExpand={() => setIsManageNavOpen(!isManageNavOpen)}
           isActive={
-            isNavItemActive(ROUTES.ORGANIZATIONS) ||
+            (canAccessOrganizations && isNavItemActive(ROUTES.ORGANIZATIONS)) ||
             isNavItemActive(ROUTES.VDCS) ||
             isNavItemActive(ROUTES.CATALOGS)
           }
         >
-          <NavItem isActive={isNavItemActive(ROUTES.ORGANIZATIONS)}>
-            <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
-          </NavItem>
+          {canAccessOrganizations && (
+            <NavItem isActive={isNavItemActive(ROUTES.ORGANIZATIONS)}>
+              <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
+            </NavItem>
+          )}
           <NavItem isActive={isNavItemActive(ROUTES.VDCS)}>
             <Link to={ROUTES.VDCS}>Virtual Data Centers</Link>
           </NavItem>
@@ -149,19 +156,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               variant="plainText"
             >
               <Avatar
-                src={user?.avatar_url}
-                alt={
-                  user?.first_name && user?.last_name
-                    ? `${user.first_name} ${user.last_name}`
-                    : user?.username || 'User'
-                }
+                alt={user?.fullName || user?.username || 'User'}
                 size="sm"
               />
               {!isMobile && (
                 <span style={{ marginLeft: '8px' }}>
-                  {user?.first_name && user?.last_name
-                    ? `${user.first_name} ${user.last_name}`
-                    : user?.username || 'User'}
+                  {user?.fullName || user?.username || 'User'}
                 </span>
               )}
             </MenuToggle>
@@ -175,6 +175,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <Link {...props} />
               )}
               icon={<UserIcon />}
+              description={
+                userRoleNames.length > 0
+                  ? userRoleNames.join(', ')
+                  : 'No roles assigned'
+              }
             >
               My Profile
             </DropdownItem>

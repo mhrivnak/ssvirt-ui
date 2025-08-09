@@ -77,7 +77,7 @@ export const handlers = [
       organizations = organizations.filter(
         (org) =>
           org.name.toLowerCase().includes(search.toLowerCase()) ||
-          org.display_name.toLowerCase().includes(search.toLowerCase())
+          org.displayName.toLowerCase().includes(search.toLowerCase())
       );
     }
 

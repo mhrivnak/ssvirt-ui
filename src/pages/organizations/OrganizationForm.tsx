@@ -36,14 +36,14 @@ import { ROUTES } from '../../utils/constants';
 
 interface FormData {
   name: string;
-  display_name: string;
+  displayName: string;
   description: string;
-  enabled: boolean;
+  isEnabled: boolean;
 }
 
 interface FormErrors {
   name?: string;
-  display_name?: string;
+  displayName?: string;
   description?: string;
   general?: string;
 }
@@ -56,9 +56,9 @@ const OrganizationForm: React.FC = () => {
   // Form state
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    display_name: '',
+    displayName: '',
     description: '',
-    enabled: true,
+    isEnabled: true,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [hasChanges, setHasChanges] = useState(false);
@@ -76,9 +76,9 @@ const OrganizationForm: React.FC = () => {
     if (isEditing && organization) {
       const data = {
         name: organization.name,
-        display_name: organization.display_name,
+        displayName: organization.displayName,
         description: organization.description || '',
-        enabled: organization.enabled,
+        isEnabled: organization.isEnabled,
       };
       setFormData(data);
       setOriginalData(data);
@@ -97,7 +97,7 @@ const OrganizationForm: React.FC = () => {
     } else if (!isEditing) {
       // For new organizations, consider any non-empty fields as changes
       const hasData =
-        formData.name || formData.display_name || formData.description;
+        formData.name || formData.displayName || formData.description;
       setHasChanges(Boolean(hasData));
     }
   }, [formData, originalData, isEditing]);
@@ -118,12 +118,12 @@ const OrganizationForm: React.FC = () => {
     }
 
     // Display name validation
-    if (!formData.display_name.trim()) {
-      newErrors.display_name = 'Display name is required';
-    } else if (formData.display_name.length < 3) {
-      newErrors.display_name = 'Display name must be at least 3 characters';
-    } else if (formData.display_name.length > 100) {
-      newErrors.display_name = 'Display name must be less than 100 characters';
+    if (!formData.displayName.trim()) {
+      newErrors.displayName = 'Display name is required';
+    } else if (formData.displayName.length < 3) {
+      newErrors.displayName = 'Display name must be at least 3 characters';
+    } else if (formData.displayName.length > 100) {
+      newErrors.displayName = 'Display name must be less than 100 characters';
     }
 
     // Description validation (optional but with limits)
@@ -159,9 +159,9 @@ const OrganizationForm: React.FC = () => {
         const updateData: UpdateOrganizationRequest = {
           id,
           name: formData.name,
-          display_name: formData.display_name,
+          displayName: formData.displayName,
           description: formData.description || undefined,
-          enabled: formData.enabled,
+          isEnabled: formData.isEnabled,
         };
 
         await updateMutation.mutateAsync(updateData);
@@ -169,9 +169,9 @@ const OrganizationForm: React.FC = () => {
       } else {
         const createData: CreateOrganizationRequest = {
           name: formData.name,
-          display_name: formData.display_name,
+          displayName: formData.displayName,
           description: formData.description || undefined,
-          enabled: formData.enabled,
+          isEnabled: formData.isEnabled,
         };
 
         const response = await createMutation.mutateAsync(createData);
@@ -246,7 +246,7 @@ const OrganizationForm: React.FC = () => {
             {isEditing && organization && (
               <BreadcrumbItem>
                 <Link to={ROUTES.ORGANIZATION_DETAIL.replace(':id', id!)}>
-                  {organization.display_name}
+                  {organization.displayName}
                 </Link>
               </BreadcrumbItem>
             )}
@@ -328,9 +328,9 @@ const OrganizationForm: React.FC = () => {
                         isRequired
                         type="text"
                         id="org-display-name"
-                        value={formData.display_name}
+                        value={formData.displayName}
                         onChange={(_, value) =>
-                          handleInputChange('display_name', value)
+                          handleInputChange('displayName', value)
                         }
                         placeholder="My Organization"
                       />
@@ -362,9 +362,9 @@ const OrganizationForm: React.FC = () => {
                       <Switch
                         id="org-enabled"
                         label="Enabled"
-                        isChecked={formData.enabled}
+                        isChecked={formData.isEnabled}
                         onChange={(_, checked) =>
-                          handleInputChange('enabled', checked)
+                          handleInputChange('isEnabled', checked)
                         }
                         aria-label="Organization status"
                       />

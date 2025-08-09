@@ -48,6 +48,7 @@ import {
   useOrganizations,
   useDeleteOrganization,
   useToggleOrganizationStatus,
+  useCanCreateOrganizations,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Organization, OrganizationQueryParams } from '../../types';
@@ -63,6 +64,9 @@ const Organizations: React.FC = () => {
   const [perPage, setPerPage] = useState(20);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Permission checks
+  const canCreateOrganizations = useCanCreateOrganizations();
 
   // Prepare query parameters
   const queryParams: OrganizationQueryParams = {
@@ -118,7 +122,7 @@ const Organizations: React.FC = () => {
   const handleDelete = async (org: Organization) => {
     if (
       window.confirm(
-        `Are you sure you want to delete organization "${org.display_name}"?`
+        `Are you sure you want to delete organization "${org.displayName}"?`
       )
     ) {
       try {
@@ -187,15 +191,17 @@ const Organizations: React.FC = () => {
                 Manage organizations and their settings
               </p>
             </SplitItem>
-            <SplitItem>
-              <Button
-                variant="primary"
-                icon={<PlusCircleIcon />}
-                onClick={() => navigate(ROUTES.ORGANIZATION_CREATE)}
-              >
-                Create Organization
-              </Button>
-            </SplitItem>
+            {canCreateOrganizations && (
+              <SplitItem>
+                <Button
+                  variant="primary"
+                  icon={<PlusCircleIcon />}
+                  onClick={() => navigate(ROUTES.ORGANIZATION_CREATE)}
+                >
+                  Create Organization
+                </Button>
+              </SplitItem>
+            )}
           </Split>
         </StackItem>
 
@@ -315,7 +321,7 @@ const Organizations: React.FC = () => {
                         ? 'Try adjusting your search criteria or filters.'
                         : 'Get started by creating your first organization.'}
                     </EmptyStateBody>
-                    {!searchTerm && (
+                    {!searchTerm && canCreateOrganizations && (
                       <EmptyStateActions>
                         <Button
                           variant="primary"
@@ -333,12 +339,9 @@ const Organizations: React.FC = () => {
                   <Thead>
                     <Tr>
                       <Th {...getSortableProps('name')}>Name</Th>
-                      <Th {...getSortableProps('display_name')}>
-                        Display Name
-                      </Th>
+                      <Th {...getSortableProps('displayName')}>Display Name</Th>
                       <Th>Description</Th>
                       <Th>Status</Th>
-                      <Th {...getSortableProps('created_at')}>Created</Th>
                       <Th>Actions</Th>
                     </Tr>
                   </Thead>
@@ -361,7 +364,7 @@ const Organizations: React.FC = () => {
                             {org.name}
                           </Button>
                         </Td>
-                        <Td dataLabel="Display Name">{org.display_name}</Td>
+                        <Td dataLabel="Display Name">{org.displayName}</Td>
                         <Td dataLabel="Description">
                           {org.description || (
                             <span className="pf-v6-u-color-200">
@@ -372,14 +375,14 @@ const Organizations: React.FC = () => {
                         <Td dataLabel="Status">
                           <Split hasGutter>
                             <SplitItem>
-                              <Badge color={org.enabled ? 'green' : 'red'}>
-                                {org.enabled ? 'Enabled' : 'Disabled'}
+                              <Badge color={org.isEnabled ? 'green' : 'red'}>
+                                {org.isEnabled ? 'Enabled' : 'Disabled'}
                               </Badge>
                             </SplitItem>
                             <SplitItem>
                               <Switch
                                 id={`status-${org.id}`}
-                                isChecked={org.enabled}
+                                isChecked={org.isEnabled}
                                 onChange={(_, checked) =>
                                   handleStatusChange(org, checked)
                                 }
@@ -388,9 +391,6 @@ const Organizations: React.FC = () => {
                               />
                             </SplitItem>
                           </Split>
-                        </Td>
-                        <Td dataLabel="Created">
-                          {new Date(org.created_at).toLocaleDateString()}
                         </Td>
                         <Td dataLabel="Actions">
                           <ActionsColumn

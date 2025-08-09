@@ -402,7 +402,9 @@ const VMDetail: React.FC = () => {
                             <DescriptionListGroup>
                               <DescriptionListTerm>Created</DescriptionListTerm>
                               <DescriptionListDescription>
-                                {formatDate(vm.created_at)}
+                                {vm.created_at
+                                  ? formatDate(vm.created_at)
+                                  : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
                             <DescriptionListGroup>
@@ -410,7 +412,9 @@ const VMDetail: React.FC = () => {
                                 Last Updated
                               </DescriptionListTerm>
                               <DescriptionListDescription>
-                                {formatDate(vm.updated_at)}
+                                {vm.updated_at
+                                  ? formatDate(vm.updated_at)
+                                  : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
                           </DescriptionList>

@@ -422,7 +422,7 @@ const VDCForm: React.FC = () => {
                               <FormSelectOption
                                 key={org.id}
                                 value={org.id}
-                                label={org.display_name}
+                                label={org.displayName}
                               />
                             ))}
                           </FormSelect>

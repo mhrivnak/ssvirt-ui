@@ -157,7 +157,7 @@ const OrganizationDetail: React.FC = () => {
               <DescriptionListGroup>
                 <DescriptionListTerm>Display Name</DescriptionListTerm>
                 <DescriptionListDescription>
-                  {organization.display_name}
+                  {organization.displayName}
                 </DescriptionListDescription>
               </DescriptionListGroup>
               <DescriptionListGroup>
@@ -175,32 +175,20 @@ const OrganizationDetail: React.FC = () => {
                 <DescriptionListDescription>
                   <Split hasGutter>
                     <SplitItem>
-                      <Badge color={organization.enabled ? 'green' : 'red'}>
-                        {organization.enabled ? 'Enabled' : 'Disabled'}
+                      <Badge color={organization.isEnabled ? 'green' : 'red'}>
+                        {organization.isEnabled ? 'Enabled' : 'Disabled'}
                       </Badge>
                     </SplitItem>
                     <SplitItem>
                       <Switch
                         id="org-status-toggle"
-                        isChecked={organization.enabled}
+                        isChecked={organization.isEnabled}
                         onChange={(_, checked) => handleStatusToggle(checked)}
                         isDisabled={toggleStatusMutation.isPending}
                         aria-label="Toggle organization status"
                       />
                     </SplitItem>
                   </Split>
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>Created</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {new Date(organization.created_at).toLocaleString()}
-                </DescriptionListDescription>
-              </DescriptionListGroup>
-              <DescriptionListGroup>
-                <DescriptionListTerm>Last Updated</DescriptionListTerm>
-                <DescriptionListDescription>
-                  {new Date(organization.updated_at).toLocaleString()}
                 </DescriptionListDescription>
               </DescriptionListGroup>
             </DescriptionList>
@@ -410,7 +398,9 @@ const OrganizationDetail: React.FC = () => {
                     </Badge>
                   </Td>
                   <Td dataLabel="Created">
-                    {new Date(vdc.created_at).toLocaleDateString()}
+                    {vdc.created_at
+                      ? new Date(vdc.created_at).toLocaleDateString()
+                      : 'N/A'}
                   </Td>
                   <Td dataLabel="Actions">
                     <ActionsColumn
@@ -493,7 +483,9 @@ const OrganizationDetail: React.FC = () => {
                     </Badge>
                   </Td>
                   <Td dataLabel="Created">
-                    {new Date(catalog.created_at).toLocaleDateString()}
+                    {catalog.created_at
+                      ? new Date(catalog.created_at).toLocaleDateString()
+                      : 'N/A'}
                   </Td>
                   <Td dataLabel="Actions">
                     <ActionsColumn
@@ -528,9 +520,7 @@ const OrganizationDetail: React.FC = () => {
             <BreadcrumbItem>
               <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
-            <BreadcrumbItem isActive>
-              {organization.display_name}
-            </BreadcrumbItem>
+            <BreadcrumbItem isActive>{organization.displayName}</BreadcrumbItem>
           </Breadcrumb>
         </StackItem>
 
@@ -541,7 +531,7 @@ const OrganizationDetail: React.FC = () => {
               <Stack>
                 <StackItem>
                   <Title headingLevel="h1" size="xl">
-                    {organization.display_name}
+                    {organization.displayName}
                   </Title>
                 </StackItem>
                 <StackItem>
@@ -601,7 +591,7 @@ const OrganizationDetail: React.FC = () => {
         )}
 
         {/* Status Alert */}
-        {!organization.enabled && (
+        {!organization.isEnabled && (
           <StackItem>
             <Alert
               variant={AlertVariant.warning}
