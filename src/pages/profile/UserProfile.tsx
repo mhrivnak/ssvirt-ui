@@ -55,15 +55,13 @@ import {
 } from '@patternfly/react-icons';
 import { Link } from 'react-router-dom';
 import {
-  useAuth,
   useUserPreferences,
   useUpdateUserPreferences,
   useChangePassword,
   useSecuritySettings,
   useUpdateSecuritySetting,
-  useUserRoleNames,
-  useUserOrganization,
 } from '../../hooks';
+import { useRole } from '../../hooks/useRole';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
 import { handleFormError } from '../../utils/errorHandler';
@@ -105,7 +103,7 @@ interface Notification {
 }
 
 const UserProfile: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { sessionData, isLoading } = useRole();
 
   // API hooks
   const { data: userPreferencesData } = useUserPreferences();
@@ -114,9 +112,10 @@ const UserProfile: React.FC = () => {
   const changePasswordMutation = useChangePassword();
   const updateSecuritySettingMutation = useUpdateSecuritySetting();
 
-  // Permission and role hooks
-  const userRoleNames = useUserRoleNames();
-  const userOrganization = useUserOrganization();
+  // Extract user info from session data
+  const user = sessionData?.user;
+  const userRoleNames = sessionData?.roles || [];
+  const userOrganization = sessionData?.org;
 
   const [activeTabKey, setActiveTabKey] = useState<string>('profile');
 
@@ -209,8 +208,8 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     if (user) {
       const data = {
-        fullName: user.fullName,
-        email: user.email,
+        fullName: user.name, // VMware Cloud Director uses 'name' field
+        email: user.name, // For now, use name as email placeholder
       };
       setProfileData(data);
       setOriginalProfileData(data);
@@ -373,8 +372,8 @@ const UserProfile: React.FC = () => {
 
       // Update form state with successful response
       const updatedProfileData = {
-        fullName: updatedUser.fullName,
-        email: updatedUser.email,
+        fullName: updatedUser.name || profileData.fullName,
+        email: updatedUser.name || profileData.email,
       };
 
       setOriginalProfileData(updatedProfileData);
@@ -612,11 +611,11 @@ const UserProfile: React.FC = () => {
                     </FlexItem>
                     <FlexItem>
                       <Title headingLevel="h2" size="lg">
-                        {user.fullName}
+                        {user?.name}
                       </Title>
-                      <p className="pf-v6-u-color-200">{user.email}</p>
+                      <p className="pf-v6-u-color-200">{user?.name}</p>
                       <p className="pf-v6-u-color-200 pf-v6-u-font-size-sm">
-                        User ID: {user.id}
+                        User ID: {user?.id}
                       </p>
                     </FlexItem>
                   </Flex>
@@ -634,20 +633,20 @@ const UserProfile: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Roles</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <Stack>
+                        <Flex spaceItems={{ default: 'spaceItemsSm' }}>
                           {userRoleNames.map((roleName) => (
-                            <StackItem key={roleName}>
+                            <FlexItem key={roleName}>
                               <Badge color="blue">{roleName}</Badge>
-                            </StackItem>
+                            </FlexItem>
                           ))}
                           {userRoleNames.length === 0 && (
-                            <StackItem>
+                            <FlexItem>
                               <span className="pf-v6-u-color-200">
                                 No roles assigned
                               </span>
-                            </StackItem>
+                            </FlexItem>
                           )}
-                        </Stack>
+                        </Flex>
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                   </DescriptionList>

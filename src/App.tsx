@@ -1,39 +1,14 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AppLayout from './components/layouts/AppLayout';
-import Dashboard from './pages/dashboard/Dashboard';
+import { Spinner, Bullseye, PageSection } from '@patternfly/react-core';
+import { RoleAwareLayout } from './components/layouts/RoleAwareLayout';
+import { RoleProvider } from './contexts/RoleContext';
+import { RoleProtectedRoute } from './components/common/RoleProtectedRoute';
 import Login from './pages/auth/Login';
-import {
-  Organizations,
-  OrganizationDetail,
-  OrganizationUsers,
-  OrganizationForm,
-} from './pages/organizations';
-import { VDCs, VDCDetail, VDCForm, VDCUsers } from './pages/vdcs';
-import { VMs, VMDetail } from './pages/vms';
-import { Catalogs, CatalogDetail } from './pages/catalogs';
-import {
-  ResourceMonitoring,
-  CostReports,
-  CapacityPlanning,
-  UsageAlerts,
-  ExportReports,
-  CustomDashboards,
-} from './pages/monitoring';
-import {
-  Automation,
-  BatchOperations,
-  DeploymentTemplates,
-  ScheduledOperations,
-  AutomationWorkflows,
-  OperationQueues,
-} from './pages/automation';
-import { UserProfile } from './pages/profile';
-import ProtectedRoute from './components/common/ProtectedRoute';
+import { RoleBasedDashboard } from './pages/dashboard/RoleBasedDashboard';
 import { ConfigLoader } from './components/common/ConfigLoader';
-import { AuthProvider } from './contexts/AuthProvider';
-import { NavigationProvider } from './contexts/NavigationContext';
+import { roleBasedRoutes } from './utils/routeProtection';
 import { ROUTES } from './utils/constants';
 
 // Import PatternFly CSS
@@ -82,335 +57,69 @@ const queryClient = new QueryClient({
   },
 });
 
+// Loading fallback component
+const LoadingFallback: React.FC = () => (
+  <PageSection>
+    <Bullseye>
+      <Spinner size="xl" />
+    </Bullseye>
+  </PageSection>
+);
+
 const App: React.FC = () => {
   return (
     <ConfigLoader>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <NavigationProvider>
-            <BrowserRouter>
+        <RoleProvider>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 {/* Public routes */}
                 <Route path={ROUTES.LOGIN} element={<Login />} />
 
-                {/* Protected routes */}
-                <Route
-                  path={ROUTES.HOME}
-                  element={
-                    <ProtectedRoute>
-                      <Navigate to={ROUTES.DASHBOARD} replace />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Protected dashboard route */}
                 <Route
                   path={ROUTES.DASHBOARD}
                   element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Dashboard />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATIONS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Organizations />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATION_CREATE}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <OrganizationForm />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATION_DETAIL}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <OrganizationDetail />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATION_EDIT}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <OrganizationForm />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATION_USERS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <OrganizationUsers />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.ORGANIZATION_ANALYTICS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <div>Organization Analytics - Coming in future PR</div>
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VMS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VMs />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VM_DETAIL}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VMDetail />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VDCS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VDCs />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VDC_CREATE}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VDCForm />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VDC_DETAIL}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VDCDetail />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VDC_EDIT}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VDCForm />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.VDC_USERS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <VDCUsers />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.CATALOGS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Catalogs />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.CATALOG_DETAIL}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <CatalogDetail />
-                      </AppLayout>
-                    </ProtectedRoute>
+                    <RoleAwareLayout>
+                      <RoleBasedDashboard />
+                    </RoleAwareLayout>
                   }
                 />
 
-                {/* Monitoring & Analytics Routes */}
+                {/* Home route redirects to dashboard */}
                 <Route
-                  path={ROUTES.MONITORING}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <ResourceMonitoring />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.MONITORING_COSTS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <CostReports />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.MONITORING_CAPACITY}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <CapacityPlanning />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.MONITORING_ALERTS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <UsageAlerts />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.MONITORING_EXPORTS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <ExportReports />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.MONITORING_DASHBOARDS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <CustomDashboards />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
+                  path={ROUTES.HOME}
+                  element={<Navigate to={ROUTES.DASHBOARD} replace />}
                 />
 
-                {/* Automation Routes */}
-                <Route
-                  path={ROUTES.AUTOMATION}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <Automation />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.AUTOMATION_BATCH_OPERATIONS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <BatchOperations />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.AUTOMATION_DEPLOYMENT_TEMPLATES}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <DeploymentTemplates />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.AUTOMATION_SCHEDULED_OPERATIONS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <ScheduledOperations />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.AUTOMATION_WORKFLOWS}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <AutomationWorkflows />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path={ROUTES.AUTOMATION_QUEUES}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <OperationQueues />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path={ROUTES.PROFILE}
-                  element={
-                    <ProtectedRoute>
-                      <AppLayout>
-                        <UserProfile />
-                      </AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Role-based protected routes */}
+                {roleBasedRoutes.map((route) => {
+                  const Component = route.component;
+                  return (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={
+                        <RoleProtectedRoute route={route}>
+                          <RoleAwareLayout>
+                            <Component />
+                          </RoleAwareLayout>
+                        </RoleProtectedRoute>
+                      }
+                    />
+                  );
+                })}
 
                 {/* Catch-all route */}
                 <Route
                   path="*"
-                  element={
-                    <ProtectedRoute>
-                      <Navigate to={ROUTES.DASHBOARD} replace />
-                    </ProtectedRoute>
-                  }
+                  element={<Navigate to={ROUTES.DASHBOARD} replace />}
                 />
               </Routes>
-            </BrowserRouter>
-          </NavigationProvider>
-        </AuthProvider>
+            </Suspense>
+          </BrowserRouter>
+        </RoleProvider>
       </QueryClientProvider>
     </ConfigLoader>
   );

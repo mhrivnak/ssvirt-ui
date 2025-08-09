@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LoginPage,
   LoginForm,
@@ -8,29 +8,32 @@ import {
 import { ExclamationCircleIcon } from '@patternfly/react-icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CONFIG, ROUTES } from '../../utils/constants';
-import { useAuth } from '../../hooks/useAuth';
-import { useLoginMutation } from '../../hooks/useAuthQueries';
+import { useRole } from '../../hooks/useRole';
+import { AuthService } from '../../services/api';
+import { getDefaultRouteForUser } from '../../utils/routeProtection';
 
 const Login: React.FC = () => {
-  const [usernameValue, setUsernameValue] = React.useState('');
-  const [passwordValue, setPasswordValue] = React.useState('');
-  const [isValidUsername, setIsValidUsername] = React.useState(true);
-  const [isValidPassword, setIsValidPassword] = React.useState(true);
+  const [usernameValue, setUsernameValue] = useState('');
+  const [passwordValue, setPasswordValue] = useState('');
+  const [isValidUsername, setIsValidUsername] = useState(true);
+  const [isValidPassword, setIsValidPassword] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
-  const loginMutation = useLoginMutation();
+  const { sessionData } = useRole();
 
   // Get the intended destination from location state, default to dashboard
   const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true });
+    if (sessionData) {
+      const defaultRoute = getDefaultRouteForUser(sessionData.roles);
+      navigate(from !== ROUTES.LOGIN ? from : defaultRoute, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [sessionData, navigate, from]);
 
   const handleUsernameChange = (
     _event: React.FormEvent<HTMLInputElement>,
@@ -51,9 +54,10 @@ const Login: React.FC = () => {
   ) => {
     event.preventDefault();
 
-    // Reset validation states
+    // Reset states
     setIsValidUsername(true);
     setIsValidPassword(true);
+    setErrorMessage('');
 
     // Validate inputs
     const isUsernameValid = !!usernameValue.trim();
@@ -66,23 +70,29 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Attempt login
+    setIsLoading(true);
+
     try {
-      await loginMutation.mutateAsync({
+      const sessionData = await AuthService.login({
         username: usernameValue.trim(),
         password: passwordValue.trim(),
       });
-      // Navigation will be handled by the useEffect hook when isAuthenticated changes
+
+      // Navigation will be handled by the useEffect hook when sessionData changes
+      const defaultRoute = getDefaultRouteForUser(sessionData.roles);
+      navigate(from !== ROUTES.LOGIN ? from : defaultRoute, { replace: true });
     } catch (error) {
-      // Error handling is managed by the mutation hook
       console.error('Login failed:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const loginForm = (
     <LoginForm
-      showHelperText={loginMutation.isError}
-      helperText={loginMutation.error?.message || 'Invalid login credentials.'}
+      showHelperText={!!errorMessage}
+      helperText={errorMessage}
       helperTextIcon={<ExclamationCircleIcon />}
       usernameLabel="Username"
       usernameValue={usernameValue}
@@ -93,8 +103,8 @@ const Login: React.FC = () => {
       onChangePassword={handlePasswordChange}
       isValidPassword={isValidPassword}
       onLoginButtonClick={onLoginButtonClick}
-      isLoginButtonDisabled={loginMutation.isPending}
-      loginButtonLabel={loginMutation.isPending ? 'Signing in...' : 'Sign in'}
+      isLoginButtonDisabled={isLoading}
+      loginButtonLabel={isLoading ? 'Signing in...' : 'Sign in'}
     />
   );
 

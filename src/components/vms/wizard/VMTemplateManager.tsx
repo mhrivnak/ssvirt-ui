@@ -35,7 +35,7 @@ import {
 import { PlusIcon, CatalogIcon, ImportIcon } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { VMCreationTemplate } from '../../../types';
-import { useAuth } from '../../../hooks/useAuth';
+import { useRole } from '../../../contexts/RoleContext';
 
 interface VMTemplateManagerProps {
   isOpen: boolean;
@@ -56,7 +56,8 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
   onLoadTemplate,
   currentFormData,
 }) => {
-  const { user } = useAuth();
+  const { sessionData } = useRole();
+  const user = sessionData?.user;
   const [templates, setTemplates] = useState<VMCreationTemplate[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] =
