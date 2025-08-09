@@ -14,6 +14,24 @@ import type {
   ApiResponse,
 } from '../types';
 import { ROLE_NAMES, QUERY_KEYS } from '../types';
+import type { RoleCapabilities } from '../types';
+
+/**
+ * Extract stable primitive values from capabilities for query keys
+ */
+function getCapabilitiesKey(capabilities: RoleCapabilities): string[] {
+  const capabilityKeys = Object.entries(capabilities)
+    .filter(([, value]) => typeof value === 'boolean' && value === true)
+    .map(([key]) => key)
+    .sort(); // Sort for consistency
+  
+  const orgIds = [
+    capabilities.primaryOrganization,
+    capabilities.operatingOrganization,
+  ].filter((id): id is string => Boolean(id)); // Type guard to filter out undefined
+  
+  return [...capabilityKeys, ...orgIds];
+}
 
 /**
  * Get organizations based on user role capabilities
@@ -21,32 +39,40 @@ import { ROLE_NAMES, QUERY_KEYS } from '../types';
 export const useRoleBasedOrganizations = (): UseQueryResult<
   VCloudPaginatedResponse<Organization>
 > => {
-  const { capabilities, sessionData } = useRole();
+  const { capabilities, sessionData, activeRole } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.organizations, capabilities.primaryOrganization],
+    queryKey: [
+      ...QUERY_KEYS.organizations, 
+      activeRole, 
+      capabilities.primaryOrganization,
+      capabilities.operatingOrganization
+    ],
     queryFn: async () => {
       if (capabilities.canManageSystem) {
         // System admin can see all organizations
         return OrganizationService.getOrganizations();
       } else if (capabilities.canManageOrganizations) {
         // Org admin sees only their organization(s)
-        const orgIds = [capabilities.primaryOrganization];
+        // Use Set to de-duplicate organization IDs
+        const orgIds = new Set([capabilities.primaryOrganization]);
         if (capabilities.operatingOrganization) {
-          orgIds.push(capabilities.operatingOrganization);
+          orgIds.add(capabilities.operatingOrganization);
         }
 
-        // Get specific organizations
-        const organizations: Organization[] = [];
-        for (const orgId of orgIds) {
+        // Fetch all organizations concurrently using Promise.all
+        const organizationPromises = Array.from(orgIds).map(async (orgId) => {
           try {
-            const orgResponse =
-              await OrganizationService.getOrganization(orgId);
-            organizations.push(orgResponse.data);
+            const orgResponse = await OrganizationService.getOrganization(orgId);
+            return orgResponse.data;
           } catch (error) {
             console.warn(`Could not fetch organization ${orgId}:`, error);
+            return null;
           }
-        }
+        });
+
+        const organizations = (await Promise.all(organizationPromises))
+          .filter((org): org is Organization => org !== null);
 
         return {
           resultTotal: organizations.length,
@@ -66,7 +92,7 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
         values: [],
       };
     },
-    enabled: capabilities.canManageOrganizations && !!sessionData,
+    enabled: (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
   });
 };
 
@@ -79,7 +105,7 @@ export const useRoleBasedVMs = (
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.vms, activeRole, capabilities, queryParams],
+    queryKey: [...QUERY_KEYS.vms, activeRole, ...getCapabilitiesKey(capabilities), queryParams],
     queryFn: async () => {
       let params = { ...queryParams };
 
@@ -112,7 +138,7 @@ export const useRoleBasedVDCs = (): UseQueryResult<ApiResponse<VDC[]>> => {
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.vdcs, activeRole, capabilities],
+    queryKey: [...QUERY_KEYS.vdcs, activeRole, ...getCapabilitiesKey(capabilities)],
     queryFn: async () => {
       if (activeRole === ROLE_NAMES.SYSTEM_ADMIN) {
         // System admin sees all VDCs
@@ -142,7 +168,7 @@ export const useRoleBasedUsers = (): UseQueryResult<
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.users, activeRole, capabilities],
+    queryKey: [...QUERY_KEYS.users, activeRole, ...getCapabilitiesKey(capabilities)],
     queryFn: async () => {
       if (activeRole === ROLE_NAMES.SYSTEM_ADMIN) {
         // System admin sees all users
@@ -207,7 +233,7 @@ export const useOrganizationStats = (
       };
     },
     enabled:
-      !!organizationId && capabilities.canManageOrganizations && !!sessionData,
+      !!organizationId && (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
   });
 };
 
@@ -255,7 +281,7 @@ export const useOrganizationResourceUsage = (
       };
     },
     enabled:
-      !!organizationId && capabilities.canManageOrganizations && !!sessionData,
+      !!organizationId && (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
   });
 };
 

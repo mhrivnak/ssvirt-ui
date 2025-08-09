@@ -8,6 +8,25 @@ import type { LoginRequest, SessionResponse, User } from '../types';
 
 // Session storage key for VMware Cloud Director session data
 const VCD_SESSION_KEY = 'vcd-session';
+const VCD_ACCESS_TOKEN_KEY = 'vcd-access-token';
+const VCD_TOKEN_TYPE_KEY = 'vcd-token-type';
+
+/**
+ * Safely encode credentials to Base64, handling Unicode characters properly
+ */
+function safeBase64Encode(str: string): string {
+  // Use TextEncoder to convert string to UTF-8 bytes, then encode to Base64
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  
+  // Convert Uint8Array to string for btoa()
+  let binaryString = '';
+  for (let i = 0; i < data.length; i++) {
+    binaryString += String.fromCharCode(data[i]);
+  }
+  
+  return btoa(binaryString);
+}
 
 // Create axios instance with base configuration
 const createApiInstance = (): AxiosInstance => {
@@ -21,14 +40,20 @@ const createApiInstance = (): AxiosInstance => {
     },
   });
 
-  // Request interceptor to add VMware Cloud Director session
+  // Request interceptor to add VMware Cloud Director Bearer token
   instance.interceptors.request.use(
     (config) => {
-      const sessionData = getSessionData();
-      if (sessionData) {
-        // Use session ID for authenticated requests
-        config.headers['X-VCD-Session'] = sessionData.id;
+      const accessToken = getAccessToken();
+      const tokenType = getTokenType();
+      
+      if (accessToken && tokenType) {
+        // Use Bearer token for authenticated requests (CloudAPI standard)
+        config.headers['Authorization'] = `${tokenType} ${accessToken}`;
       }
+      
+      // Ensure withCredentials is not set for CloudAPI compatibility
+      config.withCredentials = false;
+      
       return config;
     },
     (error) => Promise.reject(error)
@@ -38,9 +63,11 @@ const createApiInstance = (): AxiosInstance => {
   instance.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {
-      // Handle 401 Unauthorized - session expired or invalid
+      // Handle 401 Unauthorized - token expired or invalid
       if (error.response?.status === 401) {
         removeSessionData();
+        removeAccessToken();
+        removeTokenType();
         // Redirect to login will be handled by the auth context
         window.location.href = '/login';
       }
@@ -66,8 +93,40 @@ export function removeSessionData(): void {
   sessionStorage.removeItem(VCD_SESSION_KEY);
 }
 
+// Token management utilities
+export function getAccessToken(): string | null {
+  return sessionStorage.getItem(VCD_ACCESS_TOKEN_KEY);
+}
+
+export function setAccessToken(token: string): void {
+  sessionStorage.setItem(VCD_ACCESS_TOKEN_KEY, token);
+}
+
+export function removeAccessToken(): void {
+  sessionStorage.removeItem(VCD_ACCESS_TOKEN_KEY);
+}
+
+export function getTokenType(): string | null {
+  return sessionStorage.getItem(VCD_TOKEN_TYPE_KEY);
+}
+
+export function setTokenType(tokenType: string): void {
+  sessionStorage.setItem(VCD_TOKEN_TYPE_KEY, tokenType);
+}
+
+export function removeTokenType(): void {
+  sessionStorage.removeItem(VCD_TOKEN_TYPE_KEY);
+}
+
 // Create the API instance lazily (only when first accessed)
 let apiInstance: AxiosInstance | null = null;
+
+/**
+ * Reset the API instance to force recreation with updated tokens
+ */
+export function resetApiInstance(): void {
+  apiInstance = null;
+}
 
 export const api = new Proxy({} as AxiosInstance, {
   get(_target, prop: keyof AxiosInstance) {
@@ -95,22 +154,40 @@ export class AuthService {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
+        // Ensure withCredentials is not set for CloudAPI compatibility
+        withCredentials: false,
       });
+
+      // Use safe Base64 encoding for Unicode credentials
+      const basicAuthToken = safeBase64Encode(`${credentials.username}:${credentials.password}`);
 
       const response = await loginInstance.post<SessionResponse>(
         '/cloudapi/1.0.0/sessions',
         {},
         {
           headers: {
-            Authorization: `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`,
+            Authorization: `Basic ${basicAuthToken}`,
           },
         }
       );
 
       const sessionData = response.data;
 
-      // Store session data for role-based routing
+      // Extract VMware Cloud Director authentication tokens from response headers
+      const accessToken = response.headers['x-vmware-vcloud-access-token'];
+      const tokenType = response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+
+      if (!accessToken) {
+        throw new Error('Authentication failed: No access token received from VMware Cloud Director');
+      }
+
+      // Store session data and authentication tokens
       setSessionData(sessionData);
+      setAccessToken(accessToken);
+      setTokenType(tokenType);
+
+      // Reset API instance to pick up the new authentication tokens
+      resetApiInstance();
 
       return sessionData;
     } catch (error) {
@@ -138,7 +215,13 @@ export class AuthService {
       // Log error but don't throw - logout should always work locally
       console.error('Error during server logout:', error);
     } finally {
+      // Clear all authentication data
       removeSessionData();
+      removeAccessToken();
+      removeTokenType();
+      
+      // Reset API instance to remove authentication headers
+      resetApiInstance();
     }
   }
 
