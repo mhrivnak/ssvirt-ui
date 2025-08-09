@@ -48,6 +48,8 @@ spec:
       # nginx proxy sidecar container
       - name: nginx-proxy
         image: registry.access.redhat.com/ubi9/nginx-126:latest
+        command: ["nginx"]
+        args: ["-g", "daemon off;"]
         ports:
         - containerPort: 8081
           name: proxy
