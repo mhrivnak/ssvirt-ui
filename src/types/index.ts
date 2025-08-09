@@ -20,6 +20,16 @@ export interface PaginatedResponse<T> {
   message?: string;
 }
 
+// VMware Cloud Director pagination envelope structure
+export interface VCloudPaginatedResponse<T> {
+  resultTotal: number; // Total number of results across all pages
+  pageCount: number; // Total number of pages
+  page: number; // Current page number
+  pageSize: number; // Number of results per page
+  associations?: Record<string, unknown>[]; // Optional association metadata
+  values: T[]; // Array of actual data objects
+}
+
 export interface ApiError {
   success: false;
   error: string;
@@ -42,18 +52,34 @@ export interface SortParams {
 export interface FilterParams {
   search?: string;
   status?: string;
+  /** @deprecated Use orgId instead for consistency with CloudAPI */
   organization_id?: string;
   enabled?: boolean;
 }
 
+// Entity Reference System
+export interface EntityRef {
+  name: string;
+  id: string; // URN format: urn:vcloud:type:uuid
+}
+
 // Authentication types
 export interface User {
-  id: string;
+  id: string; // URN format: urn:vcloud:user:uuid
   username: string;
+  fullName: string;
+  description?: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  avatar_url?: string;
+  roleEntityRefs: EntityRef[]; // Array of role references
+  orgEntityRef: EntityRef; // Organization reference
+  deployedVmQuota: number;
+  storedVmQuota: number;
+  nameInSource?: string;
+  enabled: boolean;
+  isGroupRole: boolean;
+  providerType: string;
+  locked: boolean;
+  stranded: boolean;
 }
 
 // Organization user management types
@@ -148,15 +174,48 @@ export interface SessionInfo {
   expires_at: string;
 }
 
+// New Role Type
+export interface Role {
+  id: string; // URN format: urn:vcloud:role:uuid
+  name: string;
+  description: string;
+  bundleKey: string;
+  readOnly: boolean;
+}
+
+// Role Constants
+export const ROLE_NAMES = {
+  SYSTEM_ADMIN: 'System Administrator',
+  ORG_ADMIN: 'Organization Administrator',
+  VAPP_USER: 'vApp User',
+} as const;
+
+// Permission Checking Utilities
+export interface UserPermissions {
+  canCreateOrganizations: boolean;
+  canManageUsers: boolean;
+  canManageSystem: boolean;
+  canManageOrganization: (orgId: string) => boolean;
+}
+
 // Organization types
 export interface Organization {
-  id: string;
+  id: string; // URN format: urn:vcloud:org:uuid
   name: string;
-  display_name: string;
-  description: string;
-  enabled: boolean;
-  created_at: string;
-  updated_at: string;
+  displayName: string;
+  description?: string;
+  isEnabled: boolean;
+  orgVdcCount: number;
+  catalogCount: number;
+  vappCount: number;
+  runningVMCount: number;
+  userCount: number;
+  diskCount: number;
+  managedBy: EntityRef;
+  canManageOrgs: boolean;
+  canPublish: boolean;
+  maskedEventTaskUsername: string;
+  directlyManagedOrgCount: number;
 }
 
 // VDC types
@@ -311,12 +370,28 @@ export interface CatalogQueryParams
   is_shared?: boolean;
 }
 
+// CloudAPI Query Parameters
+export interface UserQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  orgId?: string;
+  roleId?: string;
+}
+
+export interface RoleQueryParams
+  extends PaginationParams,
+    SortParams,
+    FilterParams {
+  readOnly?: boolean;
+}
+
 // Request types for create/update operations
 export interface CreateOrganizationRequest {
   name: string;
-  display_name: string;
+  displayName: string;
   description?: string;
-  enabled?: boolean;
+  isEnabled?: boolean;
 }
 
 export interface UpdateOrganizationRequest
@@ -428,6 +503,14 @@ export const QUERY_KEYS = {
   // Dashboard
   dashboardStats: ['dashboard', 'stats'] as const,
   recentActivity: ['dashboard', 'activity'] as const,
+
+  // CloudAPI Users
+  users: ['cloudapi', 'users'] as const,
+  user: (id: string) => ['cloudapi', 'users', id] as const,
+
+  // CloudAPI Roles
+  roles: ['cloudapi', 'roles'] as const,
+  role: (id: string) => ['cloudapi', 'roles', id] as const,
 
   // Organizations
   organizations: ['organizations'] as const,

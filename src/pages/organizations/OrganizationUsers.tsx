@@ -142,8 +142,7 @@ const OrganizationUsers: React.FC = () => {
   // Filter and sort users
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
@@ -158,8 +157,8 @@ const OrganizationUsers: React.FC = () => {
 
     switch (sortBy) {
       case 'name':
-        aValue = `${a.first_name} ${a.last_name}`;
-        bValue = `${b.first_name} ${b.last_name}`;
+        aValue = a.fullName;
+        bValue = b.fullName;
         break;
       case 'email':
         aValue = a.email;
@@ -273,7 +272,7 @@ const OrganizationUsers: React.FC = () => {
           setNotification({
             variant: 'success',
             title: 'User Role Updated',
-            message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`,
+            message: `${selectedUser.fullName}'s role has been updated to ${editRole}.`,
           });
           // Auto-hide notification after 5 seconds
           setTimeout(() => setNotification(null), 5000);
@@ -297,7 +296,7 @@ const OrganizationUsers: React.FC = () => {
   const handleRemoveUser = async (user: OrganizationUser) => {
     if (
       window.confirm(
-        `Are you sure you want to remove ${user.first_name} ${user.last_name} from this organization?`
+        `Are you sure you want to remove ${user.fullName} from this organization?`
       )
     ) {
       if (!id) return;
@@ -310,7 +309,7 @@ const OrganizationUsers: React.FC = () => {
             setNotification({
               variant: 'success',
               title: 'User Removed',
-              message: `${user.first_name} ${user.last_name} has been removed from this organization.`,
+              message: `${user.fullName} has been removed from this organization.`,
             });
             // Auto-hide notification after 5 seconds
             setTimeout(() => setNotification(null), 5000);
@@ -431,7 +430,7 @@ const OrganizationUsers: React.FC = () => {
             </BreadcrumbItem>
             <BreadcrumbItem>
               <Link to={`/organizations/${id}`}>
-                {organization.display_name}
+                {organization.displayName}
               </Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>User Management</BreadcrumbItem>
@@ -446,7 +445,7 @@ const OrganizationUsers: React.FC = () => {
                 User Management
               </Title>
               <p className="pf-v6-u-color-200">
-                Manage users and roles for {organization.display_name}
+                Manage users and roles for {organization.displayName}
               </p>
             </SplitItem>
             <SplitItem>
@@ -618,9 +617,7 @@ const OrganizationUsers: React.FC = () => {
                   <Tbody>
                     {paginatedUsers.map((user) => (
                       <Tr key={user.id}>
-                        <Td dataLabel="Name">
-                          {user.first_name} {user.last_name}
-                        </Td>
+                        <Td dataLabel="Name">{user.fullName}</Td>
                         <Td dataLabel="Email">{user.email}</Td>
                         <Td dataLabel="Role">
                           <Badge color={getRoleBadgeColor(user.role)}>
@@ -776,7 +773,7 @@ const OrganizationUsers: React.FC = () => {
       {/* Edit User Role Modal */}
       <Modal
         variant={ModalVariant.small}
-        title={`Edit Role for ${selectedUser?.first_name} ${selectedUser?.last_name}`}
+        title={`Edit Role for ${selectedUser?.fullName}`}
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);

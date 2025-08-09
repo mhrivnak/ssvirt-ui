@@ -48,10 +48,26 @@ export const CONFIG = new Proxy({} as ReturnType<typeof getConfig>, {
 
 // API endpoints
 export const API_ENDPOINTS = {
-  // Authentication
-  LOGIN: '/sessions',
-  LOGOUT: '/sessions',
-  SESSION: '/session',
+  // Authentication - CloudAPI compatible
+  LOGIN: '/cloudapi/1.0.0/sessions',
+  LOGOUT: '/cloudapi/1.0.0/sessions',
+  SESSION: '/cloudapi/1.0.0/session',
+
+  // CloudAPI Users
+  CLOUDAPI_USERS: '/cloudapi/1.0.0/users',
+  CLOUDAPI_CURRENT_USER: '/cloudapi/1.0.0/users/current',
+  CLOUDAPI_USER_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/users/${encodeURIComponent(id)}`,
+
+  // CloudAPI Roles
+  CLOUDAPI_ROLES: '/cloudapi/1.0.0/roles',
+  CLOUDAPI_ROLE_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`,
+
+  // CloudAPI Organizations
+  CLOUDAPI_ORGANIZATIONS: '/cloudapi/1.0.0/orgs',
+  CLOUDAPI_ORGANIZATION_BY_ID: (id: string) =>
+    `/cloudapi/1.0.0/orgs/${encodeURIComponent(id)}`,
 
   // User
   USER_PROFILE: '/v1/user/profile',

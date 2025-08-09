@@ -203,13 +203,17 @@ const VDCDetail: React.FC = () => {
                   <DescriptionListGroup>
                     <DescriptionListTerm>Created</DescriptionListTerm>
                     <DescriptionListDescription>
-                      {new Date(vdc.created_at).toLocaleString()}
+                      {vdc.created_at
+                        ? new Date(vdc.created_at).toLocaleString()
+                        : 'N/A'}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                   <DescriptionListGroup>
                     <DescriptionListTerm>Last Updated</DescriptionListTerm>
                     <DescriptionListDescription>
-                      {new Date(vdc.updated_at).toLocaleString()}
+                      {vdc.updated_at
+                        ? new Date(vdc.updated_at).toLocaleString()
+                        : 'N/A'}
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                 </DescriptionList>
@@ -573,7 +577,9 @@ const VDCDetail: React.FC = () => {
                     {formatBytes(vm.memory_mb * 1024 * 1024)}
                   </Td>
                   <Td dataLabel="Created">
-                    {new Date(vm.created_at).toLocaleDateString()}
+                    {vm.created_at
+                      ? new Date(vm.created_at).toLocaleDateString()
+                      : 'N/A'}
                   </Td>
                   <Td dataLabel="Actions">
                     <ActionsColumn

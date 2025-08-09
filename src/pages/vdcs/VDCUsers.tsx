@@ -68,22 +68,44 @@ type VDCUser = VDCUserType;
 
 const mockUsers: VDCUser[] = [
   {
-    id: '1',
+    id: 'urn:vcloud:user:1',
     username: 'vdc-admin@example.com',
+    fullName: 'VDC Administrator',
+    description: 'VDC Administrator User',
     email: 'vdc-admin@example.com',
-    first_name: 'VDC',
-    last_name: 'Administrator',
+    roleEntityRefs: [
+      { name: 'Organization Administrator', id: 'urn:vcloud:role:1' },
+    ],
+    orgEntityRef: { name: 'Organization', id: 'urn:vcloud:org:1' },
+    deployedVmQuota: 10,
+    storedVmQuota: 20,
+    nameInSource: 'vdc-admin@example.com',
+    enabled: true,
+    isGroupRole: false,
+    providerType: 'INTEGRATED',
+    locked: false,
+    stranded: false,
     role: 'admin',
     joined_at: '2024-01-01T00:00:00Z',
     last_active: '2024-01-15T10:30:00Z',
     status: 'active',
   },
   {
-    id: '2',
+    id: 'urn:vcloud:user:2',
     username: 'vdc-user@example.com',
+    fullName: 'VDC User',
+    description: 'Regular VDC User',
     email: 'vdc-user@example.com',
-    first_name: 'VDC',
-    last_name: 'User',
+    roleEntityRefs: [{ name: 'vApp User', id: 'urn:vcloud:role:2' }],
+    orgEntityRef: { name: 'Organization', id: 'urn:vcloud:org:1' },
+    deployedVmQuota: 5,
+    storedVmQuota: 10,
+    nameInSource: 'vdc-user@example.com',
+    enabled: true,
+    isGroupRole: false,
+    providerType: 'INTEGRATED',
+    locked: false,
+    stranded: false,
     role: 'user',
     joined_at: '2024-01-02T00:00:00Z',
     last_active: '2024-01-14T15:45:00Z',
@@ -151,8 +173,7 @@ const VDCUsers: React.FC = () => {
   // Filter and sort users
   const filteredUsers = mockUsers.filter((user) => {
     const matchesSearch =
-      user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
@@ -167,8 +188,8 @@ const VDCUsers: React.FC = () => {
 
     switch (sortBy) {
       case 'name':
-        aValue = `${a.first_name} ${a.last_name}`;
-        bValue = `${b.first_name} ${b.last_name}`;
+        aValue = a.fullName;
+        bValue = b.fullName;
         break;
       case 'email':
         aValue = a.email;
@@ -279,7 +300,7 @@ const VDCUsers: React.FC = () => {
       setNotification({
         variant: 'success',
         title: 'User Role Updated',
-        message: `${selectedUser.first_name} ${selectedUser.last_name}'s role has been updated to ${editRole}.`,
+        message: `${selectedUser.fullName}'s role has been updated to ${editRole}.`,
       });
       // Auto-hide notification after 5 seconds
       setTimeout(() => setNotification(null), 5000);
@@ -300,7 +321,7 @@ const VDCUsers: React.FC = () => {
   const handleRemoveUser = async (user: VDCUser) => {
     if (
       window.confirm(
-        `Are you sure you want to remove ${user.first_name} ${user.last_name} from this VDC?`
+        `Are you sure you want to remove ${user.fullName} from this VDC?`
       )
     ) {
       if (!id) return;
@@ -311,7 +332,7 @@ const VDCUsers: React.FC = () => {
         setNotification({
           variant: 'success',
           title: 'User Removed',
-          message: `${user.first_name} ${user.last_name} has been removed from this VDC.`,
+          message: `${user.fullName} has been removed from this VDC.`,
         });
         // Auto-hide notification after 5 seconds
         setTimeout(() => setNotification(null), 5000);
@@ -611,9 +632,7 @@ const VDCUsers: React.FC = () => {
                   <Tbody>
                     {paginatedUsers.map((user) => (
                       <Tr key={user.id}>
-                        <Td dataLabel="Name">
-                          {user.first_name} {user.last_name}
-                        </Td>
+                        <Td dataLabel="Name">{user.fullName}</Td>
                         <Td dataLabel="Email">{user.email}</Td>
                         <Td dataLabel="Role">
                           <Badge color={getRoleBadgeColor(user.role)}>
@@ -769,7 +788,7 @@ const VDCUsers: React.FC = () => {
       {/* Edit User Role Modal */}
       <Modal
         variant={ModalVariant.small}
-        title={`Edit Role for ${selectedUser?.first_name} ${selectedUser?.last_name}`}
+        title={`Edit Role for ${selectedUser?.fullName}`}
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);

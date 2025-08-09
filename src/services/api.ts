@@ -106,7 +106,7 @@ export class AuthService {
   }
 
   /**
-   * Get current session information
+   * Get current session information (returns User object in CloudAPI format)
    */
   static async getSession(): Promise<SessionInfo> {
     try {
@@ -122,6 +122,28 @@ export class AuthService {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || 'Session check failed';
+        throw new Error(message);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Get current user profile from CloudAPI
+   */
+  static async getCurrentUser(): Promise<User> {
+    try {
+      const response = await api.get<ApiResponse<User>>(
+        API_ENDPOINTS.CLOUDAPI_CURRENT_USER
+      );
+      if (!response.data.success || !response.data.data) {
+        throw new Error('Failed to get current user: Invalid response');
+      }
+      return response.data.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message || 'Failed to get current user';
         throw new Error(message);
       }
       throw error;

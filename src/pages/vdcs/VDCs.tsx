@@ -507,7 +507,9 @@ const VDCs: React.FC = () => {
                           </Split>
                         </Td>
                         <Td dataLabel="Created">
-                          {new Date(vdc.created_at).toLocaleDateString()}
+                          {vdc.created_at
+                            ? new Date(vdc.created_at).toLocaleDateString()
+                            : 'N/A'}
                         </Td>
                         <Td dataLabel="Actions">
                           <ActionsColumn
