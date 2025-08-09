@@ -35,7 +35,7 @@ import {
 import { PlusIcon, CatalogIcon, ImportIcon } from '@patternfly/react-icons';
 import type { WizardFormData } from '../VMCreationWizard';
 import type { VMCreationTemplate } from '../../../types';
-import { useAuth } from '../../../hooks/useAuth';
+import { useRole } from '../../../hooks/useRole';
 
 interface VMTemplateManagerProps {
   isOpen: boolean;
@@ -56,7 +56,8 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
   onLoadTemplate,
   currentFormData,
 }) => {
-  const { user } = useAuth();
+  const { sessionData } = useRole();
+  const user = sessionData?.user;
   const [templates, setTemplates] = useState<VMCreationTemplate[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTemplate, setEditingTemplate] =
@@ -117,7 +118,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
       network_config: currentFormData.network_config,
       storage_config: currentFormData.storage_config,
       advanced_config: currentFormData.advanced_config,
-      created_by: user?.email || user?.username || 'unknown',
+      created_by: user?.name || 'unknown',
       created_at: new Date().toISOString(),
       is_shared: templateForm.isShared,
     };
@@ -218,7 +219,7 @@ const VMTemplateManager: React.FC<VMTemplateManagerProps> = ({
         const importedTemplate: VMCreationTemplate = {
           ...template,
           id: `template-${Date.now()}`,
-          created_by: user?.email || user?.username || 'unknown',
+          created_by: user?.name || 'unknown',
           created_at: new Date().toISOString(),
           is_shared: false,
         };

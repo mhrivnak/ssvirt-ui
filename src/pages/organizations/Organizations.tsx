@@ -48,11 +48,11 @@ import {
   useOrganizations,
   useDeleteOrganization,
   useToggleOrganizationStatus,
-  useCanCreateOrganizations,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { Organization, OrganizationQueryParams } from '../../types';
 import { ROUTES } from '../../utils/constants';
+import { useRole } from '../../hooks/useRole';
 
 const Organizations: React.FC = () => {
   const navigate = useNavigate();
@@ -66,7 +66,8 @@ const Organizations: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   // Permission checks
-  const canCreateOrganizations = useCanCreateOrganizations();
+  const { capabilities } = useRole();
+  const canCreateOrganizations = capabilities?.canCreateOrganizations ?? false;
 
   // Prepare query parameters
   const queryParams: OrganizationQueryParams = {

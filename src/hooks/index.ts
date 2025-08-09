@@ -1,29 +1,5 @@
-// Export existing auth hooks
-export { useAuth } from './useAuth';
-
-// Export permission hooks
-export {
-  usePermissions,
-  useCanCreateOrganizations,
-  useCanManageUsers,
-  useCanManageSystem,
-  useCanAccessOrganizations,
-  useCanManageOrganization,
-  useIsSystemAdmin,
-  useIsOrgAdmin,
-  useIsAdmin,
-  useUserRoleNames,
-  useHighestRole,
-  useCanActOnUser,
-  useUserOrganization,
-} from './usePermissions';
-export {
-  useLoginMutation,
-  useLogoutMutation,
-  useSessionQuery,
-  useUserProfileQuery,
-  useUpdateUserProfileMutation,
-} from './useAuthQueries';
+// Note: Old auth hooks have been removed in favor of RoleContext
+// The role-based system is now managed through the RoleContext provider
 
 // Export navigation hooks
 export { useNavigation } from './useNavigation';

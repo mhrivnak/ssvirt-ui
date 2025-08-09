@@ -63,6 +63,34 @@ export interface EntityRef {
   id: string; // URN format: urn:vcloud:type:uuid
 }
 
+// VMware Cloud Director Session Response
+export interface SessionResponse {
+  id: string; // Session ID: "urn:vcloud:session:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  user: {
+    name: string;
+    id: string;
+  };
+  org: {
+    name: string;
+    id: string;
+  };
+  operatingOrg?: {
+    name: string;
+    id: string;
+  };
+  site: {
+    name: string;
+    id: string;
+  };
+  roles: string[]; // Array of role names
+  roleRefs: Array<{
+    name: string;
+    id: string;
+  }>;
+  sessionIdleTimeoutMinutes: number;
+  location?: string;
+}
+
 // Authentication types
 export interface User {
   id: string; // URN format: urn:vcloud:user:uuid
@@ -80,6 +108,18 @@ export interface User {
   providerType: string;
   locked: boolean;
   stranded: boolean;
+}
+
+// Role Capabilities
+export interface RoleCapabilities {
+  canManageSystem: boolean;
+  canManageOrganizations: boolean;
+  canCreateOrganizations: boolean;
+  canManageUsers: boolean;
+  canManageVMs: boolean;
+  canViewReports: boolean;
+  primaryOrganization: string; // Primary organization ID from login response
+  operatingOrganization?: string; // Operating organization ID if different
 }
 
 // Organization user management types
