@@ -223,3 +223,6 @@ export class CloudApiOrganizationService {
     }
   }
 }
+
+// Export alias for backward compatibility
+export const OrganizationService = CloudApiOrganizationService;

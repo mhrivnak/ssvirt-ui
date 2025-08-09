@@ -40,8 +40,9 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
         const organizations: Organization[] = [];
         for (const orgId of orgIds) {
           try {
-            const org = await OrganizationService.getOrganization(orgId);
-            organizations.push(org);
+            const orgResponse =
+              await OrganizationService.getOrganization(orgId);
+            organizations.push(orgResponse.data);
           } catch (error) {
             console.warn(`Could not fetch organization ${orgId}:`, error);
           }

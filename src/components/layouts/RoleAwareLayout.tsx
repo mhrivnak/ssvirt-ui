@@ -1,8 +1,10 @@
 import React from 'react';
 import {
   Page,
-  PageHeader,
-  PageHeaderTools,
+  Masthead,
+  MastheadBrand,
+  MastheadContent,
+  MastheadMain,
   PageSidebar,
   Brand,
   Button,
@@ -60,15 +62,11 @@ const UserDropdown: React.FC = () => {
   return (
     <Flex alignItems={{ default: 'alignItemsCenter' }}>
       <FlexItem>
-        <Button
-          component={Link}
-          to="/profile"
-          variant="plain"
-          icon={<UserIcon />}
-          aria-label="User profile"
-        >
-          {sessionData.user.name}
-        </Button>
+        <Link to="/profile">
+          <Button variant="plain" icon={<UserIcon />} aria-label="User profile">
+            {sessionData.user.name}
+          </Button>
+        </Link>
       </FlexItem>
       <FlexItem>
         <Button
@@ -120,33 +118,28 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   }
 
   const header = (
-    <PageHeader
-      logo={
-        <Brand
-          src="/logo.svg"
-          alt="VMware Cloud Director"
-          component={Link}
-          to="/dashboard"
-        />
-      }
-      headerTools={
-        <PageHeaderTools>
-          <Flex alignItems={{ default: 'alignItemsCenter' }}>
-            {isMultiRole && (
-              <FlexItem>
-                <RoleSelector />
-              </FlexItem>
-            )}
+    <Masthead>
+      <MastheadMain>
+        <MastheadBrand>
+          <Brand src="/logo.svg" alt="VMware Cloud Director" />
+        </MastheadBrand>
+      </MastheadMain>
+      <MastheadContent>
+        <Flex alignItems={{ default: 'alignItemsCenter' }}>
+          {isMultiRole && (
             <FlexItem>
-              <NotificationsDropdown />
+              <RoleSelector />
             </FlexItem>
-            <FlexItem>
-              <UserDropdown />
-            </FlexItem>
-          </Flex>
-        </PageHeaderTools>
-      }
-    />
+          )}
+          <FlexItem>
+            <NotificationsDropdown />
+          </FlexItem>
+          <FlexItem>
+            <UserDropdown />
+          </FlexItem>
+        </Flex>
+      </MastheadContent>
+    </Masthead>
   );
 
   const sidebar = (
@@ -156,7 +149,7 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
   );
 
   return (
-    <Page header={header} sidebar={sidebar}>
+    <Page masthead={header} sidebar={sidebar}>
       <RoleContextIndicator />
       {children}
     </Page>

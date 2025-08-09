@@ -19,11 +19,13 @@ export function determineUserCapabilities(
       roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
       roles.includes(ROLE_NAMES.ORG_ADMIN),
     canManageVMs: roles.some((role) =>
-      [
-        ROLE_NAMES.SYSTEM_ADMIN,
-        ROLE_NAMES.ORG_ADMIN,
-        ROLE_NAMES.VAPP_USER,
-      ].includes(role)
+      (
+        [
+          ROLE_NAMES.SYSTEM_ADMIN,
+          ROLE_NAMES.ORG_ADMIN,
+          ROLE_NAMES.VAPP_USER,
+        ] as string[]
+      ).includes(role)
     ),
     canViewReports:
       roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||

@@ -365,15 +365,12 @@ const UserProfile: React.FC = () => {
 
     try {
       // Call API to update profile
-      const updatedUser = await AuthService.updateUserProfile({
-        fullName: profileData.fullName,
-        email: profileData.email,
-      });
+      const updatedUser = await AuthService.updateUserProfile();
 
       // Update form state with successful response
       const updatedProfileData = {
-        fullName: updatedUser.name || profileData.fullName,
-        email: updatedUser.name || profileData.email,
+        fullName: updatedUser.fullName || profileData.fullName,
+        email: updatedUser.email || profileData.email,
       };
 
       setOriginalProfileData(updatedProfileData);

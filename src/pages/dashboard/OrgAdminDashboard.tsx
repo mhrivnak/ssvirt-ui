@@ -159,48 +159,36 @@ const QuickActionsPanel: React.FC = () => {
           <StackItem>
             <Stack hasGutter>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/vdcs/new"
-                  variant="primary"
-                  icon={<PlusIcon />}
-                  isBlock
-                >
-                  Create VDC
-                </Button>
+                <Link to="/vdcs/new">
+                  <Button variant="primary" icon={<PlusIcon />} isBlock>
+                    Create VDC
+                  </Button>
+                </Link>
               </StackItem>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/vms/new"
-                  variant="secondary"
-                  icon={<VirtualMachineIcon />}
-                  isBlock
-                >
-                  Create VM
-                </Button>
+                <Link to="/vms/new">
+                  <Button
+                    variant="secondary"
+                    icon={<VirtualMachineIcon />}
+                    isBlock
+                  >
+                    Create VM
+                  </Button>
+                </Link>
               </StackItem>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/org-users/invite"
-                  variant="secondary"
-                  icon={<UserPlusIcon />}
-                  isBlock
-                >
-                  Invite User
-                </Button>
+                <Link to="/org-users/invite">
+                  <Button variant="secondary" icon={<UserPlusIcon />} isBlock>
+                    Invite User
+                  </Button>
+                </Link>
               </StackItem>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/catalogs"
-                  variant="secondary"
-                  icon={<BookIcon />}
-                  isBlock
-                >
-                  Browse Catalogs
-                </Button>
+                <Link to="/catalogs">
+                  <Button variant="secondary" icon={<BookIcon />} isBlock>
+                    Browse Catalogs
+                  </Button>
+                </Link>
               </StackItem>
             </Stack>
           </StackItem>

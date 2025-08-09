@@ -213,37 +213,25 @@ const QuickActionsPanel: React.FC = () => {
           <StackItem>
             <Stack hasGutter>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/organizations/new"
-                  variant="secondary"
-                  icon={<PlusIcon />}
-                  isBlock
-                >
-                  Create Organization
-                </Button>
+                <Link to="/organizations/new">
+                  <Button variant="secondary" icon={<PlusIcon />} isBlock>
+                    Create Organization
+                  </Button>
+                </Link>
               </StackItem>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/admin/users/invite"
-                  variant="secondary"
-                  icon={<UsersIcon />}
-                  isBlock
-                >
-                  Invite System User
-                </Button>
+                <Link to="/admin/users/invite">
+                  <Button variant="secondary" icon={<UsersIcon />} isBlock>
+                    Invite System User
+                  </Button>
+                </Link>
               </StackItem>
               <StackItem>
-                <Button
-                  component={Link}
-                  to="/admin/settings"
-                  variant="secondary"
-                  icon={<ServerIcon />}
-                  isBlock
-                >
-                  System Settings
-                </Button>
+                <Link to="/admin/settings">
+                  <Button variant="secondary" icon={<ServerIcon />} isBlock>
+                    System Settings
+                  </Button>
+                </Link>
               </StackItem>
             </Stack>
           </StackItem>

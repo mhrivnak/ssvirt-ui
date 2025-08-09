@@ -155,14 +155,11 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                   You don't have any virtual machines yet. Get started by
                   creating your first VM.
                 </p>
-                <Button
-                  component={Link}
-                  to="/my-vms/new"
-                  variant="primary"
-                  icon={<PlusIcon />}
-                >
-                  Create Virtual Machine
-                </Button>
+                <Link to="/my-vms/new">
+                  <Button variant="primary" icon={<PlusIcon />}>
+                    Create Virtual Machine
+                  </Button>
+                </Link>
               </div>
             </StackItem>
           </Stack>
@@ -183,14 +180,11 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                 </Title>
               </SplitItem>
               <SplitItem>
-                <Button
-                  component={Link}
-                  to="/my-vms"
-                  variant="secondary"
-                  size="sm"
-                >
-                  View All
-                </Button>
+                <Link to="/my-vms">
+                  <Button variant="secondary" size="sm">
+                    View All
+                  </Button>
+                </Link>
               </SplitItem>
             </Split>
           </StackItem>
@@ -198,7 +192,7 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
             <Grid hasGutter>
               {vms.slice(0, 3).map((vm) => (
                 <GridItem key={vm.id} span={4}>
-                  <Card isSelectableRaised>
+                  <Card isSelectable>
                     <CardBody>
                       <Stack hasGutter>
                         <StackItem>
@@ -294,14 +288,11 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({
                 </Title>
               </SplitItem>
               <SplitItem>
-                <Button
-                  component={Link}
-                  to="/catalogs"
-                  variant="secondary"
-                  size="sm"
-                >
-                  View All
-                </Button>
+                <Link to="/catalogs">
+                  <Button variant="secondary" size="sm">
+                    View All
+                  </Button>
+                </Link>
               </SplitItem>
             </Split>
           </StackItem>
@@ -309,10 +300,10 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({
             <Stack hasGutter>
               {templates.slice(0, 3).map((template) => (
                 <StackItem key={template.id}>
-                  <Card isSelectableRaised>
+                  <Card isSelectable>
                     <CardBody>
                       <Flex alignItems={{ default: 'alignItemsCenter' }}>
-                        <FlexItem isFilled>
+                        <FlexItem flex={{ default: 'flex_1' }}>
                           <div>
                             <strong>{template.name}</strong>
                             <div className="pf-v6-u-font-size-sm pf-v6-u-color-200">
@@ -325,14 +316,11 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({
                           </div>
                         </FlexItem>
                         <FlexItem>
-                          <Button
-                            component={Link}
-                            to={`/my-vms/new?template=${template.id}`}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            Deploy
-                          </Button>
+                          <Link to={`/my-vms/new?template=${template.id}`}>
+                            <Button variant="secondary" size="sm">
+                              Deploy
+                            </Button>
+                          </Link>
                         </FlexItem>
                       </Flex>
                     </CardBody>

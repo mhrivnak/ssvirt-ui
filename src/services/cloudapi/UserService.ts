@@ -161,3 +161,6 @@ export class CloudApiUserService {
     }
   }
 }
+
+// Export alias for backward compatibility
+export const UserService = CloudApiUserService;

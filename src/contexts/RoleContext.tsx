@@ -5,6 +5,7 @@ import {
 } from '../utils/roleDetection';
 import { getSessionData } from '../services/api';
 import { RoleContext, type RoleContextValue } from './RoleContextDef';
+import type { SessionResponse } from '../types';
 
 export interface RoleProviderProps {
   children: React.ReactNode;
