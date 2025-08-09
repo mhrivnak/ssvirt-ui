@@ -18,13 +18,13 @@ function safeBase64Encode(str: string): string {
   // Use TextEncoder to convert string to UTF-8 bytes, then encode to Base64
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
-  
+
   // Convert Uint8Array to string for btoa()
   let binaryString = '';
   for (let i = 0; i < data.length; i++) {
     binaryString += String.fromCharCode(data[i]);
   }
-  
+
   return btoa(binaryString);
 }
 
@@ -45,15 +45,15 @@ const createApiInstance = (): AxiosInstance => {
     (config) => {
       const accessToken = getAccessToken();
       const tokenType = getTokenType();
-      
+
       if (accessToken && tokenType) {
         // Use Bearer token for authenticated requests (CloudAPI standard)
         config.headers['Authorization'] = `${tokenType} ${accessToken}`;
       }
-      
+
       // Ensure withCredentials is not set for CloudAPI compatibility
       config.withCredentials = false;
-      
+
       return config;
     },
     (error) => Promise.reject(error)
@@ -159,7 +159,9 @@ export class AuthService {
       });
 
       // Use safe Base64 encoding for Unicode credentials
-      const basicAuthToken = safeBase64Encode(`${credentials.username}:${credentials.password}`);
+      const basicAuthToken = safeBase64Encode(
+        `${credentials.username}:${credentials.password}`
+      );
 
       const response = await loginInstance.post<SessionResponse>(
         '/cloudapi/1.0.0/sessions',
@@ -175,10 +177,13 @@ export class AuthService {
 
       // Extract VMware Cloud Director authentication tokens from response headers
       const accessToken = response.headers['x-vmware-vcloud-access-token'];
-      const tokenType = response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+      const tokenType =
+        response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
 
       if (!accessToken) {
-        throw new Error('Authentication failed: No access token received from VMware Cloud Director');
+        throw new Error(
+          'Authentication failed: No access token received from VMware Cloud Director'
+        );
       }
 
       // Store session data and authentication tokens
@@ -219,7 +224,7 @@ export class AuthService {
       removeSessionData();
       removeAccessToken();
       removeTokenType();
-      
+
       // Reset API instance to remove authentication headers
       resetApiInstance();
     }

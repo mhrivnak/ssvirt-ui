@@ -24,12 +24,12 @@ function getCapabilitiesKey(capabilities: RoleCapabilities): string[] {
     .filter(([, value]) => typeof value === 'boolean' && value === true)
     .map(([key]) => key)
     .sort(); // Sort for consistency
-  
+
   const orgIds = [
     capabilities.primaryOrganization,
     capabilities.operatingOrganization,
   ].filter((id): id is string => Boolean(id)); // Type guard to filter out undefined
-  
+
   return [...capabilityKeys, ...orgIds];
 }
 
@@ -43,10 +43,10 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
 
   return useQuery({
     queryKey: [
-      ...QUERY_KEYS.organizations, 
-      activeRole, 
+      ...QUERY_KEYS.organizations,
+      activeRole,
       capabilities.primaryOrganization,
-      capabilities.operatingOrganization
+      capabilities.operatingOrganization,
     ],
     queryFn: async () => {
       if (capabilities.canManageSystem) {
@@ -63,7 +63,8 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
         // Fetch all organizations concurrently using Promise.all
         const organizationPromises = Array.from(orgIds).map(async (orgId) => {
           try {
-            const orgResponse = await OrganizationService.getOrganization(orgId);
+            const orgResponse =
+              await OrganizationService.getOrganization(orgId);
             return orgResponse.data;
           } catch (error) {
             console.warn(`Could not fetch organization ${orgId}:`, error);
@@ -71,8 +72,9 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
           }
         });
 
-        const organizations = (await Promise.all(organizationPromises))
-          .filter((org): org is Organization => org !== null);
+        const organizations = (await Promise.all(organizationPromises)).filter(
+          (org): org is Organization => org !== null
+        );
 
         return {
           resultTotal: organizations.length,
@@ -92,7 +94,9 @@ export const useRoleBasedOrganizations = (): UseQueryResult<
         values: [],
       };
     },
-    enabled: (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
+    enabled:
+      (capabilities.canManageOrganizations || capabilities.canManageSystem) &&
+      !!sessionData,
   });
 };
 
@@ -105,7 +109,12 @@ export const useRoleBasedVMs = (
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.vms, activeRole, ...getCapabilitiesKey(capabilities), queryParams],
+    queryKey: [
+      ...QUERY_KEYS.vms,
+      activeRole,
+      ...getCapabilitiesKey(capabilities),
+      queryParams,
+    ],
     queryFn: async () => {
       let params = { ...queryParams };
 
@@ -138,7 +147,11 @@ export const useRoleBasedVDCs = (): UseQueryResult<ApiResponse<VDC[]>> => {
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.vdcs, activeRole, ...getCapabilitiesKey(capabilities)],
+    queryKey: [
+      ...QUERY_KEYS.vdcs,
+      activeRole,
+      ...getCapabilitiesKey(capabilities),
+    ],
     queryFn: async () => {
       if (activeRole === ROLE_NAMES.SYSTEM_ADMIN) {
         // System admin sees all VDCs
@@ -168,7 +181,11 @@ export const useRoleBasedUsers = (): UseQueryResult<
   const { capabilities, activeRole, sessionData } = useRole();
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.users, activeRole, ...getCapabilitiesKey(capabilities)],
+    queryKey: [
+      ...QUERY_KEYS.users,
+      activeRole,
+      ...getCapabilitiesKey(capabilities),
+    ],
     queryFn: async () => {
       if (activeRole === ROLE_NAMES.SYSTEM_ADMIN) {
         // System admin sees all users
@@ -233,7 +250,9 @@ export const useOrganizationStats = (
       };
     },
     enabled:
-      !!organizationId && (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
+      !!organizationId &&
+      (capabilities.canManageOrganizations || capabilities.canManageSystem) &&
+      !!sessionData,
   });
 };
 
@@ -281,7 +300,9 @@ export const useOrganizationResourceUsage = (
       };
     },
     enabled:
-      !!organizationId && (capabilities.canManageOrganizations || capabilities.canManageSystem) && !!sessionData,
+      !!organizationId &&
+      (capabilities.canManageOrganizations || capabilities.canManageSystem) &&
+      !!sessionData,
   });
 };
 
