@@ -1,28 +1,30 @@
-● Catalog API Client Guide
+# Catalog API Client Guide
 
-  Overview
+## Overview
 
-  The catalog API provides VMware Cloud Director-compliant endpoints for managing catalogs. All endpoints follow CloudAPI patterns with URN-based identification and paginated responses.
+The catalog API provides VMware Cloud Director-compliant endpoints for managing catalogs. All endpoints follow CloudAPI patterns with URN-based identification and paginated responses.
 
-  Base URL
+## Base URL
 
-  /cloudapi/1.0.0/catalogs
+`/cloudapi/1.0.0/catalogs`
 
-  Authentication
+## Authentication
 
-  All endpoints require JWT authentication via the Authorization: Bearer <token> header. Users can access catalogs from their organizations and any published catalogs.
+All endpoints require JWT authentication via the Authorization: Bearer <token> header. Users can access catalogs from their organizations and any published catalogs.
 
-  Endpoints
+## Endpoints
 
-  1. List Catalogs
+### 1. List Catalogs
 
-  GET /cloudapi/1.0.0/catalogs
+GET /cloudapi/1.0.0/catalogs
 
-  Query Parameters:
+**Query Parameters:**
   - page (optional): Page number, starts at 1 (default: 1)
   - pageSize (optional): Items per page, max 128 (default: 25)
 
   Response: 200 OK
+  
+  ```json
   {
     "resultTotal": 42,
     "pageCount": 2,
@@ -57,13 +59,14 @@
       }
     ]
   }
+  ```
 
-  2. Get Single Catalog
+### 2. Get Single Catalog
 
-  GET /cloudapi/1.0.0/catalogs/{catalogUrn}
+GET /cloudapi/1.0.0/catalogs/{catalogUrn}
 
-  Path Parameters:
-  - catalogUrn: Catalog URN (format: urn:vcloud:catalog:<uuid>)
+**Path Parameters:**
+- catalogUrn: Catalog URN (format: urn:vcloud:catalog:<uuid>)
 
   Response: 200 OK
   {
@@ -93,58 +96,64 @@
     "version": 1
   }
 
-  3. Create Catalog
+### 3. Create Catalog
 
-  POST /cloudapi/1.0.0/catalogs
+POST /cloudapi/1.0.0/catalogs
 
-  Request Body:
+**Request Body:**
+  
+  ```json
   {
     "name": "New Catalog",
     "description": "Description of the catalog",
     "orgId": "urn:vcloud:org:87654321-4321-4321-4321-210987654321",
     "isPublished": false
   }
+  ```
 
-  Required Fields:
-  - name: Catalog name
-  - orgId: Organization URN where catalog will be created
+**Required Fields:**
+- name: Catalog name
+- orgId: Organization URN where catalog will be created
 
-  Optional Fields:
-  - description: Catalog description
-  - isPublished: Whether catalog is published (default: false)
+**Optional Fields:**
+- description: Catalog description
+- isPublished: Whether catalog is published (default: false)
 
-  Response: 201 Created
+**Response:** 201 Created
   Returns the complete catalog object (same structure as GET response).
 
-  4. Update Catalog
+### 4. Update Catalog
 
-  PUT /cloudapi/1.0.0/catalogs/{catalogUrn}
+PUT /cloudapi/1.0.0/catalogs/{catalogUrn}
 
-  Path Parameters:
-  - catalogUrn: Catalog URN to update
+**Path Parameters:**
+- catalogUrn: Catalog URN to update
 
-  Request Body:
+**Request Body:**
+  
+  ```json
   {
     "name": "Updated Catalog Name",      // Optional: new catalog name
     "description": "Updated description", // Optional: new description
     "isPublished": true                  // Optional: update publish status
   }
+  ```
 
-  Response: 200 OK
-  Returns the complete updated catalog object (same structure as GET response).
+**Response:** 200 OK
+Returns the complete updated catalog object (same structure as GET response).
 
-  5. Delete Catalog
+### 5. Delete Catalog
 
-  DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}
+DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}
 
-  Path Parameters:
-  - catalogUrn: Catalog URN to delete
+**Path Parameters:**
+- catalogUrn: Catalog URN to delete
 
-  Response: 204 No Content (empty body)
+**Response:** 204 No Content (empty body)
 
-  Data Schema
+## Data Schema
 
-  Catalog Object
+### Catalog Object
 
   interface Catalog {
     id: string;                           // URN: urn:vcloud:catalog:<uuid>
@@ -189,7 +198,7 @@
     values: T[];                          // Array of items
   }
 
-  Create Request Schema
+### Create Request Schema
 
   interface CatalogCreateRequest {
     name: string;                         // Required: Catalog name
@@ -198,17 +207,19 @@
     isPublished?: boolean;                // Optional: Publish status (default: false)
   }
 
-  Error Responses
+## Error Responses
 
-  Common Error Format
+### Common Error Format
 
+  ```json
   {
     "error": "Error Type",
     "message": "Human readable message",
     "details": "Technical details"
   }
+  ```
 
-  HTTP Status Codes
+### HTTP Status Codes
 
   - 200 OK: Successful GET requests
   - 201 Created: Successful catalog creation
@@ -219,9 +230,9 @@
   - 409 Conflict: Cannot delete catalog with dependent vApp templates
   - 500 Internal Server Error: Server-side error
 
-  Usage Examples
+## Usage Examples
 
-  JavaScript/TypeScript
+### JavaScript/TypeScript
 
   // List catalogs with pagination
   const response = await fetch('/cloudapi/1.0.0/catalogs?page=1&pageSize=10', {
@@ -261,29 +272,38 @@
     }
   });
 
-  cURL Examples
+## cURL Examples
 
-  # List catalogs
-  curl -H "Authorization: Bearer $TOKEN" \
-    "https://api.example.com/cloudapi/1.0.0/catalogs?page=1&pageSize=25"
+```bash
+# List catalogs
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://api.example.com/cloudapi/1.0.0/catalogs?page=1&pageSize=25"
 
-  # Get catalog
-  curl -H "Authorization: Bearer $TOKEN" \
-    "https://api.example.com/cloudapi/1.0.0/catalogs/urn:vcloud:catalog:12345678-1234-1234-1234-123456789012"
+# Get catalog
+curl -H "Authorization: Bearer $TOKEN" \
+  "https://api.example.com/cloudapi/1.0.0/catalogs/urn:vcloud:catalog:12345678-1234-1234-1234-123456789012"
 
-  # Create catalog
-  curl -X POST \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "Content-Type: application/json" \
-    -d '{"name":"My Catalog","orgId":"urn:vcloud:org:87654321-4321-4321-4321-210987654321","isPublished":false}' \
-    "https://api.example.com/cloudapi/1.0.0/catalogs"
+# Create catalog
+curl -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My Catalog","orgId":"urn:vcloud:org:87654321-4321-4321-4321-210987654321","isPublished":false}' \
+  "https://api.example.com/cloudapi/1.0.0/catalogs"
 
-  # Delete catalog
-  curl -X DELETE \
-    -H "Authorization: Bearer $TOKEN" \
-    "https://api.example.com/cloudapi/1.0.0/catalogs/urn:vcloud:catalog:12345678-1234-1234-1234-123456789012"
+# Update catalog
+curl -X PUT \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated Catalog","description":"Updated description","isPublished":true}' \
+  "https://api.example.com/cloudapi/1.0.0/catalogs/urn:vcloud:catalog:12345678-1234-1234-1234-123456789012"
 
-  Important Notes
+# Delete catalog
+curl -X DELETE \
+  -H "Authorization: Bearer $TOKEN" \
+  "https://api.example.com/cloudapi/1.0.0/catalogs/urn:vcloud:catalog:12345678-1234-1234-1234-123456789012"
+```
+
+## Important Notes
 
   1. URN Format: All catalog IDs use the format urn:vcloud:catalog:<uuid>
   2. Organization Access: Users can only create catalogs in organizations they have access to
