@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
 import { QUERY_KEYS } from '../types';
-import type { InstantiateTemplateRequest } from '../types';
+import type { InstantiateTemplateRequest, CatalogItem } from '../types';
 
 /**
  * Hook to get accessible VDCs for VM creation
@@ -41,7 +41,7 @@ export const useAllCatalogItems = (
         catalogs.map(async (catalog) => {
           try {
             // Fetch all pages of catalog items for this catalog
-            let allItems: any[] = [];
+            let allItems: (CatalogItem & { catalog_id: string; catalog_name: string })[] = [];
             let page = 1;
             let hasMore = true;
 
