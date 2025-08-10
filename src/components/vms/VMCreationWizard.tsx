@@ -201,12 +201,6 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
         powerOn: true,
         deploy: true,
         acceptAllEulas: true,
-        sourceItem: {
-          source: {
-            href: `https://vcd.example.com/api/catalogItem/${selectedTemplate.id}`, // This will be updated by API service
-          },
-          vAppScopedLocalId: 'vm-1',
-        },
         guestCustomization: formData.advanced_config.guest_customization
           ? {
               computerName:
@@ -439,7 +433,6 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)?.name ||
           'Unknown VDC'
         }
-        vappId={createdVAppId}
         vappStatus={vappStatus?.status}
         error={creationError || undefined}
       />

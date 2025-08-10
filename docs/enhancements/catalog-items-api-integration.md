@@ -11,15 +11,17 @@ backed by OpenShift Templates.
 ## Current State
 
 ### Existing Catalog Implementation
+
 - **Service**: `src/services/cloudapi/CatalogService.ts` - CloudAPI catalog operations
 - **Hooks**: `src/hooks/useCatalogs.ts` - React Query hooks for catalog management
 - **Types**: `src/types/index.ts` - CloudAPI-compliant catalog and basic CatalogItem types
-- **UI Components**: 
+- **UI Components**:
   - `src/pages/catalogs/Catalogs.tsx` - catalog listing page
   - `src/pages/catalogs/CatalogDetail.tsx` - catalog detail page
 - **Mock Data**: CloudAPI-compliant test data with placeholder catalog items
 
 ### Current Limitations
+
 1. **No Catalog Items Display** - Catalog detail page shows template count but no items
 2. **Placeholder CatalogItem Interface** - Basic type that doesn't match the real API
 3. **Empty Catalog Items Array** - VM creation wizard shows "Templates not available" message
@@ -29,6 +31,7 @@ backed by OpenShift Templates.
 ## Target State
 
 ### Catalog Items Integration
+
 - **API Integration**: Full support for Catalog Items CloudAPI endpoints
 - **Rich Item Display**: Detailed catalog item information with template specifications
 - **Template Browsing**: Users can explore available templates within catalogs
@@ -36,6 +39,7 @@ backed by OpenShift Templates.
 - **Performance Optimized**: Efficient caching and pagination handling
 
 ### New API Endpoints Support
+
 1. `GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems` - list catalog items with pagination
 2. `GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}` - get catalog item details
 
@@ -165,12 +169,14 @@ backed by OpenShift Templates.
 ## Implementation Changes
 
 ### Breaking Changes
+
 - **CatalogItem Interface**: Complete replacement of existing placeholder interface
 - **VM Creation Wizard**: Significant changes to template selection component
 - **Mock Data**: Complete replacement of placeholder catalog items data
 - **Component Props**: Updates to components that use CatalogItem types
 
 ### New Features Added
+
 - **Catalog Items Display** - Full catalog item browsing capability
 - **Template Specifications** - Detailed OpenShift Template information
 - **Real VM Creation** - Actual template selection replacing "not available" message
@@ -179,49 +185,52 @@ backed by OpenShift Templates.
 ## Data Structure Integration
 
 ### New CloudAPI Structures
+
 ```typescript
 interface CatalogItem {
-  id: string;                           // URN: urn:vcloud:catalogitem:uuid
-  name: string;                         // Catalog item name
-  description: string;                  // Catalog item description
-  catalogEntityRef: EntityRef;          // Reference to parent catalog
-  entity: CatalogItemEntity;           // Detailed template specifications
-  isVappTemplate: boolean;             // Always true for vApp templates
-  status: string;                      // Item status
-  owner: EntityRef;                    // Owner reference
-  isPublished: boolean;                // Publication status
-  creationDate: string;                // ISO-8601 timestamp
-  modificationDate: string;            // ISO-8601 timestamp
-  versionNumber: number;               // Version number
+  id: string; // URN: urn:vcloud:catalogitem:uuid
+  name: string; // Catalog item name
+  description: string; // Catalog item description
+  catalogEntityRef: EntityRef; // Reference to parent catalog
+  entity: CatalogItemEntity; // Detailed template specifications
+  isVappTemplate: boolean; // Always true for vApp templates
+  status: string; // Item status
+  owner: EntityRef; // Owner reference
+  isPublished: boolean; // Publication status
+  creationDate: string; // ISO-8601 timestamp
+  modificationDate: string; // ISO-8601 timestamp
+  versionNumber: number; // Version number
 }
 
 interface CatalogItemEntity {
-  name: string;                        // Template name
-  description: string;                 // Template description
-  templateSpec: TemplateSpec;          // OpenShift Template specifications
-  deploymentLeases: any[];             // Deployment lease information
+  name: string; // Template name
+  description: string; // Template description
+  templateSpec: TemplateSpec; // OpenShift Template specifications
+  deploymentLeases: any[]; // Deployment lease information
 }
 
 interface TemplateSpec {
-  kind: string;                        // "Template"
-  apiVersion: string;                  // Template API version
-  metadata: TemplateMetadata;          // Template metadata
-  parameters: TemplateParameter[];     // Template parameters
-  objects: any[];                      // Template objects
+  kind: string; // "Template"
+  apiVersion: string; // Template API version
+  metadata: TemplateMetadata; // Template metadata
+  parameters: TemplateParameter[]; // Template parameters
+  objects: any[]; // Template objects
 }
 
 interface TemplateParameter {
-  name: string;                        // Parameter name
-  displayName?: string;                // Human-readable name
-  description?: string;                // Parameter description
-  value?: string;                      // Default value
-  required?: boolean;                  // Whether parameter is required
-  generate?: string;                   // Generation expression
+  name: string; // Parameter name
+  displayName?: string; // Human-readable name
+  description?: string; // Parameter description
+  value?: string; // Default value
+  required?: boolean; // Whether parameter is required
+  generate?: string; // Generation expression
 }
 ```
 
 ### VM Creation Integration
+
 The VM creation wizard will be updated to work directly with the new CatalogItem structure:
+
 - Template selection will use `entity.templateSpec` for specifications
 - VM parameters will be derived from `entity.templateSpec.parameters`
 - Template metadata will come from `entity.templateSpec.metadata`
@@ -230,6 +239,7 @@ The VM creation wizard will be updated to work directly with the new CatalogItem
 ## API Integration Details
 
 ### Request/Response Patterns
+
 ```typescript
 // List catalog items
 GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems?page=1&pageSize=25
@@ -250,6 +260,7 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
 ```
 
 ### Error Handling
+
 - Consistent with existing catalog API error patterns
 - Proper HTTP status codes (200, 404, 401, 403, 500)
 - CloudAPI-compliant error response format
@@ -258,6 +269,7 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
 ## UI/UX Enhancements
 
 ### Catalog Detail Page Improvements
+
 1. **New Catalog Items Section**
    - Tabbed interface: "Overview" and "Templates"
    - Grid/list view toggle for catalog items
@@ -277,6 +289,7 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
    - Integration with VM creation workflow
 
 ### VM Creation Wizard Enhancement
+
 1. **Template Selection Improvement**
    - Replace empty state with actual template list
    - Rich template information display
@@ -292,16 +305,19 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
 ## Performance Considerations
 
 ### Caching Strategy
+
 - **Catalog Items List**: 10-minute cache with stale-while-revalidate
 - **Individual Items**: 15-minute cache (longer for detailed specifications)
 - **Template Specs**: 30-minute cache (template specs change infrequently)
 
 ### Pagination Optimization
+
 - Implement virtual scrolling for large catalogs
 - Prefetch next page when user scrolls near end
 - Intelligent page size selection based on content
 
 ### Loading States
+
 - Skeleton loading for catalog items list
 - Progressive loading for template details
 - Optimistic updates where appropriate
@@ -309,18 +325,21 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
 ## Testing Strategy
 
 ### Unit Tests
+
 - Service layer methods with proper URN handling
 - Hook behavior with CloudAPI responses
 - Component rendering with catalog items data
 - Type safety validation
 
 ### Integration Tests
+
 - End-to-end catalog items browsing
 - Pagination and search functionality
 - VM creation workflow integration
 - Error handling scenarios
 
 ### Performance Tests
+
 - Large catalog rendering performance
 - Caching behavior validation
 - API response time measurement
@@ -359,7 +378,7 @@ GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems/{item_id}
 ## Risk Mitigation
 
 1. **API Compatibility**: Thorough testing with actual API responses
-2. **Performance**: Implement proper caching and pagination strategies  
+2. **Performance**: Implement proper caching and pagination strategies
 3. **Type Safety**: Comprehensive TypeScript coverage for all new interfaces
 4. **User Experience**: Progressive enhancement with proper loading states
 5. **Breaking Changes**: Systematic migration of all components using CatalogItem types

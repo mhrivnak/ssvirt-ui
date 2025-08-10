@@ -5,7 +5,7 @@ import type {
   CatalogItem,
   InstantiateTemplateRequest,
   VApp,
-  VM,
+  VMCloudAPI,
   VMHardwareSection,
 } from '../../types';
 
@@ -28,13 +28,20 @@ export class VMService {
   /**
    * List catalog items (templates) for a specific catalog
    * @param catalogId The catalog URN or ID
+   * @param params Optional pagination parameters
    */
   static async getCatalogItems(
-    catalogId: string
+    catalogId: string,
+    params?: { page?: number; pageSize?: number }
   ): Promise<VCloudPaginatedResponse<CatalogItem>> {
-    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(
-      `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems`
-    );
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.set('page', params.page.toString());
+    if (params?.pageSize)
+      queryParams.set('pageSize', params.pageSize.toString());
+
+    const url = `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(url);
     return response.data;
   }
 
@@ -72,8 +79,8 @@ export class VMService {
    * Provides detailed information about a specific VM within a vApp
    * @param vmId The VM URN
    */
-  static async getVM(vmId: string): Promise<VM> {
-    const response = await api.get<VM>(
+  static async getVM(vmId: string): Promise<VMCloudAPI> {
+    const response = await api.get<VMCloudAPI>(
       `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}`
     );
     return response.data;
@@ -106,8 +113,8 @@ export class VMService {
    * List all VMs accessible to the current user
    * Provides organization-wide VM visibility
    */
-  static async getVMs(): Promise<VCloudPaginatedResponse<VM>> {
-    const response = await api.get<VCloudPaginatedResponse<VM>>(
+  static async getVMs(): Promise<VCloudPaginatedResponse<VMCloudAPI>> {
+    const response = await api.get<VCloudPaginatedResponse<VMCloudAPI>>(
       '/cloudapi/1.0.0/vms'
     );
     return response.data;

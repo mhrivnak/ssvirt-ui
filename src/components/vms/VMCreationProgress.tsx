@@ -32,7 +32,6 @@ interface VMCreationProgressProps {
   vmName: string;
   vdcName: string;
   progress?: VMCreationProgress;
-  vappId?: string | null;
   vappStatus?: VAppStatus;
   error?: string;
 }
@@ -137,19 +136,19 @@ function VMCreationProgress({
       switch (vappStatus) {
         case 'INSTANTIATING':
           setCurrentStepIndex(1);
-          setCompletedSteps(['validate']);
+          setCompletedSteps(CREATION_STEPS.slice(0, 1).map((step) => step.id));
           break;
         case 'RESOLVED':
           setCurrentStepIndex(2);
-          setCompletedSteps(['validate', 'allocate']);
+          setCompletedSteps(CREATION_STEPS.slice(0, 2).map((step) => step.id));
           break;
         case 'DEPLOYED':
           setCurrentStepIndex(3);
-          setCompletedSteps(['validate', 'allocate', 'create']);
+          setCompletedSteps(CREATION_STEPS.slice(0, 3).map((step) => step.id));
           break;
         case 'POWERED_ON':
-          setCurrentStepIndex(4);
-          setCompletedSteps(['validate', 'allocate', 'create', 'configure']);
+          setCurrentStepIndex(CREATION_STEPS.length);
+          setCompletedSteps(CREATION_STEPS.map((step) => step.id));
           setIsComplete(true);
           break;
         case 'FAILED':

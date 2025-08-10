@@ -692,7 +692,7 @@ export const generateMockVApp = (
   name?: string,
   description?: string
 ): VApp => ({
-  id: `urn:vcloud:vapp:${Math.random().toString(36).substr(2, 9)}`,
+  id: `urn:vcloud:vapp:${Math.random().toString(36).slice(2, 11)}`,
   name: name || 'test-vapp',
   description: description || 'Mock vApp for testing',
   status: 'INSTANTIATING' as VAppStatus,
@@ -709,7 +709,7 @@ export const generateMockVApp = (
 
 // Mock CloudAPI VM generator
 export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
-  id: `urn:vcloud:vm:${Math.random().toString(36).substr(2, 9)}`,
+  id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
   name: name || 'test-vm',
   description: 'Mock VM for testing',
   status: 'INSTANTIATING' as VMStatus,

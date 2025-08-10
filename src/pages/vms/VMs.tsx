@@ -439,6 +439,13 @@ const VMs: React.FC = () => {
                         <SelectOption value="UNRESOLVED">
                           Unresolved
                         </SelectOption>
+                        <SelectOption value="INSTANTIATING">
+                          Instantiating
+                        </SelectOption>
+                        <SelectOption value="RESOLVED">Resolved</SelectOption>
+                        <SelectOption value="DEPLOYED">Deployed</SelectOption>
+                        <SelectOption value="FAILED">Failed</SelectOption>
+                        <SelectOption value="UNKNOWN">Unknown</SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>

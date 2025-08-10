@@ -15,6 +15,7 @@ This enhancement proposal outlines the implementation of a complete VM creation 
 ## Previous State (Now Replaced)
 
 The previous VM creation implementation used legacy endpoints that have been completely replaced:
+
 - `/api/v1/vms` endpoints (removed)
 - Mixed API patterns (replaced with pure CloudAPI)
 - Direct VM creation (replaced with vApp-based template instantiation)
@@ -26,6 +27,7 @@ The previous VM creation implementation used legacy endpoints that have been com
 **Base URL**: `/cloudapi/1.0.0`
 
 **Resource Hierarchy**:
+
 1. Organization (automatic filtering by JWT)
 2. Virtual Data Center (VDC)
 3. vApp (container for VMs)
@@ -35,18 +37,21 @@ The previous VM creation implementation used legacy endpoints that have been com
 ### Core API Endpoints
 
 #### VDC Management
+
 ```typescript
 GET /cloudapi/1.0.0/vdcs
 // List all VDCs accessible to the current user
 ```
 
 #### Catalog Management
+
 ```typescript
 GET /cloudapi/1.0.0/catalogs/{catalog_id}/catalogItems
 // List available VM templates in a catalog
 ```
 
 #### VM Creation (via Template Instantiation)
+
 ```typescript
 POST /cloudapi/1.0.0/vdcs/{vdc_id}/actions/instantiateTemplate
 Content-Type: application/json
@@ -94,6 +99,7 @@ Response: 202 Accepted
 ```
 
 #### Resource Monitoring
+
 ```typescript
 GET /cloudapi/1.0.0/vapps/{vapp_id}
 // Get vApp details and status
@@ -110,20 +116,25 @@ GET /cloudapi/1.0.0/vms/{vm_id}/virtualHardwareSection
 #### Phase 1: Service Layer Updates ✅ COMPLETED
 
 **1. CloudAPI VM Service (`src/services/cloudapi/VMService.ts`) ✅**
+
 ```typescript
 export class VMService {
   /**
    * List VDCs accessible to current user
    */
   static async getVDCs(): Promise<VCloudPaginatedResponse<VDC>> {
-    const response = await api.get<VCloudPaginatedResponse<VDC>>('/cloudapi/1.0.0/vdcs');
+    const response = await api.get<VCloudPaginatedResponse<VDC>>(
+      '/cloudapi/1.0.0/vdcs'
+    );
     return response.data;
   }
 
   /**
    * List catalog items (templates) for a specific catalog
    */
-  static async getCatalogItems(catalogId: string): Promise<VCloudPaginatedResponse<CatalogItem>> {
+  static async getCatalogItems(
+    catalogId: string
+  ): Promise<VCloudPaginatedResponse<CatalogItem>> {
     const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(
       `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems`
     );
@@ -134,7 +145,7 @@ export class VMService {
    * Create VM by instantiating template
    */
   static async instantiateTemplate(
-    vdcId: string, 
+    vdcId: string,
     request: InstantiateTemplateRequest
   ): Promise<VCloudPaginatedResponse<VApp>> {
     const response = await api.post<VCloudPaginatedResponse<VApp>>(
@@ -179,6 +190,7 @@ export class VMService {
 #### Phase 2: Type System Updates ✅ COMPLETED
 
 **CloudAPI TypeScript Interfaces (added to `src/types/index.ts`) ✅**
+
 ```typescript
 // VM Creation Request
 export interface InstantiateTemplateRequest {
@@ -241,12 +253,12 @@ export interface VM {
   type: string;
   createdDate: string;
   lastModifiedDate: string;
-  
+
   // Hardware details
   virtualHardwareSection?: VMHardwareSection;
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
-  
+
   // Relationships
   vapp?: EntityRef;
   vdc?: EntityRef;
@@ -255,9 +267,9 @@ export interface VM {
 }
 
 // VM Status Enumeration
-export type VMStatus = 
+export type VMStatus =
   | 'INSTANTIATING'
-  | 'RESOLVED' 
+  | 'RESOLVED'
   | 'DEPLOYED'
   | 'POWERED_ON'
   | 'POWERED_OFF'
@@ -265,10 +277,10 @@ export type VMStatus =
   | 'FAILED'
   | 'UNKNOWN';
 
-export type VAppStatus = 
+export type VAppStatus =
   | 'INSTANTIATING'
   | 'RESOLVED'
-  | 'DEPLOYED' 
+  | 'DEPLOYED'
   | 'POWERED_ON'
   | 'POWERED_OFF'
   | 'MIXED'
@@ -297,6 +309,7 @@ export interface VMHardwareItem {
 #### Phase 3: React Hooks Updates ✅ COMPLETED
 
 **CloudAPI VM Hooks (`src/hooks/useCloudAPIVMs.ts`) ✅**
+
 ```typescript
 /**
  * Hook to get accessible VDCs for VM creation
@@ -306,7 +319,7 @@ export const useVMVDCs = () => {
     queryKey: QUERY_KEYS.vmVdcs,
     queryFn: () => VMService.getVDCs(),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,   // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
 
@@ -319,7 +332,7 @@ export const useCatalogItems = (catalogId?: string) => {
     queryFn: () => VMService.getCatalogItems(catalogId!),
     enabled: !!catalogId,
     staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 30 * 60 * 1000,    // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 };
 
@@ -328,18 +341,21 @@ export const useCatalogItems = (catalogId?: string) => {
  */
 export const useInstantiateTemplate = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ vdcId, request }: { 
-      vdcId: string; 
-      request: InstantiateTemplateRequest 
+    mutationFn: ({
+      vdcId,
+      request,
+    }: {
+      vdcId: string;
+      request: InstantiateTemplateRequest;
     }) => VMService.instantiateTemplate(vdcId, request),
-    
+
     onSuccess: (response) => {
       // Invalidate relevant caches
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
-      
+
       // Cache the new vApp
       if (response.values?.[0]) {
         queryClient.setQueryData(
@@ -348,7 +364,7 @@ export const useInstantiateTemplate = () => {
         );
       }
     },
-    
+
     onError: (error) => {
       console.error('Failed to instantiate template:', error);
     },
@@ -394,6 +410,7 @@ export const useVMDetails = (vmId?: string) => {
 **1. Updated VM Creation Wizard (`src/components/vms/VMCreationWizard.tsx`) ✅**
 
 Completed Changes:
+
 - ✅ Replaced direct VM creation with template instantiation workflow
 - ✅ Added vApp concept to the UI flow
 - ✅ Implemented real-time status monitoring via `useVAppStatus`
@@ -403,6 +420,7 @@ Completed Changes:
 **2. Template Selection Enhancement 🔄 REMAINING**
 
 Current implementation loads templates from the first available catalog. Enhancement would add:
+
 - Multi-catalog browsing interface
 - Rich template metadata display (OS, resources, description)
 - Template preview with specifications
@@ -411,6 +429,7 @@ Current implementation loads templates from the first available catalog. Enhance
 **3. Enhanced Progress Monitoring (`src/components/vms/VMCreationProgress.tsx`) ✅**
 
 Completed enhancements:
+
 - ✅ Real-time vApp status monitoring with `useVAppStatus` integration
 - ✅ Status visualization (INSTANTIATING → RESOLVED → DEPLOYED → POWERED_ON)
 - ✅ Error handling and recovery options
@@ -419,6 +438,7 @@ Completed enhancements:
 #### Phase 5: Mock Data & Testing ✅ COMPLETED
 
 **CloudAPI Mock Handlers (`src/mocks/handlers.ts`) ✅**
+
 ```typescript
 // CloudAPI VDC endpoints
 http.get('/cloudapi/1.0.0/vdcs', ({ request }) => {
@@ -436,11 +456,11 @@ http.get('/cloudapi/1.0.0/catalogs/:catalogId/catalogItems', ({ params, request 
 }),
 
 // Template instantiation endpoint
-http.post('/cloudapi/1.0.0/vdcs/:vdcId/actions/instantiateTemplate', 
+http.post('/cloudapi/1.0.0/vdcs/:vdcId/actions/instantiateTemplate',
   async ({ params, request }) => {
     const { vdcId } = params;
     const body = await request.json() as InstantiateTemplateRequest;
-    
+
     const vapp = generateMockVApp(body.name, body.description);
     return HttpResponse.json(
       createCloudApiPaginatedResponse([vapp], 1, 25),
@@ -457,7 +477,7 @@ http.get('/cloudapi/1.0.0/vapps/:vappId', ({ params }) => {
   return HttpResponse.json(vapp);
 }),
 
-// VM monitoring endpoints  
+// VM monitoring endpoints
 http.get('/cloudapi/1.0.0/vms/:vmId', ({ params }) => {
   const { vmId } = params;
   const vm = generateMockVM();
@@ -501,16 +521,19 @@ http.get('/cloudapi/1.0.0/vms/:vmId', ({ params }) => {
 ### Error Handling Strategy
 
 **1. Validation Errors**
+
 - Client-side validation for required fields
 - Server-side validation error display
 - Field-specific error messaging
 
 **2. API Errors**
+
 - HTTP status code handling (400, 401, 403, 404, 500)
 - Detailed error message extraction from CloudAPI responses
 - Retry mechanisms for transient failures
 
 **3. Timeout Handling**
+
 - Long-running operation monitoring
 - Graceful timeout with status preservation
 - User notification and recovery options

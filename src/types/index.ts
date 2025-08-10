@@ -548,12 +548,6 @@ export interface InstantiateTemplateRequest {
     resetPasswordRequired?: boolean;
     customizationScript?: string;
   };
-  sourceItem: {
-    source: {
-      href: string;
-    };
-    vAppScopedLocalId: string;
-  };
   networkConnectionSection?: {
     networkConnection: Array<{
       network: string;
@@ -576,7 +570,7 @@ export interface VApp {
   type: string;
   createdDate: string;
   lastModifiedDate: string;
-  vms?: VM[];
+  vms?: VMCloudAPI[];
   networks?: VAppNetwork[];
   owner?: EntityRef;
   org?: EntityRef;
@@ -922,6 +916,8 @@ export const QUERY_KEYS = {
     ['cloudapi', 'catalogs', catalogId, 'catalogItems', params || {}] as const,
   catalogItem: (catalogId: string, itemId: string) =>
     ['cloudapi', 'catalogs', catalogId, 'catalogItems', itemId] as const,
+  allCatalogItems: (catalogIds: string[]) =>
+    ['cloudapi', 'catalogItems', 'all', catalogIds.sort()] as const,
 
   // Resource Monitoring & Analytics
   resourceUsage: ['monitoring', 'resource-usage'] as const,

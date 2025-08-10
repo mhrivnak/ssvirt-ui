@@ -7,13 +7,15 @@ This enhancement proposes implementing role-specific views that provide customiz
 ## Background
 
 Currently, the application provides a unified interface for all users regardless of their role. This leads to:
+
 - Information overload for users who only need role-specific features
 - Security concerns with exposing functionality beyond user permissions
 - Poor user experience due to lack of contextual organization
 
 The VMware Cloud Director API provides three primary roles:
+
 - **System Administrator**: Full system-wide access and management
-- **Organization Administrator**: Organization-scoped management capabilities  
+- **Organization Administrator**: Organization-scoped management capabilities
 - **vApp User**: Limited access to virtual machine operations
 
 ## Goals
@@ -29,6 +31,7 @@ The VMware Cloud Director API provides three primary roles:
 ### Authentication and Session Management
 
 #### VMware Cloud Director Login API Integration
+
 The implementation will integrate with the VMware Cloud Director login API (`POST /cloudapi/1.0.0/sessions`) which provides all necessary user, organization, and role information in the response:
 
 ```typescript
@@ -62,6 +65,7 @@ interface SessionResponse {
 ```
 
 #### User Role Processing
+
 ```typescript
 // src/utils/roleDetection.ts
 export interface RoleCapabilities {
@@ -75,30 +79,38 @@ export interface RoleCapabilities {
   operatingOrganization?: string; // Operating organization ID if different
 }
 
-export function determineUserCapabilities(sessionResponse: SessionResponse): RoleCapabilities {
+export function determineUserCapabilities(
+  sessionResponse: SessionResponse
+): RoleCapabilities {
   const roles = sessionResponse.roles;
-  
+
   return {
     canManageSystem: roles.includes(ROLE_NAMES.SYSTEM_ADMIN),
-    canManageOrganizations: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) || 
-                            roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageOrganizations:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
     canCreateOrganizations: roles.includes(ROLE_NAMES.SYSTEM_ADMIN),
-    canManageUsers: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) || 
-                    roles.includes(ROLE_NAMES.ORG_ADMIN),
-    canManageVMs: roles.some(role => [
-      ROLE_NAMES.SYSTEM_ADMIN,
-      ROLE_NAMES.ORG_ADMIN, 
-      ROLE_NAMES.VAPP_USER
-    ].includes(role)),
-    canViewReports: roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
-                    roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageUsers:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
+    canManageVMs: roles.some((role) =>
+      [
+        ROLE_NAMES.SYSTEM_ADMIN,
+        ROLE_NAMES.ORG_ADMIN,
+        ROLE_NAMES.VAPP_USER,
+      ].includes(role)
+    ),
+    canViewReports:
+      roles.includes(ROLE_NAMES.SYSTEM_ADMIN) ||
+      roles.includes(ROLE_NAMES.ORG_ADMIN),
     primaryOrganization: sessionResponse.org.id,
-    operatingOrganization: sessionResponse.operatingOrg?.id
+    operatingOrganization: sessionResponse.operatingOrg?.id,
   };
 }
 ```
 
 #### Authentication Service Integration
+
 ```typescript
 // src/services/auth.ts
 export class AuthService {
@@ -106,24 +118,24 @@ export class AuthService {
     const response = await fetch('/cloudapi/1.0.0/sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok) {
       throw new Error('Authentication failed');
     }
-    
+
     const sessionData: SessionResponse = await response.json();
-    
+
     // Store session information for role-based routing
     sessionStorage.setItem('vcd-session', JSON.stringify(sessionData));
-    
+
     return sessionData;
   }
-  
+
   static getSessionData(): SessionResponse | null {
     const stored = sessionStorage.getItem('vcd-session');
     return stored ? JSON.parse(stored) : null;
@@ -132,6 +144,7 @@ export class AuthService {
 ```
 
 #### Role Context Management
+
 ```typescript
 // src/contexts/RoleContext.tsx
 export interface RoleContextValue {
@@ -146,10 +159,10 @@ export interface RoleContextValue {
 export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { sessionData } = useAuth(); // sessionData from VMware Cloud Director login API
   const [activeRole, setActiveRole] = useState<string>('');
-  
+
   const availableRoles = sessionData?.roles || [];
   const isMultiRole = availableRoles.length > 1;
-  
+
   // Initialize with highest privilege role
   useEffect(() => {
     if (availableRoles.length > 0 && !activeRole) {
@@ -158,17 +171,17 @@ export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setActiveRole(highestRole);
     }
   }, [availableRoles, activeRole]);
-  
-  const capabilities = useMemo(() => 
+
+  const capabilities = useMemo(() =>
     determineUserCapabilities(sessionData), [sessionData]);
-  
+
   const switchRole = useCallback((roleName: string) => {
     if (availableRoles.includes(roleName)) {
       setActiveRole(roleName);
       // Trigger navigation update and data refresh
     }
   }, [availableRoles]);
-  
+
   return (
     <RoleContext.Provider value={{
       activeRole,
@@ -191,9 +204,9 @@ export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const RoleSelector: React.FC = () => {
   const { activeRole, availableRoles, switchRole, isMultiRole } = useRole();
   const [isOpen, setIsOpen] = useState(false);
-  
+
   if (!isMultiRole) return null;
-  
+
   return (
     <Dropdown
       isOpen={isOpen}
@@ -249,6 +262,7 @@ export const RoleSelector: React.FC = () => {
 ### Role-Specific Navigation
 
 #### Navigation Structure
+
 ```typescript
 // src/utils/navigation.ts
 export interface NavigationItem {
@@ -261,16 +275,18 @@ export interface NavigationItem {
   roles?: string[];
 }
 
-export const getNavigationForRole = (capabilities: RoleCapabilities): NavigationItem[] => {
+export const getNavigationForRole = (
+  capabilities: RoleCapabilities
+): NavigationItem[] => {
   const baseNavigation: NavigationItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       to: '/dashboard',
       icon: TachometerAltIcon,
-    }
+    },
   ];
-  
+
   if (capabilities.canManageSystem) {
     return [
       ...baseNavigation,
@@ -292,19 +308,27 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
         icon: CogIcon,
         children: [
           { id: 'roles', label: 'Roles & Permissions', to: '/admin/roles' },
-          { id: 'system-settings', label: 'System Settings', to: '/admin/settings' },
-          { id: 'monitoring', label: 'System Monitoring', to: '/admin/monitoring' }
-        ]
+          {
+            id: 'system-settings',
+            label: 'System Settings',
+            to: '/admin/settings',
+          },
+          {
+            id: 'monitoring',
+            label: 'System Monitoring',
+            to: '/admin/monitoring',
+          },
+        ],
       },
       {
         id: 'reports',
         label: 'Reports & Analytics',
         to: '/reports',
         icon: ChartLineIcon,
-      }
+      },
     ];
   }
-  
+
   if (capabilities.canManageOrganizations) {
     return [
       ...baseNavigation,
@@ -331,13 +355,17 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
         label: 'Resource Management',
         icon: ChartBarIcon,
         children: [
-          { id: 'capacity', label: 'Capacity Planning', to: '/resources/capacity' },
-          { id: 'usage', label: 'Usage Reports', to: '/resources/usage' }
-        ]
-      }
+          {
+            id: 'capacity',
+            label: 'Capacity Planning',
+            to: '/resources/capacity',
+          },
+          { id: 'usage', label: 'Usage Reports', to: '/resources/usage' },
+        ],
+      },
     ];
   }
-  
+
   // vApp User navigation
   return [
     ...baseNavigation,
@@ -352,7 +380,7 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
       label: 'Catalogs',
       to: '/catalogs',
       icon: BookIcon,
-    }
+    },
   ];
 };
 ```
@@ -360,20 +388,21 @@ export const getNavigationForRole = (capabilities: RoleCapabilities): Navigation
 ### Role-Specific Dashboards
 
 #### System Administrator Dashboard
+
 ```typescript
 // src/pages/dashboard/SystemAdminDashboard.tsx
 export const SystemAdminDashboard: React.FC = () => {
   const { data: systemStats } = useSystemStats();
   const { data: recentActivity } = useSystemActivity();
   const { data: systemAlerts } = useSystemAlerts();
-  
+
   return (
     <PageSection>
       <Stack hasGutter>
         <StackItem>
           <Title headingLevel="h1" size="xl">System Administration Dashboard</Title>
         </StackItem>
-        
+
         {/* System-wide metrics */}
         <StackItem>
           <Grid hasGutter>
@@ -415,12 +444,12 @@ export const SystemAdminDashboard: React.FC = () => {
             </GridItem>
           </Grid>
         </StackItem>
-        
+
         {/* System alerts */}
         <StackItem>
           <SystemAlertsPanel alerts={systemAlerts} />
         </StackItem>
-        
+
         {/* Recent system activity */}
         <StackItem>
           <Grid hasGutter>
@@ -439,16 +468,17 @@ export const SystemAdminDashboard: React.FC = () => {
 ```
 
 #### Organization Administrator Dashboard
+
 ```typescript
 // src/pages/dashboard/OrgAdminDashboard.tsx
 export const OrgAdminDashboard: React.FC = () => {
   const { sessionData, capabilities } = useRole();
   const organizationId = capabilities.operatingOrganization || capabilities.primaryOrganization;
   const organizationName = sessionData.operatingOrg?.name || sessionData.org.name;
-  
+
   const { data: orgStats } = useOrganizationStats(organizationId);
   const { data: resourceUsage } = useOrganizationResourceUsage(organizationId);
-  
+
   return (
     <PageSection>
       <Stack hasGutter>
@@ -468,7 +498,7 @@ export const OrgAdminDashboard: React.FC = () => {
             </SplitItem>
           </Split>
         </StackItem>
-        
+
         {/* Organization metrics */}
         <StackItem>
           <Grid hasGutter>
@@ -498,12 +528,12 @@ export const OrgAdminDashboard: React.FC = () => {
             </GridItem>
           </Grid>
         </StackItem>
-        
+
         {/* Resource usage charts */}
         <StackItem>
           <ResourceUsageOverview usage={resourceUsage} />
         </StackItem>
-        
+
         {/* Recent activity and quick actions */}
         <StackItem>
           <Grid hasGutter>
@@ -528,13 +558,14 @@ export const OrgAdminDashboard: React.FC = () => {
 ```
 
 #### vApp User Dashboard
+
 ```typescript
 // src/pages/dashboard/VAppUserDashboard.tsx
 export const VAppUserDashboard: React.FC = () => {
   const { user } = useAuth();
   const { data: userVMs } = useUserVMs();
   const { data: availableTemplates } = useAvailableTemplates();
-  
+
   return (
     <PageSection>
       <Stack hasGutter>
@@ -546,7 +577,7 @@ export const VAppUserDashboard: React.FC = () => {
             Manage your virtual machines and applications
           </p>
         </StackItem>
-        
+
         {/* User VM overview */}
         <StackItem>
           <Grid hasGutter>
@@ -570,12 +601,12 @@ export const VAppUserDashboard: React.FC = () => {
             </GridItem>
           </Grid>
         </StackItem>
-        
+
         {/* Quick VM actions */}
         <StackItem>
           <UserVMDashboard vms={userVMs} />
         </StackItem>
-        
+
         {/* Getting started guide */}
         <StackItem>
           <GettingStartedPanel />
@@ -589,11 +620,12 @@ export const VAppUserDashboard: React.FC = () => {
 ### Data Filtering and Scoping
 
 #### Role-Based Data Hooks
+
 ```typescript
 // src/hooks/useRoleBasedData.ts
 export const useOrganizations = () => {
   const { capabilities } = useRole();
-  
+
   return useQuery({
     queryKey: ['organizations', capabilities],
     queryFn: async () => {
@@ -602,24 +634,24 @@ export const useOrganizations = () => {
       } else if (capabilities.organizations.length > 0) {
         // Return only organizations user can access
         return OrganizationService.getOrganizations({
-          filter: { ids: capabilities.organizations }
+          filter: { ids: capabilities.organizations },
         });
       }
       return { data: [] };
     },
-    enabled: capabilities.canManageOrganizations
+    enabled: capabilities.canManageOrganizations,
   });
 };
 
 export const useVMs = (queryParams?: VMQueryParams) => {
   const { capabilities, activeRole } = useRole();
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['vms', activeRole, capabilities, queryParams],
     queryFn: async () => {
       let params = { ...queryParams };
-      
+
       if (activeRole === ROLE_NAMES.VAPP_USER) {
         // Filter to only user's VMs
         params = { ...params, owner: user?.id };
@@ -627,10 +659,10 @@ export const useVMs = (queryParams?: VMQueryParams) => {
         // Filter to organization's VMs
         params = { ...params, organization_id: capabilities.organizations[0] };
       }
-      
+
       return VMService.getVMs(params);
     },
-    enabled: capabilities.canManageVMs
+    enabled: capabilities.canManageVMs,
   });
 };
 ```
@@ -638,6 +670,7 @@ export const useVMs = (queryParams?: VMQueryParams) => {
 ### Route Protection and Layout
 
 #### Role-Based Route Configuration
+
 ```typescript
 // src/utils/routes.ts
 export interface RouteConfig {
@@ -653,44 +686,49 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/admin/*',
     component: SystemAdminRoutes,
-    requiredRoles: [ROLE_NAMES.SYSTEM_ADMIN]
+    requiredRoles: [ROLE_NAMES.SYSTEM_ADMIN],
   },
   {
     path: '/organizations',
     component: OrganizationsPage,
-    requiredCapabilities: ['canManageOrganizations']
+    requiredCapabilities: ['canManageOrganizations'],
   },
-  
+
   // Organization Admin routes
   {
     path: '/vdcs',
     component: VDCsPage,
-    requiredCapabilities: ['canManageOrganizations']
+    requiredCapabilities: ['canManageOrganizations'],
   },
   {
     path: '/org-users',
     component: OrganizationUsersPage,
-    requiredCapabilities: ['canManageUsers']
+    requiredCapabilities: ['canManageUsers'],
   },
-  
+
   // vApp User routes
   {
     path: '/my-vms',
     component: UserVMsPage,
-    requiredRoles: [ROLE_NAMES.VAPP_USER, ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.SYSTEM_ADMIN]
-  }
+    requiredRoles: [
+      ROLE_NAMES.VAPP_USER,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.SYSTEM_ADMIN,
+    ],
+  },
 ];
 ```
 
 #### Role-Aware Layout Component
+
 ```typescript
 // src/components/layouts/RoleAwareLayout.tsx
 export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { activeRole, capabilities, isMultiRole } = useRole();
-  
-  const navigation = useMemo(() => 
+
+  const navigation = useMemo(() =>
     getNavigationForRole(capabilities), [capabilities]);
-  
+
   return (
     <Page
       header={
@@ -725,6 +763,7 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
 ## Implementation Plan
 
 ### Phase 1: Complete Interface Replacement (2 weeks)
+
 1. **VMware Cloud Director Authentication Integration**
    - Integrate with `/cloudapi/1.0.0/sessions` login endpoint
    - Update authentication service to handle session response structure
@@ -739,11 +778,12 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
 3. **Navigation Framework**
    - Build role-aware navigation system
-   - Implement `RoleSelector` component  
+   - Implement `RoleSelector` component
    - Create route protection mechanisms
    - **Replace existing navigation entirely**
 
 ### Phase 2: Role-Specific Dashboard Implementation (3 weeks)
+
 1. **System Admin Dashboard**
    - System-wide metrics and monitoring
    - User and organization management overview
@@ -763,6 +803,7 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
    - **Replace existing dashboard for vApp users**
 
 ### Phase 3: Data Integration and Route Replacement (2 weeks)
+
 1. **Role-Based Data Filtering**
    - Implement scoped data hooks
    - Add organization context management
@@ -775,6 +816,7 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
    - Remove generic/unified interfaces
 
 ### Phase 4: Testing and Deployment (1 week)
+
 1. **Comprehensive Testing**
    - Unit tests for role detection logic
    - Integration tests for role switching
@@ -789,16 +831,19 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
 ## Security Considerations
 
 ### Permission Enforcement
+
 - All API calls include role context validation
 - Client-side restrictions backed by server-side authorization
 - Role switching triggers complete data refresh
 
 ### Data Isolation
+
 - Organization admins only access their organization's data
 - vApp users only see their own resources
 - System admins have full visibility with audit logging
 
 ### Session Management
+
 - Role switching doesn't require re-authentication
 - Role changes logged for audit purposes
 - Session timeout respects most restrictive role settings
@@ -806,22 +851,23 @@ export const RoleAwareLayout: React.FC<{ children: React.ReactNode }> = ({ child
 ## Testing Strategy
 
 ### Unit Testing
+
 ```typescript
 // src/utils/__tests__/roleDetection.test.ts
 describe('Role Detection', () => {
   it('should correctly identify system admin capabilities', () => {
     const user = createMockUser([ROLE_NAMES.SYSTEM_ADMIN]);
     const capabilities = determineUserCapabilities(user);
-    
+
     expect(capabilities.canManageSystem).toBe(true);
     expect(capabilities.canCreateOrganizations).toBe(true);
     expect(capabilities.canManageUsers).toBe(true);
   });
-  
+
   it('should limit org admin to organization scope', () => {
     const user = createMockUser([ROLE_NAMES.ORG_ADMIN]);
     const capabilities = determineUserCapabilities(user);
-    
+
     expect(capabilities.canManageSystem).toBe(false);
     expect(capabilities.canManageOrganizations).toBe(true);
     expect(capabilities.canCreateOrganizations).toBe(false);
@@ -830,6 +876,7 @@ describe('Role Detection', () => {
 ```
 
 ### Integration Testing
+
 ```typescript
 // src/components/__tests__/RoleSelector.test.tsx
 describe('RoleSelector', () => {
@@ -839,40 +886,47 @@ describe('RoleSelector', () => {
         <RoleSelector />
       </RoleProvider>
     );
-    
+
     expect(container.firstChild).toBeNull();
   });
-  
+
   it('should allow role switching for multi-role users', async () => {
     render(
       <RoleProvider user={multiRoleUser}>
         <RoleSelector />
       </RoleProvider>
     );
-    
+
     await user.click(screen.getByRole('button', { name: /acting as/i }));
     await user.click(screen.getByText(ROLE_NAMES.ORG_ADMIN));
-    
+
     expect(mockSwitchRole).toHaveBeenCalledWith(ROLE_NAMES.ORG_ADMIN);
   });
 });
 ```
 
 ### E2E Testing
+
 ```typescript
 // e2e/role-switching.spec.ts
 test('System admin can switch to org admin view', async ({ page }) => {
   await loginAsUser(page, 'multi-role-user');
-  
+
   // Verify system admin dashboard
-  await expect(page.getByRole('heading', { name: 'System Administration Dashboard' })).toBeVisible();
-  
+  await expect(
+    page.getByRole('heading', { name: 'System Administration Dashboard' })
+  ).toBeVisible();
+
   // Switch to org admin role
-  await page.getByRole('button', { name: /acting as.*system administrator/i }).click();
+  await page
+    .getByRole('button', { name: /acting as.*system administrator/i })
+    .click();
   await page.getByText('Organization Administrator').click();
-  
+
   // Verify org admin dashboard
-  await expect(page.getByRole('heading', { name: /.*dashboard/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /.*dashboard/i })
+  ).toBeVisible();
   await expect(page.getByText('Virtual Data Centers')).toBeVisible();
 });
 ```
@@ -880,6 +934,7 @@ test('System admin can switch to org admin view', async ({ page }) => {
 ## Migration Strategy
 
 ### No Backward Compatibility
+
 **Important**: This enhancement will completely replace the existing unified interface. No effort will be spent on maintaining backward compatibility or providing fallback mechanisms. The implementation will:
 
 - Replace the current dashboard entirely with role-specific dashboards
@@ -888,12 +943,14 @@ test('System admin can switch to org admin view', async ({ page }) => {
 - Require all users to use the new role-specific views immediately upon deployment
 
 ### Direct Implementation
+
 - Complete replacement of existing dashboard and navigation
 - Immediate enforcement of role-based data scoping
 - All routes will be role-aware from deployment
 - No feature flags or gradual rollout mechanisms
 
 ### User Communication
+
 - Pre-deployment communication about the interface changes
 - Role-specific user guides available at launch
 - Support team training on new role-based workflows
@@ -901,16 +958,19 @@ test('System admin can switch to org admin view', async ({ page }) => {
 ## Monitoring and Analytics
 
 ### Performance Metrics
+
 - Dashboard load times by role
 - API response times for role-scoped data
 - User engagement with role-specific features
 
 ### Usage Analytics
+
 - Role switching frequency and patterns
 - Feature adoption by role type
 - User session duration by active role
 
 ### Error Tracking
+
 - Role permission validation failures
 - Data loading errors by role context
 - Navigation failures in role-specific views
@@ -920,6 +980,7 @@ test('System admin can switch to org admin view', async ({ page }) => {
 This enhancement will significantly improve user experience by providing role-appropriate interfaces while maintaining security and flexibility. The phased implementation approach ensures minimal disruption to existing functionality while delivering immediate value to users.
 
 The role-specific views will:
+
 - Reduce cognitive load by showing only relevant information
 - Improve security through proper data scoping
 - Enhance productivity with optimized workflows

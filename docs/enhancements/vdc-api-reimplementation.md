@@ -38,11 +38,13 @@ The current VDC API implementation does not conform to VMware Cloud Director sta
 ## API Specification
 
 ### Base URL
+
 ```
 /api/admin/org/{orgId}/vdcs
 ```
 
 ### Authentication
+
 - Requires VMware Cloud Director Bearer token authentication (matches Go server JWT implementation)
 - System Administrator role required for all operations
 - Authentication middleware validates user claims for system admin privileges
@@ -50,11 +52,13 @@ The current VDC API implementation does not conform to VMware Cloud Director sta
 ### Endpoints
 
 #### 1. List VDCs
+
 ```
 GET /api/admin/org/{orgId}/vdcs
 ```
 
 **Query Parameters:**
+
 - `page` (optional): Page number for pagination
 - `pageSize` (optional): Number of items per page
 - `sortAsc` (optional): Sort field for ascending order
@@ -62,10 +66,11 @@ GET /api/admin/org/{orgId}/vdcs
 - `filter` (optional): Filter expression
 
 **Response:**
+
 ```typescript
 {
   "resultTotal": number,
-  "pageCount": number, 
+  "pageCount": number,
   "page": number,
   "pageSize": number,
   "associations": [],
@@ -74,16 +79,19 @@ GET /api/admin/org/{orgId}/vdcs
 ```
 
 #### 2. Get VDC
+
 ```
 GET /api/admin/org/{orgId}/vdcs/{vdcId}
 ```
 
 **Response:**
+
 ```typescript
-VDC
+VDC;
 ```
 
 #### 3. Create VDC
+
 ```
 POST /api/admin/org/{orgId}/vdcs
 Content-Type: application/json
@@ -100,7 +108,7 @@ Content-Type: application/json
     },
     "memory": {
       "allocated": number,
-      "limit": number, 
+      "limit": number,
       "units": "MB"
     }
   },
@@ -123,6 +131,7 @@ Content-Type: application/json
 ```
 
 #### 4. Update VDC
+
 ```
 PUT /api/admin/org/{orgId}/vdcs/{vdcId}
 Content-Type: application/json
@@ -162,33 +171,36 @@ Content-Type: application/json
 ```
 
 #### 5. Delete VDC
+
 ```
 DELETE /api/admin/org/{orgId}/vdcs/{vdcId}
 ```
 
-**Response:** 
+**Response:**
+
 - `204 No Content` on success
 - `409 Conflict` if VDC contains resources
 
 ## Data Model
 
 ### VDC Entity
+
 ```typescript
 interface VDC {
   id: string; // URN format: urn:vcloud:vdc:uuid
   name: string;
   description?: string;
-  allocationModel: "PayAsYouGo" | "AllocationPool" | "ReservationPool" | "Flex";
+  allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
   computeCapacity: {
     cpu: {
       allocated: number;
       limit: number;
-      units: "MHz";
+      units: 'MHz';
     };
     memory: {
       allocated: number;
       limit: number;
-      units: "MB";
+      units: 'MB';
     };
   };
   providerVdc: {
@@ -200,7 +212,7 @@ interface VDC {
     providerVdcStorageProfile: {
       id: string;
       limit: number;
-      units: "MB";
+      units: 'MB';
       default: boolean;
     };
   };
@@ -219,21 +231,22 @@ interface VDC {
 ```
 
 ### Request/Response Types
+
 ```typescript
 interface CreateVDCRequest {
   name: string;
   description?: string;
-  allocationModel: "PayAsYouGo" | "AllocationPool" | "ReservationPool" | "Flex";
+  allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
   computeCapacity: {
     cpu: {
       allocated: number;
       limit: number;
-      units: "MHz";
+      units: 'MHz';
     };
     memory: {
       allocated: number;
       limit: number;
-      units: "MB";
+      units: 'MB';
     };
   };
   providerVdc: {
@@ -245,7 +258,7 @@ interface CreateVDCRequest {
     providerVdcStorageProfile: {
       id: string;
       limit: number;
-      units: "MB";
+      units: 'MB';
       default: boolean;
     };
   };
@@ -256,17 +269,21 @@ interface CreateVDCRequest {
 interface UpdateVDCRequest {
   name?: string;
   description?: string;
-  allocationModel?: "PayAsYouGo" | "AllocationPool" | "ReservationPool" | "Flex";
+  allocationModel?:
+    | 'PayAsYouGo'
+    | 'AllocationPool'
+    | 'ReservationPool'
+    | 'Flex';
   computeCapacity?: {
     cpu?: {
       allocated?: number;
       limit?: number;
-      units?: "MHz";
+      units?: 'MHz';
     };
     memory?: {
       allocated?: number;
       limit?: number;
-      units?: "MB";
+      units?: 'MB';
     };
   };
   providerVdc?: {
@@ -278,7 +295,7 @@ interface UpdateVDCRequest {
     providerVdcStorageProfile: {
       id: string;
       limit: number;
-      units: "MB";
+      units: 'MB';
       default: boolean;
     };
   };
@@ -298,35 +315,41 @@ interface VDCQueryParams {
 ## Implementation Plan
 
 ### Phase 1: Complete Legacy Removal
+
 1. **Remove old VDC service** (`src/services/vdcs.ts`) - treat as if it never existed
 2. **Remove all legacy VDC types** from `src/types/index.ts`
 3. **Remove any references** to old VDC API throughout codebase
 4. **Clean up old imports** and dependencies
 
 ### Phase 2: Implement New Types
+
 1. **Add new VDC types** to `src/types/index.ts`
 2. **Add VDC query parameters** and request types
 3. **Update QUERY_KEYS** for new VDC structure
 
 ### Phase 3: Implement CloudAPI Service
+
 1. **Create VDCService** (`src/services/cloudapi/VDCService.ts`)
 2. **Implement CRUD operations** following CloudAPI patterns
 3. **Add proper error handling** and response transformation
 4. **Integrate with authentication system**
 
 ### Phase 4: Update React Hooks
+
 1. **Update useRoleBasedVDCs** hook
 2. **Add individual VDC hooks** (useVDC, useCreateVDC, etc.)
 3. **Implement proper query key management**
 4. **Add System Administrator role checks**
 
 ### Phase 5: Update UI Components
+
 1. **Update VDC list components** to use new data model
 2. **Update VDC detail views** with new fields
 3. **Implement create/edit forms** with new schema
 4. **Add proper validation** and error handling
 
 ### Phase 6: Testing & Documentation
+
 1. **Add unit tests** for VDC service
 2. **Add integration tests** for VDC hooks
 3. **Update component tests** for new data model
@@ -335,12 +358,14 @@ interface VDCQueryParams {
 ## Files to be Modified/Created
 
 ### New Files
+
 - `src/services/cloudapi/VDCService.ts` - Main VDC CloudAPI service
 - `src/hooks/useVDC.ts` - Individual VDC management hooks
 - `src/components/vdcs/VDCForm.tsx` - VDC create/edit form
 - `src/components/vdcs/VDCDetails.tsx` - VDC detail view
 
 ### Modified Files
+
 - `src/types/index.ts` - Add new VDC types, remove old ones
 - `src/hooks/useRoleBasedData.ts` - Update VDC hooks
 - `src/pages/admin/VDCs.tsx` - Update to use new API
@@ -348,19 +373,23 @@ interface VDCQueryParams {
 - Any components currently using old VDC API
 
 ### Removed Files
+
 - `src/services/vdcs.ts` - Legacy VDC service
 
 ## Risk Assessment
 
 ### High Risk
+
 - **Complete rewrite**: All VDC-related functionality will be rebuilt from scratch
 - **Integration testing**: Ensuring new implementation works with existing systems
 
-### Medium Risk  
+### Medium Risk
+
 - **CloudAPI authentication**: Ensuring proper bearer token integration
 - **UI component updates**: All VDC interfaces need complete rebuilding
 
 ### Low Risk
+
 - **Clean slate development**: No legacy compatibility constraints simplify implementation
 - **Role restrictions**: System Administrator only reduces access complexity
 - **Testing**: Fresh implementation allows optimal test coverage

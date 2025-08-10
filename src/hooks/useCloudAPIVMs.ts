@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
 import { QUERY_KEYS } from '../types';
@@ -36,17 +35,35 @@ export const useAllCatalogItems = (
   catalogs: Array<{ id: string; name: string }>
 ) => {
   return useQuery({
-    queryKey: ['cloudapi', 'catalogItems', 'all', catalogs.map((c) => c.id)],
+    queryKey: QUERY_KEYS.allCatalogItems(catalogs.map((c) => c.id)),
     queryFn: async () => {
       const results = await Promise.all(
         catalogs.map(async (catalog) => {
           try {
-            const response = await VMService.getCatalogItems(catalog.id);
-            return response.values.map((item) => ({
-              ...item,
-              catalog_id: catalog.id,
-              catalog_name: catalog.name,
-            }));
+            // Fetch all pages of catalog items for this catalog
+            let allItems: any[] = [];
+            let page = 1;
+            let hasMore = true;
+
+            while (hasMore) {
+              const response = await VMService.getCatalogItems(catalog.id, {
+                page,
+                pageSize: 100,
+              });
+              const pageItems = response.values.map((item) => ({
+                ...item,
+                catalog_id: catalog.id,
+                catalog_name: catalog.name,
+              }));
+
+              allItems = allItems.concat(pageItems);
+
+              // Check if there are more pages
+              hasMore = response.pageCount > page;
+              page++;
+            }
+
+            return allItems;
           } catch (error) {
             console.warn(
               `Failed to load catalog items for catalog ${catalog.name}:`,
@@ -103,29 +120,21 @@ export const useInstantiateTemplate = () => {
  * Hook to monitor vApp status during creation
  */
 export const useVAppStatus = (vappId?: string) => {
-  const query = useQuery({
+  return useQuery({
     queryKey: QUERY_KEYS.vapp(vappId || ''),
     queryFn: () => VMService.getVApp(vappId!),
     enabled: !!vappId,
     staleTime: 0, // Always fetch fresh data for status monitoring
+    refetchInterval: (query) => {
+      // Poll every 2 seconds if status is INSTANTIATING or UNKNOWN
+      const data = query.state.data;
+      if (data?.status === 'INSTANTIATING' || data?.status === 'UNKNOWN') {
+        return 2000;
+      }
+      // Otherwise, stop polling
+      return false;
+    },
   });
-
-  // Set up refetch interval based on status
-  const { refetch } = query;
-  React.useEffect(() => {
-    if (!query.data || !vappId) return;
-
-    const status = query.data.status;
-    if (status === 'INSTANTIATING' || status === 'UNKNOWN') {
-      const interval = setInterval(() => {
-        refetch();
-      }, 2000);
-
-      return () => clearInterval(interval);
-    }
-  }, [query.data, vappId, refetch]);
-
-  return query;
 };
 
 /**
@@ -287,10 +296,13 @@ export const useDeleteVM = () => {
 
   return useMutation({
     mutationFn: (vmId: string) => VMService.deleteVM(vmId),
-    onSuccess: () => {
+    onSuccess: (_, vmId) => {
       // Invalidate all VM and vApp queries
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVMs });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
+      // Remove the specific VM detail cache
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.vmHardware(vmId) });
     },
   });
 };

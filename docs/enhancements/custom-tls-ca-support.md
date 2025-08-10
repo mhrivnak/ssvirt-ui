@@ -9,7 +9,7 @@ This enhancement proposal adds an nginx proxy sidecar container to the SSVIRT UI
 Currently, the SSVIRT UI cannot establish secure connections to API servers that use custom CA certificates or self-signed certificates due to browser security limitations. This is a common scenario in:
 
 1. **OpenShift/Kubernetes environments** where routes use custom certificates
-2. **Enterprise environments** with internal certificate authorities  
+2. **Enterprise environments** with internal certificate authorities
 3. **Development/testing environments** using self-signed certificates
 
 Browser security models prevent JavaScript from programmatically adding certificates to the trust store, causing API calls to fail with certificate validation errors.
@@ -39,6 +39,7 @@ Browser → HTTPS (OpenShift Route) → HTTP → Pod [nginx proxy + UI container
 ```
 
 The solution uses a sidecar proxy container that:
+
 - Serves the React UI on `/`
 - Proxies API requests from `/api/*` to the backend API service
 - Handles custom CA certificate validation for internal API communication
@@ -59,37 +60,37 @@ spec:
   template:
     spec:
       containers:
-      # Existing UI container
-      - name: ssvirt-ui
-        image: quay.io/mhrivnak/ssvirt-ui:latest
-        ports:
-        - containerPort: 8080
-          name: ui
-        volumeMounts:
-        - name: config-volume
-          mountPath: /opt/app-root/src/dist/config.json
-          subPath: config.json
-          readOnly: true
-        
-      # New nginx proxy sidecar
-      - name: nginx-proxy
-        image: registry.access.redhat.com/ubi9/nginx-126:latest
-        ports:
-        - containerPort: 8081
-          name: proxy
-        volumeMounts:
-        - name: nginx-config
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
-          readOnly: true
-      
+        # Existing UI container
+        - name: ssvirt-ui
+          image: quay.io/mhrivnak/ssvirt-ui:latest
+          ports:
+            - containerPort: 8080
+              name: ui
+          volumeMounts:
+            - name: config-volume
+              mountPath: /opt/app-root/src/dist/config.json
+              subPath: config.json
+              readOnly: true
+
+        # New nginx proxy sidecar
+        - name: nginx-proxy
+          image: registry.access.redhat.com/ubi9/nginx-126:latest
+          ports:
+            - containerPort: 8081
+              name: proxy
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+
       volumes:
-      - name: config-volume
-        configMap:
-          name: ssvirt-ui-config
-      - name: nginx-config
-        configMap:
-          name: ssvirt-nginx-config
+        - name: config-volume
+          configMap:
+            name: ssvirt-ui-config
+        - name: nginx-config
+          configMap:
+            name: ssvirt-nginx-config
 ```
 
 #### 2. nginx Configuration
@@ -106,7 +107,7 @@ data:
     events {
         worker_connections 1024;
     }
-    
+
     http {
         upstream ui_backend {
             server localhost:8080;
@@ -151,9 +152,9 @@ metadata:
   name: ssvirt-ui
 spec:
   ports:
-  - port: 8080
-    targetPort: 8081  # Point to nginx proxy port
-    name: http
+    - port: 8080
+      targetPort: 8081 # Point to nginx proxy port
+      name: http
   selector:
     app: ssvirt-ui
 ```
@@ -182,9 +183,10 @@ data:
 ### Deployment Process
 
 1. **Apply all manifests**:
+
 ```bash
 kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/nginx-configmap.yaml  
+kubectl apply -f k8s/nginx-configmap.yaml
 kubectl apply -f k8s/deployment.yaml
 ```
 
@@ -233,25 +235,29 @@ Update README.md with:
 ## Alternatives Considered
 
 ### 1. Client-Side Certificate Management
+
 - **Pros**: No additional containers
 - **Cons**: Browser security limitations make this impossible
 
 ### 2. Envoy Proxy Sidecar
+
 - **Pros**: More advanced routing capabilities
 - **Cons**: More complex configuration, larger resource footprint
 
 ### 3. API Gateway Solution
+
 - **Pros**: Centralized API management
 - **Cons**: Additional infrastructure complexity
 
 ### 4. Service Mesh Integration
+
 - **Pros**: Comprehensive network management
 - **Cons**: Requires service mesh installation and management
 
 ## Implementation Plan
 
 1. **Phase 1**: Create nginx configuration and multi-container deployment
-2. **Phase 2**: Update UI configuration to use relative API paths  
+2. **Phase 2**: Update UI configuration to use relative API paths
 3. **Phase 3**: Add CA certificate support for internal API communication
 4. **Phase 4**: Update documentation and testing
 5. **Phase 5**: Performance optimization and monitoring

@@ -20,6 +20,10 @@ import {
 
 const BASE_URL = '/api/v1';
 
+// Module-level stores for stable data across requests
+const vmStore = generateMockCloudApiVMs();
+const vappStore = generateMockVApps();
+
 // Helper function to create paginated response
 const createPaginatedResponse = <T>(
   data: T[],
@@ -522,17 +526,17 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
 
-    const vms = generateMockCloudApiVMs();
     return HttpResponse.json(
-      createCloudApiPaginatedResponse(vms, page, pageSize)
+      createCloudApiPaginatedResponse(vmStore, page, pageSize)
     );
   }),
 
   // Get specific VM
   http.get('/cloudapi/1.0.0/vms/:vmUrn', ({ params }) => {
     const { vmUrn } = params;
-    const vms = generateMockCloudApiVMs();
-    const vm = vms.find((v) => v.id === decodeURIComponent(vmUrn as string));
+    const vm = vmStore.find(
+      (v) => v.id === decodeURIComponent(vmUrn as string)
+    );
 
     if (!vm) {
       return HttpResponse.json(
@@ -632,7 +636,14 @@ export const handlers = [
   }),
 
   // Delete VM
-  http.delete('/cloudapi/1.0.0/vms/:vmUrn', () => {
+  http.delete('/cloudapi/1.0.0/vms/:vmUrn', ({ params }) => {
+    const { vmUrn } = params;
+    const vmIndex = vmStore.findIndex(
+      (v) => v.id === decodeURIComponent(vmUrn as string)
+    );
+    if (vmIndex !== -1) {
+      vmStore.splice(vmIndex, 1);
+    }
     return HttpResponse.json(
       { message: 'VM deletion initiated' },
       { status: 202 }
@@ -647,17 +658,15 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
 
-    const vapps = generateMockVApps();
     return HttpResponse.json(
-      createCloudApiPaginatedResponse(vapps, page, pageSize)
+      createCloudApiPaginatedResponse(vappStore, page, pageSize)
     );
   }),
 
   // Get specific vApp
   http.get('/cloudapi/1.0.0/vapps/:vappUrn', ({ params }) => {
     const { vappUrn } = params;
-    const vapps = generateMockVApps();
-    const vapp = vapps.find(
+    const vapp = vappStore.find(
       (v) => v.id === decodeURIComponent(vappUrn as string)
     );
 
@@ -676,7 +685,14 @@ export const handlers = [
   }),
 
   // Delete vApp
-  http.delete('/cloudapi/1.0.0/vapps/:vappUrn', () => {
+  http.delete('/cloudapi/1.0.0/vapps/:vappUrn', ({ params }) => {
+    const { vappUrn } = params;
+    const vappIndex = vappStore.findIndex(
+      (v) => v.id === decodeURIComponent(vappUrn as string)
+    );
+    if (vappIndex !== -1) {
+      vappStore.splice(vappIndex, 1);
+    }
     return HttpResponse.json(
       { message: 'vApp deletion initiated' },
       { status: 202 }
@@ -698,6 +714,9 @@ export const handlers = [
 
       // Update status to INSTANTIATING initially
       vapp.status = 'INSTANTIATING';
+
+      // Add to store for consistent access
+      vappStore.push(vapp);
 
       return HttpResponse.json(createCloudApiPaginatedResponse([vapp], 1, 25), {
         status: 202,

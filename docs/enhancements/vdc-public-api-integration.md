@@ -7,15 +7,17 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ## Current State
 
 ### Existing VDC Implementation
+
 - **Service**: `src/services/cloudapi/index.ts` - CloudAPI VDC operations (admin only)
 - **Hooks**: `src/hooks/index.ts` - React Query hooks for VDC management
 - **Types**: `src/types/index.ts` - VDC interfaces and query parameters
-- **UI Components**: 
+- **UI Components**:
   - `src/pages/organizations/OrganizationDetail.tsx` - organization VDC listing
   - Various VDC-related components across the application
 - **Authentication**: System admin authentication with full access
 
 ### Current Limitations
+
 1. **Admin-Only Access** - Current VDC endpoints require system admin privileges
 2. **Single API Pattern** - All users use the same admin API endpoints
 3. **No Role-Based Access** - No differentiation between admin and regular user access
@@ -24,6 +26,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ## Target State
 
 ### Role-Based VDC Access
+
 - **System Administrators**: Continue using `/api/admin/org/{orgId}/vdcs` endpoints
 - **Regular Users**: Use new `/cloudapi/1.0.0/vdcs` endpoints with organization-scoped access
 - **Automatic Role Detection**: Service layer automatically routes to appropriate API based on user permissions
@@ -34,23 +37,30 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 1: Service Layer Enhancement
 
 1. **Create new VDC Public Service: `src/services/cloudapi/VDCPublicService.ts`**
+
    ```typescript
    export class VDCPublicService {
      // List VDCs accessible to current user's organization(s)
-     static async getVDCs(params?: VDCQueryParams): Promise<VCloudPaginatedResponse<VDC>>
-     
+     static async getVDCs(
+       params?: VDCQueryParams
+     ): Promise<VCloudPaginatedResponse<VDC>>;
+
      // Get specific VDC by URN
-     static async getVDC(vdcId: string): Promise<VDC>
+     static async getVDC(vdcId: string): Promise<VDC>;
    }
    ```
 
 2. **Enhanced VDC Service Factory: `src/services/cloudapi/VDCService.ts`**
+
    ```typescript
    export class VDCService {
      // Intelligent routing based on user permissions
-     static async getVDCs(orgIdOrParams?: string | VDCApiQueryParams, adminParams?: VDCAdminQueryParams): Promise<VCloudPaginatedResponse<VDC>> {
+     static async getVDCs(
+       orgIdOrParams?: string | VDCApiQueryParams,
+       adminParams?: VDCAdminQueryParams
+     ): Promise<VCloudPaginatedResponse<VDC>> {
        const userPermissions = await AuthService.getCurrentUserPermissions();
-       
+
        if (userPermissions.canManageSystem) {
          // Route to admin API - orgIdOrParams is orgId, adminParams contains query params
          const orgId = orgIdOrParams as string;
@@ -61,10 +71,10 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
          return VDCPublicService.getVDCs(params);
        }
      }
-     
+
      static async getVDC(vdcId: string): Promise<VDC> {
        const userPermissions = await AuthService.getCurrentUserPermissions();
-       
+
        if (userPermissions.canManageSystem) {
          return VDCAdminService.getVDC(vdcId);
        } else {
@@ -81,6 +91,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 2: Authentication Enhancement
 
 1. **Update Authentication Service**
+
    ```typescript
    // Add to AuthService in src/services/auth.ts
    export class AuthService {
@@ -88,11 +99,11 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
        // Check user roles and capabilities
        // Return permissions object with role-based flags
      }
-     
+
      static isSystemAdmin(user: User): boolean {
        // Check if user has system admin role
      }
-     
+
      static getUserOrganizations(user: User): EntityRef[] {
        // Get list of organizations user belongs to
      }
@@ -107,6 +118,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 3: Type System Updates
 
 1. **Enhance VDC types in `src/types/index.ts`**
+
    ```typescript
    // Add public API specific query parameters
    export interface VDCPublicQueryParams {
@@ -114,13 +126,13 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
      pageSize?: number;
      // Note: Public API has limited filtering compared to admin API
    }
-   
+
    // Update existing VDCQueryParams for admin API
    export interface VDCAdminQueryParams extends VDCQueryParams {
      // Keep all existing admin-specific parameters
      orgId?: string; // Admin can specify organization
    }
-   
+
    // Union type for service layer
    export type VDCApiQueryParams = VDCPublicQueryParams | VDCAdminQueryParams;
    ```
@@ -139,6 +151,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 4: Hook Layer Updates
 
 1. **Update existing hooks in `src/hooks/index.ts`**
+
    ```typescript
    // Enhanced useVDCs hook with automatic API selection
    export const useVDCs = (params?: VDCQueryParams) => {
@@ -149,7 +162,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
        cacheTime: 15 * 60 * 1000, // 15 minutes
      });
    };
-   
+
    // Enhanced useVDC hook
    export const useVDC = (vdcId: string) => {
      return useQuery({
@@ -160,7 +173,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
        cacheTime: 20 * 60 * 1000, // 20 minutes
      });
    };
-   
+
    // Organization-specific VDCs hook (primarily for public API)
    export const useOrganizationVDCs = (orgId?: string) => {
      return useQuery({
@@ -186,12 +199,13 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 5: UI Component Updates
 
 1. **Update Organization Detail Page**
+
    ```typescript
    // src/pages/organizations/OrganizationDetail.tsx
    const OrganizationDetail: React.FC = () => {
      const { data: userPermissions } = useUserPermissions();
      const { data: vdcsResponse } = useOrganizationVDCs(organization?.id);
-     
+
      // Component will automatically get appropriate data based on user role
      // No changes needed to rendering logic
    };
@@ -210,17 +224,18 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
 ### Phase 6: Mock Data and Testing
 
 1. **Update mock handlers in `src/mocks/handlers.ts`**
+
    ```typescript
    // Add public API endpoints
    rest.get('/cloudapi/1.0.0/vdcs', (req, res, ctx) => {
      // Mock public VDC API response
      // Filter VDCs based on mock user's organization
    });
-   
+
    rest.get('/cloudapi/1.0.0/vdcs/:vdcId', (req, res, ctx) => {
      // Mock single VDC retrieval for public API
    });
-   
+
    // Keep existing admin API mocks
    rest.get('/api/admin/org/:orgId/vdcs', (req, res, ctx) => {
      // Existing admin API mock
@@ -228,6 +243,7 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
    ```
 
 2. **Add permission-based mock data**
+
    ```typescript
    // src/mocks/data.ts
    export const mockUserPermissions: UserPermissions = {
@@ -236,10 +252,10 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
      canViewVDCs: true,
      canManageVDCs: false,
      accessibleOrganizations: [
-       { id: 'urn:vcloud:org:test-org-1', name: 'Test Organization 1' }
+       { id: 'urn:vcloud:org:test-org-1', name: 'Test Organization 1' },
      ],
    };
-   
+
    export const mockAdminPermissions: UserPermissions = {
      canManageSystem: true, // System admin
      canManageOrganizations: true,
@@ -293,10 +309,10 @@ GET /cloudapi/1.0.0/vdcs/{vdc_urn}
 
 ```typescript
 // List VDCs for specific organization (admin only)
-GET /api/admin/org/{orgId}/vdcs
+GET / api / admin / org / { orgId } / vdcs;
 
 // Get VDC details (admin only)
-GET /api/admin/org/{orgId}/vdcs/{vdcId}
+GET / api / admin / org / { orgId } / vdcs / { vdcId };
 ```
 
 ### Authentication Flow
@@ -307,6 +323,7 @@ GET /api/admin/org/{orgId}/vdcs/{vdcId}
    - User permissions determined from session data
 
 2. **API Selection Logic**
+
    ```typescript
    if (user.roles.includes('System Administrator')) {
      // Use admin API endpoints
@@ -325,11 +342,13 @@ GET /api/admin/org/{orgId}/vdcs/{vdcId}
 ## Breaking Changes and Migration
 
 ### Non-Breaking Implementation
+
 - **Backward Compatibility**: All existing components continue to work
 - **Gradual Migration**: Service layer changes are transparent to UI components
 - **Admin Functionality Preserved**: System admins retain all existing capabilities
 
 ### Enhanced Functionality
+
 - **Regular User Access**: Non-admin users can now view VDCs from their organizations
 - **Role-Based UX**: UI adapts based on user permissions
 - **Improved Performance**: Optimized API calls based on user scope
@@ -337,18 +356,21 @@ GET /api/admin/org/{orgId}/vdcs/{vdcId}
 ## Testing Strategy
 
 ### Unit Tests
+
 - Service layer routing logic
 - Permission-based API selection
 - Mock data consistency between API endpoints
 - Error handling for permission denied scenarios
 
 ### Integration Tests
+
 - End-to-end VDC browsing for different user roles
 - Permission change handling
 - API failover scenarios
 - Session management and token handling
 
 ### User Acceptance Testing
+
 - System admin workflow (no regression)
 - Regular user VDC access
 - Organization-scoped data visibility
@@ -357,17 +379,20 @@ GET /api/admin/org/{orgId}/vdcs/{vdcId}
 ## Performance Considerations
 
 ### Caching Strategy
+
 - **User Permissions**: 10-minute cache with manual invalidation on role changes
 - **VDC Data**: 5-15 minute cache depending on user role and data sensitivity
 - **Organization Data**: Longer cache for regular users, shorter for admins
 
 ### API Optimization
+
 - Batch permission checks where possible
 - Minimize redundant API calls
 - Implement efficient query key serialization
 - Use React Query's intelligent caching
 
 ### Loading States
+
 - Progressive loading based on user permissions
 - Skeleton loading for VDC lists
 - Graceful degradation for permission failures
@@ -375,12 +400,14 @@ GET /api/admin/org/{orgId}/vdcs/{vdcId}
 ## Security Considerations
 
 ### Access Control
+
 - Server-side permission enforcement (not just UI hiding)
 - Proper JWT token validation
 - Organization scope enforcement in public API
 - Audit logging for VDC access
 
 ### Data Protection
+
 - No sensitive admin data exposed to regular users
 - Proper error messages without information leakage
 - Secure token storage and transmission
