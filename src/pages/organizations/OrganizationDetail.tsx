@@ -55,7 +55,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   useOrganization,
   useToggleOrganizationStatus,
-  useVDCs,
+  useOrganizationVDCs,
   useCatalogs,
   useUserPermissions,
 } from '../../hooks';
@@ -74,10 +74,13 @@ const OrganizationDetail: React.FC = () => {
   const { data: orgResponse, isLoading, error } = useOrganization(id || '');
   const { data: userPermissions } = useUserPermissions();
 
-  // Use role-based VDC access
-  const { data: vdcsResponse } = useVDCs(
-    userPermissions?.canManageSystem ? id || '' : undefined
-  );
+  // Use organization-scoped VDC access
+  const { data: vdcsResponse } = useOrganizationVDCs();
+
+  // Create permission guard for organization management
+  const canManageThisOrg =
+    userPermissions?.canManageSystem ||
+    userPermissions?.canManageOrganization?.(id || '');
   const { data: catalogsResponse } = useCatalogs();
 
   // Early validation for id parameter
@@ -209,54 +212,60 @@ const OrganizationDetail: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
               <CardBody>
                 <Stack hasGutter>
-                  <StackItem>
-                    <Button
-                      variant="primary"
-                      icon={<EditIcon />}
-                      onClick={() =>
-                        navigate(
-                          ROUTES.ORGANIZATION_EDIT.replace(
-                            ':id',
-                            organization.id
+                  {canManageThisOrg && (
+                    <StackItem>
+                      <Button
+                        variant="primary"
+                        icon={<EditIcon />}
+                        onClick={() =>
+                          navigate(
+                            ROUTES.ORGANIZATION_EDIT.replace(
+                              ':id',
+                              organization.id
+                            )
                           )
-                        )
-                      }
-                      isBlock
-                    >
-                      Edit Organization
-                    </Button>
-                  </StackItem>
-                  <StackItem>
-                    <Button
-                      variant="secondary"
-                      icon={<UsersIcon />}
-                      onClick={() =>
-                        navigate(
-                          ROUTES.ORGANIZATION_USERS.replace(
-                            ':id',
-                            organization.id
+                        }
+                        isBlock
+                      >
+                        Edit Organization
+                      </Button>
+                    </StackItem>
+                  )}
+                  {canManageThisOrg && (
+                    <StackItem>
+                      <Button
+                        variant="secondary"
+                        icon={<UsersIcon />}
+                        onClick={() =>
+                          navigate(
+                            ROUTES.ORGANIZATION_USERS.replace(
+                              ':id',
+                              organization.id
+                            )
                           )
-                        )
-                      }
-                      isBlock
-                    >
-                      Manage Users
-                    </Button>
-                  </StackItem>
-                  <StackItem>
-                    <Button
-                      variant="secondary"
-                      icon={<PlusCircleIcon />}
-                      onClick={() =>
-                        navigate('/vdcs/create', {
-                          state: { organizationId: organization.id },
-                        })
-                      }
-                      isBlock
-                    >
-                      Create VDC
-                    </Button>
-                  </StackItem>
+                        }
+                        isBlock
+                      >
+                        Manage Users
+                      </Button>
+                    </StackItem>
+                  )}
+                  {canManageThisOrg && (
+                    <StackItem>
+                      <Button
+                        variant="secondary"
+                        icon={<PlusCircleIcon />}
+                        onClick={() =>
+                          navigate('/vdcs/create', {
+                            state: { organizationId: organization.id },
+                          })
+                        }
+                        isBlock
+                      >
+                        Create VDC
+                      </Button>
+                    </StackItem>
+                  )}
                   <StackItem>
                     <Button
                       variant="link"
@@ -332,20 +341,22 @@ const OrganizationDetail: React.FC = () => {
       <CardTitle>
         <Split>
           <SplitItem isFilled>Virtual Data Centers</SplitItem>
-          <SplitItem>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<PlusCircleIcon />}
-              onClick={() =>
-                navigate('/vdcs/create', {
-                  state: { organizationId: organization.id },
-                })
-              }
-            >
-              Create VDC
-            </Button>
-          </SplitItem>
+          {canManageThisOrg && (
+            <SplitItem>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<PlusCircleIcon />}
+                onClick={() =>
+                  navigate('/vdcs/create', {
+                    state: { organizationId: organization.id },
+                  })
+                }
+              >
+                Create VDC
+              </Button>
+            </SplitItem>
+          )}
         </Split>
       </CardTitle>
       <CardBody>
@@ -355,20 +366,24 @@ const OrganizationDetail: React.FC = () => {
               No Virtual Data Centers
             </Title>
             <EmptyStateBody>
-              This organization doesn't have any VDCs yet. Create one to get
-              started.
+              This organization doesn't have any VDCs yet.{' '}
+              {canManageThisOrg
+                ? 'Create one to get started.'
+                : 'Contact an administrator to create VDCs.'}
             </EmptyStateBody>
-            <Button
-              variant="primary"
-              icon={<PlusCircleIcon />}
-              onClick={() =>
-                navigate('/vdcs/create', {
-                  state: { organizationId: organization.id },
-                })
-              }
-            >
-              Create VDC
-            </Button>
+            {canManageThisOrg && (
+              <Button
+                variant="primary"
+                icon={<PlusCircleIcon />}
+                onClick={() =>
+                  navigate('/vdcs/create', {
+                    state: { organizationId: organization.id },
+                  })
+                }
+              >
+                Create VDC
+              </Button>
+            )}
           </EmptyState>
         ) : (
           <Table aria-label="VDCs table" variant="compact">
@@ -549,35 +564,42 @@ const OrganizationDetail: React.FC = () => {
             </SplitItem>
             <SplitItem>
               <Flex spaceItems={{ default: 'spaceItemsSm' }}>
-                <FlexItem>
-                  <Button
-                    variant="secondary"
-                    icon={<EditIcon />}
-                    onClick={() =>
-                      navigate(
-                        ROUTES.ORGANIZATION_EDIT.replace(':id', organization.id)
-                      )
-                    }
-                  >
-                    Edit
-                  </Button>
-                </FlexItem>
-                <FlexItem>
-                  <Button
-                    variant="secondary"
-                    icon={<UsersIcon />}
-                    onClick={() =>
-                      navigate(
-                        ROUTES.ORGANIZATION_USERS.replace(
-                          ':id',
-                          organization.id
+                {canManageThisOrg && (
+                  <FlexItem>
+                    <Button
+                      variant="secondary"
+                      icon={<EditIcon />}
+                      onClick={() =>
+                        navigate(
+                          ROUTES.ORGANIZATION_EDIT.replace(
+                            ':id',
+                            organization.id
+                          )
                         )
-                      )
-                    }
-                  >
-                    Manage Users
-                  </Button>
-                </FlexItem>
+                      }
+                    >
+                      Edit
+                    </Button>
+                  </FlexItem>
+                )}
+                {canManageThisOrg && (
+                  <FlexItem>
+                    <Button
+                      variant="secondary"
+                      icon={<UsersIcon />}
+                      onClick={() =>
+                        navigate(
+                          ROUTES.ORGANIZATION_USERS.replace(
+                            ':id',
+                            organization.id
+                          )
+                        )
+                      }
+                    >
+                      Manage Users
+                    </Button>
+                  </FlexItem>
+                )}
               </Flex>
             </SplitItem>
           </Split>

@@ -126,7 +126,8 @@ export class PermissionChecker {
       canManageOrganizations: isSystemAdmin,
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
-      accessibleOrganizations: [user.orgEntityRef],
+      // System admins get empty array to indicate access to all orgs
+      accessibleOrganizations: isSystemAdmin ? [] : [user.orgEntityRef],
       canManageOrganization: (orgId: string) =>
         this.canManageOrganization(user, orgId),
     };

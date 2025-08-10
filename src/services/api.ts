@@ -5,6 +5,7 @@ import axios, {
 } from 'axios';
 import { getConfig } from '../utils/constants';
 import type { LoginRequest, SessionResponse, User } from '../types';
+import { ROLE_NAMES } from '../types';
 
 // Session storage key for VMware Cloud Director session data
 const VCD_SESSION_KEY = 'vcd-session';
@@ -49,6 +50,15 @@ const createApiInstance = (): AxiosInstance => {
       if (accessToken && tokenType) {
         // Use Bearer token for authenticated requests (CloudAPI standard)
         config.headers['Authorization'] = `${tokenType} ${accessToken}`;
+      }
+
+      // Add tenant context header for organization-scoped API calls
+      const sessionData = getSessionData();
+      if (sessionData?.operatingOrg?.id) {
+        config.headers['X-VMWARE-VCLOUD-TENANT-CONTEXT'] =
+          sessionData.operatingOrg.id;
+      } else if (sessionData?.org?.id) {
+        config.headers['X-VMWARE-VCLOUD-TENANT-CONTEXT'] = sessionData.org.id;
       }
 
       // Ensure withCredentials is not set for CloudAPI compatibility
@@ -296,10 +306,7 @@ export class AuthService {
 
     // Check if user has system admin role
     const isSystemAdmin = sessionData.roles.some(
-      (role) =>
-        role === 'System Administrator' ||
-        role.toLowerCase().includes('system') ||
-        role.toLowerCase().includes('admin')
+      (role) => role === ROLE_NAMES.SYSTEM_ADMIN
     );
 
     // Extract user's organizations
@@ -332,12 +339,7 @@ export class AuthService {
       return false;
     }
 
-    return sessionData.roles.some(
-      (role) =>
-        role === 'System Administrator' ||
-        role.toLowerCase().includes('system') ||
-        role.toLowerCase().includes('admin')
-    );
+    return sessionData.roles.some((role) => role === ROLE_NAMES.SYSTEM_ADMIN);
   }
 
   /**

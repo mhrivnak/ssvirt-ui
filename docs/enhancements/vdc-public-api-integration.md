@@ -48,14 +48,16 @@ This document outlines the plan to integrate the new VDC Public API endpoints fo
    ```typescript
    export class VDCService {
      // Intelligent routing based on user permissions
-     static async getVDCs(params?: VDCQueryParams): Promise<VCloudPaginatedResponse<VDC>> {
+     static async getVDCs(orgIdOrParams?: string | VDCApiQueryParams, adminParams?: VDCAdminQueryParams): Promise<VCloudPaginatedResponse<VDC>> {
        const userPermissions = await AuthService.getCurrentUserPermissions();
        
        if (userPermissions.canManageSystem) {
-         // Route to admin API
-         return VDCAdminService.getVDCs(params);
+         // Route to admin API - orgIdOrParams is orgId, adminParams contains query params
+         const orgId = orgIdOrParams as string;
+         return VDCAdminService.getVDCs(orgId, adminParams);
        } else {
-         // Route to public API
+         // Route to public API - orgIdOrParams contains query parameters
+         const params = orgIdOrParams as VDCApiQueryParams;
          return VDCPublicService.getVDCs(params);
        }
      }

@@ -28,7 +28,8 @@ import { ROUTES } from '../../utils/constants';
 const VDCDetail: React.FC = () => {
   const { orgId, vdcId } = useParams<{ orgId: string; vdcId: string }>();
   const navigate = useNavigate();
-  const { data: userPermissions } = useUserPermissions();
+  const { data: userPermissions, isLoading: isLoadingPermissions } =
+    useUserPermissions();
 
   // Call hooks before any early returns - use role-based API routing
   const {
@@ -39,6 +40,15 @@ const VDCDetail: React.FC = () => {
     userPermissions?.canManageSystem ? orgId || '' : vdcId || '',
     userPermissions?.canManageSystem ? vdcId : undefined
   );
+
+  // Show loading spinner while permissions are loading
+  if (isLoadingPermissions) {
+    return (
+      <PageSection>
+        <LoadingSpinner />
+      </PageSection>
+    );
+  }
 
   // Check if user has permission to view VDCs
   if (!userPermissions?.canViewVDCs) {

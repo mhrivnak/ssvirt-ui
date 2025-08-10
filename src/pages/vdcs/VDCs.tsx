@@ -52,7 +52,8 @@ import { ROUTES } from '../../utils/constants';
 const VDCs: React.FC = () => {
   const navigate = useNavigate();
   const { orgId } = useParams<{ orgId: string }>();
-  const { data: userPermissions } = useUserPermissions();
+  const { data: userPermissions, isLoading: isLoadingPermissions } =
+    useUserPermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [allocationFilter, setAllocationFilter] = useState<string>('all');
@@ -104,6 +105,15 @@ const VDCs: React.FC = () => {
   );
   const deleteVDCMutation = useDeleteVDC();
 
+  // Show loading spinner while permissions are loading
+  if (isLoadingPermissions) {
+    return (
+      <PageSection>
+        <LoadingSpinner />
+      </PageSection>
+    );
+  }
+
   // Check if user has permission to view VDCs
   if (!userPermissions?.canViewVDCs) {
     return (
@@ -149,6 +159,14 @@ const VDCs: React.FC = () => {
   };
 
   const handleDelete = async (vdc: VDC) => {
+    // Check permissions before allowing delete
+    if (!userPermissions?.canManageVDCs || !orgId) {
+      setErrorMessage(
+        'You do not have permission to delete VDCs or organization ID is missing'
+      );
+      return;
+    }
+
     if (
       window.confirm(
         `Are you sure you want to delete VDC "${vdc.name}"? This will also delete all VMs and resources in this VDC.`
@@ -156,7 +174,7 @@ const VDCs: React.FC = () => {
     ) {
       try {
         await deleteVDCMutation.mutateAsync({
-          orgId: orgId || '',
+          orgId: orgId,
           vdcId: vdc.id,
         });
       } catch (error) {
@@ -490,19 +508,23 @@ const VDCs: React.FC = () => {
                                     `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}`
                                   ),
                               },
-                              {
-                                title: 'Edit',
-                                onClick: () =>
-                                  navigate(
-                                    `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}/edit`
-                                  ),
-                              },
-                              { isSeparator: true },
-                              {
-                                title: 'Delete',
-                                onClick: () => handleDelete(vdc),
-                                isDisabled: deleteVDCMutation.isPending,
-                              },
+                              ...(userPermissions?.canManageVDCs
+                                ? [
+                                    {
+                                      title: 'Edit',
+                                      onClick: () =>
+                                        navigate(
+                                          `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdc.id}/edit`
+                                        ),
+                                    },
+                                    { isSeparator: true },
+                                    {
+                                      title: 'Delete',
+                                      onClick: () => handleDelete(vdc),
+                                      isDisabled: deleteVDCMutation.isPending,
+                                    },
+                                  ]
+                                : []),
                             ]}
                           />
                         </Td>

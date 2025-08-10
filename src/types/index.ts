@@ -702,6 +702,7 @@ export const QUERY_KEYS = {
   // Auth
   session: ['auth', 'session'] as const,
   userProfile: ['auth', 'user'] as const,
+  userPermissions: ['auth', 'permissions'] as const,
   userPreferences: ['auth', 'user', 'preferences'] as const,
   securitySettings: ['auth', 'user', 'security'] as const,
 

@@ -1,14 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { AxiosError } from 'axios';
 import { VDCService } from '../services';
 import { QUERY_KEYS } from '../types';
 import { useUserPermissions } from './usePermissions';
 import type {
   VDCApiQueryParams,
+  VDCPublicQueryParams,
   VDCQueryParams,
   CreateVDCRequest,
   UpdateVDCRequest,
 } from '../types';
+
+/**
+ * Check if error is a permission error based on HTTP status codes
+ */
+const isPermissionError = (error: unknown): boolean => {
+  if (error instanceof AxiosError) {
+    return error.response?.status === 401 || error.response?.status === 403;
+  }
+  return false;
+};
 
 /**
  * Hook to fetch VDCs with automatic API routing
@@ -43,7 +55,7 @@ export const useVDCs = (
         return await VDCService.getVDCs(orgIdOrParams, adminParams);
       } catch (error) {
         // Handle permission errors gracefully
-        if (error instanceof Error && error.message.includes('permission')) {
+        if (isPermissionError(error)) {
           throw new Error('You do not have permission to view VDCs');
         }
         throw error;
@@ -56,7 +68,7 @@ export const useVDCs = (
     gcTime: 15 * 60 * 1000, // 15 minutes
     retry: (failureCount, error) => {
       // Don't retry permission errors
-      if (error instanceof Error && error.message.includes('permission')) {
+      if (isPermissionError(error)) {
         return false;
       }
       return failureCount < 3;
@@ -79,21 +91,29 @@ export const useVDC = (vdcIdOrOrgId: string, vdcId?: string) => {
     queryKey: QUERY_KEYS.vdc(actualVdcId),
     queryFn: async () => {
       try {
-        return await VDCService.getVDC(vdcIdOrOrgId, vdcId);
+        if (vdcId) {
+          return await VDCService.getVDC(vdcIdOrOrgId, vdcId);
+        } else {
+          return await VDCService.getVDC(vdcIdOrOrgId);
+        }
       } catch (error) {
         // Handle permission errors gracefully
-        if (error instanceof Error && error.message.includes('permission')) {
+        if (isPermissionError(error)) {
           throw new Error('You do not have permission to view this VDC');
         }
         throw error;
       }
     },
-    enabled: !!actualVdcId && (userPermissions?.canViewVDCs ?? false),
+    enabled:
+      !!actualVdcId &&
+      (userPermissions?.canViewVDCs ?? false) &&
+      // For admin users, require both orgId and vdcId parameters
+      (userPermissions?.canManageSystem ? !!vdcId : true),
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 20 * 60 * 1000, // 20 minutes
     retry: (failureCount, error) => {
       // Don't retry permission errors
-      if (error instanceof Error && error.message.includes('permission')) {
+      if (isPermissionError(error)) {
         return false;
       }
       return failureCount < 3;
@@ -104,7 +124,7 @@ export const useVDC = (vdcIdOrOrgId: string, vdcId?: string) => {
 /**
  * Hook to fetch VDCs for current user's organization(s) (public API)
  */
-export const useOrganizationVDCs = (params?: VDCApiQueryParams) => {
+export const useOrganizationVDCs = (params?: VDCPublicQueryParams) => {
   // Serialize params to ensure stable queryKey
   const serializedParams = useMemo(() => {
     return params ? JSON.stringify(params) : '';

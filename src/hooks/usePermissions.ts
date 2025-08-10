@@ -7,7 +7,7 @@ import { QUERY_KEYS } from '../types';
  */
 export const useUserPermissions = () => {
   return useQuery({
-    queryKey: QUERY_KEYS.userProfile, // Reuse existing user profile query key
+    queryKey: QUERY_KEYS.userPermissions, // Use distinct query key for permissions
     queryFn: () => AuthService.getCurrentUserPermissions(),
     staleTime: 10 * 60 * 1000, // Cache permissions for 10 minutes
     gcTime: 15 * 60 * 1000, // Keep in cache for 15 minutes

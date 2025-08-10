@@ -474,12 +474,15 @@ export const handlers = [
   // CloudAPI Admin VDCs endpoints (Admin API)
   http.get('/api/admin/org/:orgId/vdcs', ({ params, request }) => {
     const { orgId } = params;
+    const decodedOrgId = decodeURIComponent(orgId as string);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
 
     // For admin API, return VDCs for the specific organization
-    const vdcs = generateMockVDCs().filter((vdc) => vdc.org?.id === orgId);
+    const vdcs = generateMockVDCs().filter(
+      (vdc) => vdc.org?.id === decodedOrgId
+    );
     return HttpResponse.json(
       createCloudApiPaginatedResponse(vdcs, page, pageSize)
     );
@@ -487,8 +490,12 @@ export const handlers = [
 
   http.get('/api/admin/org/:orgId/vdcs/:vdcId', ({ params }) => {
     const { orgId, vdcId } = params;
+    const decodedOrgId = decodeURIComponent(orgId as string);
+    const decodedVdcId = decodeURIComponent(vdcId as string);
     const vdcs = generateMockVDCs();
-    const vdc = vdcs.find((v) => v.id === vdcId && v.org?.id === orgId);
+    const vdc = vdcs.find(
+      (v) => v.id === decodedVdcId && v.org?.id === decodedOrgId
+    );
 
     if (!vdc) {
       return HttpResponse.json(
