@@ -13,6 +13,9 @@ import {
   generateMockDashboardStats,
   generateMockRecentActivity,
   generateMockUser,
+  generateMockVApp,
+  generateMockCloudApiVMs,
+  generateMockVApps,
 } from './data';
 
 const BASE_URL = '/api/v1';
@@ -510,4 +513,195 @@ export const handlers = [
 
     return HttpResponse.json(vdc);
   }),
+
+  // CloudAPI VM Management endpoints
+
+  // Get all VMs
+  http.get('/cloudapi/1.0.0/vms', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    const vms = generateMockCloudApiVMs();
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vms, page, pageSize)
+    );
+  }),
+
+  // Get specific VM
+  http.get('/cloudapi/1.0.0/vms/:vmUrn', ({ params }) => {
+    const { vmUrn } = params;
+    const vms = generateMockCloudApiVMs();
+    const vm = vms.find((v) => v.id === decodeURIComponent(vmUrn as string));
+
+    if (!vm) {
+      return HttpResponse.json(
+        {
+          error: 'VM not found',
+          message: 'The requested VM could not be found',
+          details: `VM with URN ${vmUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(vm);
+  }),
+
+  // Get VM hardware configuration
+  http.get(
+    '/cloudapi/1.0.0/vms/:vmUrn/virtualHardwareSection',
+    ({ params }) => {
+      const { vmUrn } = params;
+
+      // Mock hardware section
+      const hardwareSection = {
+        items: [
+          {
+            id: 1,
+            resourceType: 3,
+            elementName: 'CPU',
+            quantity: 2,
+            virtualQuantity: 2,
+            virtualQuantityUnits: 'hertz * 10^6',
+          },
+          {
+            id: 2,
+            resourceType: 4,
+            elementName: 'Memory',
+            quantity: 4096,
+            virtualQuantity: 4096,
+            virtualQuantityUnits: 'byte * 2^20',
+          },
+          {
+            id: 3,
+            resourceType: 17,
+            elementName: 'Hard Disk 1',
+            quantity: 50,
+            virtualQuantity: 50,
+            virtualQuantityUnits: 'byte * 2^30',
+          },
+        ],
+        links: [
+          {
+            rel: 'edit',
+            href: `https://vcd.example.com/cloudapi/1.0.0/vms/${vmUrn}/virtualHardwareSection`,
+            type: 'application/json',
+          },
+        ],
+      };
+
+      return HttpResponse.json(hardwareSection);
+    }
+  ),
+
+  // VM Power Operations
+  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/powerOn', () => {
+    return HttpResponse.json(
+      { message: 'VM power on initiated' },
+      { status: 202 }
+    );
+  }),
+
+  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/powerOff', () => {
+    return HttpResponse.json(
+      { message: 'VM power off initiated' },
+      { status: 202 }
+    );
+  }),
+
+  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/reboot', () => {
+    return HttpResponse.json(
+      { message: 'VM reboot initiated' },
+      { status: 202 }
+    );
+  }),
+
+  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/suspend', () => {
+    return HttpResponse.json(
+      { message: 'VM suspend initiated' },
+      { status: 202 }
+    );
+  }),
+
+  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/reset', () => {
+    return HttpResponse.json(
+      { message: 'VM reset initiated' },
+      { status: 202 }
+    );
+  }),
+
+  // Delete VM
+  http.delete('/cloudapi/1.0.0/vms/:vmUrn', () => {
+    return HttpResponse.json(
+      { message: 'VM deletion initiated' },
+      { status: 202 }
+    );
+  }),
+
+  // CloudAPI vApp Management endpoints
+
+  // Get all vApps
+  http.get('/cloudapi/1.0.0/vapps', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    const vapps = generateMockVApps();
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vapps, page, pageSize)
+    );
+  }),
+
+  // Get specific vApp
+  http.get('/cloudapi/1.0.0/vapps/:vappUrn', ({ params }) => {
+    const { vappUrn } = params;
+    const vapps = generateMockVApps();
+    const vapp = vapps.find(
+      (v) => v.id === decodeURIComponent(vappUrn as string)
+    );
+
+    if (!vapp) {
+      return HttpResponse.json(
+        {
+          error: 'vApp not found',
+          message: 'The requested vApp could not be found',
+          details: `vApp with URN ${vappUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(vapp);
+  }),
+
+  // Delete vApp
+  http.delete('/cloudapi/1.0.0/vapps/:vappUrn', () => {
+    return HttpResponse.json(
+      { message: 'vApp deletion initiated' },
+      { status: 202 }
+    );
+  }),
+
+  // Template instantiation endpoint
+  http.post(
+    '/cloudapi/1.0.0/vdcs/:vdcUrn/actions/instantiateTemplate',
+    async ({ request }) => {
+      const body = (await request.json()) as {
+        name?: string;
+        description?: string;
+        [key: string]: unknown;
+      };
+
+      // Create a new vApp based on the template instantiation request
+      const vapp = generateMockVApp(body?.name, body?.description);
+
+      // Update status to INSTANTIATING initially
+      vapp.status = 'INSTANTIATING';
+
+      return HttpResponse.json(createCloudApiPaginatedResponse([vapp], 1, 25), {
+        status: 202,
+      });
+    }
+  ),
 ];

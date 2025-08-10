@@ -24,7 +24,7 @@ import {
   VirtualMachineIcon,
   ClockIcon,
 } from '@patternfly/react-icons';
-import type { VMCreationProgress } from '../../types';
+import type { VMCreationProgress, VAppStatus } from '../../types';
 
 interface VMCreationProgressProps {
   isOpen: boolean;
@@ -32,6 +32,8 @@ interface VMCreationProgressProps {
   vmName: string;
   vdcName: string;
   progress?: VMCreationProgress;
+  vappId?: string | null;
+  vappStatus?: VAppStatus;
   error?: string;
 }
 
@@ -80,6 +82,7 @@ function VMCreationProgress({
   vmName,
   vdcName,
   progress,
+  vappStatus,
   error,
 }: VMCreationProgressProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -127,6 +130,34 @@ function VMCreationProgress({
       setHasError(true);
     }
   }, [error]);
+
+  // Handle vApp status updates
+  useEffect(() => {
+    if (vappStatus) {
+      switch (vappStatus) {
+        case 'INSTANTIATING':
+          setCurrentStepIndex(1);
+          setCompletedSteps(['validate']);
+          break;
+        case 'RESOLVED':
+          setCurrentStepIndex(2);
+          setCompletedSteps(['validate', 'allocate']);
+          break;
+        case 'DEPLOYED':
+          setCurrentStepIndex(3);
+          setCompletedSteps(['validate', 'allocate', 'create']);
+          break;
+        case 'POWERED_ON':
+          setCurrentStepIndex(4);
+          setCompletedSteps(['validate', 'allocate', 'create', 'configure']);
+          setIsComplete(true);
+          break;
+        case 'FAILED':
+          setHasError(true);
+          break;
+      }
+    }
+  }, [vappStatus]);
 
   const getStepStatus = (stepId: string, stepIndex: number) => {
     if (hasError && stepIndex === currentStepIndex) {

@@ -306,10 +306,15 @@ export interface VM {
 }
 
 export type VMStatus =
+  | 'INSTANTIATING'
+  | 'RESOLVED'
+  | 'DEPLOYED'
   | 'POWERED_ON'
   | 'POWERED_OFF'
   | 'SUSPENDED'
-  | 'UNRESOLVED';
+  | 'FAILED'
+  | 'UNKNOWN'
+  | 'UNRESOLVED'; // Legacy status for backward compatibility
 
 export interface VMPowerOperation {
   vm_id: string;
@@ -410,6 +415,7 @@ export interface CatalogItem {
   disk_size_gb: number; // Default disk size in GB for VM creation
   vm_instance_type: string; // Instance type classification
   catalog_id: string; // Parent catalog ID for filtering
+  catalog_name?: string; // Parent catalog name for display (added by useAllCatalogItems)
 }
 
 export interface CatalogItemQueryParams {
@@ -524,6 +530,168 @@ export interface RoleQueryParams
     SortParams,
     FilterParams {
   readOnly?: boolean;
+}
+
+// CloudAPI VM Creation Types
+export interface InstantiateTemplateRequest {
+  name: string;
+  description?: string;
+  catalogItemUrn: string;
+  powerOn?: boolean;
+  deploy?: boolean;
+  acceptAllEulas?: boolean;
+  guestCustomization?: {
+    computerName?: string;
+    adminPassword?: string;
+    adminPasswordEnabled?: boolean;
+    adminPasswordAuto?: boolean;
+    resetPasswordRequired?: boolean;
+    customizationScript?: string;
+  };
+  sourceItem: {
+    source: {
+      href: string;
+    };
+    vAppScopedLocalId: string;
+  };
+  networkConnectionSection?: {
+    networkConnection: Array<{
+      network: string;
+      networkConnectionIndex: number;
+      isConnected: boolean;
+      ipAddressAllocationMode: 'POOL' | 'DHCP' | 'MANUAL' | 'NONE';
+      ipAddress?: string;
+      isPrimary?: boolean;
+    }>;
+  };
+}
+
+// vApp Resource
+export interface VApp {
+  id: string; // URN format
+  name: string;
+  description?: string;
+  status: VAppStatus;
+  href: string;
+  type: string;
+  createdDate: string;
+  lastModifiedDate: string;
+  vms?: VM[];
+  networks?: VAppNetwork[];
+  owner?: EntityRef;
+  org?: EntityRef;
+  vdc?: EntityRef;
+}
+
+// vApp Network
+export interface VAppNetwork {
+  id: string;
+  name: string;
+  description?: string;
+  configuration?: {
+    ipScopes: Array<{
+      gateway: string;
+      netmask: string;
+      dns1?: string;
+      dns2?: string;
+      dnsSuffix?: string;
+      ipRanges: Array<{
+        startAddress: string;
+        endAddress: string;
+      }>;
+    }>;
+  };
+}
+
+// VM Status Enumeration (Enhanced for CloudAPI)
+export type VAppStatus =
+  | 'INSTANTIATING'
+  | 'RESOLVED'
+  | 'DEPLOYED'
+  | 'POWERED_ON'
+  | 'POWERED_OFF'
+  | 'MIXED'
+  | 'FAILED'
+  | 'UNKNOWN';
+
+// Enhanced VM interface for CloudAPI
+export interface VMCloudAPI {
+  id: string; // URN format
+  name: string;
+  description?: string;
+  status: VMStatus;
+  href: string;
+  type: string;
+  createdDate: string;
+  lastModifiedDate: string;
+
+  // Hardware details
+  virtualHardwareSection?: VMHardwareSection;
+  guestCustomizationSection?: VMGuestCustomizationSection;
+  networkConnectionSection?: VMNetworkConnectionSection;
+
+  // Relationships
+  vapp?: EntityRef;
+  vdc?: EntityRef;
+  org?: EntityRef;
+  catalogItem?: EntityRef;
+}
+
+// Hardware Configuration
+export interface VMHardwareSection {
+  items: VMHardwareItem[];
+  links: Link[];
+}
+
+export interface VMHardwareItem {
+  id: number;
+  resourceType: number;
+  resourceSubType?: string;
+  elementName: string;
+  description?: string;
+  quantity: number;
+  units?: string;
+  virtualQuantity?: number;
+  virtualQuantityUnits?: string;
+}
+
+// Guest Customization
+export interface VMGuestCustomizationSection {
+  enabled: boolean;
+  computerName?: string;
+  adminPasswordEnabled?: boolean;
+  adminPasswordAuto?: boolean;
+  adminPassword?: string;
+  resetPasswordRequired?: boolean;
+  customizationScript?: string;
+  joinDomainEnabled?: boolean;
+  domainName?: string;
+  domainUserName?: string;
+  domainUserPassword?: string;
+  links: Link[];
+}
+
+// Network Connection
+export interface VMNetworkConnectionSection {
+  networkConnection: Array<{
+    network: string;
+    networkConnectionIndex: number;
+    isConnected: boolean;
+    ipAddressAllocationMode: 'POOL' | 'DHCP' | 'MANUAL' | 'NONE';
+    ipAddress?: string;
+    isPrimary?: boolean;
+    externalIpAddress?: string;
+    macAddress?: string;
+  }>;
+  links: Link[];
+}
+
+// Generic Link interface for CloudAPI responses
+export interface Link {
+  rel: string;
+  href: string;
+  type?: string;
+  model?: string;
 }
 
 // Request types for create/update operations
@@ -730,10 +898,20 @@ export const QUERY_KEYS = {
   vdcsByOrg: (orgId: string) => ['vdcs', 'organization', orgId] as const,
   vdcUsers: (vdcId: string) => ['vdcs', vdcId, 'users'] as const,
 
-  // VMs
+  // VMs (Legacy API)
   vms: ['vms'] as const,
   vm: (id: string) => ['vms', id] as const,
   vmsByVdc: (vdcId: string) => ['vms', 'vdc', vdcId] as const,
+
+  // CloudAPI VMs
+  vmVdcs: ['cloudapi', 'vms', 'vdcs'] as const,
+  cloudApiVMs: ['cloudapi', 'vms'] as const,
+  cloudApiVM: (id: string) => ['cloudapi', 'vms', id] as const,
+  vmHardware: (id: string) => ['cloudapi', 'vms', id, 'hardware'] as const,
+
+  // CloudAPI vApps
+  vapps: ['cloudapi', 'vapps'] as const,
+  vapp: (id: string) => ['cloudapi', 'vapps', id] as const,
 
   // Catalogs (CloudAPI)
   catalogs: ['cloudapi', 'catalogs'] as const,

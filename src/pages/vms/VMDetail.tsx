@@ -165,6 +165,11 @@ const VMDetail: React.FC = () => {
       POWERED_OFF: { color: 'red' as const, icon: PowerOffIcon },
       SUSPENDED: { color: 'orange' as const, icon: PauseIcon },
       UNRESOLVED: { color: 'grey' as const, icon: ExclamationTriangleIcon },
+      INSTANTIATING: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      RESOLVED: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      DEPLOYED: { color: 'green' as const, icon: PlayIcon },
+      FAILED: { color: 'red' as const, icon: ExclamationTriangleIcon },
+      UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
     };
 
     const config = statusConfig[status];
