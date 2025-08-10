@@ -411,6 +411,7 @@ export interface CatalogItem {
 export interface CatalogItemQueryParams {
   page?: number; // Page number, starts at 1 (default: 1)
   pageSize?: number; // Items per page, max 100 (default: 25)
+  filter?: string; // Search filter for catalog items
 }
 
 export interface Catalog {

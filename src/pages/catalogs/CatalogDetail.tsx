@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -52,6 +52,7 @@ const CatalogDetail: React.FC = () => {
   const catalogItemsParams: CatalogItemQueryParams = {
     page,
     pageSize,
+    ...(searchTerm && { filter: searchTerm }),
   };
 
   const {
@@ -59,6 +60,24 @@ const CatalogDetail: React.FC = () => {
     isLoading: catalogItemsLoading,
     error: catalogItemsError,
   } = useCatalogItems(id || '', catalogItemsParams);
+
+  // Compute filtered items once for consistent empty state and rendering
+  const filteredItems = useMemo(() => {
+    if (!catalogItemsResponse?.values) return [];
+
+    if (!searchTerm) return catalogItemsResponse.values;
+
+    return catalogItemsResponse.values.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [catalogItemsResponse?.values, searchTerm]);
+
+  // Reset page to 1 when search term changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   // Handle missing id parameter
   if (!id) {
@@ -275,7 +294,7 @@ const CatalogDetail: React.FC = () => {
                         ? catalogItemsError.message
                         : 'Failed to load catalog templates. Please try again.'}
                     </Alert>
-                  ) : !catalogItemsResponse?.values?.length ? (
+                  ) : !filteredItems.length ? (
                     <EmptyState variant={EmptyStateVariant.lg}>
                       <VirtualMachineIcon style={{ fontSize: '64px' }} />
                       <Title headingLevel="h2" size="lg">
@@ -291,72 +310,60 @@ const CatalogDetail: React.FC = () => {
                     <Stack hasGutter>
                       <StackItem>
                         <Grid hasGutter>
-                          {catalogItemsResponse.values
-                            ?.filter(
-                              (item) =>
-                                !searchTerm ||
-                                item.name
-                                  .toLowerCase()
-                                  .includes(searchTerm.toLowerCase()) ||
-                                item.description
-                                  .toLowerCase()
-                                  .includes(searchTerm.toLowerCase())
-                            )
-                            .map((item) => (
-                              <GridItem key={item.id} span={6}>
-                                <Card isSelectable>
-                                  <CardBody>
-                                    <Stack hasGutter>
-                                      <StackItem>
-                                        <Split>
-                                          <SplitItem>
-                                            <VirtualMachineIcon
-                                              style={{ fontSize: '24px' }}
-                                            />
-                                          </SplitItem>
-                                          <SplitItem isFilled>
-                                            <Title headingLevel="h4" size="md">
-                                              {item.name}
-                                            </Title>
-                                          </SplitItem>
-                                          <SplitItem>
-                                            <Badge color="blue">
-                                              v{item.versionNumber}
-                                            </Badge>
-                                          </SplitItem>
-                                        </Split>
-                                      </StackItem>
-                                      <StackItem>
-                                        <p className="pf-v6-u-color-200">
-                                          {item.description}
-                                        </p>
-                                      </StackItem>
-                                      <StackItem>
-                                        <Stack>
-                                          <StackItem>
-                                            <Badge>
-                                              {
-                                                item.entity.templateSpec
-                                                  .parameters.length
-                                              }{' '}
-                                              parameters
-                                            </Badge>
-                                          </StackItem>
-                                          <StackItem>
-                                            <small className="pf-v6-u-color-200">
-                                              Created:{' '}
-                                              {new Date(
-                                                item.creationDate
-                                              ).toLocaleDateString()}
-                                            </small>
-                                          </StackItem>
-                                        </Stack>
-                                      </StackItem>
-                                    </Stack>
-                                  </CardBody>
-                                </Card>
-                              </GridItem>
-                            ))}
+                          {filteredItems.map((item) => (
+                            <GridItem key={item.id} span={6}>
+                              <Card isSelectable>
+                                <CardBody>
+                                  <Stack hasGutter>
+                                    <StackItem>
+                                      <Split>
+                                        <SplitItem>
+                                          <VirtualMachineIcon
+                                            style={{ fontSize: '24px' }}
+                                          />
+                                        </SplitItem>
+                                        <SplitItem isFilled>
+                                          <Title headingLevel="h4" size="md">
+                                            {item.name}
+                                          </Title>
+                                        </SplitItem>
+                                        <SplitItem>
+                                          <Badge color="blue">
+                                            v{item.versionNumber}
+                                          </Badge>
+                                        </SplitItem>
+                                      </Split>
+                                    </StackItem>
+                                    <StackItem>
+                                      <p className="pf-v6-u-color-200">
+                                        {item.description ||
+                                          'No description available'}
+                                      </p>
+                                    </StackItem>
+                                    <StackItem>
+                                      <Stack>
+                                        <StackItem>
+                                          <Badge>
+                                            {item.entity?.templateSpec
+                                              ?.parameters?.length || 0}{' '}
+                                            parameters
+                                          </Badge>
+                                        </StackItem>
+                                        <StackItem>
+                                          <small className="pf-v6-u-color-200">
+                                            Created:{' '}
+                                            {new Date(
+                                              item.creationDate
+                                            ).toLocaleDateString()}
+                                          </small>
+                                        </StackItem>
+                                      </Stack>
+                                    </StackItem>
+                                  </Stack>
+                                </CardBody>
+                              </Card>
+                            </GridItem>
+                          ))}
                         </Grid>
                       </StackItem>
 

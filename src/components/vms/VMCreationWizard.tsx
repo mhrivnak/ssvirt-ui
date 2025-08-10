@@ -7,7 +7,7 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import { useCreateVM, useCatalogs } from '../../hooks';
+import { useCreateVM, useCatalogs, useCatalogItems } from '../../hooks';
 import type {
   CreateVMRequest,
   VMNetworkConfig,
@@ -109,11 +109,19 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const { data: catalogsResponse } = useCatalogs();
   const catalogs = catalogsResponse?.values || [];
 
-  // For now, use empty catalog items array - will be populated by mock data
-  // In a real implementation, we would need to:
-  // 1. Select a specific catalog first, then load its items
-  // 2. Or implement a composite hook that fetches items from all catalogs
-  const catalogItems: CatalogItem[] = [];
+  // Load catalog items from the first available catalog
+  const firstCatalogId = catalogs[0]?.id;
+  const { data: catalogItemsResponse } = useCatalogItems(firstCatalogId || '', {
+    pageSize: 100,
+  });
+
+  // Extract catalog items and add catalog_id for compatibility
+  const catalogItems: CatalogItem[] = (catalogItemsResponse?.values || []).map(
+    (item) => ({
+      ...item,
+      catalog_id: firstCatalogId || '',
+    })
+  );
 
   const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
