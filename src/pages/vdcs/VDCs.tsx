@@ -155,7 +155,10 @@ const VDCs: React.FC = () => {
       )
     ) {
       try {
-        await deleteVDCMutation.mutateAsync({ orgId: orgId || '', vdcId: vdc.id });
+        await deleteVDCMutation.mutateAsync({
+          orgId: orgId || '',
+          vdcId: vdc.id,
+        });
       } catch (error) {
         setErrorMessage(
           `Failed to delete VDC: ${error instanceof Error ? error.message : 'Unknown error'}`
