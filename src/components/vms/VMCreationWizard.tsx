@@ -108,7 +108,11 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const vdcs: VDC[] = [];
   const { data: catalogsResponse } = useCatalogs();
   const catalogs = catalogsResponse?.values || [];
-  // Note: Catalog items (vApp templates) are not implemented in this CloudAPI version
+
+  // For now, use empty catalog items array - will be populated by mock data
+  // In a real implementation, we would need to:
+  // 1. Select a specific catalog first, then load its items
+  // 2. Or implement a composite hook that fetches items from all catalogs
   const catalogItems: CatalogItem[] = [];
 
   const updateFormData = useCallback((updates: Partial<WizardFormData>) => {

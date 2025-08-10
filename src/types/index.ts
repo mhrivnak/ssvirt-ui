@@ -354,17 +354,68 @@ export interface SubscriptionConfig {
   isSubscribed: boolean; // Matches catalog.isSubscribed
 }
 
+export interface EntityRef {
+  id: string; // URN format
+  name?: string; // Optional entity name
+}
+
+export interface TemplateParameter {
+  name: string; // Parameter name
+  displayName?: string; // Human-readable name
+  description?: string; // Parameter description
+  value?: string; // Default value
+  required?: boolean; // Whether parameter is required
+  generate?: string; // Generation expression
+}
+
+export interface TemplateMetadata {
+  name: string; // Template name
+  namespace?: string; // Template namespace
+  labels?: Record<string, string>; // Template labels
+  annotations?: Record<string, string>; // Template annotations
+}
+
+export interface TemplateSpec {
+  kind: string; // "Template"
+  apiVersion: string; // Template API version
+  metadata: TemplateMetadata; // Template metadata
+  parameters: TemplateParameter[]; // Template parameters
+  objects: unknown[]; // Template objects
+}
+
+export interface CatalogItemEntity {
+  name: string; // Template name
+  description: string; // Template description
+  templateSpec: TemplateSpec; // OpenShift Template specifications
+  deploymentLeases: unknown[]; // Deployment lease information
+}
+
 export interface CatalogItem {
   id: string; // URN format: urn:vcloud:catalogitem:uuid
-  name: string;
-  description: string;
-  catalogId: string; // Parent catalog URN
-  catalog_id: string; // Legacy property name for backward compatibility
-  os_type: string; // Operating system type
-  cpu_count: number; // Number of CPUs
-  memory_mb: number; // Memory in MB
-  disk_size_gb: number; // Disk size in GB
-  vm_instance_type: string; // VM instance type
+  name: string; // Catalog item name
+  description: string; // Catalog item description
+  catalogEntityRef: EntityRef; // Reference to parent catalog
+  entity: CatalogItemEntity; // Detailed template specifications
+  isVappTemplate: boolean; // Always true for vApp templates
+  status: string; // Item status
+  owner: EntityRef; // Owner reference
+  isPublished: boolean; // Publication status
+  creationDate: string; // ISO-8601 timestamp
+  modificationDate: string; // ISO-8601 timestamp
+  versionNumber: number; // Version number
+
+  // VM Creation Wizard compatibility properties (derived from templateSpec)
+  os_type: string; // Derived from template metadata or parameters
+  cpu_count: number; // Default CPU count for VM creation
+  memory_mb: number; // Default memory in MB for VM creation
+  disk_size_gb: number; // Default disk size in GB for VM creation
+  vm_instance_type: string; // Instance type classification
+  catalog_id: string; // Parent catalog ID for filtering
+}
+
+export interface CatalogItemQueryParams {
+  page?: number; // Page number, starts at 1 (default: 1)
+  pageSize?: number; // Items per page, max 100 (default: 25)
 }
 
 export interface Catalog {
@@ -673,6 +724,12 @@ export const QUERY_KEYS = {
   // Catalogs (CloudAPI)
   catalogs: ['cloudapi', 'catalogs'] as const,
   catalog: (id: string) => ['cloudapi', 'catalogs', id] as const,
+
+  // Catalog Items (CloudAPI)
+  catalogItems: (catalogId: string, params?: CatalogItemQueryParams) =>
+    ['cloudapi', 'catalogs', catalogId, 'catalogItems', params || {}] as const,
+  catalogItem: (catalogId: string, itemId: string) =>
+    ['cloudapi', 'catalogs', catalogId, 'catalogItems', itemId] as const,
 
   // Resource Monitoring & Analytics
   resourceUsage: ['monitoring', 'resource-usage'] as const,

@@ -3,6 +3,7 @@ import type {
   VDC,
   VM,
   Catalog,
+  CatalogItem,
   DashboardStats,
   RecentActivity,
   User,
@@ -300,6 +301,303 @@ export const generateMockCatalogs = (): Catalog[] => [
     },
     isLocal: true,
     version: 1,
+  },
+];
+
+export const generateMockCatalogItems = (): CatalogItem[] => [
+  // Development Catalog Items
+  {
+    id: 'urn:vcloud:catalogitem:ubuntu-20-dev',
+    name: 'Ubuntu 20.04 Development',
+    description: 'Ubuntu 20.04 LTS template configured for development work',
+    catalogEntityRef: {
+      id: 'urn:vcloud:catalog:12345678-1234-1234-1234-123456789012',
+      name: 'Development Catalog',
+    },
+    entity: {
+      name: 'Ubuntu 20.04 Development Template',
+      description: 'Pre-configured Ubuntu development environment',
+      templateSpec: {
+        kind: 'Template',
+        apiVersion: 'template.openshift.io/v1',
+        metadata: {
+          name: 'ubuntu-20-dev',
+          labels: {
+            'template-type': 'vm',
+            'os-family': 'ubuntu',
+            environment: 'development',
+          },
+          annotations: {
+            description: 'Ubuntu 20.04 development template',
+            version: '1.0',
+          },
+        },
+        parameters: [
+          {
+            name: 'VM_NAME',
+            displayName: 'Virtual Machine Name',
+            description: 'Name for the new virtual machine',
+            required: true,
+          },
+          {
+            name: 'CPU_COUNT',
+            displayName: 'CPU Count',
+            description: 'Number of virtual CPUs',
+            value: '2',
+            required: false,
+          },
+          {
+            name: 'MEMORY_SIZE',
+            displayName: 'Memory Size (MB)',
+            description: 'Amount of memory in megabytes',
+            value: '4096',
+            required: false,
+          },
+        ],
+        objects: [],
+      },
+      deploymentLeases: [],
+    },
+    isVappTemplate: true,
+    status: 'RESOLVED',
+    owner: {
+      id: 'urn:vcloud:user:admin',
+      name: 'Administrator',
+    },
+    isPublished: false,
+    creationDate: '2024-01-15T10:30:00.000Z',
+    modificationDate: '2024-01-15T10:30:00.000Z',
+    versionNumber: 1,
+    // VM Creation compatibility properties
+    os_type: 'Ubuntu 20.04 LTS',
+    cpu_count: 2,
+    memory_mb: 4096,
+    disk_size_gb: 50,
+    vm_instance_type: 'Development',
+    catalog_id: 'urn:vcloud:catalog:12345678-1234-1234-1234-123456789012',
+  },
+  {
+    id: 'urn:vcloud:catalogitem:centos-8-web',
+    name: 'CentOS 8 Web Server',
+    description: 'CentOS 8 with pre-installed web server components',
+    catalogEntityRef: {
+      id: 'urn:vcloud:catalog:12345678-1234-1234-1234-123456789012',
+      name: 'Development Catalog',
+    },
+    entity: {
+      name: 'CentOS 8 Web Server Template',
+      description: 'CentOS 8 with Apache, PHP, and MySQL',
+      templateSpec: {
+        kind: 'Template',
+        apiVersion: 'template.openshift.io/v1',
+        metadata: {
+          name: 'centos-8-web',
+          labels: {
+            'template-type': 'vm',
+            'os-family': 'centos',
+            environment: 'web',
+          },
+          annotations: {
+            description: 'CentOS 8 web server template',
+            version: '1.2',
+          },
+        },
+        parameters: [
+          {
+            name: 'VM_NAME',
+            displayName: 'Virtual Machine Name',
+            description: 'Name for the new virtual machine',
+            required: true,
+          },
+          {
+            name: 'CPU_COUNT',
+            displayName: 'CPU Count',
+            description: 'Number of virtual CPUs',
+            value: '4',
+            required: false,
+          },
+          {
+            name: 'MEMORY_SIZE',
+            displayName: 'Memory Size (MB)',
+            description: 'Amount of memory in megabytes',
+            value: '8192',
+            required: false,
+          },
+          {
+            name: 'WEB_PORT',
+            displayName: 'Web Server Port',
+            description: 'Port for web server',
+            value: '80',
+            required: false,
+          },
+        ],
+        objects: [],
+      },
+      deploymentLeases: [],
+    },
+    isVappTemplate: true,
+    status: 'RESOLVED',
+    owner: {
+      id: 'urn:vcloud:user:admin',
+      name: 'Administrator',
+    },
+    isPublished: false,
+    creationDate: '2024-01-15T11:00:00.000Z',
+    modificationDate: '2024-01-15T11:00:00.000Z',
+    versionNumber: 2,
+    // VM Creation compatibility properties
+    os_type: 'CentOS 8',
+    cpu_count: 4,
+    memory_mb: 8192,
+    disk_size_gb: 100,
+    vm_instance_type: 'Web Server',
+    catalog_id: 'urn:vcloud:catalog:12345678-1234-1234-1234-123456789012',
+  },
+  {
+    id: 'urn:vcloud:catalogitem:windows-2019-server',
+    name: 'Windows Server 2019',
+    description: 'Windows Server 2019 Standard Edition',
+    catalogEntityRef: {
+      id: 'urn:vcloud:catalog:87654321-4321-4321-4321-210987654321',
+      name: 'Production Templates',
+    },
+    entity: {
+      name: 'Windows Server 2019 Template',
+      description: 'Windows Server 2019 Standard Edition with IIS',
+      templateSpec: {
+        kind: 'Template',
+        apiVersion: 'template.openshift.io/v1',
+        metadata: {
+          name: 'windows-2019-server',
+          labels: {
+            'template-type': 'vm',
+            'os-family': 'windows',
+            environment: 'production',
+          },
+          annotations: {
+            description: 'Windows Server 2019 production template',
+            version: '2.0',
+          },
+        },
+        parameters: [
+          {
+            name: 'VM_NAME',
+            displayName: 'Virtual Machine Name',
+            description: 'Name for the new virtual machine',
+            required: true,
+          },
+          {
+            name: 'CPU_COUNT',
+            displayName: 'CPU Count',
+            description: 'Number of virtual CPUs',
+            value: '4',
+            required: false,
+          },
+          {
+            name: 'MEMORY_SIZE',
+            displayName: 'Memory Size (MB)',
+            description: 'Amount of memory in megabytes',
+            value: '8192',
+            required: false,
+          },
+          {
+            name: 'ADMIN_PASSWORD',
+            displayName: 'Administrator Password',
+            description: 'Password for the Administrator account',
+            required: true,
+          },
+        ],
+        objects: [],
+      },
+      deploymentLeases: [],
+    },
+    isVappTemplate: true,
+    status: 'RESOLVED',
+    owner: {
+      id: 'urn:vcloud:user:admin',
+      name: 'Administrator',
+    },
+    isPublished: true,
+    creationDate: '2024-01-10T09:00:00.000Z',
+    modificationDate: '2024-01-12T14:30:00.000Z',
+    versionNumber: 2,
+    // VM Creation compatibility properties
+    os_type: 'Windows Server 2019',
+    cpu_count: 4,
+    memory_mb: 8192,
+    disk_size_gb: 120,
+    vm_instance_type: 'Server',
+    catalog_id: 'urn:vcloud:catalog:87654321-4321-4321-4321-210987654321',
+  },
+  {
+    id: 'urn:vcloud:catalogitem:rhel-8-minimal',
+    name: 'RHEL 8 Minimal',
+    description: 'Red Hat Enterprise Linux 8 minimal installation',
+    catalogEntityRef: {
+      id: 'urn:vcloud:catalog:11111111-2222-3333-4444-555555555555',
+      name: 'Testing Environment',
+    },
+    entity: {
+      name: 'RHEL 8 Minimal Template',
+      description: 'Minimal Red Hat Enterprise Linux 8 installation',
+      templateSpec: {
+        kind: 'Template',
+        apiVersion: 'template.openshift.io/v1',
+        metadata: {
+          name: 'rhel-8-minimal',
+          labels: {
+            'template-type': 'vm',
+            'os-family': 'rhel',
+            environment: 'testing',
+          },
+          annotations: {
+            description: 'RHEL 8 minimal testing template',
+            version: '1.0',
+          },
+        },
+        parameters: [
+          {
+            name: 'VM_NAME',
+            displayName: 'Virtual Machine Name',
+            description: 'Name for the new virtual machine',
+            required: true,
+          },
+          {
+            name: 'CPU_COUNT',
+            displayName: 'CPU Count',
+            description: 'Number of virtual CPUs',
+            value: '2',
+            required: false,
+          },
+          {
+            name: 'MEMORY_SIZE',
+            displayName: 'Memory Size (MB)',
+            description: 'Amount of memory in megabytes',
+            value: '2048',
+            required: false,
+          },
+        ],
+        objects: [],
+      },
+      deploymentLeases: [],
+    },
+    isVappTemplate: true,
+    status: 'RESOLVED',
+    owner: {
+      id: 'urn:vcloud:user:admin',
+      name: 'Administrator',
+    },
+    isPublished: false,
+    creationDate: '2024-01-20T14:15:00.000Z',
+    modificationDate: '2024-01-20T14:15:00.000Z',
+    versionNumber: 1,
+    // VM Creation compatibility properties
+    os_type: 'Red Hat Enterprise Linux 8',
+    cpu_count: 2,
+    memory_mb: 2048,
+    disk_size_gb: 40,
+    vm_instance_type: 'Minimal',
+    catalog_id: 'urn:vcloud:catalog:11111111-2222-3333-4444-555555555555',
   },
 ];
 
