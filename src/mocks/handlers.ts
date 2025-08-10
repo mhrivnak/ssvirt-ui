@@ -437,4 +437,77 @@ export const handlers = [
       return HttpResponse.json(catalogItem);
     }
   ),
+
+  // CloudAPI VDCs endpoints (Public API for regular users)
+  http.get('/cloudapi/1.0.0/vdcs', ({ request }) => {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    // For public API, return VDCs that regular users can access
+    // In a real implementation, this would be filtered based on user's organization membership
+    const vdcs = generateMockVDCs();
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vdcs, page, pageSize)
+    );
+  }),
+
+  http.get('/cloudapi/1.0.0/vdcs/:vdcUrn', ({ params }) => {
+    const { vdcUrn } = params;
+    const vdcs = generateMockVDCs();
+    const vdc = vdcs.find((v) => v.id === decodeURIComponent(vdcUrn as string));
+
+    if (!vdc) {
+      return HttpResponse.json(
+        {
+          error: 'VDC not found',
+          message: 'The requested VDC could not be found',
+          details: `VDC with URN ${vdcUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(vdc);
+  }),
+
+  // CloudAPI Admin VDCs endpoints (Admin API)
+  http.get('/api/admin/org/:orgId/vdcs', ({ params, request }) => {
+    const { orgId } = params;
+    const decodedOrgId = decodeURIComponent(orgId as string);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    // For admin API, return VDCs for the specific organization
+    const vdcs = generateMockVDCs().filter(
+      (vdc) => vdc.org?.id === decodedOrgId
+    );
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vdcs, page, pageSize)
+    );
+  }),
+
+  http.get('/api/admin/org/:orgId/vdcs/:vdcId', ({ params }) => {
+    const { orgId, vdcId } = params;
+    const decodedOrgId = decodeURIComponent(orgId as string);
+    const decodedVdcId = decodeURIComponent(vdcId as string);
+    const vdcs = generateMockVDCs();
+    const vdc = vdcs.find(
+      (v) => v.id === decodedVdcId && v.org?.id === decodedOrgId
+    );
+
+    if (!vdc) {
+      return HttpResponse.json(
+        {
+          error: 'VDC not found',
+          message: 'The requested VDC could not be found',
+          details: `VDC with ID ${vdcId} not found in organization ${orgId}`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(vdc);
+  }),
 ];

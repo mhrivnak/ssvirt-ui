@@ -217,7 +217,11 @@ export interface UserPermissions {
   canCreateOrganizations: boolean;
   canManageUsers: boolean;
   canManageSystem: boolean;
-  canManageOrganization: (orgId: string) => boolean;
+  canManageOrganizations: boolean;
+  canViewVDCs: boolean;
+  canManageVDCs: boolean;
+  accessibleOrganizations: EntityRef[];
+  canManageOrganization?: (orgId: string) => boolean;
 }
 
 // Organization types
@@ -474,7 +478,14 @@ export interface OrganizationQueryParams
   // Organization-specific filters
 }
 
-export interface VDCQueryParams {
+// VDC Query Parameters - Public API (limited filtering)
+export interface VDCPublicQueryParams {
+  page?: number; // Page number, starts at 1 (default: 1)
+  pageSize?: number; // Items per page, max 100 (default: 25)
+}
+
+// VDC Query Parameters - Admin API (full filtering)
+export interface VDCAdminQueryParams {
   page?: number;
   pageSize?: number;
   sortAsc?: string;
@@ -487,6 +498,12 @@ export interface VDCQueryParams {
     | 'ReservationPool'
     | 'Flex';
 }
+
+// Legacy VDC Query Parameters (for backward compatibility)
+export type VDCQueryParams = VDCAdminQueryParams;
+
+// Union type for VDC API parameters
+export type VDCApiQueryParams = VDCPublicQueryParams | VDCAdminQueryParams;
 
 export interface CatalogQueryParams {
   page?: number; // Page number, starts at 1 (default: 1)
@@ -685,6 +702,7 @@ export const QUERY_KEYS = {
   // Auth
   session: ['auth', 'session'] as const,
   userProfile: ['auth', 'user'] as const,
+  userPermissions: ['auth', 'permissions'] as const,
   userPreferences: ['auth', 'user', 'preferences'] as const,
   securitySettings: ['auth', 'user', 'security'] as const,
 

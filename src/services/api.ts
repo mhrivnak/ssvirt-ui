@@ -5,6 +5,7 @@ import axios, {
 } from 'axios';
 import { getConfig } from '../utils/constants';
 import type { LoginRequest, SessionResponse, User } from '../types';
+import { ROLE_NAMES } from '../types';
 
 // Session storage key for VMware Cloud Director session data
 const VCD_SESSION_KEY = 'vcd-session';
@@ -49,6 +50,15 @@ const createApiInstance = (): AxiosInstance => {
       if (accessToken && tokenType) {
         // Use Bearer token for authenticated requests (CloudAPI standard)
         config.headers['Authorization'] = `${tokenType} ${accessToken}`;
+      }
+
+      // Add tenant context header for organization-scoped API calls
+      const sessionData = getSessionData();
+      if (sessionData?.operatingOrg?.id) {
+        config.headers['X-VMWARE-VCLOUD-TENANT-CONTEXT'] =
+          sessionData.operatingOrg.id;
+      } else if (sessionData?.org?.id) {
+        config.headers['X-VMWARE-VCLOUD-TENANT-CONTEXT'] = sessionData.org.id;
       }
 
       // Ensure withCredentials is not set for CloudAPI compatibility
@@ -281,6 +291,74 @@ export class AuthService {
   static async updateUserProfile(): Promise<User> {
     // This would integrate with actual VMware Cloud Director user management APIs
     throw new Error('User profile updates not implemented yet');
+  }
+
+  /**
+   * Get current user permissions for role-based access control
+   */
+  static async getCurrentUserPermissions(): Promise<
+    import('../types').UserPermissions
+  > {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      throw new Error('No active session');
+    }
+
+    // Check if user has system admin role
+    const isSystemAdmin = sessionData.roles.some(
+      (role) => role === ROLE_NAMES.SYSTEM_ADMIN
+    );
+
+    // Extract user's organizations
+    const accessibleOrganizations = sessionData.operatingOrg
+      ? [
+          {
+            id: sessionData.operatingOrg.id,
+            name: sessionData.operatingOrg.name,
+          },
+        ]
+      : [{ id: sessionData.org.id, name: sessionData.org.name }];
+
+    return {
+      canCreateOrganizations: isSystemAdmin,
+      canManageUsers: isSystemAdmin,
+      canManageSystem: isSystemAdmin,
+      canManageOrganizations: isSystemAdmin,
+      canViewVDCs: true, // All authenticated users can view VDCs
+      canManageVDCs: isSystemAdmin,
+      accessibleOrganizations,
+    };
+  }
+
+  /**
+   * Check if current user is a system administrator
+   */
+  static isSystemAdmin(): boolean {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      return false;
+    }
+
+    return sessionData.roles.some((role) => role === ROLE_NAMES.SYSTEM_ADMIN);
+  }
+
+  /**
+   * Get user's accessible organizations
+   */
+  static getUserOrganizations(): Array<{ id: string; name: string }> {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      return [];
+    }
+
+    return sessionData.operatingOrg
+      ? [
+          {
+            id: sessionData.operatingOrg.id,
+            name: sessionData.operatingOrg.name,
+          },
+        ]
+      : [{ id: sessionData.org.id, name: sessionData.org.name }];
   }
 }
 

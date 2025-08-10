@@ -8,6 +8,7 @@ import type {
   RecentActivity,
   User,
   VMStatus,
+  UserPermissions,
 } from '../types';
 
 // Mock data generators
@@ -657,3 +658,28 @@ export const generateMockRecentActivity = (): RecentActivity[] => [
     resource_name: 'test-runner-01',
   },
 ];
+
+// Mock user permissions
+export const generateMockUserPermissions = (): UserPermissions => ({
+  canCreateOrganizations: false,
+  canManageUsers: false,
+  canManageSystem: false, // Regular user by default
+  canManageOrganizations: false,
+  canViewVDCs: true,
+  canManageVDCs: false,
+  accessibleOrganizations: [{ id: 'urn:vcloud:org:1', name: 'Engineering' }],
+});
+
+export const generateMockAdminPermissions = (): UserPermissions => ({
+  canCreateOrganizations: true,
+  canManageUsers: true,
+  canManageSystem: true, // System admin
+  canManageOrganizations: true,
+  canViewVDCs: true,
+  canManageVDCs: true,
+  accessibleOrganizations: [
+    { id: 'urn:vcloud:org:1', name: 'Engineering' },
+    { id: 'urn:vcloud:org:2', name: 'Quality Assurance' },
+    { id: 'urn:vcloud:org:3', name: 'Operations' },
+  ],
+});

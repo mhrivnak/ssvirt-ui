@@ -21,31 +21,51 @@ import {
 } from '@patternfly/react-core';
 import { NetworkIcon, EditIcon } from '@patternfly/react-icons';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useVDC } from '../../hooks';
-import { useRole } from '../../hooks/useRole';
+import { useVDC, useUserPermissions } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
 
 const VDCDetail: React.FC = () => {
   const { orgId, vdcId } = useParams<{ orgId: string; vdcId: string }>();
   const navigate = useNavigate();
-  const { capabilities } = useRole();
+  const { data: userPermissions, isLoading: isLoadingPermissions } =
+    useUserPermissions();
 
-  // Call hooks before any early returns
-  const { data: vdc, isLoading, error } = useVDC(orgId || '', vdcId || '');
+  // Call hooks before any early returns - use role-based API routing
+  const {
+    data: vdc,
+    isLoading,
+    error,
+  } = useVDC(
+    userPermissions?.canManageSystem ? orgId || '' : vdcId || '',
+    userPermissions?.canManageSystem ? vdcId : undefined
+  );
 
-  // Check if user has system admin privileges
-  if (!capabilities.canManageSystem) {
+  // Show loading spinner while permissions are loading
+  if (isLoadingPermissions) {
+    return (
+      <PageSection>
+        <LoadingSpinner />
+      </PageSection>
+    );
+  }
+
+  // Check if user has permission to view VDCs
+  if (!userPermissions?.canViewVDCs) {
     return (
       <PageSection>
         <Alert variant={AlertVariant.warning} title="Access Denied" isInline>
-          Only System Administrators can view Virtual Data Center details.
+          You don't have permission to view Virtual Data Center details.
         </Alert>
       </PageSection>
     );
   }
 
-  if (!orgId || !vdcId) {
+  // For admin users, both orgId and vdcId are required. For regular users, only vdcId is needed
+  if (
+    (userPermissions?.canManageSystem && (!orgId || !vdcId)) ||
+    (!userPermissions?.canManageSystem && !vdcId)
+  ) {
     return (
       <PageSection>
         <Alert
