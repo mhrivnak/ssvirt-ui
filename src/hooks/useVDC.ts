@@ -1,42 +1,120 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { VDCService } from '../services/cloudapi/VDCService';
+import { VDCService } from '../services';
 import { QUERY_KEYS } from '../types';
-import { useRole } from './useRole';
+import { useUserPermissions } from './usePermissions';
 import type {
+  VDCApiQueryParams,
   VDCQueryParams,
   CreateVDCRequest,
   UpdateVDCRequest,
 } from '../types';
 
 /**
- * Hook to fetch VDCs for an organization (System Admin only)
+ * Hook to fetch VDCs with automatic API routing
+ * For admins: requires orgId parameter and uses admin API
+ * For regular users: uses public API with organization scope
  */
-export const useVDCs = (orgId: string, params?: VDCQueryParams) => {
-  const { capabilities } = useRole();
+export const useVDCs = (
+  orgIdOrParams?: string | VDCApiQueryParams,
+  adminParams?: VDCQueryParams
+) => {
+  const { data: userPermissions } = useUserPermissions();
 
+  // Serialize params to ensure stable queryKey
+  const serializedParams = useMemo(() => {
+    const params =
+      adminParams ||
+      (typeof orgIdOrParams !== 'string' ? orgIdOrParams : undefined);
+    return params ? JSON.stringify(params) : '';
+  }, [orgIdOrParams, adminParams]);
+
+  // For admin users, extract orgId
+  const orgId = typeof orgIdOrParams === 'string' ? orgIdOrParams : '';
+  const queryKey =
+    userPermissions?.canManageSystem && orgId
+      ? [...QUERY_KEYS.vdcsByOrg(orgId), serializedParams]
+      : [...QUERY_KEYS.vdcs, serializedParams];
+
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      try {
+        return await VDCService.getVDCs(orgIdOrParams, adminParams);
+      } catch (error) {
+        // Handle permission errors gracefully
+        if (error instanceof Error && error.message.includes('permission')) {
+          throw new Error('You do not have permission to view VDCs');
+        }
+        throw error;
+      }
+    },
+    enabled:
+      userPermissions?.canViewVDCs &&
+      (userPermissions?.canManageSystem ? !!orgId : true),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    retry: (failureCount, error) => {
+      // Don't retry permission errors
+      if (error instanceof Error && error.message.includes('permission')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * Hook to fetch a single VDC with automatic API routing
+ * For admins: requires orgId parameter and uses admin API
+ * For regular users: uses public API with VDC URN
+ */
+export const useVDC = (vdcIdOrOrgId: string, vdcId?: string) => {
+  const { data: userPermissions } = useUserPermissions();
+
+  // Determine the actual VDC ID for cache key
+  const actualVdcId = vdcId || vdcIdOrOrgId;
+
+  return useQuery({
+    queryKey: QUERY_KEYS.vdc(actualVdcId),
+    queryFn: async () => {
+      try {
+        return await VDCService.getVDC(vdcIdOrOrgId, vdcId);
+      } catch (error) {
+        // Handle permission errors gracefully
+        if (error instanceof Error && error.message.includes('permission')) {
+          throw new Error('You do not have permission to view this VDC');
+        }
+        throw error;
+      }
+    },
+    enabled: !!actualVdcId && (userPermissions?.canViewVDCs ?? false),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 20 * 60 * 1000, // 20 minutes
+    retry: (failureCount, error) => {
+      // Don't retry permission errors
+      if (error instanceof Error && error.message.includes('permission')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * Hook to fetch VDCs for current user's organization(s) (public API)
+ */
+export const useOrganizationVDCs = (params?: VDCApiQueryParams) => {
   // Serialize params to ensure stable queryKey
   const serializedParams = useMemo(() => {
     return params ? JSON.stringify(params) : '';
   }, [params]);
 
   return useQuery({
-    queryKey: [...QUERY_KEYS.vdcsByOrg(orgId), serializedParams],
-    queryFn: () => VDCService.getVDCs(orgId, params),
-    enabled: !!orgId && capabilities.canManageSystem,
-  });
-};
-
-/**
- * Hook to fetch a single VDC (System Admin only)
- */
-export const useVDC = (orgId: string, vdcId: string) => {
-  const { capabilities } = useRole();
-
-  return useQuery({
-    queryKey: QUERY_KEYS.vdc(vdcId),
-    queryFn: () => VDCService.getVDC(orgId, vdcId),
-    enabled: !!orgId && !!vdcId && capabilities.canManageSystem,
+    queryKey: [...QUERY_KEYS.vdcs, 'organization', serializedParams],
+    queryFn: () => VDCService.getVDCs(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };
 

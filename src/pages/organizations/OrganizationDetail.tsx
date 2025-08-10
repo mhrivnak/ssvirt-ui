@@ -57,6 +57,7 @@ import {
   useToggleOrganizationStatus,
   useVDCs,
   useCatalogs,
+  useUserPermissions,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, Catalog } from '../../types';
@@ -71,7 +72,12 @@ const OrganizationDetail: React.FC = () => {
 
   // Hooks must be called before any conditional returns
   const { data: orgResponse, isLoading, error } = useOrganization(id || '');
-  const { data: vdcsResponse } = useVDCs(id || '');
+  const { data: userPermissions } = useUserPermissions();
+
+  // Use role-based VDC access
+  const { data: vdcsResponse } = useVDCs(
+    userPermissions?.canManageSystem ? id || '' : undefined
+  );
   const { data: catalogsResponse } = useCatalogs();
 
   // Early validation for id parameter

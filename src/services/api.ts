@@ -282,6 +282,82 @@ export class AuthService {
     // This would integrate with actual VMware Cloud Director user management APIs
     throw new Error('User profile updates not implemented yet');
   }
+
+  /**
+   * Get current user permissions for role-based access control
+   */
+  static async getCurrentUserPermissions(): Promise<
+    import('../types').UserPermissions
+  > {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      throw new Error('No active session');
+    }
+
+    // Check if user has system admin role
+    const isSystemAdmin = sessionData.roles.some(
+      (role) =>
+        role === 'System Administrator' ||
+        role.toLowerCase().includes('system') ||
+        role.toLowerCase().includes('admin')
+    );
+
+    // Extract user's organizations
+    const accessibleOrganizations = sessionData.operatingOrg
+      ? [
+          {
+            id: sessionData.operatingOrg.id,
+            name: sessionData.operatingOrg.name,
+          },
+        ]
+      : [{ id: sessionData.org.id, name: sessionData.org.name }];
+
+    return {
+      canCreateOrganizations: isSystemAdmin,
+      canManageUsers: isSystemAdmin,
+      canManageSystem: isSystemAdmin,
+      canManageOrganizations: isSystemAdmin,
+      canViewVDCs: true, // All authenticated users can view VDCs
+      canManageVDCs: isSystemAdmin,
+      accessibleOrganizations,
+    };
+  }
+
+  /**
+   * Check if current user is a system administrator
+   */
+  static isSystemAdmin(): boolean {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      return false;
+    }
+
+    return sessionData.roles.some(
+      (role) =>
+        role === 'System Administrator' ||
+        role.toLowerCase().includes('system') ||
+        role.toLowerCase().includes('admin')
+    );
+  }
+
+  /**
+   * Get user's accessible organizations
+   */
+  static getUserOrganizations(): Array<{ id: string; name: string }> {
+    const sessionData = getSessionData();
+    if (!sessionData) {
+      return [];
+    }
+
+    return sessionData.operatingOrg
+      ? [
+          {
+            id: sessionData.operatingOrg.id,
+            name: sessionData.operatingOrg.name,
+          },
+        ]
+      : [{ id: sessionData.org.id, name: sessionData.org.name }];
+  }
 }
 
 // Export the configured API instance for other services

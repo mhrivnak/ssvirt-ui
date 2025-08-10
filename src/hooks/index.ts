@@ -21,10 +21,19 @@ export {
 export {
   useVDCs,
   useVDC,
+  useOrganizationVDCs,
   useCreateVDC,
   useUpdateVDC,
   useDeleteVDC,
 } from './useVDC';
+
+// Export permission hooks
+export {
+  useUserPermissions,
+  useIsSystemAdmin,
+  useUserOrganizations,
+  useVDCPermissions,
+} from './usePermissions';
 
 export {
   useVMs,

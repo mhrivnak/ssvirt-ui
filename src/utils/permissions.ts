@@ -118,10 +118,15 @@ export class PermissionChecker {
    * Get comprehensive user permissions object
    */
   static getUserPermissions(user: User): UserPermissions {
+    const isSystemAdmin = this.canManageSystem(user);
     return {
       canCreateOrganizations: this.canCreateOrganizations(user),
       canManageUsers: this.canManageUsers(user),
-      canManageSystem: this.canManageSystem(user),
+      canManageSystem: isSystemAdmin,
+      canManageOrganizations: isSystemAdmin,
+      canViewVDCs: true, // All authenticated users can view VDCs
+      canManageVDCs: isSystemAdmin,
+      accessibleOrganizations: [user.orgEntityRef],
       canManageOrganization: (orgId: string) =>
         this.canManageOrganization(user, orgId),
     };

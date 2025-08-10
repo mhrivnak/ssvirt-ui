@@ -44,8 +44,7 @@ import {
   FilterIcon,
 } from '@patternfly/react-icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useVDCs, useDeleteVDC } from '../../hooks';
-import { useRole } from '../../hooks/useRole';
+import { useVDCs, useDeleteVDC, useUserPermissions } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, VDCQueryParams } from '../../types';
 import { ROUTES } from '../../utils/constants';
@@ -53,7 +52,7 @@ import { ROUTES } from '../../utils/constants';
 const VDCs: React.FC = () => {
   const navigate = useNavigate();
   const { orgId } = useParams<{ orgId: string }>();
-  const { capabilities } = useRole();
+  const { data: userPermissions } = useUserPermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [allocationFilter, setAllocationFilter] = useState<string>('all');
@@ -65,47 +64,59 @@ const VDCs: React.FC = () => {
   const [isAllocationFilterOpen, setIsAllocationFilterOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Prepare query parameters
-  const queryParams: VDCQueryParams = {
-    filter: searchTerm || undefined,
-    sortAsc: sortDirection === 'asc' ? sortBy : undefined,
-    sortDesc: sortDirection === 'desc' ? sortBy : undefined,
-    page,
-    pageSize: perPage,
-    status:
-      statusFilter !== 'all'
-        ? (statusFilter as 'enabled' | 'disabled')
-        : undefined,
-    allocationModel:
-      allocationFilter !== 'all'
-        ? (allocationFilter as
-            | 'PayAsYouGo'
-            | 'AllocationPool'
-            | 'ReservationPool'
-            | 'Flex')
-        : undefined,
-  };
+  // Prepare query parameters based on user permissions
+  const queryParams = userPermissions?.canManageSystem
+    ? {
+        filter: searchTerm || undefined,
+        sortAsc: sortDirection === 'asc' ? sortBy : undefined,
+        sortDesc: sortDirection === 'desc' ? sortBy : undefined,
+        page,
+        pageSize: perPage,
+        status:
+          statusFilter !== 'all'
+            ? (statusFilter as 'enabled' | 'disabled')
+            : undefined,
+        allocationModel:
+          allocationFilter !== 'all'
+            ? (allocationFilter as
+                | 'PayAsYouGo'
+                | 'AllocationPool'
+                | 'ReservationPool'
+                | 'Flex')
+            : undefined,
+      }
+    : {
+        // Limited query params for regular users
+        page,
+        pageSize: perPage,
+      };
 
-  // Call hooks before any early returns
+  // Call hooks before any early returns - use role-based API routing
   const {
     data: vdcsResponse,
     isLoading,
     error,
-  } = useVDCs(orgId || '', queryParams);
+  } = useVDCs(
+    userPermissions?.canManageSystem ? orgId || '' : queryParams,
+    userPermissions?.canManageSystem
+      ? (queryParams as VDCQueryParams)
+      : undefined
+  );
   const deleteVDCMutation = useDeleteVDC();
 
-  // Check if user has system admin privileges
-  if (!capabilities.canManageSystem) {
+  // Check if user has permission to view VDCs
+  if (!userPermissions?.canViewVDCs) {
     return (
       <PageSection>
         <Alert variant={AlertVariant.warning} title="Access Denied" isInline>
-          Only System Administrators can manage Virtual Data Centers.
+          You don't have permission to view Virtual Data Centers.
         </Alert>
       </PageSection>
     );
   }
 
-  if (!orgId) {
+  // For admin users, orgId is required. For regular users, it's optional (uses public API)
+  if (userPermissions?.canManageSystem && !orgId) {
     return (
       <PageSection>
         <Alert
@@ -113,7 +124,7 @@ const VDCs: React.FC = () => {
           title="Invalid Organization"
           isInline
         >
-          Organization ID is required to view VDCs.
+          Organization ID is required for administrators to view VDCs.
         </Alert>
       </PageSection>
     );
@@ -144,7 +155,7 @@ const VDCs: React.FC = () => {
       )
     ) {
       try {
-        await deleteVDCMutation.mutateAsync({ orgId, vdcId: vdc.id });
+        await deleteVDCMutation.mutateAsync({ orgId: orgId || '', vdcId: vdc.id });
       } catch (error) {
         setErrorMessage(
           `Failed to delete VDC: ${error instanceof Error ? error.message : 'Unknown error'}`
