@@ -29,10 +29,12 @@ export class VMService {
    * List catalog items (templates) for a specific catalog
    * @param catalogId The catalog URN or ID
    * @param params Optional pagination parameters
+   * @param options Optional request options including AbortSignal
    */
   static async getCatalogItems(
     catalogId: string,
-    params?: { page?: number; pageSize?: number }
+    params?: { page?: number; pageSize?: number },
+    options?: { signal?: AbortSignal }
   ): Promise<VCloudPaginatedResponse<CatalogItem>> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.set('page', params.page.toString());
@@ -41,7 +43,9 @@ export class VMService {
 
     const url = `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(url);
+    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(url, {
+      signal: options?.signal,
+    });
     return response.data;
   }
 

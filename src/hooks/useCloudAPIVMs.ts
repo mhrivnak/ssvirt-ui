@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
 import { QUERY_KEYS } from '../types';
-import type { InstantiateTemplateRequest, CatalogItem } from '../types';
+import type {
+  InstantiateTemplateRequest,
+  CatalogItem,
+  VCloudPaginatedResponse,
+  VApp,
+} from '../types';
 
 /**
  * Hook to get accessible VDCs for VM creation
@@ -19,9 +24,10 @@ export const useVMVDCs = () => {
  * Hook to get catalog items (templates) for VM creation
  */
 export const useCatalogItems = (catalogId?: string) => {
-  return useQuery({
+  return useQuery<VCloudPaginatedResponse<CatalogItem>>({
     queryKey: QUERY_KEYS.catalogItems(catalogId || ''),
-    queryFn: () => VMService.getCatalogItems(catalogId!),
+    queryFn: ({ signal }) =>
+      VMService.getCatalogItems(catalogId!, undefined, { signal }),
     enabled: !!catalogId,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -36,7 +42,7 @@ export const useAllCatalogItems = (
 ) => {
   return useQuery({
     queryKey: QUERY_KEYS.allCatalogItems(catalogs.map((c) => c.id)),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const results = await Promise.all(
         catalogs.map(async (catalog) => {
           try {
@@ -49,10 +55,14 @@ export const useAllCatalogItems = (
             let hasMore = true;
 
             while (hasMore) {
-              const response = await VMService.getCatalogItems(catalog.id, {
-                page,
-                pageSize: 100,
-              });
+              const response = await VMService.getCatalogItems(
+                catalog.id,
+                {
+                  page,
+                  pageSize: 100,
+                },
+                { signal }
+              );
               const pageItems = response.values.map((item) => ({
                 ...item,
                 catalog_id: catalog.id,
@@ -123,15 +133,16 @@ export const useInstantiateTemplate = () => {
  * Hook to monitor vApp status during creation
  */
 export const useVAppStatus = (vappId?: string) => {
-  return useQuery({
+  return useQuery<VApp>({
     queryKey: QUERY_KEYS.vapp(vappId || ''),
     queryFn: () => VMService.getVApp(vappId!),
     enabled: !!vappId,
     staleTime: 0, // Always fetch fresh data for status monitoring
     refetchInterval: (query) => {
       // Poll every 2 seconds if status is INSTANTIATING or UNKNOWN
-      const data = query.state.data;
-      if (data?.status === 'INSTANTIATING' || data?.status === 'UNKNOWN') {
+      const vappData = query.state.data;
+      const status = vappData?.status;
+      if (status === 'INSTANTIATING' || status === 'UNKNOWN') {
         return 2000;
       }
       // Otherwise, stop polling
