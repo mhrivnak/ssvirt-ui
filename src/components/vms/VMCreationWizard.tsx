@@ -7,9 +7,15 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-import { useCreateVM, useCatalogs, useCatalogItems } from '../../hooks';
+import {
+  useInstantiateTemplate,
+  useVMVDCs,
+  useCatalogs,
+  useAllCatalogItems,
+  useVAppStatus,
+} from '../../hooks';
 import type {
-  CreateVMRequest,
+  InstantiateTemplateRequest,
   VMNetworkConfig,
   VMStorageConfig,
   VMAdvancedConfig,
@@ -71,6 +77,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const [showProgress, setShowProgress] = useState(false);
   const [creationError, setCreationError] = useState<string | null>(null);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [createdVAppId, setCreatedVAppId] = useState<string | null>(null);
 
   // Function to create initial form data
   const createInitialFormData = (): WizardFormData => ({
@@ -103,25 +110,19 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   );
 
   // Hooks
-  const createVMMutation = useCreateVM();
-  // TODO: VDCs now require organization ID - this needs proper implementation
-  const vdcs: VDC[] = [];
+  const instantiateTemplateMutation = useInstantiateTemplate();
+  const { data: vdcsResponse } = useVMVDCs();
+  const vdcs = vdcsResponse?.values || [];
   const { data: catalogsResponse } = useCatalogs();
   const catalogs = catalogsResponse?.values || [];
 
-  // Load catalog items from the first available catalog
-  const firstCatalogId = catalogs[0]?.id;
-  const { data: catalogItemsResponse } = useCatalogItems(firstCatalogId || '', {
-    pageSize: 100,
-  });
+  // Monitor vApp creation progress
+  const { data: vappStatus } = useVAppStatus(createdVAppId || undefined);
 
-  // Extract catalog items and add catalog_id for compatibility
-  const catalogItems: CatalogItem[] = (catalogItemsResponse?.values || []).map(
-    (item) => ({
-      ...item,
-      catalog_id: firstCatalogId || '',
-    })
-  );
+  // Load catalog items from all available catalogs
+  const { data: allCatalogItems, isLoading: isLoadingCatalogItems } =
+    useAllCatalogItems(catalogs);
+  const catalogItems: CatalogItem[] = allCatalogItems || [];
 
   const updateFormData = useCallback((updates: Partial<WizardFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -184,20 +185,61 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     setCreationError(null);
 
     try {
-      const createRequest: CreateVMRequest = {
+      // Find the selected catalog item to get its href
+      const selectedTemplate = catalogItems.find(
+        (item) => item.id === formData.catalog_item_id
+      );
+      if (!selectedTemplate) {
+        throw new Error('Selected template not found');
+      }
+
+      // Build the CloudAPI template instantiation request
+      const instantiateRequest: InstantiateTemplateRequest = {
         name: formData.name,
-        vdc_id: formData.vdc_id,
-        catalog_item_id: formData.catalog_item_id,
-        cpu_count: formData.cpu_count,
-        memory_mb: formData.memory_mb,
         description: formData.description || undefined,
-        network_config: formData.network_config,
-        storage_config: formData.storage_config,
-        advanced_config: formData.advanced_config,
+        catalogItemUrn: formData.catalog_item_id,
+        powerOn: true,
+        deploy: true,
+        acceptAllEulas: true,
+        guestCustomization: formData.advanced_config.guest_customization
+          ? {
+              computerName:
+                formData.advanced_config.computer_name || formData.name,
+              adminPassword: formData.advanced_config.admin_password,
+              adminPasswordEnabled: !!formData.advanced_config.admin_password,
+              customizationScript: formData.advanced_config.cloud_init_script,
+            }
+          : undefined,
+        networkConnectionSection:
+          formData.network_config.ip_allocation_mode !== 'DHCP'
+            ? {
+                networkConnection: [
+                  {
+                    network: formData.network_config.network_id || 'default',
+                    networkConnectionIndex: 0,
+                    isConnected: true,
+                    ipAddressAllocationMode:
+                      formData.network_config.ip_allocation_mode === 'STATIC'
+                        ? 'MANUAL'
+                        : formData.network_config.ip_allocation_mode || 'DHCP',
+                    ipAddress: formData.network_config.ip_address,
+                    isPrimary: true,
+                  },
+                ],
+              }
+            : undefined,
       };
 
-      // Start the VM creation
-      await createVMMutation.mutateAsync(createRequest);
+      // Start the VM creation via template instantiation
+      const response = await instantiateTemplateMutation.mutateAsync({
+        vdcId: formData.vdc_id,
+        request: instantiateRequest,
+      });
+
+      // Set the created vApp ID for progress monitoring
+      if (response.values?.[0]?.id) {
+        setCreatedVAppId(response.values[0].id);
+      }
 
       setShowProgress(true);
       onClose();
@@ -217,6 +259,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
     setIsCreating(false);
     setShowProgress(false);
     setCreationError(null);
+    setCreatedVAppId(null);
     // Reset form data
     setFormData(createInitialFormData());
     onClose();
@@ -225,6 +268,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
   const handleProgressClose = () => {
     setShowProgress(false);
     setCreationError(null);
+    setCreatedVAppId(null);
   };
 
   const handleLoadTemplate = (templateData: Partial<WizardFormData>) => {
@@ -244,6 +288,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           updateFormData={updateFormData}
           catalogItems={catalogItems}
           catalogs={catalogs}
+          isLoadingCatalogItems={isLoadingCatalogItems}
         />
       ),
     },
@@ -388,6 +433,7 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
           vdcs.find((vdc: VDC) => vdc.id === formData.vdc_id)?.name ||
           'Unknown VDC'
         }
+        vappStatus={vappStatus?.status}
         error={creationError || undefined}
       />
 

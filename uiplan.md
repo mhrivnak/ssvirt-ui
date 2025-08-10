@@ -9,6 +9,7 @@ This document outlines a comprehensive plan to implement a React-based web UI fo
 **SSVIRT Backend Repository**: https://github.com/mhrivnak/ssvirt
 
 This repository contains the complete backend implementation including:
+
 - API endpoint definitions and handlers (`pkg/api/`)
 - Database models and schemas (`pkg/database/models/`)
 - Authentication and authorization logic (`pkg/auth/`)
@@ -16,6 +17,7 @@ This repository contains the complete backend implementation including:
 - Documentation and setup guides (`docs/`)
 
 Implementers should reference this repository for:
+
 - Complete API specifications and request/response formats
 - Authentication flow details
 - Database model relationships
@@ -39,18 +41,21 @@ When possible, use the latest stable releases.
 ## User Personas & Access Levels
 
 ### 1. System Administrator
+
 - Manage organizations and users
 - Configure system-wide settings
 - Monitor resource usage and health
 - Manage VM templates and catalogs
 
 ### 2. Organization Administrator
+
 - Manage organization users and roles
 - Create and configure VDCs
 - Monitor organization resource usage
 - Manage organization-specific catalogs
 
 ### 3. VDC User (End User)
+
 - Create and manage VMs within assigned VDCs
 - Access VM consoles
 - Monitor VM status and resource usage
@@ -61,6 +66,7 @@ When possible, use the latest stable releases.
 ### Authentication & Session Management
 
 #### Login Flow
+
 ```http
 POST /api/sessions
 Content-Type: application/json
@@ -88,6 +94,7 @@ Response (201):
 ```
 
 #### Session Management
+
 ```http
 GET /api/session
 Authorization: Bearer {token}
@@ -107,6 +114,7 @@ Authorization: Bearer {token}
 ```
 
 #### User Profile
+
 ```http
 GET /api/v1/user/profile
 Authorization: Bearer {token}
@@ -125,6 +133,7 @@ Content-Type: application/json
 ### Organization Management
 
 #### List Organizations
+
 ```http
 GET /api/org
 Authorization: Bearer {token}
@@ -137,7 +146,7 @@ Response (200):
       {
         "id": "org-uuid",
         "name": "example-org",
-        "display_name": "Example Organization", 
+        "display_name": "Example Organization",
         "description": "Organization description",
         "enabled": true,
         "created_at": "2024-01-01T00:00:00Z",
@@ -150,6 +159,7 @@ Response (200):
 ```
 
 #### Get Organization Details
+
 ```http
 GET /api/org/{org-id}
 Authorization: Bearer {token}
@@ -172,6 +182,7 @@ Response (200):
 ### VDC Management
 
 #### List VDCs in Organization
+
 ```http
 GET /api/org/{org-id}/vdcs/query
 Authorization: Bearer {token}
@@ -201,6 +212,7 @@ Response (200):
 ```
 
 #### Get VDC Details
+
 ```http
 GET /api/vdc/{vdc-id}
 Authorization: Bearer {token}
@@ -227,6 +239,7 @@ Response (200):
 ### VM Management
 
 #### List VMs in vApp
+
 ```http
 GET /api/vApp/{vapp-id}/vms/query
 Authorization: Bearer {token}
@@ -262,6 +275,7 @@ Response (200):
 ```
 
 #### Get VM Details
+
 ```http
 GET /api/vm/{vm-id}
 Authorization: Bearer {token}
@@ -288,6 +302,7 @@ Response (200):
 ```
 
 #### VM Power Operations
+
 ```http
 POST /api/vm/{vm-id}/power/action/powerOn
 Authorization: Bearer {token}
@@ -320,6 +335,7 @@ Response (200):
 ```
 
 #### Create VM
+
 ```http
 POST /api/vApp/{vapp-id}/vms
 Authorization: Bearer {token}
@@ -352,6 +368,7 @@ Response (201):
 ```
 
 #### Update VM
+
 ```http
 PUT /api/vm/{vm-id}
 Authorization: Bearer {token}
@@ -366,6 +383,7 @@ Content-Type: application/json
 ```
 
 #### Delete VM
+
 ```http
 DELETE /api/vm/{vm-id}
 Authorization: Bearer {token}
@@ -384,6 +402,7 @@ Response (200):
 ### vApp Template Management
 
 #### Instantiate vApp Template
+
 ```http
 POST /api/vdc/{vdc-id}/action/instantiateVAppTemplate
 Authorization: Bearer {token}
@@ -420,6 +439,7 @@ Response (201):
 ### Catalog Management
 
 #### List Catalogs in Organization
+
 ```http
 GET /api/org/{org-id}/catalogs/query
 Authorization: Bearer {token}
@@ -445,6 +465,7 @@ Response (200):
 ```
 
 #### Get Catalog Details with Templates
+
 ```http
 GET /api/catalog/{catalog-id}
 Authorization: Bearer {token}
@@ -479,6 +500,7 @@ Response (200):
 ```
 
 #### List Catalog Items
+
 ```http
 GET /api/catalog/{catalog-id}/catalogItems/query
 Authorization: Bearer {token}
@@ -507,6 +529,7 @@ Response (200):
 ```
 
 #### Get Catalog Item Details
+
 ```http
 GET /api/catalogItem/{item-id}
 Authorization: Bearer {token}
@@ -518,7 +541,7 @@ Response (200):
     "id": "template-uuid",
     "name": "ubuntu-22.04",
     "description": "Ubuntu 22.04 LTS",
-    "os_type": "ubuntu64Guest", 
+    "os_type": "ubuntu64Guest",
     "vm_instance_type": "standard.medium",
     "cpu_count": 2,
     "memory_mb": 4096,
@@ -532,6 +555,7 @@ Response (200):
 ### System Health & Monitoring
 
 #### Health Check
+
 ```http
 GET /health
 
@@ -545,6 +569,7 @@ Response (200):
 ```
 
 #### Readiness Check
+
 ```http
 GET /ready
 
@@ -560,6 +585,7 @@ Response (200):
 ```
 
 #### Version Information
+
 ```http
 GET /api/v1/version
 
@@ -596,6 +622,7 @@ Examples:
 ### Authentication Headers
 
 All authenticated requests must include:
+
 ```http
 Authorization: Bearer {jwt-token}
 Content-Type: application/json (for POST/PUT requests)
@@ -604,6 +631,7 @@ Content-Type: application/json (for POST/PUT requests)
 ### Rate Limiting
 
 The API may implement rate limiting. Check for these headers:
+
 ```http
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
@@ -640,7 +668,9 @@ src/
 ### Phase 1: Foundation & Authentication (PRs 1-4)
 
 #### PR #1: Project Setup & Basic Structure
+
 **Scope**: Initial project scaffolding
+
 - Set up Vite + React + TypeScript project
 - Install and configure PatternFly 6
 - Set up ESLint, Prettier, and basic tooling
@@ -651,7 +681,9 @@ src/
 **Deliverable**: Working dev environment with PatternFly styling
 
 #### PR #2: Authentication System
+
 **Scope**: Login/logout functionality
+
 - Create login page with PatternFly LoginPage component
 - Implement JWT token management (storage, refresh)
 - Create authentication context and hooks
@@ -660,15 +692,18 @@ src/
 - Implement logout functionality
 
 **API References**:
+
 - `POST /api/sessions` - Login endpoint
-- `DELETE /api/sessions` - Logout endpoint  
+- `DELETE /api/sessions` - Logout endpoint
 - `GET /api/session` - Current session validation
 - See `pkg/auth/` in backend repo for JWT token structure and validation logic
 
 **Deliverable**: Working authentication flow
 
 #### PR #3: Base Layout & Navigation
+
 **Scope**: Application shell
+
 - Create main application layout using PatternFly Page component
 - Implement responsive navigation with PatternFly Nav components
 - Create breadcrumb system
@@ -679,7 +714,9 @@ src/
 **Deliverable**: Complete application shell with navigation
 
 #### PR #4: API Service Layer
+
 **Scope**: Centralized API management
+
 - Create API service classes for each domain (auth, orgs, vms, etc.)
 - Implement React Query setup and configuration
 - Create custom hooks for data fetching
@@ -692,7 +729,9 @@ src/
 ### Phase 2: Core User Interface (PRs 5-8)
 
 #### PR #5: Dashboard & Overview
+
 **Scope**: Main dashboard page
+
 - Create dashboard layout with PatternFly Grid
 - Implement resource overview cards (VMs, VDCs, etc.)
 - Add recent activity timeline
@@ -703,7 +742,9 @@ src/
 **Deliverable**: Functional main dashboard
 
 #### PR #6: Organization Management
+
 **Scope**: Organization listing and details
+
 - Create organization list page with PatternFly Table
 - Implement organization search and filtering
 - Create organization detail view
@@ -714,7 +755,9 @@ src/
 **Deliverable**: Complete organization management interface
 
 #### PR #7: VDC Management
+
 **Scope**: Virtual Data Center management
+
 - Create VDC listing with resource usage display
 - Implement VDC detail view with namespace information
 - Add VDC creation wizard with resource quota configuration
@@ -725,7 +768,9 @@ src/
 **Deliverable**: Full VDC management capability
 
 #### PR #8: User Profile & Settings
+
 **Scope**: User account management
+
 - Create user profile page with editable fields
 - Implement password change functionality
 - Add user preferences and settings
@@ -738,7 +783,9 @@ src/
 ### Phase 3: VM Management Core (PRs 9-13)
 
 #### PR #9: VM Listing & Search
+
 **Scope**: VM discovery and filtering
+
 - Create VM list page with advanced PatternFly DataList/Table
 - Implement multi-level filtering (by VDC, status, etc.)
 - Add VM search functionality
@@ -750,7 +797,9 @@ src/
 **Deliverable**: Comprehensive VM listing interface
 
 #### PR #10: VM Details & Monitoring
+
 **Scope**: Individual VM management
+
 - Create detailed VM information page
 - Display VM specifications (CPU, memory, storage)
 - Show VM network configuration
@@ -762,7 +811,9 @@ src/
 **Deliverable**: Complete VM detail interface
 
 #### PR #11: VM Power Management
+
 **Scope**: VM lifecycle operations
+
 - Implement power on/off/restart controls
 - Add suspend/resume functionality
 - Create VM reset functionality
@@ -774,7 +825,9 @@ src/
 **Deliverable**: Full VM power management
 
 #### PR #12: VM Creation Wizard
+
 **Scope**: New VM provisioning
+
 - Create multi-step VM creation wizard
 - Implement template selection from catalogs
 - Add resource specification forms (CPU, memory, storage)
@@ -786,7 +839,9 @@ src/
 **Deliverable**: Complete VM provisioning workflow
 
 #### PR #13: VM Configuration Management
+
 **Scope**: VM settings and updates
+
 - Create VM configuration editing interface
 - Implement resource scaling (CPU/memory adjustment)
 - Add disk management (add/remove/resize)
@@ -800,7 +855,9 @@ src/
 ### Phase 4: Advanced Features (PRs 14-18)
 
 #### PR #14: Catalog & Template Management
+
 **Scope**: Template browsing and management
+
 - Create catalog browsing interface
 - Implement template search and filtering
 - Add template detail views with specifications
@@ -812,7 +869,9 @@ src/
 **Deliverable**: Complete catalog browsing experience
 
 #### PR #15: Resource Monitoring & Analytics
+
 **Scope**: Usage tracking and reporting
+
 - Create resource usage dashboards
 - Implement cost tracking and reporting
 - Add resource utilization charts
@@ -824,7 +883,9 @@ src/
 **Deliverable**: Comprehensive monitoring interface
 
 #### PR #16: Batch Operations & Automation
+
 **Scope**: Mass operations and workflows
+
 - Create bulk operation interface
 - Implement VM deployment templates
 - Add scheduled operations
@@ -836,7 +897,9 @@ src/
 **Deliverable**: Advanced automation features
 
 #### PR #17: Advanced Networking
+
 **Scope**: Network management interface
+
 - Create network topology visualization
 - Implement UserDefinedNetwork management
 - Add network policy configuration
@@ -848,7 +911,9 @@ src/
 **Deliverable**: Complete networking management
 
 #### PR #18: Administration Interface
+
 **Scope**: System administration tools
+
 - Create system health dashboard
 - Implement user management interface
 - Add system configuration pages
@@ -862,7 +927,9 @@ src/
 ### Phase 5: User Experience Enhancement (PRs 19-22)
 
 #### PR #19: Advanced UI/UX Features
+
 **Scope**: Enhanced user experience
+
 - Implement keyboard shortcuts
 - Add drag-and-drop functionality
 - Create customizable dashboards
@@ -874,7 +941,9 @@ src/
 **Deliverable**: Enhanced user experience
 
 #### PR #20: Real-time Updates & Notifications
+
 **Scope**: Live data and notifications
+
 - Implement WebSocket connections for real-time updates
 - Create notification system with PatternFly alerts
 - Add real-time VM status updates
@@ -886,7 +955,9 @@ src/
 **Deliverable**: Real-time user interface
 
 #### PR #21: Mobile Responsiveness & PWA
+
 **Scope**: Mobile support
+
 - Enhance mobile responsiveness across all pages
 - Implement Progressive Web App (PWA) features
 - Add offline capability for basic operations
@@ -898,7 +969,9 @@ src/
 **Deliverable**: Mobile-optimized application
 
 #### PR #22: Performance & Optimization
+
 **Scope**: Performance improvements
+
 - Implement code splitting and lazy loading
 - Add image optimization and lazy loading
 - Create efficient data caching strategies
@@ -912,6 +985,7 @@ src/
 ## Key UI Components & Patterns
 
 ### Data Display Components
+
 - **VMCard**: Compact VM information display
 - **ResourceUsageChart**: Animated resource utilization charts
 - **StatusBadge**: Consistent status indicators
@@ -919,18 +993,21 @@ src/
 - **ActivityTimeline**: Event history display
 
 ### Form Components
+
 - **VMCreationWizard**: Multi-step VM creation flow
 - **ResourceSpecForm**: CPU/memory/storage configuration
 - **NetworkConfigForm**: Network interface setup
 - **BulkActionForm**: Mass operation configuration
 
 ### Navigation Components
+
 - **BreadcrumbTrail**: Hierarchical navigation
 - **FilterSidebar**: Advanced filtering interface
 - **QuickActions**: Context-sensitive action buttons
 - **GlobalSearch**: Application-wide search
 
 ### Data Components
+
 - **VMTable**: Sortable, filterable VM listing
 - **ResourceTree**: Hierarchical resource display
 - **MetricsGrid**: Resource monitoring layout
@@ -939,18 +1016,21 @@ src/
 ## Testing Strategy
 
 ### Unit Testing
+
 - Component testing with React Testing Library
 - Service layer testing with mocked API responses
 - Hook testing with React Testing Library
 - Utility function testing
 
 ### Integration Testing
+
 - User flow testing with Playwright
 - API integration testing
 - Authentication flow testing
 - Cross-component interaction testing
 
 ### Accessibility Testing
+
 - ARIA label validation
 - Keyboard navigation testing
 - Screen reader compatibility
@@ -959,18 +1039,21 @@ src/
 ## Security Considerations
 
 ### Authentication Security
+
 - Secure JWT token storage (httpOnly cookies when possible)
 - Automatic token refresh handling
 - Session timeout management
 - CSRF protection
 
 ### Authorization
+
 - Role-based UI rendering
 - API permission validation
 - Secure route protection
 - Resource access verification
 
 ### Data Security
+
 - Input sanitization and validation
 - XSS prevention
 - Secure communication (HTTPS enforcement)
@@ -979,12 +1062,14 @@ src/
 ## Performance Targets
 
 ### Loading Performance
+
 - Initial page load: < 3 seconds
 - Route transitions: < 500ms
 - API responses: < 2 seconds
 - Large dataset rendering: < 1 second
 
 ### Bundle Size
+
 - Initial bundle: < 1MB gzipped
 - Individual route chunks: < 500KB gzipped
 - Component library: Tree-shaken imports only
@@ -993,30 +1078,35 @@ src/
 ## Browser Support
 
 ### Primary Support
+
 - Chrome 90+
 - Firefox 90+
 - Safari 14+
 - Edge 90+
 
 ### Secondary Support
+
 - iOS Safari 14+
 - Android Chrome 90+
 
 ## Deployment Strategy
 
 ### Development Environment
+
 - Local development with hot reload
 - Mock API server for offline development
 - Storybook for component development
 - Development database with test data
 
 ### Staging Environment
+
 - Production-like environment for testing
 - Integration with staging SSVIRT API
 - Performance testing environment
 - User acceptance testing platform
 
 ### Production Environment
+
 - CDN deployment for static assets
 - Environment-specific configuration
 - Production monitoring and logging
@@ -1025,12 +1115,14 @@ src/
 ## Documentation Requirements
 
 ### Developer Documentation
+
 - Component documentation with Storybook
 - API integration guide
 - Contributing guidelines
 - Architecture decision records
 
 ### User Documentation
+
 - User guide with screenshots
 - Feature overview videos
 - Troubleshooting guide
@@ -1039,6 +1131,7 @@ src/
 ## Future Enhancements
 
 ### Potential Phase 6+ Features
+
 - VM console access (noVNC integration)
 - VM snapshot management
 - VM migration tools
@@ -1063,12 +1156,14 @@ src/
 ## Success Metrics
 
 ### User Experience Metrics
+
 - Time to complete common tasks (VM creation, power operations)
 - User satisfaction scores
 - Support ticket reduction
 - Feature adoption rates
 
 ### Technical Metrics
+
 - Page load times
 - API response times
 - Error rates
@@ -1078,12 +1173,14 @@ src/
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **API changes**: Maintain API versioning and adapter patterns
 - **Performance issues**: Implement monitoring and optimization early
 - **Browser compatibility**: Regular cross-browser testing
 - **Security vulnerabilities**: Regular security audits and updates
 
 ### Project Risks
+
 - **Scope creep**: Well-defined MVP and phased approach
 - **Resource constraints**: Modular implementation allows for team scaling
 - **Timeline delays**: Buffer time included in estimates

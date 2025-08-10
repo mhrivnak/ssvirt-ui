@@ -20,6 +20,7 @@ import {
   EmptyState,
   EmptyStateVariant,
   EmptyStateBody,
+  Spinner,
 } from '@patternfly/react-core';
 import {
   VirtualMachineIcon,
@@ -34,8 +35,9 @@ import type { Catalog, CatalogItem } from '../../../types';
 interface TemplateSelectionStepProps {
   formData: WizardFormData;
   updateFormData: (updates: Partial<WizardFormData>) => void;
-  catalogItems: CatalogItem[]; // Templates not implemented in CloudAPI version
+  catalogItems: CatalogItem[];
   catalogs: Catalog[];
+  isLoadingCatalogItems?: boolean;
 }
 
 const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
@@ -43,6 +45,7 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
   updateFormData,
   catalogItems,
   catalogs,
+  isLoadingCatalogItems = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCatalogId, setSelectedCatalogId] = useState('');
@@ -98,25 +101,31 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
     return '💿';
   };
 
+  if (isLoadingCatalogItems) {
+    return (
+      <EmptyState variant={EmptyStateVariant.lg}>
+        <Spinner size="xl" />
+        <Title headingLevel="h2" size="lg">
+          Loading templates...
+        </Title>
+        <EmptyStateBody>
+          Fetching available VM templates from all catalogs.
+        </EmptyStateBody>
+      </EmptyState>
+    );
+  }
+
   if (!catalogItems.length) {
     return (
       <EmptyState variant={EmptyStateVariant.lg}>
         <VirtualMachineIcon style={{ fontSize: '64px' }} />
         <Title headingLevel="h2" size="lg">
-          Templates not available
+          No templates available
         </Title>
         <EmptyStateBody>
-          VM templates are not implemented in the current CloudAPI version.
-          Please contact your administrator for template availability or use
-          custom VM specifications for now.
+          No VM templates were found in the available catalogs. Please contact
+          your administrator to ensure templates are published and accessible.
         </EmptyStateBody>
-        <Alert
-          variant={AlertVariant.info}
-          title="CloudAPI Implementation Note"
-          isInline
-        >
-          This feature will be available in a future CloudAPI update.
-        </Alert>
       </EmptyState>
     );
   }
@@ -251,6 +260,13 @@ const TemplateSelectionStep: React.FC<TemplateSelectionStepProps> = ({
                             <p className="pf-v6-u-color-200 pf-v6-u-mb-sm">
                               {catalogItem.description}
                             </p>
+                            {catalogItem.catalog_name && (
+                              <div className="pf-v6-u-mb-sm">
+                                <Label color="teal" icon={<CatalogIcon />}>
+                                  {catalogItem.catalog_name}
+                                </Label>
+                              </div>
+                            )}
                             <div
                               style={{
                                 display: 'flex',

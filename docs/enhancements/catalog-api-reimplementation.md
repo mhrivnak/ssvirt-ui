@@ -10,15 +10,17 @@ endpoints, data structures, and patterns.
 ## Current State
 
 ### Legacy Implementation
+
 - **Service**: Legacy service (removed) - used `/api/v1/catalogs` endpoints
 - **Hooks**: `src/hooks/useCatalogs.ts` - React Query hooks (now updated for CloudAPI)
 - **Types**: `src/types/index.ts:341-363` - custom catalog types
-- **UI Components**: 
+- **UI Components**:
   - `src/pages/catalogs/Catalogs.tsx` - catalog listing page
   - `src/pages/catalogs/CatalogDetail.tsx` - catalog detail page
 - **API Format**: Custom pagination with `PaginatedResponse<Catalog>`
 
 ### Issues with Current Implementation
+
 1. **Non-compliant API endpoints** - uses custom `/api/v1/` instead of CloudAPI
 2. **Incorrect data structures** - doesn't match VMware Cloud Director standards
 3. **Missing access controls** - no organization-based filtering
@@ -28,6 +30,7 @@ endpoints, data structures, and patterns.
 ## Target State
 
 ### CloudAPI Compliance
+
 - **Base URL**: `/cloudapi/1.0.0/catalogs`
 - **Authentication**: JWT Bearer token
 - **URN Format**: `urn:vcloud:catalog:<uuid>`
@@ -35,6 +38,7 @@ endpoints, data structures, and patterns.
 - **Access Control**: Organization-based catalog access
 
 ### New API Endpoints
+
 1. `GET /cloudapi/1.0.0/catalogs` - list catalogs with pagination
 2. `GET /cloudapi/1.0.0/catalogs/{catalogUrn}` - get single catalog
 3. `POST /cloudapi/1.0.0/catalogs` - create catalog
@@ -44,12 +48,13 @@ endpoints, data structures, and patterns.
 ## Implementation Plan
 
 ### Phase 1: Type System Updates
+
 1. **Update catalog types in `src/types/index.ts`**
    - Replace legacy `Catalog` interface with CloudAPI-compliant structure
    - Add new interfaces:
      - `CatalogCloudAPI` - main catalog object
      - `OrgReference` - organization reference
-     - `OwnerReference` - owner reference  
+     - `OwnerReference` - owner reference
      - `PublishConfig` - publish configuration
      - `SubscriptionConfig` - subscription configuration
      - `CreateCatalogRequest` - catalog creation payload
@@ -62,6 +67,7 @@ endpoints, data structures, and patterns.
    - Ensure consistency with VDC implementation patterns
 
 ### Phase 2: Service Layer Reimplementation
+
 1. **Create new CloudAPI service: `src/services/cloudapi/CatalogService.ts`**
    - Implement all CRUD operations following VMware Cloud Director patterns
    - Use proper URN encoding for path parameters
@@ -72,7 +78,8 @@ endpoints, data structures, and patterns.
    - ✅ Deleted `src/services/catalogs.ts`
    - ✅ Updated `src/services/index.ts` exports to use CloudAPI `CatalogService`
 
-### Phase 3: Hook Reimplementation  
+### Phase 3: Hook Reimplementation
+
 1. **Rewrite `src/hooks/useCatalogs.ts`**
    - Replace all hooks to use new CloudAPI service
    - Implement proper query key serialization for stable caching
@@ -87,6 +94,7 @@ endpoints, data structures, and patterns.
    - `useDeleteCatalog()` - delete catalog mutation
 
 ### Phase 4: UI Component Updates
+
 1. **Update `src/pages/catalogs/Catalogs.tsx`**
    - Migrate to new CloudAPI data structures
    - Update filtering to use CloudAPI parameters
@@ -109,6 +117,7 @@ endpoints, data structures, and patterns.
    - Verify breadcrumb navigation
 
 ### Phase 5: Data Migration & Mocks
+
 1. **Update mock data in `src/mocks/data.ts`**
    - Replace legacy catalog mock data with CloudAPI-compliant structures
    - Use proper URN format for IDs
@@ -121,6 +130,7 @@ endpoints, data structures, and patterns.
    - Handle URN-based routing
 
 ### Phase 6: Testing & Validation
+
 1. **TypeScript compilation**
    - Ensure all type errors are resolved
    - Verify strict TypeScript compliance
@@ -139,12 +149,14 @@ endpoints, data structures, and patterns.
 ## Breaking Changes
 
 ### Removed Legacy Features
+
 - **Legacy API endpoints** - `/api/v1/catalogs/*` will no longer be used
 - **Legacy catalog types** - old `Catalog` and `CatalogItem` interfaces removed
 - **Custom pagination** - replaced with VMware Cloud Director standard
 - **Legacy hooks** - all existing catalog hooks will be replaced
 
 ### New Requirements
+
 - **Organization context** - catalogs now require organization information
 - **URN format** - all catalog IDs must use `urn:vcloud:catalog:<uuid>` format
 - **CloudAPI authentication** - requires proper JWT Bearer tokens
@@ -153,6 +165,7 @@ endpoints, data structures, and patterns.
 ## Data Structure Mapping
 
 ### Legacy → CloudAPI Mapping
+
 ```typescript
 // Legacy
 interface Catalog {
@@ -172,41 +185,45 @@ interface CatalogItem {         → (removed - not in scope)
 ```
 
 ### New CloudAPI Structure
+
 ```typescript
 interface CatalogCloudAPI {
-  id: string;                           // urn:vcloud:catalog:<uuid>
+  id: string; // urn:vcloud:catalog:<uuid>
   name: string;
   description: string;
-  org: { id: string };                  // urn:vcloud:org:<uuid>
+  org: { id: string }; // urn:vcloud:org:<uuid>
   isPublished: boolean;
   isSubscribed: boolean;
-  creationDate: string;                 // ISO-8601
+  creationDate: string; // ISO-8601
   numberOfVAppTemplates: number;
-  numberOfMedia: number;                // always 0
-  catalogStorageProfiles: any[];        // always empty
+  numberOfMedia: number; // always 0
+  catalogStorageProfiles: any[]; // always empty
   publishConfig: { isPublished: boolean };
   subscriptionConfig: { isSubscribed: boolean };
-  distributedCatalogConfig: object;     // always empty
-  owner: { id: string };               // currently empty
-  isLocal: boolean;                     // always true
-  version: number;                      // always 1
+  distributedCatalogConfig: object; // always empty
+  owner: { id: string }; // currently empty
+  isLocal: boolean; // always true
+  version: number; // always 1
 }
 ```
 
 ## Testing Strategy
 
 ### Unit Tests
+
 - Service layer methods with proper URN handling
 - Hook behavior with CloudAPI responses
 - Component rendering with new data structures
 
-### Integration Tests  
+### Integration Tests
+
 - End-to-end catalog listing and filtering
 - Catalog creation and deletion workflows
 - Organization-based access control
 - Pagination behavior
 
 ### TypeScript Validation
+
 - Strict compilation with no type errors
 - Proper CloudAPI type compliance
 - Consistent patterns with VDC implementation
@@ -224,7 +241,7 @@ interface CatalogCloudAPI {
 ## Timeline
 
 - **Phase 1-2**: Type system and service layer (1-2 days)
-- **Phase 3**: Hook reimplementation (1 day)  
+- **Phase 3**: Hook reimplementation (1 day)
 - **Phase 4**: UI component updates (1-2 days)
 - **Phase 5**: Data migration and mocks (1 day)
 - **Phase 6**: Testing and validation (1 day)

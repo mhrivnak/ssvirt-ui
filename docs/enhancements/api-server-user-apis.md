@@ -23,16 +23,19 @@ This enhancement proposal outlines the migration of SSVirt APIs to adhere strict
 ### Phase 1: Model Updates
 
 #### 1.1 URN ID System
+
 Every record must have an "id" field formatted as: `"urn:vcloud:$TYPE:$UUID"`
 
 Types include:
+
 - user
-- org  
+- org
 - role
 
 #### 1.2 Model Schema Changes
 
 **User Model Updates:**
+
 - Change `ID` field type from `uuid.UUID` to `string` with URN format
 - Add `fullName` field replacing `firstName` + `lastName`
 - Add `description` field
@@ -43,6 +46,7 @@ Types include:
 - Update relationships to use entity references
 
 **Organization Model Updates:**
+
 - Change `ID` field type from `uuid.UUID` to `string` with URN format
 - Rename `Enabled` to `isEnabled`
 - Add count fields: `orgVdcCount`, `catalogCount`, `vappCount`, `runningVMCount`, `userCount`, `diskCount`
@@ -50,11 +54,14 @@ Types include:
 - Add `canManageOrgs`, `canPublish`, `maskedEventTaskUsername`, `directlyManagedOrgCount` fields
 
 **Role Model Creation:**
+
 - Create new `Role` model with `id`, `name`, `description`, `bundleKey`, `readOnly` fields
 - Seed with predefined roles: "System Administrator", "Organization Administrator", "vApp User"
 
 #### 1.3 Entity Reference System
+
 Create shared structures for entity references:
+
 ```go
 type EntityRef struct {
     Name string `json:"name"`
@@ -65,32 +72,40 @@ type EntityRef struct {
 ### Phase 2: API Endpoint Updates
 
 #### 2.1 New API Routes
+
 Implement VMware Cloud Director compatible endpoints:
 
 **Users:**
+
 - `GET /cloudapi/1.0.0/users` - bulk user queries
 - `GET /cloudapi/1.0.0/users/{id}` - single user query
 
 **Roles:**
-- `GET /cloudapi/1.0.0/roles` - bulk role queries  
+
+- `GET /cloudapi/1.0.0/roles` - bulk role queries
 - `GET /cloudapi/1.0.0/roles/{id}` - single role query
 
 **Organizations:**
+
 - `GET /cloudapi/1.0.0/orgs` - bulk org queries
 - `GET /cloudapi/1.0.0/orgs/{id}` - single org query
 
 #### 2.2 Remove Legacy Routes
+
 Remove existing `/api/v1` endpoints that don't align with VMware Cloud Director specification.
 
 ### Phase 3: Data Migration & Seeding
 
 #### 3.1 Default Data Creation
+
 - Create "Provider" organization as default
 - Seed roles: "System Administrator", "Organization Administrator", "vApp User"
 - Update initial admin user to have System Administrator role in Provider org
 
 #### 3.2 URN Generation
+
 Implement helper functions:
+
 ```go
 func GenerateUserURN(uuid string) string {
     return fmt.Sprintf("urn:vcloud:user:%s", uuid)
@@ -106,11 +121,13 @@ func GenerateRoleURN(uuid string) string {
 ### Phase 4: Repository & Service Updates
 
 #### 4.1 Repository Layer Changes
+
 - Update all repository methods to work with string URN IDs
 - Add methods for entity reference lookups
 - Update queries to populate count fields for organizations
 
-#### 4.2 Service Layer Updates  
+#### 4.2 Service Layer Updates
+
 - Update user service to handle new user schema
 - Add role service for role management
 - Update organization service to compute count fields
@@ -119,11 +136,13 @@ func GenerateRoleURN(uuid string) string {
 ### Phase 5: Testing & Validation
 
 #### 5.1 Unit Tests
+
 - Update all existing unit tests for new schemas
 - Add tests for URN generation and parsing
 - Test entity reference resolution
 
 #### 5.2 Integration Tests
+
 - Test complete API flows with new endpoints
 - Validate VMware Cloud Director API compliance
 - Test role-based access patterns
@@ -142,7 +161,7 @@ func GenerateRoleURN(uuid string) string {
 ## Files to Modify
 
 - `pkg/database/models/user.go` - User model updates
-- `pkg/database/models/organization.go` - Organization model updates  
+- `pkg/database/models/organization.go` - Organization model updates
 - `pkg/database/models/role.go` - New role model
 - `pkg/database/models/types.go` - Add entity reference types
 - `pkg/database/repositories/*.go` - Repository updates
@@ -157,39 +176,42 @@ func GenerateRoleURN(uuid string) string {
 **Reference:** https://developer.broadcom.com/xapis/vmware-cloud-director-openapi/latest/user/
 
 **Endpoints:**
+
 - `GET /cloudapi/1.0.0/users` - bulk user queries
 - `GET /cloudapi/1.0.0/users/{id}` - single user query
 
 **Schema:**
+
 ```json
 {
-    "username": "string",
-    "fullName": "string", 
-    "description": "string",
-    "id": "string",
-    "roleEntityRefs": [
-        {
-            "name": "string",
-            "id": "string"
-        }
-    ],
-    "orgEntityRef": {
-        "name": "string", 
-        "id": "string"
-    },
-    "deployedVmQuota": 0,
-    "storedVmQuota": 0,
-    "email": "string",
-    "nameInSource": "string",
-    "enabled": false,
-    "isGroupRole": false,
-    "providerType": "string",
-    "locked": false,
-    "stranded": false
+  "username": "string",
+  "fullName": "string",
+  "description": "string",
+  "id": "string",
+  "roleEntityRefs": [
+    {
+      "name": "string",
+      "id": "string"
+    }
+  ],
+  "orgEntityRef": {
+    "name": "string",
+    "id": "string"
+  },
+  "deployedVmQuota": 0,
+  "storedVmQuota": 0,
+  "email": "string",
+  "nameInSource": "string",
+  "enabled": false,
+  "isGroupRole": false,
+  "providerType": "string",
+  "locked": false,
+  "stranded": false
 }
 ```
 
 **Implementation Notes:**
+
 - `fullName` replaces existing `firstName` + `lastName` fields
 - `roleEntityRefs` contains the roles assigned to the user (correcting the documentation: these are Role references, not Organization)
 - `orgEntityRef` contains the organization the user belongs to
@@ -202,21 +224,24 @@ func GenerateRoleURN(uuid string) string {
 **Reference:** https://developer.broadcom.com/xapis/vmware-cloud-director-openapi/latest/roles/
 
 **Endpoints:**
-- `GET /cloudapi/1.0.0/roles` - bulk role queries  
+
+- `GET /cloudapi/1.0.0/roles` - bulk role queries
 - `GET /cloudapi/1.0.0/roles/{id}` - single role query
 
 **Schema:**
+
 ```json
 {
-    "name": "string",
-    "id": "string", 
-    "description": "string",
-    "bundleKey": "string",
-    "readOnly": false
+  "name": "string",
+  "id": "string",
+  "description": "string",
+  "bundleKey": "string",
+  "readOnly": false
 }
 ```
 
 **Predefined Roles:**
+
 1. **System Administrator** (`urn:vcloud:role:<uuid>`)
    - Full system access
    - Can manage all organizations
@@ -233,6 +258,7 @@ func GenerateRoleURN(uuid string) string {
    - `readOnly: true`
 
 **Implementation Notes:**
+
 - All roles should be `readOnly: true`
 - `description` and `bundleKey` can be empty strings initially
 - Role constants should be defined for permission checking
@@ -242,35 +268,38 @@ func GenerateRoleURN(uuid string) string {
 **Reference:** https://developer.broadcom.com/xapis/vmware-cloud-director-openapi/latest/org/
 
 **Endpoints:**
+
 - `GET /cloudapi/1.0.0/orgs` - bulk org queries
 - `GET /cloudapi/1.0.0/orgs/{id}` - single org query
 
 **Schema:**
+
 ```json
 {
-    "id": "string",
+  "id": "string",
+  "name": "string",
+  "displayName": "string",
+  "description": "string",
+  "isEnabled": false,
+  "orgVdcCount": 0,
+  "catalogCount": 0,
+  "vappCount": 0,
+  "runningVMCount": 0,
+  "userCount": 0,
+  "diskCount": 0,
+  "managedBy": {
     "name": "string",
-    "displayName": "string", 
-    "description": "string",
-    "isEnabled": false,
-    "orgVdcCount": 0,
-    "catalogCount": 0,
-    "vappCount": 0,
-    "runningVMCount": 0,
-    "userCount": 0,
-    "diskCount": 0,
-    "managedBy": {
-        "name": "string",
-        "id": "string" 
-    },
-    "canManageOrgs": false,
-    "canPublish": false,
-    "maskedEventTaskUsername": "string",
-    "directlyManagedOrgCount": 0
+    "id": "string"
+  },
+  "canManageOrgs": false,
+  "canPublish": false,
+  "maskedEventTaskUsername": "string",
+  "directlyManagedOrgCount": 0
 }
 ```
 
 **Default Organization:**
+
 - Name: "Provider"
 - `displayName`: "Provider Organization"
 - `description`: "Default provider organization"
@@ -279,6 +308,7 @@ func GenerateRoleURN(uuid string) string {
 - `canManageOrgs`: true (for system-level org)
 
 **Implementation Notes:**
+
 - Count fields must be computed from related entities, but that can be done later
 - `managedBy` references the primary admin user
 - `maskedEventTaskUsername` can be empty initially
@@ -287,13 +317,15 @@ func GenerateRoleURN(uuid string) string {
 ## Data Seeding Requirements
 
 1. **Create Default Roles** (in order):
+
    ```
    System Administrator (urn:vcloud:role:<uuid>)
-   Organization Administrator (urn:vcloud:role:<uuid>)  
+   Organization Administrator (urn:vcloud:role:<uuid>)
    vApp User (urn:vcloud:role:<uuid>)
    ```
 
 2. **Create Provider Organization**:
+
    ```
    Provider (urn:vcloud:org:<uuid>)
    ```
@@ -307,6 +339,7 @@ func GenerateRoleURN(uuid string) string {
 ## Technical Implementation Details
 
 ### URN Format Constants
+
 ```go
 const (
     URNPrefixUser = "urn:vcloud:user:"
@@ -316,7 +349,7 @@ const (
 
 const (
     RoleSystemAdmin = "System Administrator"
-    RoleOrgAdmin    = "Organization Administrator" 
+    RoleOrgAdmin    = "Organization Administrator"
     RoleVAppUser    = "vApp User"
 )
 
@@ -326,13 +359,16 @@ const (
 ```
 
 ### Response Format
+
 All endpoints should return:
+
 - Single entities: Direct object
 - Collections: Array of objects
 - Proper HTTP status codes (200, 404, 500)
 - Content-Type: application/json
 
 ### Error Handling
+
 - 404 for non-existent entities
 - 400 for malformed URN IDs
 - 500 for database errors

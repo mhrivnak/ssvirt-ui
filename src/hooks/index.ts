@@ -54,6 +54,26 @@ export {
   useBulkResetVMs,
 } from './useVMs';
 
+// Export CloudAPI VM hooks
+export {
+  useVMVDCs,
+  useCatalogItems as useCloudAPICatalogItems,
+  useAllCatalogItems,
+  useInstantiateTemplate,
+  useVAppStatus,
+  useVMDetails,
+  useVMHardware,
+  useCloudAPIVMs,
+  useVApps,
+  usePowerOnVM as useCloudAPIPowerOnVM,
+  usePowerOffVM as useCloudAPIPowerOffVM,
+  useRebootVM as useCloudAPIRebootVM,
+  useSuspendVM as useCloudAPISuspendVM,
+  useResetVM as useCloudAPIResetVM,
+  useDeleteVApp,
+  useDeleteVM as useCloudAPIDeleteVM,
+} from './useCloudAPIVMs';
+
 export {
   useCatalogs,
   useCatalog,

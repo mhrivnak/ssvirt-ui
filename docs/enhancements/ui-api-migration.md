@@ -137,7 +137,9 @@ Create new services in `src/services/` for VMware Cloud Director endpoints:
 ```typescript
 // src/services/cloudapi/UserService.ts
 export class CloudApiUserService {
-  static async getUsers(params?: UserQueryParams): Promise<PaginatedResponse<User>> {
+  static async getUsers(
+    params?: UserQueryParams
+  ): Promise<PaginatedResponse<User>> {
     const response = await api.get('/cloudapi/1.0.0/users', { params });
     return response.data;
   }
@@ -163,7 +165,9 @@ export class CloudApiRoleService {
 
 // src/services/cloudapi/OrganizationService.ts
 export class CloudApiOrganizationService {
-  static async getOrganizations(params?: OrganizationQueryParams): Promise<PaginatedResponse<Organization>> {
+  static async getOrganizations(
+    params?: OrganizationQueryParams
+  ): Promise<PaginatedResponse<Organization>> {
     const response = await api.get('/cloudapi/1.0.0/orgs', { params });
     return response.data;
   }
@@ -205,16 +209,16 @@ Create comprehensive permission checking utilities:
 // src/utils/permissions.ts
 export class PermissionChecker {
   static isSystemAdmin(user: User): boolean {
-    return user.roleEntityRefs.some(role => 
-      role.name === ROLE_NAMES.SYSTEM_ADMIN
+    return user.roleEntityRefs.some(
+      (role) => role.name === ROLE_NAMES.SYSTEM_ADMIN
     );
   }
 
   static isOrgAdmin(user: User, orgId?: string): boolean {
-    const hasOrgAdminRole = user.roleEntityRefs.some(role => 
-      role.name === ROLE_NAMES.ORG_ADMIN
+    const hasOrgAdminRole = user.roleEntityRefs.some(
+      (role) => role.name === ROLE_NAMES.ORG_ADMIN
     );
-    
+
     if (!orgId) return hasOrgAdminRole;
     return hasOrgAdminRole && user.orgEntityRef.id === orgId;
   }
@@ -236,7 +240,8 @@ export class PermissionChecker {
       canCreateOrganizations: this.canCreateOrganizations(user),
       canManageUsers: this.canManageUsers(user),
       canManageSystem: this.isSystemAdmin(user),
-      canManageOrganization: (orgId: string) => this.canManageUsers(user, orgId),
+      canManageOrganization: (orgId: string) =>
+        this.canManageUsers(user, orgId),
     };
   }
 }
@@ -250,7 +255,7 @@ Create React hooks for permission checking:
 // src/hooks/usePermissions.ts
 export const usePermissions = () => {
   const { user } = useAuth();
-  
+
   return useMemo(() => {
     if (!user) return null;
     return PermissionChecker.getUserPermissions(user);
@@ -273,7 +278,7 @@ Update Organizations page to use new permission system:
 // src/pages/organizations/Organizations.tsx (key changes)
 const Organizations: React.FC = () => {
   const canCreateOrgs = useCanCreateOrganizations();
-  
+
   // ... existing code ...
 
   return (
@@ -312,7 +317,7 @@ Update user profile to display new user information:
 // src/pages/profile/UserProfile.tsx (key changes)
 const UserProfile: React.FC = () => {
   const { user } = useAuth();
-  
+
   if (!user) return <LoadingSpinner />;
 
   return (
@@ -321,7 +326,7 @@ const UserProfile: React.FC = () => {
         <StackItem>
           <Title headingLevel="h1" size="xl">User Profile</Title>
         </StackItem>
-        
+
         <StackItem>
           <Card>
             <CardBody>
@@ -330,12 +335,12 @@ const UserProfile: React.FC = () => {
                   <DescriptionListTerm>Full Name</DescriptionListTerm>
                   <DescriptionListDescription>{user.fullName}</DescriptionListDescription>
                 </DescriptionListGroup>
-                
+
                 <DescriptionListGroup>
                   <DescriptionListTerm>Organization</DescriptionListTerm>
                   <DescriptionListDescription>{user.orgEntityRef.name}</DescriptionListDescription>
                 </DescriptionListGroup>
-                
+
                 <DescriptionListGroup>
                   <DescriptionListTerm>Roles</DescriptionListTerm>
                   <DescriptionListDescription>
@@ -366,31 +371,33 @@ Update navigation to show/hide items based on user permissions:
 
 ```typescript
 // src/contexts/NavigationContext.tsx (key changes)
-export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const NavigationProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { user } = useAuth();
   const permissions = usePermissions();
-  
+
   const getFilteredNavItems = useMemo(() => {
     if (!user || !permissions) return [];
-    
+
     const baseItems = [
       { id: 'dashboard', label: 'Dashboard', href: ROUTES.DASHBOARD },
     ];
-    
+
     // Only show Organizations to System Admins and Org Admins
     if (permissions.canCreateOrganizations || permissions.canManageUsers) {
       baseItems.push({
         id: 'organizations',
-        label: 'Organizations', 
-        href: ROUTES.ORGANIZATIONS
+        label: 'Organizations',
+        href: ROUTES.ORGANIZATIONS,
       });
     }
-    
+
     // Add other conditional nav items...
-    
+
     return baseItems;
   }, [user, permissions]);
-  
+
   // ... rest of provider
 };
 ```
@@ -433,43 +440,49 @@ Implement feature flags for gradual migration:
 // src/utils/config.ts
 export const FEATURE_FLAGS = {
   USE_CLOUDAPI_ENDPOINTS: true, // Enable new API endpoints
-  LEGACY_COMPATIBILITY: true,   // Support legacy data formats
+  LEGACY_COMPATIBILITY: true, // Support legacy data formats
 } as const;
 ```
 
 ## Implementation Plan
 
 ### Phase 1: Type System and Utilities (Week 1)
+
 1. **Update type definitions** in `src/types/index.ts`
 2. **Create permission utilities** in `src/utils/permissions.ts`
 3. **Add permission hooks** in `src/hooks/usePermissions.ts`
 4. **Create data adapters** for legacy compatibility
 
 ### Phase 2: API Service Layer (Week 1-2)
+
 1. **Create CloudAPI services** for users, roles, organizations
 2. **Update authentication service** to use new session endpoint
 3. **Add API response validation** for new data structures
 4. **Implement error handling** for URN-based IDs
 
 ### Phase 3: Component Updates (Week 2-3)
+
 1. **Update Organizations page** with permission-based rendering
 2. **Fix organization creation** for System Administrators
 3. **Update User Profile page** to display new user information
 4. **Add Role management interface** (new feature)
 
 ### Phase 4: Navigation and Layout (Week 3)
+
 1. **Update navigation** with permission-based filtering
 2. **Add role indicators** in user profile dropdown
 3. **Update breadcrumbs** to handle URN-based IDs
 4. **Add organization context** display
 
 ### Phase 5: Testing and Validation (Week 4)
+
 1. **Update unit tests** for new type system
 2. **Add permission testing** scenarios
-3. **Test migration compatibility** 
+3. **Test migration compatibility**
 4. **Validate VMware Cloud Director compliance**
 
 ### Phase 6: Documentation and Polish (Week 4)
+
 1. **Update component documentation**
 2. **Add permission system guide**
 3. **Create migration troubleshooting guide**
@@ -478,17 +491,20 @@ export const FEATURE_FLAGS = {
 ## User Experience Impact
 
 ### Positive Changes
+
 1. **Fixed Organization Creation**: System Administrators can now properly create organizations
 2. **Better Permission Visibility**: Users see only actions they can perform
 3. **Improved User Information**: Full name display, role visibility, organization context
 4. **Consistent Navigation**: Role-based menu filtering
 
 ### Potential Issues
+
 1. **Initial Learning Curve**: Users may need to understand new role system
 2. **Permission Restrictions**: Some users may lose access to previously visible (but non-functional) features
 3. **URN IDs**: Technical users may notice different ID formats
 
 ### Mitigation Strategies
+
 1. **Clear Error Messages**: When users lack permissions, provide helpful explanations
 2. **Progressive Disclosure**: Show advanced features only to appropriate roles
 3. **Migration Guides**: Provide documentation for users upgrading from legacy system
@@ -496,16 +512,19 @@ export const FEATURE_FLAGS = {
 ## Security Considerations
 
 ### Enhanced Security
+
 1. **Proper Permission Checking**: All UI actions now validate user permissions
 2. **Role-Based Access Control**: Comprehensive RBAC implementation
 3. **Organization Isolation**: Users can only access appropriate organization resources
 
 ### Security Risks
+
 1. **Client-Side Permission Checks**: UI permissions must be backed by server-side validation
 2. **Role Escalation**: Ensure role changes require proper authentication
 3. **Data Exposure**: Avoid exposing sensitive user/org data in client-side code
 
 ### Mitigation
+
 1. **Server-Side Validation**: All API calls must validate permissions server-side
 2. **Principle of Least Privilege**: Grant minimum necessary permissions
 3. **Audit Logging**: Track permission changes and administrative actions
@@ -513,16 +532,19 @@ export const FEATURE_FLAGS = {
 ## Testing Strategy
 
 ### Unit Testing
+
 - Permission utility functions
 - Data adapters and type conversions
 - Component permission rendering logic
 
 ### Integration Testing
+
 - Authentication flow with new user structure
 - Organization creation by System Administrators
 - Role-based navigation filtering
 
 ### E2E Testing
+
 - Complete user journeys for each role type
 - Organization management workflows
 - Permission boundary validation
@@ -530,30 +552,36 @@ export const FEATURE_FLAGS = {
 ## Migration Risks and Mitigation
 
 ### High Risk: Data Format Changes
+
 - **Risk**: Existing cached data may be incompatible
 - **Mitigation**: Clear local storage on migration, implement data adapters
 
 ### Medium Risk: Permission Changes
+
 - **Risk**: Users may lose access to previously available features
 - **Mitigation**: Comprehensive user communication, gradual rollout
 
 ### Low Risk: UI Consistency
+
 - **Risk**: Different data structures may cause UI inconsistencies
 - **Mitigation**: Thorough testing, fallback displays for missing data
 
 ## Success Metrics
 
 ### Functional Metrics
+
 - System Administrators can successfully create organizations
 - All user roles see appropriate navigation options
 - Permission checks prevent unauthorized actions
 
 ### Technical Metrics
+
 - Zero breaking changes for authorized user workflows
 - API response time within 2x of current performance
 - No client-side permission bypass vulnerabilities
 
 ### User Experience Metrics
+
 - Reduced support tickets about missing organization creation
 - Improved user satisfaction with role clarity
 - Faster task completion for administrative workflows
@@ -561,12 +589,14 @@ export const FEATURE_FLAGS = {
 ## Future Enhancements
 
 ### Phase 2 Features (Post-Migration)
+
 - Advanced role management (custom roles)
 - Organization delegation and hierarchy
 - Fine-grained permission controls
 - Role-based dashboard customization
 
 ### Integration Opportunities
+
 - SSO/LDAP integration using VMware Cloud Director patterns
 - Advanced auditing and compliance reporting
 - Multi-tenant organization management

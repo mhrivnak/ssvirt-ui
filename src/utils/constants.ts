@@ -122,6 +122,11 @@ export const VM_STATUS_LABELS = {
   POWERED_OFF: 'Powered Off',
   SUSPENDED: 'Suspended',
   UNRESOLVED: 'Unresolved',
+  INSTANTIATING: 'Instantiating',
+  RESOLVED: 'Resolved',
+  DEPLOYED: 'Deployed',
+  FAILED: 'Failed',
+  UNKNOWN: 'Unknown',
 } as const;
 
 // Routes

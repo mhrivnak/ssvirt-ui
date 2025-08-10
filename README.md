@@ -25,22 +25,26 @@ This application provides a user-friendly interface for managing virtual machine
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/mhrivnak/ssvirt-ui.git
 cd ssvirt-ui
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Copy environment configuration:
+
 ```bash
 cp .env.example .env
 ```
 
 4. Update `.env` with your API endpoint:
+
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api
 ```
@@ -48,6 +52,7 @@ VITE_API_BASE_URL=http://localhost:8080/api
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -57,6 +62,7 @@ The application will be available at `http://localhost:5173`
 ### Build
 
 Build for production:
+
 ```bash
 npm run build
 ```
@@ -66,6 +72,7 @@ npm run build
 ### Building the Container Image
 
 Build the container image using Podman (or Docker):
+
 ```bash
 podman build -t ssvirt-ui .
 ```
@@ -73,6 +80,7 @@ podman build -t ssvirt-ui .
 ### Running the Container
 
 Run the container, mapping port 8080:
+
 ```bash
 podman run -d -p 8080:8080 --name ssvirt-ui-container ssvirt-ui
 ```
@@ -84,6 +92,7 @@ The application will be available at `http://localhost:8080`
 The application requires runtime configuration via a mounted `config.json` file:
 
 Create a configuration file:
+
 ```json
 {
   "apiBaseUrl": "http://your-api-server:8080/api",
@@ -94,6 +103,7 @@ Create a configuration file:
 ```
 
 Mount it into the container:
+
 ```bash
 podman run -d -p 8080:8080 \
   -v /path/to/your/config.json:/opt/app-root/src/dist/config.json:ro \
@@ -102,6 +112,7 @@ podman run -d -p 8080:8080 \
 ```
 
 Configuration options in the JSON file:
+
 - `apiBaseUrl`: Backend API endpoint URL
 - `appTitle`: Application title
 - `appVersion`: Application version
@@ -137,6 +148,7 @@ kubectl apply -f k8s/configmap.yaml -f k8s/deployment.yaml
 ```
 
 This will create:
+
 - **Deployment**: 2 replicas of the SSVIRT UI using `quay.io/mhrivnak/ssvirt-ui:latest`
 - **Service**: ClusterIP service exposing port 8080
 - **Route** (OpenShift): HTTPS route with edge termination
@@ -145,6 +157,7 @@ This will create:
 ### Accessing the Application
 
 #### On OpenShift
+
 The application will be accessible via the created Route:
 
 ```bash
@@ -153,6 +166,7 @@ oc get route ssvirt-ui -o jsonpath='{.spec.host}'
 ```
 
 #### On Standard Kubernetes
+
 For non-OpenShift clusters, uncomment and configure the Ingress section in `k8s/deployment.yaml`, or use port forwarding for testing:
 
 ```bash
@@ -168,14 +182,14 @@ The deployment uses a config.json file mounted from a ConfigMap:
 
 ```yaml
 volumes:
-- name: config-volume
-  configMap:
-    name: ssvirt-ui-config
+  - name: config-volume
+    configMap:
+      name: ssvirt-ui-config
 volumeMounts:
-- name: config-volume
-  mountPath: /opt/app-root/src/dist/config.json
-  subPath: config.json
-  readOnly: true
+  - name: config-volume
+    mountPath: /opt/app-root/src/dist/config.json
+    subPath: config.json
+    readOnly: true
 ```
 
 Edit the ConfigMap to match your environment:
@@ -185,6 +199,7 @@ kubectl edit configmap ssvirt-ui-config
 ```
 
 The ConfigMap contains a config.json file with these options:
+
 - `apiBaseUrl`: Backend API endpoint URL (default: "http://ssvirt-backend:8080/api")
 - `appTitle`: Application title (default: "SSVIRT Web UI")
 - `appVersion`: Application version (default: "1.0.0")
@@ -193,16 +208,19 @@ The ConfigMap contains a config.json file with these options:
 ### Customization Examples
 
 #### Scale the deployment:
+
 ```bash
 kubectl scale deployment ssvirt-ui --replicas=3
 ```
 
 #### Update the image:
+
 ```bash
 kubectl set image deployment/ssvirt-ui ssvirt-ui=quay.io/mhrivnak/ssvirt-ui:v1.2.0
 ```
 
 #### Using Kustomize for environment-specific deployments:
+
 ```bash
 # Create overlays for different environments
 mkdir -p k8s/overlays/production
@@ -228,6 +246,7 @@ kubectl apply -k k8s/overlays/production/
 ### Health Checks
 
 The deployment includes health checks:
+
 - **Readiness Probe**: Ensures the container is ready to serve traffic
 - **Liveness Probe**: Restarts the container if it becomes unresponsive
 
@@ -242,6 +261,7 @@ kubectl describe deployment ssvirt-ui
 ### Security
 
 The deployment follows security best practices:
+
 - Runs as non-root user
 - Drops all capabilities
 - Uses security contexts
@@ -251,21 +271,25 @@ The deployment follows security best practices:
 ### Troubleshooting
 
 #### Check pod logs:
+
 ```bash
 kubectl logs -l app=ssvirt-ui
 ```
 
 #### Check service endpoints:
+
 ```bash
 kubectl get endpoints ssvirt-ui
 ```
 
 #### Test connectivity to backend:
+
 ```bash
 kubectl exec -it deployment/ssvirt-ui -- curl http://ssvirt-backend:8080/health
 ```
 
 #### Debug configuration:
+
 ```bash
 kubectl exec -it deployment/ssvirt-ui -- cat /opt/app-root/src/dist/config.json
 ```
@@ -312,6 +336,7 @@ src/
 This project is under active development. The implementation is being done in phases:
 
 **Phase 1: Foundation & Authentication** (Current)
+
 - ✅ Project setup with Vite + React + TypeScript
 - ✅ PatternFly 6 integration
 - ✅ Basic routing structure

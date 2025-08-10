@@ -5,20 +5,19 @@ metadata:
   name: ssvirt-ui
 
 resources:
-- deployment.yaml
-- configmap.yaml
-- nginx-configmap.yaml
+  - deployment.yaml
+  - configmap.yaml
+  - nginx-configmap.yaml
 
 labels:
-- pairs:
-    app.kubernetes.io/name: ssvirt-ui
-    app.kubernetes.io/component: frontend
-    app.kubernetes.io/part-of: ssvirt
+  - pairs:
+      app.kubernetes.io/name: ssvirt-ui
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/part-of: ssvirt
 
 images:
-- name: quay.io/mhrivnak/ssvirt-ui
-  newTag: latest
-
+  - name: quay.io/mhrivnak/ssvirt-ui
+    newTag: latest
 # Example customizations you can uncomment and modify:
 #
 # # Override replicas

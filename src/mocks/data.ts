@@ -2,12 +2,15 @@ import type {
   Organization,
   VDC,
   VM,
+  VApp,
+  VMCloudAPI,
   Catalog,
   CatalogItem,
   DashboardStats,
   RecentActivity,
   User,
   VMStatus,
+  VAppStatus,
   UserPermissions,
 } from '../types';
 
@@ -683,3 +686,52 @@ export const generateMockAdminPermissions = (): UserPermissions => ({
     { id: 'urn:vcloud:org:3', name: 'Operations' },
   ],
 });
+
+// Mock CloudAPI vApp generator
+export const generateMockVApp = (
+  name?: string,
+  description?: string
+): VApp => ({
+  id: `urn:vcloud:vapp:${Math.random().toString(36).slice(2, 11)}`,
+  name: name || 'test-vapp',
+  description: description || 'Mock vApp for testing',
+  status: 'INSTANTIATING' as VAppStatus,
+  href: 'https://vcd.example.com/cloudapi/1.0.0/vapps/mock-vapp-id',
+  type: 'application/json',
+  createdDate: new Date().toISOString(),
+  lastModifiedDate: new Date().toISOString(),
+  vms: [],
+  networks: [],
+  owner: { id: 'urn:vcloud:user:1', name: 'john.doe@example.com' },
+  org: { id: 'urn:vcloud:org:1', name: 'Engineering' },
+  vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+});
+
+// Mock CloudAPI VM generator
+export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
+  id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
+  name: name || 'test-vm',
+  description: 'Mock VM for testing',
+  status: 'INSTANTIATING' as VMStatus,
+  href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id',
+  type: 'application/json',
+  createdDate: new Date().toISOString(),
+  lastModifiedDate: new Date().toISOString(),
+  vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
+  vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+  org: { id: 'urn:vcloud:org:1', name: 'Engineering' },
+});
+
+// Mock CloudAPI VMs collection
+export const generateMockCloudApiVMs = (): VMCloudAPI[] => [
+  generateMockCloudApiVM('web-server-01'),
+  generateMockCloudApiVM('database-01'),
+  generateMockCloudApiVM('api-server-01'),
+];
+
+// Mock CloudAPI vApps collection
+export const generateMockVApps = (): VApp[] => [
+  generateMockVApp('web-tier', 'Web application tier'),
+  generateMockVApp('data-tier', 'Database tier'),
+  generateMockVApp('api-tier', 'API services tier'),
+];

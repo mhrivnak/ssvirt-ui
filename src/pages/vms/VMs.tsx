@@ -276,6 +276,11 @@ const VMs: React.FC = () => {
       POWERED_OFF: { color: 'red' as const, icon: PowerOffIcon },
       SUSPENDED: { color: 'orange' as const, icon: PauseIcon },
       UNRESOLVED: { color: 'grey' as const, icon: ExclamationTriangleIcon },
+      INSTANTIATING: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      RESOLVED: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      DEPLOYED: { color: 'green' as const, icon: PlayIcon },
+      FAILED: { color: 'red' as const, icon: ExclamationTriangleIcon },
+      UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
     };
 
     const config = statusConfig[status];
@@ -434,6 +439,13 @@ const VMs: React.FC = () => {
                         <SelectOption value="UNRESOLVED">
                           Unresolved
                         </SelectOption>
+                        <SelectOption value="INSTANTIATING">
+                          Instantiating
+                        </SelectOption>
+                        <SelectOption value="RESOLVED">Resolved</SelectOption>
+                        <SelectOption value="DEPLOYED">Deployed</SelectOption>
+                        <SelectOption value="FAILED">Failed</SelectOption>
+                        <SelectOption value="UNKNOWN">Unknown</SelectOption>
                       </SelectList>
                     </Select>
                   </ToolbarItem>
