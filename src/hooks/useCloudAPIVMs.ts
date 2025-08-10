@@ -41,7 +41,10 @@ export const useAllCatalogItems = (
         catalogs.map(async (catalog) => {
           try {
             // Fetch all pages of catalog items for this catalog
-            let allItems: (CatalogItem & { catalog_id: string; catalog_name: string })[] = [];
+            let allItems: (CatalogItem & {
+              catalog_id: string;
+              catalog_name: string;
+            })[] = [];
             let page = 1;
             let hasMore = true;
 
