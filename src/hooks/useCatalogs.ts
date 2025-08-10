@@ -125,7 +125,7 @@ export const useCatalogItems = (
     queryFn: () => CatalogService.getCatalogItems(catalogId, params),
     enabled: !!catalogId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };
 
@@ -138,6 +138,6 @@ export const useCatalogItem = (catalogId: string, itemId: string) => {
     queryFn: () => CatalogService.getCatalogItem(catalogId, itemId),
     enabled: !!catalogId && !!itemId,
     staleTime: 15 * 60 * 1000, // 15 minutes - template specs change infrequently
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 };

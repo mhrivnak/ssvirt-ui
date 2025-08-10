@@ -354,11 +354,6 @@ export interface SubscriptionConfig {
   isSubscribed: boolean; // Matches catalog.isSubscribed
 }
 
-export interface EntityRef {
-  id: string; // URN format
-  name?: string; // Optional entity name
-}
-
 export interface TemplateParameter {
   name: string; // Parameter name
   displayName?: string; // Human-readable name

@@ -275,7 +275,7 @@ const CatalogDetail: React.FC = () => {
                         ? catalogItemsError.message
                         : 'Failed to load catalog templates. Please try again.'}
                     </Alert>
-                  ) : !catalogItemsResponse?.values.length ? (
+                  ) : !catalogItemsResponse?.values?.length ? (
                     <EmptyState variant={EmptyStateVariant.lg}>
                       <VirtualMachineIcon style={{ fontSize: '64px' }} />
                       <Title headingLevel="h2" size="lg">
@@ -292,7 +292,7 @@ const CatalogDetail: React.FC = () => {
                       <StackItem>
                         <Grid hasGutter>
                           {catalogItemsResponse.values
-                            .filter(
+                            ?.filter(
                               (item) =>
                                 !searchTerm ||
                                 item.name
@@ -361,17 +361,18 @@ const CatalogDetail: React.FC = () => {
                       </StackItem>
 
                       {/* Pagination */}
-                      {catalogItemsResponse.pageCount > 1 && (
-                        <StackItem>
-                          <Pagination
-                            itemCount={catalogItemsResponse.resultTotal}
-                            page={page}
-                            perPage={pageSize}
-                            onSetPage={(_, newPage) => setPage(newPage)}
-                            variant="bottom"
-                          />
-                        </StackItem>
-                      )}
+                      {catalogItemsResponse?.pageCount &&
+                        catalogItemsResponse.pageCount > 1 && (
+                          <StackItem>
+                            <Pagination
+                              itemCount={catalogItemsResponse?.resultTotal || 0}
+                              page={page}
+                              perPage={pageSize}
+                              onSetPage={(_, newPage) => setPage(newPage)}
+                              variant="bottom"
+                            />
+                          </StackItem>
+                        )}
                     </Stack>
                   )}
                 </StackItem>
