@@ -5,6 +5,8 @@ import type {
   CreateCatalogRequest,
   UpdateCatalogRequest,
   VCloudPaginatedResponse,
+  CatalogItem,
+  CatalogItemQueryParams,
 } from '../../types';
 
 /**
@@ -69,5 +71,34 @@ export class CatalogService {
     await api.delete(
       `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}`
     );
+  }
+
+  /**
+   * Get catalog items with pagination
+   * GET /cloudapi/1.0.0/catalogs/{catalogUrn}/catalogItems
+   */
+  static async getCatalogItems(
+    catalogId: string,
+    params?: CatalogItemQueryParams
+  ): Promise<VCloudPaginatedResponse<CatalogItem>> {
+    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(
+      `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems`,
+      { params }
+    );
+    return response.data;
+  }
+
+  /**
+   * Get a single catalog item by URN
+   * GET /cloudapi/1.0.0/catalogs/{catalogUrn}/catalogItems/{itemUrn}
+   */
+  static async getCatalogItem(
+    catalogId: string,
+    itemId: string
+  ): Promise<CatalogItem> {
+    const response = await api.get<CatalogItem>(
+      `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems/${encodeURIComponent(itemId)}`
+    );
+    return response.data;
   }
 }

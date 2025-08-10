@@ -51,6 +51,8 @@ export {
   useCreateCatalog,
   useUpdateCatalog,
   useDeleteCatalog,
+  useCatalogItems,
+  useCatalogItem,
 } from './useCatalogs';
 
 export { useDashboardStats, useRecentActivity } from './useDashboard';

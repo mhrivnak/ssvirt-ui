@@ -9,6 +9,7 @@ import {
   generateMockVDCs,
   generateMockVMs,
   generateMockCatalogs,
+  generateMockCatalogItems,
   generateMockDashboardStats,
   generateMockRecentActivity,
   generateMockUser,
@@ -389,4 +390,51 @@ export const handlers = [
     // For demo purposes, just return 204 No Content
     return new HttpResponse(null, { status: 204 });
   }),
+
+  // Catalog Items endpoints
+  http.get(
+    '/cloudapi/1.0.0/catalogs/:catalogUrn/catalogItems',
+    ({ params, request }) => {
+      const { catalogUrn } = params;
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+      const allCatalogItems = generateMockCatalogItems();
+      const catalogItems = allCatalogItems.filter(
+        (item) =>
+          item.catalogEntityRef.id === decodeURIComponent(catalogUrn as string)
+      );
+
+      return HttpResponse.json(
+        createCloudApiPaginatedResponse(catalogItems, page, pageSize)
+      );
+    }
+  ),
+
+  http.get(
+    '/cloudapi/1.0.0/catalogs/:catalogUrn/catalogItems/:itemUrn',
+    ({ params }) => {
+      const { catalogUrn, itemUrn } = params;
+      const allCatalogItems = generateMockCatalogItems();
+      const catalogItem = allCatalogItems.find(
+        (item) =>
+          item.id === decodeURIComponent(itemUrn as string) &&
+          item.catalogEntityRef.id === decodeURIComponent(catalogUrn as string)
+      );
+
+      if (!catalogItem) {
+        return HttpResponse.json(
+          {
+            error: 'Catalog item not found',
+            message: 'The requested catalog item could not be found',
+            details: `Catalog item with URN ${itemUrn} not found in catalog ${catalogUrn}`,
+          },
+          { status: 404 }
+        );
+      }
+
+      return HttpResponse.json(catalogItem);
+    }
+  ),
 ];

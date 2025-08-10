@@ -7,6 +7,7 @@ import type {
   CatalogQueryParams,
   CreateCatalogRequest,
   UpdateCatalogRequest,
+  CatalogItemQueryParams,
 } from '../types';
 
 /**
@@ -109,5 +110,34 @@ export const useDeleteCatalog = () => {
     onError: (error) => {
       logger.error('Failed to delete catalog:', error);
     },
+  });
+};
+
+/**
+ * Hook to fetch catalog items with pagination
+ */
+export const useCatalogItems = (
+  catalogId: string,
+  params?: CatalogItemQueryParams
+) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.catalogItems(catalogId, params),
+    queryFn: () => CatalogService.getCatalogItems(catalogId, params),
+    enabled: !!catalogId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+  });
+};
+
+/**
+ * Hook to fetch a single catalog item by URN
+ */
+export const useCatalogItem = (catalogId: string, itemId: string) => {
+  return useQuery({
+    queryKey: QUERY_KEYS.catalogItem(catalogId, itemId),
+    queryFn: () => CatalogService.getCatalogItem(catalogId, itemId),
+    enabled: !!catalogId && !!itemId,
+    staleTime: 15 * 60 * 1000, // 15 minutes - template specs change infrequently
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 };
