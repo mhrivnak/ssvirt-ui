@@ -94,7 +94,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to get user:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to get user',
         error:
@@ -120,7 +120,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to get current user:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to get current user',
         error:
@@ -147,7 +147,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to create user:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to create user',
         error:
@@ -175,7 +175,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to update user:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to update user',
         error:
@@ -229,7 +229,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to toggle user status:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to toggle user status',
         error:
@@ -325,7 +325,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to update user roles:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to update user roles',
         error:
@@ -355,7 +355,7 @@ export class UserService {
     } catch (error) {
       console.error('Failed to update user organization:', error);
       return {
-        data: null as User,
+        data: null as unknown as User,
         success: false,
         message: 'Failed to update user organization',
         error:
