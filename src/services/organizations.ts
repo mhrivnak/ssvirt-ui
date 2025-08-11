@@ -25,16 +25,26 @@ export class OrganizationService {
         params,
       }
     );
+    console.log('🏢 CloudAPI organizations response:', response);
+    console.log('🏢 Response data type:', typeof response.data);
+    console.log('🏢 Response data isArray:', Array.isArray(response.data));
+    console.log('🏢 Response data:', response.data);
+
+    // Ensure we have an array
+    const organizationsArray = Array.isArray(response.data)
+      ? response.data
+      : [];
+
     // Convert array response to paginated format for compatibility
     return {
-      data: response.data,
+      data: organizationsArray,
       pagination: {
         page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1
+        per_page: organizationsArray.length,
+        total: organizationsArray.length,
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -49,7 +59,7 @@ export class OrganizationService {
     return {
       data: response.data,
       success: true,
-      message: 'Organization retrieved successfully'
+      message: 'Organization retrieved successfully',
     };
   }
 
@@ -67,7 +77,7 @@ export class OrganizationService {
     return {
       data: response.data,
       success: true,
-      message: 'Organization created successfully'
+      message: 'Organization created successfully',
     };
   }
 
@@ -86,7 +96,7 @@ export class OrganizationService {
     return {
       data: response.data,
       success: true,
-      message: 'Organization updated successfully'
+      message: 'Organization updated successfully',
     };
   }
 
@@ -94,14 +104,12 @@ export class OrganizationService {
    * Delete an organization
    */
   static async deleteOrganization(id: string): Promise<ApiResponse<null>> {
-    await cloudApi.delete(
-      API_ENDPOINTS.CLOUDAPI.ORGANIZATION_BY_ID(id)
-    );
+    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.ORGANIZATION_BY_ID(id));
     // CloudAPI delete returns no content, create success response
     return {
       data: null,
       success: true,
-      message: 'Organization deleted successfully'
+      message: 'Organization deleted successfully',
     };
   }
 
@@ -120,7 +128,7 @@ export class OrganizationService {
     return {
       data: response.data,
       success: true,
-      message: `Organization ${enabled ? 'enabled' : 'disabled'} successfully`
+      message: `Organization ${enabled ? 'enabled' : 'disabled'} successfully`,
     };
   }
 
@@ -135,8 +143,8 @@ export class OrganizationService {
       API_ENDPOINTS.CLOUDAPI.USERS,
       {
         params: {
-          filter: `orgEntityRef.id==${encodeURIComponent(id)}`
-        }
+          filter: `orgEntityRef.id==${encodeURIComponent(id)}`,
+        },
       }
     );
     // Convert array response to paginated format for compatibility
@@ -146,9 +154,9 @@ export class OrganizationService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -166,15 +174,15 @@ export class OrganizationService {
         ...data,
         orgEntityRef: {
           id: organizationId,
-          name: 'Organization' // Organization name would need to be looked up separately
-        }
+          name: 'Organization', // Organization name would need to be looked up separately
+        },
       }
     );
     // Convert direct response to wrapped format for compatibility
     return {
       data: response.data,
       success: true,
-      message: 'User invited to organization successfully'
+      message: 'User invited to organization successfully',
     };
   }
 
@@ -189,17 +197,19 @@ export class OrganizationService {
     const response = await cloudApi.put<OrganizationUser>(
       API_ENDPOINTS.CLOUDAPI.USER_BY_ID(data.user_id),
       {
-        roleEntityRefs: [{
-          id: data.role,
-          name: 'Role' // Role name would need to be looked up separately
-        }]
+        roleEntityRefs: [
+          {
+            id: data.role,
+            name: 'Role', // Role name would need to be looked up separately
+          },
+        ],
       }
     );
     // Convert direct response to wrapped format for compatibility
     return {
       data: response.data,
       success: true,
-      message: 'User role updated successfully'
+      message: 'User role updated successfully',
     };
   }
 
@@ -211,14 +221,12 @@ export class OrganizationService {
     userId: string
   ): Promise<ApiResponse<null>> {
     // Remove user from organization - VMware Cloud Director approach
-    await cloudApi.delete(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId)
-    );
+    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId));
     // CloudAPI delete returns no content, create success response
     return {
       data: null,
       success: true,
-      message: 'User removed from organization successfully'
+      message: 'User removed from organization successfully',
     };
   }
 }
