@@ -19,9 +19,8 @@ export class VMService {
    * Uses CloudAPI to get VDCs with proper organization filtering via JWT
    */
   static async getVDCs(): Promise<VCloudPaginatedResponse<VDC>> {
-    const response = await cloudApi.get<VCloudPaginatedResponse<VDC>>(
-      '/1.0.0/vdcs'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VDC>>('/1.0.0/vdcs');
     return response.data;
   }
 
@@ -43,9 +42,12 @@ export class VMService {
 
     const url = `/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    const response = await cloudApi.get<VCloudPaginatedResponse<CatalogItem>>(url, {
-      signal: options?.signal,
-    });
+    const response = await cloudApi.get<VCloudPaginatedResponse<CatalogItem>>(
+      url,
+      {
+        signal: options?.signal,
+      }
+    );
     return response.data;
   }
 
@@ -107,9 +109,8 @@ export class VMService {
    * Used for VM management and overview pages
    */
   static async getVApps(): Promise<VCloudPaginatedResponse<VApp>> {
-    const response = await cloudApi.get<VCloudPaginatedResponse<VApp>>(
-      '/1.0.0/vapps'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VApp>>('/1.0.0/vapps');
     return response.data;
   }
 
@@ -118,9 +119,8 @@ export class VMService {
    * Provides organization-wide VM visibility
    */
   static async getVMs(): Promise<VCloudPaginatedResponse<VMCloudAPI>> {
-    const response = await cloudApi.get<VCloudPaginatedResponse<VMCloudAPI>>(
-      '/1.0.0/vms'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VMCloudAPI>>('/1.0.0/vms');
     return response.data;
   }
 
@@ -169,9 +169,7 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async resetVM(vmId: string): Promise<void> {
-    await cloudApi.post(
-      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reset`
-    );
+    await cloudApi.post(`/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reset`);
   }
 
   /**

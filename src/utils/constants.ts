@@ -2,8 +2,7 @@ import { getRuntimeConfig } from './config';
 
 // Fallback configuration for when runtime config is not available (e.g., tests)
 const FALLBACK_CONFIG = {
-  API_BASE_URL:
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   APP_TITLE: import.meta.env.VITE_APP_TITLE || 'SSVIRT Web UI',
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.1',
   DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',
@@ -54,34 +53,35 @@ export const API_ENDPOINTS = {
     LOGIN: '/1.0.0/sessions',
     LOGOUT: '/1.0.0/sessions',
     SESSION: '/1.0.0/session',
-    
+
     // Users
     USERS: '/1.0.0/users',
     CURRENT_USER: '/1.0.0/users/current',
     USER_BY_ID: (id: string) => `/1.0.0/users/${encodeURIComponent(id)}`,
-    
+
     // Roles
     ROLES: '/1.0.0/roles',
     ROLE_BY_ID: (id: string) => `/1.0.0/roles/${encodeURIComponent(id)}`,
-    
+
     // Organizations
     ORGANIZATIONS: '/1.0.0/orgs',
     ORGANIZATION_BY_ID: (id: string) => `/1.0.0/orgs/${encodeURIComponent(id)}`,
-    
+
     // VDCs
     VDCS: '/1.0.0/vdcs',
     VDC_BY_ID: (id: string) => `/1.0.0/vdcs/${encodeURIComponent(id)}`,
-    
+
     // VMs and vApps
     VMS: '/1.0.0/vms',
     VM_BY_ID: (id: string) => `/1.0.0/vms/${encodeURIComponent(id)}`,
     VAPPS: '/1.0.0/vapps',
     VAPP_BY_ID: (id: string) => `/1.0.0/vapps/${encodeURIComponent(id)}`,
-    
+
     // Catalogs
     CATALOGS: '/1.0.0/catalogs',
     CATALOG_BY_ID: (id: string) => `/1.0.0/catalogs/${encodeURIComponent(id)}`,
-    CATALOG_ITEMS: (catalogId: string) => `/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems`,
+    CATALOG_ITEMS: (catalogId: string) =>
+      `/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems`,
   },
 
   // Legacy API endpoints (use with api instance)
