@@ -7,6 +7,7 @@ import type {
   UpdateRoleRequest,
   ApiResponse,
   PaginatedResponse,
+  VCloudPaginatedResponse,
 } from '../types';
 
 export class RoleService {
@@ -16,38 +17,22 @@ export class RoleService {
   static async getRoles(
     params?: RoleQueryParams
   ): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
-      params,
-    });
-
-    // Check for real pagination info in response headers or data
-    const totalCount = parseInt(response.headers?.['x-total-count'] || '0', 10);
-    const perPage = parseInt(response.headers?.['x-per-page'] || '25', 10);
-    const currentPage = parseInt(
-      response.headers?.['x-current-page'] || '1',
-      10
+    const response = await cloudApi.get<VCloudPaginatedResponse<Role>>(
+      API_ENDPOINTS.CLOUDAPI.ROLES,
+      {
+        params,
+      }
     );
 
-    // Use real pagination if available, otherwise fall back to single-page metadata
-    const pagination =
-      totalCount > 0
-        ? {
-            page: currentPage,
-            per_page: perPage,
-            total: totalCount,
-            total_pages: Math.ceil(totalCount / perPage),
-          }
-        : {
-            // Fallback when API doesn't return pagination info - treat as single page
-            page: params?.page || 1,
-            per_page: params?.per_page || response.data.length,
-            total: response.data.length,
-            total_pages: 1,
-          };
-
+    // Handle VCloudPaginatedResponse format
     return {
-      data: response.data,
-      pagination,
+      data: response.data.values || [],
+      pagination: {
+        page: response.data.page,
+        per_page: response.data.pageSize,
+        total: response.data.resultTotal,
+        total_pages: response.data.pageCount,
+      },
       success: true,
     };
   }
@@ -117,19 +102,22 @@ export class RoleService {
    * Get predefined system roles
    */
   static async getSystemRoles(): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
-      params: {
-        filter: 'readOnly==true',
-      },
-    });
-    // Convert array response to paginated format for compatibility
+    const response = await cloudApi.get<VCloudPaginatedResponse<Role>>(
+      API_ENDPOINTS.CLOUDAPI.ROLES,
+      {
+        params: {
+          filter: 'readOnly==true',
+        },
+      }
+    );
+    // Handle VCloudPaginatedResponse format
     return {
-      data: response.data,
+      data: response.data.values || [],
       pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
+        page: response.data.page,
+        per_page: response.data.pageSize,
+        total: response.data.resultTotal,
+        total_pages: response.data.pageCount,
       },
       success: true,
     };
@@ -139,19 +127,22 @@ export class RoleService {
    * Get custom organization roles
    */
   static async getCustomRoles(): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
-      params: {
-        filter: 'readOnly==false',
-      },
-    });
-    // Convert array response to paginated format for compatibility
+    const response = await cloudApi.get<VCloudPaginatedResponse<Role>>(
+      API_ENDPOINTS.CLOUDAPI.ROLES,
+      {
+        params: {
+          filter: 'readOnly==false',
+        },
+      }
+    );
+    // Handle VCloudPaginatedResponse format
     return {
-      data: response.data,
+      data: response.data.values || [],
       pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
+        page: response.data.page,
+        per_page: response.data.pageSize,
+        total: response.data.resultTotal,
+        total_pages: response.data.pageCount,
       },
       success: true,
     };
@@ -161,13 +152,17 @@ export class RoleService {
    * Get role by name (helper method for common role lookups)
    */
   static async getRoleByName(name: string): Promise<ApiResponse<Role | null>> {
-    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
-      params: {
-        filter: `name==${name}`,
-      },
-    });
+    const response = await cloudApi.get<VCloudPaginatedResponse<Role>>(
+      API_ENDPOINTS.CLOUDAPI.ROLES,
+      {
+        params: {
+          filter: `name==${name}`,
+        },
+      }
+    );
 
-    const role = response.data.length > 0 ? response.data[0] : null;
+    const roles = response.data.values || [];
+    const role = roles.length > 0 ? roles[0] : null;
 
     return {
       data: role,
