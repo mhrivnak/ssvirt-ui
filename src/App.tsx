@@ -102,6 +102,7 @@ const App: React.FC = () => {
 
                 {/* Role-based protected routes */}
                 {roleBasedRoutes.map((route) => {
+                  console.log('🚦 Registering route:', route.path, route);
                   const Component = route.component;
                   return (
                     <Route
