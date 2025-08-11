@@ -16,12 +16,9 @@ export class RoleService {
   static async getRoles(
     params?: RoleQueryParams
   ): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(
-      API_ENDPOINTS.CLOUDAPI.ROLES,
-      {
-        params,
-      }
-    );
+    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
+      params,
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -29,9 +26,9 @@ export class RoleService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -46,16 +43,14 @@ export class RoleService {
     return {
       data: response.data,
       success: true,
-      message: 'Role retrieved successfully'
+      message: 'Role retrieved successfully',
     };
   }
 
   /**
    * Create a new role (if allowed - most roles are read-only in VMware Cloud Director)
    */
-  static async createRole(
-    data: CreateRoleRequest
-  ): Promise<ApiResponse<Role>> {
+  static async createRole(data: CreateRoleRequest): Promise<ApiResponse<Role>> {
     const response = await cloudApi.post<Role>(
       API_ENDPOINTS.CLOUDAPI.ROLES,
       data
@@ -64,16 +59,14 @@ export class RoleService {
     return {
       data: response.data,
       success: true,
-      message: 'Role created successfully'
+      message: 'Role created successfully',
     };
   }
 
   /**
    * Update an existing role (if allowed - most roles are read-only in VMware Cloud Director)
    */
-  static async updateRole(
-    data: UpdateRoleRequest
-  ): Promise<ApiResponse<Role>> {
+  static async updateRole(data: UpdateRoleRequest): Promise<ApiResponse<Role>> {
     const { id, ...updateData } = data;
     const response = await cloudApi.put<Role>(
       API_ENDPOINTS.CLOUDAPI.ROLE_BY_ID(id),
@@ -83,7 +76,7 @@ export class RoleService {
     return {
       data: response.data,
       success: true,
-      message: 'Role updated successfully'
+      message: 'Role updated successfully',
     };
   }
 
@@ -91,14 +84,12 @@ export class RoleService {
    * Delete a role (if allowed - most roles are read-only in VMware Cloud Director)
    */
   static async deleteRole(id: string): Promise<ApiResponse<null>> {
-    await cloudApi.delete(
-      API_ENDPOINTS.CLOUDAPI.ROLE_BY_ID(id)
-    );
+    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.ROLE_BY_ID(id));
     // CloudAPI delete returns no content, create success response
     return {
       data: null,
       success: true,
-      message: 'Role deleted successfully'
+      message: 'Role deleted successfully',
     };
   }
 
@@ -106,14 +97,11 @@ export class RoleService {
    * Get predefined system roles
    */
   static async getSystemRoles(): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(
-      API_ENDPOINTS.CLOUDAPI.ROLES,
-      {
-        params: {
-          filter: 'readOnly==true'
-        }
-      }
-    );
+    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
+      params: {
+        filter: 'readOnly==true',
+      },
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -121,9 +109,9 @@ export class RoleService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -131,14 +119,11 @@ export class RoleService {
    * Get custom organization roles
    */
   static async getCustomRoles(): Promise<PaginatedResponse<Role>> {
-    const response = await cloudApi.get<Role[]>(
-      API_ENDPOINTS.CLOUDAPI.ROLES,
-      {
-        params: {
-          filter: 'readOnly==false'
-        }
-      }
-    );
+    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
+      params: {
+        filter: 'readOnly==false',
+      },
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -146,9 +131,9 @@ export class RoleService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -156,21 +141,18 @@ export class RoleService {
    * Get role by name (helper method for common role lookups)
    */
   static async getRoleByName(name: string): Promise<ApiResponse<Role | null>> {
-    const response = await cloudApi.get<Role[]>(
-      API_ENDPOINTS.CLOUDAPI.ROLES,
-      {
-        params: {
-          filter: `name==${encodeURIComponent(name)}`
-        }
-      }
-    );
-    
+    const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
+      params: {
+        filter: `name==${encodeURIComponent(name)}`,
+      },
+    });
+
     const role = response.data.length > 0 ? response.data[0] : null;
-    
+
     return {
       data: role,
       success: true,
-      message: role ? 'Role found' : 'Role not found'
+      message: role ? 'Role found' : 'Role not found',
     };
   }
 
@@ -189,23 +171,27 @@ export class RoleService {
   /**
    * Get predefined role constants
    */
-  static getPredefinedRoles(): Array<{ name: string; description: string; bundleKey: string }> {
+  static getPredefinedRoles(): Array<{
+    name: string;
+    description: string;
+    bundleKey: string;
+  }> {
     return [
       {
         name: 'System Administrator',
         description: 'Full system access and organization management',
-        bundleKey: 'com.vmware.vcloud.system.admin'
+        bundleKey: 'com.vmware.vcloud.system.admin',
       },
       {
-        name: 'Organization Administrator', 
+        name: 'Organization Administrator',
         description: 'Full access within assigned organization',
-        bundleKey: 'com.vmware.vcloud.organization.admin'
+        bundleKey: 'com.vmware.vcloud.organization.admin',
       },
       {
         name: 'vApp User',
         description: 'Basic user access to assigned vApps',
-        bundleKey: 'com.vmware.vcloud.vapp.user'
-      }
+        bundleKey: 'com.vmware.vcloud.vapp.user',
+      },
     ];
   }
 }

@@ -7,14 +7,14 @@ import { ROLE_NAMES } from '../types';
 function matchesRole(roleName: string, expectedRole: string): boolean {
   // Direct match
   if (roleName === expectedRole) return true;
-  
+
   // Case insensitive match
   if (roleName.toLowerCase() === expectedRole.toLowerCase()) return true;
-  
+
   // Check for common variations
   const normalizedRole = roleName.toLowerCase().replace(/[^a-z]/g, '');
   const normalizedExpected = expectedRole.toLowerCase().replace(/[^a-z]/g, '');
-  
+
   return normalizedRole === normalizedExpected;
 }
 
@@ -22,7 +22,7 @@ function matchesRole(roleName: string, expectedRole: string): boolean {
  * Check if user has a specific role type
  */
 function hasRoleType(roles: string[], roleType: string): boolean {
-  return roles.some(role => matchesRole(role, roleType));
+  return roles.some((role) => matchesRole(role, roleType));
 }
 
 /**
@@ -32,7 +32,7 @@ export function determineUserCapabilities(
   sessionResponse: SessionResponse
 ): RoleCapabilities {
   const roles = sessionResponse.roles;
-  
+
   const isSystemAdmin = hasRoleType(roles, ROLE_NAMES.SYSTEM_ADMIN);
   const isOrgAdmin = hasRoleType(roles, ROLE_NAMES.ORG_ADMIN);
   const isVappUser = hasRoleType(roles, ROLE_NAMES.VAPP_USER);
@@ -58,15 +58,17 @@ export function getHighestPriorityRole(roles: string[]): string {
     ROLE_NAMES.ORG_ADMIN,
     ROLE_NAMES.VAPP_USER,
   ];
-  
+
   // Find the highest priority role that matches
   for (const expectedRole of priorityOrder) {
     if (hasRoleType(roles, expectedRole)) {
       // Return the actual role name from the session, not the constant
-      return roles.find(role => matchesRole(role, expectedRole)) || expectedRole;
+      return (
+        roles.find((role) => matchesRole(role, expectedRole)) || expectedRole
+      );
     }
   }
-  
+
   return roles[0] || '';
 }
 

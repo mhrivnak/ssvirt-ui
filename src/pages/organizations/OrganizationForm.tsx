@@ -51,7 +51,7 @@ interface FormErrors {
 const OrganizationForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isEditing = Boolean(id);
+  const isEditing = Boolean(id) && id !== 'create';
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
@@ -64,8 +64,10 @@ const OrganizationForm: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [originalData, setOriginalData] = useState<FormData | null>(null);
 
-  // Hooks
-  const { data: orgResponse, isLoading } = useOrganization(id!);
+  // Hooks - only fetch organization data if we're actually editing (not creating)
+  const { data: orgResponse, isLoading } = useOrganization(
+    isEditing ? id! : ''
+  );
   const createMutation = useCreateOrganization();
   const updateMutation = useUpdateOrganization();
 

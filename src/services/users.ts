@@ -16,12 +16,9 @@ export class UserService {
   static async getUsers(
     params?: UserQueryParams
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      {
-        params,
-      }
-    );
+    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
+      params,
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -29,9 +26,9 @@ export class UserService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -46,7 +43,7 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'User retrieved successfully'
+      message: 'User retrieved successfully',
     };
   }
 
@@ -61,16 +58,14 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'Current user retrieved successfully'
+      message: 'Current user retrieved successfully',
     };
   }
 
   /**
    * Create a new user
    */
-  static async createUser(
-    data: CreateUserRequest
-  ): Promise<ApiResponse<User>> {
+  static async createUser(data: CreateUserRequest): Promise<ApiResponse<User>> {
     const response = await cloudApi.post<User>(
       API_ENDPOINTS.CLOUDAPI.USERS,
       data
@@ -79,16 +74,14 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'User created successfully'
+      message: 'User created successfully',
     };
   }
 
   /**
    * Update an existing user
    */
-  static async updateUser(
-    data: UpdateUserRequest
-  ): Promise<ApiResponse<User>> {
+  static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
     const { id, ...updateData } = data;
     const response = await cloudApi.put<User>(
       API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
@@ -98,7 +91,7 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'User updated successfully'
+      message: 'User updated successfully',
     };
   }
 
@@ -106,14 +99,12 @@ export class UserService {
    * Delete a user
    */
   static async deleteUser(id: string): Promise<ApiResponse<null>> {
-    await cloudApi.delete(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id)
-    );
+    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id));
     // CloudAPI delete returns no content, create success response
     return {
       data: null,
       success: true,
-      message: 'User deleted successfully'
+      message: 'User deleted successfully',
     };
   }
 
@@ -132,7 +123,7 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: `User ${enabled ? 'enabled' : 'disabled'} successfully`
+      message: `User ${enabled ? 'enabled' : 'disabled'} successfully`,
     };
   }
 
@@ -142,14 +133,11 @@ export class UserService {
   static async getUsersByOrganization(
     organizationId: string
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      {
-        params: {
-          filter: `orgEntityRef.id==${encodeURIComponent(organizationId)}`
-        }
-      }
-    );
+    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
+      params: {
+        filter: `orgEntityRef.id==${encodeURIComponent(organizationId)}`,
+      },
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -157,9 +145,9 @@ export class UserService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -169,14 +157,11 @@ export class UserService {
   static async getUsersByRole(
     roleId: string
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      {
-        params: {
-          filter: `roleEntityRefs.id==${encodeURIComponent(roleId)}`
-        }
-      }
-    );
+    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
+      params: {
+        filter: `roleEntityRefs.id==${encodeURIComponent(roleId)}`,
+      },
+    });
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
@@ -184,9 +169,9 @@ export class UserService {
         page: 1,
         per_page: response.data.length,
         total: response.data.length,
-        total_pages: 1
+        total_pages: 1,
       },
-      success: true
+      success: true,
     };
   }
 
@@ -205,7 +190,7 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'User roles updated successfully'
+      message: 'User roles updated successfully',
     };
   }
 
@@ -224,7 +209,7 @@ export class UserService {
     return {
       data: response.data,
       success: true,
-      message: 'User organization updated successfully'
+      message: 'User organization updated successfully',
     };
   }
 }

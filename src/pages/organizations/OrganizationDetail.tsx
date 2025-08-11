@@ -62,6 +62,7 @@ import {
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { VDC, Catalog } from '../../types';
 import { ROUTES } from '../../utils/constants';
+import OrganizationForm from './OrganizationForm';
 
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,8 +71,13 @@ const OrganizationDetail: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const toggleStatusMutation = useToggleOrganizationStatus();
 
-  // Hooks must be called before any conditional returns
-  const { data: orgResponse, isLoading, error } = useOrganization(id || '');
+  // Check if this is the create route
+  const isCreateMode = id === 'create';
+
+  // Hooks must be called before any conditional returns, but skip organization fetch for create mode
+  const { data: orgResponse, isLoading, error } = useOrganization(
+    isCreateMode ? '' : (id || '')
+  );
   const { data: userPermissions } = useUserPermissions();
 
   // Use organization-scoped VDC access
@@ -83,7 +89,7 @@ const OrganizationDetail: React.FC = () => {
     userPermissions?.canManageOrganization?.(id || '');
   const { data: catalogsResponse } = useCatalogs();
 
-  // Early validation for id parameter
+  // Early validation for id parameter (skip validation for create mode)
   if (!id) {
     return (
       <PageSection>
@@ -119,6 +125,11 @@ const OrganizationDetail: React.FC = () => {
       );
     }
   };
+
+  // Handle create mode - use the OrganizationForm component
+  if (isCreateMode) {
+    return <OrganizationForm />;
+  }
 
   if (isLoading) {
     return (

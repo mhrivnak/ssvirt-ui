@@ -412,12 +412,9 @@ export const ExportService = {
    * Download export file
    */
   downloadExportFile: async (jobId: string) => {
-    const response = await api.get(
-      `/v1/monitoring/export/${jobId}/download`,
-      {
-        responseType: 'blob',
-      }
-    );
+    const response = await api.get(`/v1/monitoring/export/${jobId}/download`, {
+      responseType: 'blob',
+    });
     return response.data;
   },
 };
