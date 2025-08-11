@@ -181,7 +181,7 @@ export class RoleService {
     try {
       const result = await this.getRoleByName(name);
       return result.data !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
