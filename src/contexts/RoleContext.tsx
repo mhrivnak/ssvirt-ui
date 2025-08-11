@@ -16,7 +16,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
   const [activeRole, setActiveRole] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load session data on mount
+  // Load session data on mount and when storage changes
   useEffect(() => {
     const loadSessionData = () => {
       const session = getSessionData();
@@ -31,6 +31,30 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
     };
 
     loadSessionData();
+
+    // Listen for storage events to detect session changes
+    const handleStorageChange = (event: StorageEvent) => {
+      if (
+        event.key === 'vcd-session' ||
+        event.key === 'vcd-session-updated' ||
+        event.key === null
+      ) {
+        loadSessionData();
+      }
+    };
+
+    // Listen for custom session update events
+    const handleSessionUpdate = () => {
+      loadSessionData();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('session-updated', handleSessionUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('session-updated', handleSessionUpdate);
+    };
   }, [activeRole]);
 
   const availableRoles = useMemo(

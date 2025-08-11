@@ -205,9 +205,31 @@ export class AuthService {
       const sessionData = response.data;
 
       // Extract VMware Cloud Director authentication tokens from response headers
-      const accessToken = response.headers['x-vmware-vcloud-access-token'];
-      const tokenType =
-        response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+      const authorizationHeader = response.headers['authorization'];
+      let accessToken: string | undefined;
+      let tokenType = 'Bearer';
+
+      if (authorizationHeader) {
+        // Parse the Authorization header robustly (format: "Bearer <token>" or "<type> <token>")
+        const authParts = authorizationHeader
+          .trim()
+          .split(/\s+/)
+          .filter((part: string) => part.length > 0);
+
+        if (authParts.length >= 2) {
+          // Normalize token type (case-insensitive comparison, set to 'Bearer' for bearer tokens)
+          const firstPart = authParts[0].toLowerCase();
+          tokenType = firstPart === 'bearer' ? 'Bearer' : authParts[0];
+          // Join remaining parts in case token has multiple segments
+          accessToken = authParts.slice(1).join(' ').trim();
+        }
+      }
+
+      // Fallback to legacy header names if Authorization header not found
+      if (!accessToken) {
+        accessToken = response.headers['x-vmware-vcloud-access-token'];
+        tokenType = response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+      }
 
       if (!accessToken) {
         throw new Error(
@@ -222,6 +244,12 @@ export class AuthService {
 
       // Reset API instance to pick up the new authentication tokens
       resetApiInstance();
+
+      // Dispatch a custom event to notify components of session update
+      window.dispatchEvent(new CustomEvent('session-updated'));
+
+      // Notify other tabs of session change via localStorage
+      localStorage.setItem('vcd-session-updated', Date.now().toString());
 
       return sessionData;
     } catch (error) {
@@ -256,6 +284,12 @@ export class AuthService {
 
       // Reset API instance to remove authentication headers
       resetApiInstance();
+
+      // Dispatch a custom event to notify components of session update
+      window.dispatchEvent(new CustomEvent('session-updated'));
+
+      // Notify other tabs of session change via localStorage
+      localStorage.setItem('vcd-session-updated', Date.now().toString());
     }
   }
 
