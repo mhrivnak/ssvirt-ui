@@ -75,9 +75,11 @@ const OrganizationDetail: React.FC = () => {
   const isCreateMode = id === 'create';
 
   // Hooks must be called before any conditional returns, but skip organization fetch for create mode
-  const { data: orgResponse, isLoading, error } = useOrganization(
-    isCreateMode ? '' : (id || '')
-  );
+  const {
+    data: orgResponse,
+    isLoading,
+    error,
+  } = useOrganization(isCreateMode ? '' : id || '');
   const { data: userPermissions } = useUserPermissions();
 
   // Use organization-scoped VDC access

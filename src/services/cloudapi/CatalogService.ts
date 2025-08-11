@@ -45,7 +45,10 @@ export class CatalogService {
    * POST /cloudapi/1.0.0/catalogs
    */
   static async createCatalog(data: CreateCatalogRequest): Promise<Catalog> {
-    const response = await cloudApi.post<Catalog>(API_ENDPOINTS.CLOUDAPI.CATALOGS, data);
+    const response = await cloudApi.post<Catalog>(
+      API_ENDPOINTS.CLOUDAPI.CATALOGS,
+      data
+    );
     return response.data;
   }
 
@@ -69,9 +72,7 @@ export class CatalogService {
    * DELETE /cloudapi/1.0.0/catalogs/{catalogUrn}
    */
   static async deleteCatalog(catalogId: string): Promise<void> {
-    await cloudApi.delete(
-      API_ENDPOINTS.CLOUDAPI.CATALOG_BY_ID(catalogId)
-    );
+    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.CATALOG_BY_ID(catalogId));
   }
 
   /**
