@@ -1,0 +1,6 @@
+{
+  "apiBaseUrl": "https://ssvirt-ui-ssvirt.apps.qe1.kni.eng.rdu2.dc.redhat.com/api",
+  "appTitle": "SSVIRT Web UI",
+  "appVersion": "1.0.0",
+  "logoUrl": "/vite.svg"
+}
