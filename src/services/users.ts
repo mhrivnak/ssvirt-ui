@@ -81,76 +81,131 @@ export class UserService {
    * Get a single user by ID
    */
   static async getUser(id: string): Promise<ApiResponse<User>> {
-    const response = await cloudApi.get<User>(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id)
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'User retrieved successfully',
-    };
+    try {
+      const response = await cloudApi.get<User>(
+        API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id)
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'User retrieved successfully',
+      };
+    } catch (error) {
+      console.error('Failed to get user:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to get user',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
    * Get current user information
    */
   static async getCurrentUser(): Promise<ApiResponse<User>> {
-    const response = await cloudApi.get<User>(
-      API_ENDPOINTS.CLOUDAPI.CURRENT_USER
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'Current user retrieved successfully',
-    };
+    try {
+      const response = await cloudApi.get<User>(
+        API_ENDPOINTS.CLOUDAPI.CURRENT_USER
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'Current user retrieved successfully',
+      };
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to get current user',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
    * Create a new user
    */
   static async createUser(data: CreateUserRequest): Promise<ApiResponse<User>> {
-    const response = await cloudApi.post<User>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      data
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'User created successfully',
-    };
+    try {
+      const response = await cloudApi.post<User>(
+        API_ENDPOINTS.CLOUDAPI.USERS,
+        data
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'User created successfully',
+      };
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to create user',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
    * Update an existing user
    */
   static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
-    const { id, ...updateData } = data;
-    const response = await cloudApi.put<User>(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
-      updateData
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'User updated successfully',
-    };
+    try {
+      const { id, ...updateData } = data;
+      const response = await cloudApi.put<User>(
+        API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
+        updateData
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'User updated successfully',
+      };
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to update user',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
    * Delete a user
    */
   static async deleteUser(id: string): Promise<ApiResponse<null>> {
-    await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id));
-    // CloudAPI delete returns no content, create success response
-    return {
-      data: null,
-      success: true,
-      message: 'User deleted successfully',
-    };
+    try {
+      await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id));
+      // CloudAPI delete returns no content, create success response
+      return {
+        data: null,
+        success: true,
+        message: 'User deleted successfully',
+      };
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      return {
+        data: null,
+        success: false,
+        message: 'Failed to delete user',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -160,16 +215,27 @@ export class UserService {
     id: string,
     enabled: boolean
   ): Promise<ApiResponse<User>> {
-    const response = await cloudApi.patch<User>(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
-      { enabled }
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: `User ${enabled ? 'enabled' : 'disabled'} successfully`,
-    };
+    try {
+      const response = await cloudApi.patch<User>(
+        API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
+        { enabled }
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: `User ${enabled ? 'enabled' : 'disabled'} successfully`,
+      };
+    } catch (error) {
+      console.error('Failed to toggle user status:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to toggle user status',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -178,12 +244,31 @@ export class UserService {
   static async getUsersByOrganization(
     organizationId: string
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
-      params: {
-        filter: buildFilter('orgEntityRef.id', organizationId),
-      },
-    });
-    return convertArrayToPaginatedResponse(response.data);
+    try {
+      const response = await cloudApi.get<User[]>(
+        API_ENDPOINTS.CLOUDAPI.USERS,
+        {
+          params: {
+            filter: buildFilter('orgEntityRef.id', organizationId),
+          },
+        }
+      );
+      return convertArrayToPaginatedResponse(response.data);
+    } catch (error) {
+      console.error('Failed to get users by organization:', error);
+      return {
+        data: [],
+        pagination: {
+          page: 1,
+          per_page: 0,
+          total: 0,
+          total_pages: 0,
+        },
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -192,12 +277,31 @@ export class UserService {
   static async getUsersByRole(
     roleId: string
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
-      params: {
-        filter: buildFilter('roleEntityRefs.id', roleId),
-      },
-    });
-    return convertArrayToPaginatedResponse(response.data);
+    try {
+      const response = await cloudApi.get<User[]>(
+        API_ENDPOINTS.CLOUDAPI.USERS,
+        {
+          params: {
+            filter: buildFilter('roleEntityRefs.id', roleId),
+          },
+        }
+      );
+      return convertArrayToPaginatedResponse(response.data);
+    } catch (error) {
+      console.error('Failed to get users by role:', error);
+      return {
+        data: [],
+        pagination: {
+          page: 1,
+          per_page: 0,
+          total: 0,
+          total_pages: 0,
+        },
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -207,16 +311,27 @@ export class UserService {
     userId: string,
     roleEntityRefs: Array<{ id: string; name: string }>
   ): Promise<ApiResponse<User>> {
-    const response = await cloudApi.patch<User>(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId),
-      { roleEntityRefs }
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'User roles updated successfully',
-    };
+    try {
+      const response = await cloudApi.patch<User>(
+        API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId),
+        { roleEntityRefs }
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'User roles updated successfully',
+      };
+    } catch (error) {
+      console.error('Failed to update user roles:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to update user roles',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -226,15 +341,26 @@ export class UserService {
     userId: string,
     orgEntityRef: { id: string; name: string }
   ): Promise<ApiResponse<User>> {
-    const response = await cloudApi.patch<User>(
-      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId),
-      { orgEntityRef }
-    );
-    // Convert direct response to wrapped format for compatibility
-    return {
-      data: response.data,
-      success: true,
-      message: 'User organization updated successfully',
-    };
+    try {
+      const response = await cloudApi.patch<User>(
+        API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId),
+        { orgEntityRef }
+      );
+      // Convert direct response to wrapped format for compatibility
+      return {
+        data: response.data,
+        success: true,
+        message: 'User organization updated successfully',
+      };
+    } catch (error) {
+      console.error('Failed to update user organization:', error);
+      return {
+        data: null as User,
+        success: false,
+        message: 'Failed to update user organization',
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 }
