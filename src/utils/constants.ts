@@ -3,7 +3,7 @@ import { getRuntimeConfig } from './config';
 // Fallback configuration for when runtime config is not available (e.g., tests)
 const FALLBACK_CONFIG = {
   API_BASE_URL:
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   APP_TITLE: import.meta.env.VITE_APP_TITLE || 'SSVIRT Web UI',
   APP_VERSION: import.meta.env.VITE_APP_VERSION || '0.0.1',
   DEV_MODE: import.meta.env.VITE_DEV_MODE === 'true',

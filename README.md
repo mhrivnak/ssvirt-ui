@@ -95,7 +95,7 @@ Create a configuration file:
 
 ```json
 {
-  "apiBaseUrl": "http://your-api-server:8080/api",
+  "apiBaseUrl": "http://your-api-server:8080",
   "appTitle": "Your Custom Title",
   "appVersion": "1.0.0",
   "logoUrl": "/your-logo.svg"
@@ -113,7 +113,7 @@ podman run -d -p 8080:8080 \
 
 Configuration options in the JSON file:
 
-- `apiBaseUrl`: Backend API endpoint URL
+- `apiBaseUrl`: Base URL for backend server (serves both `/api/` and `/cloudapi/` endpoints)
 - `appTitle`: Application title
 - `appVersion`: Application version
 - `logoUrl`: Logo image URL
@@ -200,10 +200,27 @@ kubectl edit configmap ssvirt-ui-config
 
 The ConfigMap contains a config.json file with these options:
 
-- `apiBaseUrl`: Backend API endpoint URL (default: "http://ssvirt-backend:8080/api")
+- `apiBaseUrl`: Base URL for backend server (default: "http://ssvirt-backend:8080")
 - `appTitle`: Application title (default: "SSVIRT Web UI")
 - `appVersion`: Application version (default: "1.0.0")
 - `logoUrl`: Logo image URL (default: "/vite.svg")
+
+### API Endpoints
+
+The application communicates with the backend server through two sets of API endpoints:
+
+1. **Legacy API** (`/api/`): Used for traditional operations including:
+   - User profile and preferences management
+   - Organization and VDC queries
+   - Legacy VM power operations
+
+2. **CloudAPI** (`/cloudapi/`): VMware Cloud Director CloudAPI endpoints for:
+   - Authentication and session management
+   - VM creation via vApp instantiation
+   - Modern VM lifecycle operations
+   - Catalog and template browsing
+
+The nginx proxy configuration automatically routes requests to the appropriate backend endpoints based on the URL path.
 
 ### Customization Examples
 
