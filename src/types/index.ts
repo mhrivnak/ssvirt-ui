@@ -1659,3 +1659,52 @@ export interface CreateAutomationWorkflowRequest {
   steps: Omit<WorkflowStep, 'id'>[];
   is_enabled?: boolean;
 }
+
+// User Management API Request Types
+export interface CreateUserRequest {
+  username: string;
+  fullName: string;
+  description?: string;
+  email: string;
+  password: string;
+  roleEntityRefs: EntityRef[]; // Array of role references
+  orgEntityRef: EntityRef; // Organization reference
+  deployedVmQuota?: number;
+  storedVmQuota?: number;
+  nameInSource?: string;
+  enabled?: boolean;
+  isGroupRole?: boolean;
+  providerType?: string;
+}
+
+export interface UpdateUserRequest {
+  id: string; // URN format: urn:vcloud:user:uuid
+  username?: string;
+  fullName?: string;
+  description?: string;
+  email?: string;
+  roleEntityRefs?: EntityRef[]; // Array of role references
+  orgEntityRef?: EntityRef; // Organization reference
+  deployedVmQuota?: number;
+  storedVmQuota?: number;
+  nameInSource?: string;
+  enabled?: boolean;
+  isGroupRole?: boolean;
+  providerType?: string;
+}
+
+// Role Management API Request Types
+export interface CreateRoleRequest {
+  name: string;
+  description?: string;
+  bundleKey?: string;
+  readOnly?: boolean;
+}
+
+export interface UpdateRoleRequest {
+  id: string; // URN format: urn:vcloud:role:uuid
+  name?: string;
+  description?: string;
+  bundleKey?: string;
+  readOnly?: boolean;
+}

@@ -43,7 +43,20 @@ const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({
       <NavItem
         isActive={itemIsActive}
         component={({ children, ...props }) => (
-          <Link to={item.to!} {...props}>
+          <Link
+            to={item.to!}
+            {...props}
+            onClick={(e) => {
+              console.log(
+                '🔥 Navigation link clicked:',
+                item.label,
+                'to:',
+                item.to
+              );
+              console.log('🔥 Click event:', e);
+              console.log('🔥 Current location:', location.pathname);
+            }}
+          >
             {children}
           </Link>
         )}
@@ -61,7 +74,10 @@ export const RoleAwareNavigation: React.FC = () => {
 
   const navigationItems = useMemo(() => {
     if (isLoading) return [];
-    return getNavigationForRole(capabilities);
+    console.log('🧭 Generating navigation for capabilities:', capabilities);
+    const items = getNavigationForRole(capabilities);
+    console.log('🧭 Generated navigation items:', items);
+    return items;
   }, [capabilities, isLoading]);
 
   if (isLoading) {

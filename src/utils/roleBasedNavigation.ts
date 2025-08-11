@@ -39,7 +39,7 @@ export const getNavigationForRole = (
 
   // System Administrator Navigation
   if (capabilities.canManageSystem) {
-    return [
+    const systemAdminNav = [
       ...baseNavigation,
       {
         id: 'organizations',
@@ -84,6 +84,7 @@ export const getNavigationForRole = (
         icon: ChartLineIcon,
       },
     ];
+    return systemAdminNav;
   }
 
   // Organization Administrator Navigation

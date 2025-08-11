@@ -12,7 +12,7 @@ export class DashboardService {
    */
   static async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
     const response = await api.get<ApiResponse<DashboardStats>>(
-      '/api/v1/dashboard/stats'
+      '/v1/dashboard/stats'
     );
     return response.data;
   }
@@ -24,7 +24,7 @@ export class DashboardService {
     limit: number = 10
   ): Promise<PaginatedResponse<RecentActivity>> {
     const response = await api.get<PaginatedResponse<RecentActivity>>(
-      '/api/v1/dashboard/activity',
+      '/v1/dashboard/activity',
       {
         params: { per_page: limit },
       }

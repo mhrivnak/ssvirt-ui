@@ -12,6 +12,23 @@ export interface RouteConfig {
 }
 
 /**
+ * Check if a role name matches a known role pattern (case-insensitive, flexible)
+ */
+const matchesRole = (roleName: string, expectedRole: string): boolean => {
+  // Direct match
+  if (roleName === expectedRole) return true;
+
+  // Case insensitive match
+  if (roleName.toLowerCase() === expectedRole.toLowerCase()) return true;
+
+  // Check for common variations (remove spaces, punctuation)
+  const normalizedRole = roleName.toLowerCase().replace(/[^a-z]/g, '');
+  const normalizedExpected = expectedRole.toLowerCase().replace(/[^a-z]/g, '');
+
+  return normalizedRole === normalizedExpected;
+};
+
+/**
  * Check if user has required roles for a route
  */
 export const hasRequiredRoles = (
@@ -22,7 +39,9 @@ export const hasRequiredRoles = (
     return true;
   }
 
-  return requiredRoles.some((role) => userRoles.includes(role));
+  return requiredRoles.some((requiredRole) =>
+    userRoles.some((userRole) => matchesRole(userRole, requiredRole))
+  );
 };
 
 /**
@@ -167,6 +186,12 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/profile',
     component: React.lazy(() => import('../pages/profile/UserProfile')),
+  },
+
+  // Debug route for testing
+  {
+    path: '/debug',
+    component: React.lazy(() => import('../pages/debug/DebugRoute')),
   },
 
   // Reports (system and org admins)

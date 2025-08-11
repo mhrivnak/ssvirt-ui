@@ -29,7 +29,7 @@ export const BatchOperationService = {
   ) => {
     const response = await api.get<
       ApiResponse<{ operations: BatchOperation[]; total: number }>
-    >('/api/v1/automation/batch-operations', { params, signal });
+    >('/v1/automation/batch-operations', { params, signal });
     return response.data;
   },
 
@@ -38,7 +38,7 @@ export const BatchOperationService = {
    */
   getBatchOperation: async (operationId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/batch-operations/${operationId}`,
+      `/v1/automation/batch-operations/${operationId}`,
       { signal }
     );
     return response.data;
@@ -49,7 +49,7 @@ export const BatchOperationService = {
    */
   createBatchOperation: async (operation: CreateBatchOperationRequest) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      '/api/v1/automation/batch-operations',
+      '/v1/automation/batch-operations',
       operation
     );
     return response.data;
@@ -60,7 +60,7 @@ export const BatchOperationService = {
    */
   cancelBatchOperation: async (operationId: string) => {
     const response = await api.post<ApiResponse<{ cancelled: boolean }>>(
-      `/api/v1/automation/batch-operations/${operationId}/cancel`
+      `/v1/automation/batch-operations/${operationId}/cancel`
     );
     return response.data;
   },
@@ -70,7 +70,7 @@ export const BatchOperationService = {
    */
   retryBatchOperation: async (operationId: string) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/batch-operations/${operationId}/retry`
+      `/v1/automation/batch-operations/${operationId}/retry`
     );
     return response.data;
   },
@@ -80,7 +80,7 @@ export const BatchOperationService = {
    */
   rollbackBatchOperation: async (operationId: string) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/batch-operations/${operationId}/rollback`
+      `/v1/automation/batch-operations/${operationId}/rollback`
     );
     return response.data;
   },
@@ -90,7 +90,7 @@ export const BatchOperationService = {
    */
   deleteBatchOperation: async (operationId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/automation/batch-operations/${operationId}`
+      `/v1/automation/batch-operations/${operationId}`
     );
     return response.data;
   },
@@ -109,7 +109,7 @@ export const DeploymentTemplateService = {
   ) => {
     const response = await api.get<
       ApiResponse<{ templates: DeploymentTemplate[]; total: number }>
-    >('/api/v1/automation/deployment-templates', { params, signal });
+    >('/v1/automation/deployment-templates', { params, signal });
     return response.data;
   },
 
@@ -118,7 +118,7 @@ export const DeploymentTemplateService = {
    */
   getDeploymentTemplate: async (templateId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<DeploymentTemplate>>(
-      `/api/v1/automation/deployment-templates/${templateId}`,
+      `/v1/automation/deployment-templates/${templateId}`,
       { signal }
     );
     return response.data;
@@ -131,7 +131,7 @@ export const DeploymentTemplateService = {
     template: CreateDeploymentTemplateRequest
   ) => {
     const response = await api.post<ApiResponse<DeploymentTemplate>>(
-      '/api/v1/automation/deployment-templates',
+      '/v1/automation/deployment-templates',
       template
     );
     return response.data;
@@ -145,7 +145,7 @@ export const DeploymentTemplateService = {
     updates: Partial<CreateDeploymentTemplateRequest>
   ) => {
     const response = await api.put<ApiResponse<DeploymentTemplate>>(
-      `/api/v1/automation/deployment-templates/${templateId}`,
+      `/v1/automation/deployment-templates/${templateId}`,
       updates
     );
     return response.data;
@@ -156,7 +156,7 @@ export const DeploymentTemplateService = {
    */
   cloneDeploymentTemplate: async (templateId: string, name: string) => {
     const response = await api.post<ApiResponse<DeploymentTemplate>>(
-      `/api/v1/automation/deployment-templates/${templateId}/clone`,
+      `/v1/automation/deployment-templates/${templateId}/clone`,
       { name }
     );
     return response.data;
@@ -170,7 +170,7 @@ export const DeploymentTemplateService = {
     deploymentConfig: Record<string, unknown>
   ) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/deployment-templates/${templateId}/deploy`,
+      `/v1/automation/deployment-templates/${templateId}/deploy`,
       deploymentConfig
     );
     return response.data;
@@ -181,7 +181,7 @@ export const DeploymentTemplateService = {
    */
   deleteDeploymentTemplate: async (templateId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/automation/deployment-templates/${templateId}`
+      `/v1/automation/deployment-templates/${templateId}`
     );
     return response.data;
   },
@@ -200,7 +200,7 @@ export const ScheduledOperationService = {
   ) => {
     const response = await api.get<
       ApiResponse<{ operations: ScheduledOperation[]; total: number }>
-    >('/api/v1/automation/scheduled-operations', { params, signal });
+    >('/v1/automation/scheduled-operations', { params, signal });
     return response.data;
   },
 
@@ -209,7 +209,7 @@ export const ScheduledOperationService = {
    */
   getScheduledOperation: async (operationId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<ScheduledOperation>>(
-      `/api/v1/automation/scheduled-operations/${operationId}`,
+      `/v1/automation/scheduled-operations/${operationId}`,
       { signal }
     );
     return response.data;
@@ -222,7 +222,7 @@ export const ScheduledOperationService = {
     operation: CreateScheduledOperationRequest
   ) => {
     const response = await api.post<ApiResponse<ScheduledOperation>>(
-      '/api/v1/automation/scheduled-operations',
+      '/v1/automation/scheduled-operations',
       operation
     );
     return response.data;
@@ -236,7 +236,7 @@ export const ScheduledOperationService = {
     updates: Partial<CreateScheduledOperationRequest>
   ) => {
     const response = await api.put<ApiResponse<ScheduledOperation>>(
-      `/api/v1/automation/scheduled-operations/${operationId}`,
+      `/v1/automation/scheduled-operations/${operationId}`,
       updates
     );
     return response.data;
@@ -247,7 +247,7 @@ export const ScheduledOperationService = {
    */
   toggleScheduledOperation: async (operationId: string, enabled: boolean) => {
     const response = await api.patch<ApiResponse<ScheduledOperation>>(
-      `/api/v1/automation/scheduled-operations/${operationId}/toggle`,
+      `/v1/automation/scheduled-operations/${operationId}/toggle`,
       { enabled }
     );
     return response.data;
@@ -258,7 +258,7 @@ export const ScheduledOperationService = {
    */
   runScheduledOperation: async (operationId: string) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/scheduled-operations/${operationId}/run`
+      `/v1/automation/scheduled-operations/${operationId}/run`
     );
     return response.data;
   },
@@ -268,7 +268,7 @@ export const ScheduledOperationService = {
    */
   deleteScheduledOperation: async (operationId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/automation/scheduled-operations/${operationId}`
+      `/v1/automation/scheduled-operations/${operationId}`
     );
     return response.data;
   },
@@ -287,7 +287,7 @@ export const AutomationWorkflowService = {
   ) => {
     const response = await api.get<
       ApiResponse<{ workflows: AutomationWorkflow[]; total: number }>
-    >('/api/v1/automation/workflows', { params, signal });
+    >('/v1/automation/workflows', { params, signal });
     return response.data;
   },
 
@@ -296,7 +296,7 @@ export const AutomationWorkflowService = {
    */
   getAutomationWorkflow: async (workflowId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<AutomationWorkflow>>(
-      `/api/v1/automation/workflows/${workflowId}`,
+      `/v1/automation/workflows/${workflowId}`,
       { signal }
     );
     return response.data;
@@ -309,7 +309,7 @@ export const AutomationWorkflowService = {
     workflow: CreateAutomationWorkflowRequest
   ) => {
     const response = await api.post<ApiResponse<AutomationWorkflow>>(
-      '/api/v1/automation/workflows',
+      '/v1/automation/workflows',
       workflow
     );
     return response.data;
@@ -323,7 +323,7 @@ export const AutomationWorkflowService = {
     updates: Partial<CreateAutomationWorkflowRequest>
   ) => {
     const response = await api.put<ApiResponse<AutomationWorkflow>>(
-      `/api/v1/automation/workflows/${workflowId}`,
+      `/v1/automation/workflows/${workflowId}`,
       updates
     );
     return response.data;
@@ -334,7 +334,7 @@ export const AutomationWorkflowService = {
    */
   toggleAutomationWorkflow: async (workflowId: string, enabled: boolean) => {
     const response = await api.patch<ApiResponse<AutomationWorkflow>>(
-      `/api/v1/automation/workflows/${workflowId}/toggle`,
+      `/v1/automation/workflows/${workflowId}/toggle`,
       { enabled }
     );
     return response.data;
@@ -348,7 +348,7 @@ export const AutomationWorkflowService = {
     executionConfig?: Record<string, unknown>
   ) => {
     const response = await api.post<ApiResponse<BatchOperation>>(
-      `/api/v1/automation/workflows/${workflowId}/execute`,
+      `/v1/automation/workflows/${workflowId}/execute`,
       executionConfig || {}
     );
     return response.data;
@@ -359,7 +359,7 @@ export const AutomationWorkflowService = {
    */
   cloneAutomationWorkflow: async (workflowId: string, name: string) => {
     const response = await api.post<ApiResponse<AutomationWorkflow>>(
-      `/api/v1/automation/workflows/${workflowId}/clone`,
+      `/v1/automation/workflows/${workflowId}/clone`,
       { name }
     );
     return response.data;
@@ -370,7 +370,7 @@ export const AutomationWorkflowService = {
    */
   deleteAutomationWorkflow: async (workflowId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/automation/workflows/${workflowId}`
+      `/v1/automation/workflows/${workflowId}`
     );
     return response.data;
   },
@@ -386,7 +386,7 @@ export const OperationQueueService = {
   getOperationQueues: async (signal?: AbortSignal) => {
     const response = await api.get<
       ApiResponse<{ queues: OperationQueue[]; total: number }>
-    >('/api/v1/automation/queues', { signal });
+    >('/v1/automation/queues', { signal });
     return response.data;
   },
 
@@ -395,7 +395,7 @@ export const OperationQueueService = {
    */
   getOperationQueue: async (queueId: string, signal?: AbortSignal) => {
     const response = await api.get<ApiResponse<OperationQueue>>(
-      `/api/v1/automation/queues/${queueId}`,
+      `/v1/automation/queues/${queueId}`,
       { signal }
     );
     return response.data;
@@ -406,7 +406,7 @@ export const OperationQueueService = {
    */
   pauseOperationQueue: async (queueId: string) => {
     const response = await api.post<ApiResponse<OperationQueue>>(
-      `/api/v1/automation/queues/${queueId}/pause`
+      `/v1/automation/queues/${queueId}/pause`
     );
     return response.data;
   },
@@ -416,7 +416,7 @@ export const OperationQueueService = {
    */
   resumeOperationQueue: async (queueId: string) => {
     const response = await api.post<ApiResponse<OperationQueue>>(
-      `/api/v1/automation/queues/${queueId}/resume`
+      `/v1/automation/queues/${queueId}/resume`
     );
     return response.data;
   },
@@ -426,7 +426,7 @@ export const OperationQueueService = {
    */
   clearCompletedOperations: async (queueId: string) => {
     const response = await api.post<ApiResponse<{ cleared_count: number }>>(
-      `/api/v1/automation/queues/${queueId}/clear-completed`
+      `/v1/automation/queues/${queueId}/clear-completed`
     );
     return response.data;
   },
