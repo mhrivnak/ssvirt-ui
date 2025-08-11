@@ -8,6 +8,7 @@ import type {
   OrganizationUser,
   InviteUserRequest,
   UpdateUserRoleRequest,
+  Role,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
@@ -143,7 +144,7 @@ export class OrganizationService {
       API_ENDPOINTS.CLOUDAPI.USERS,
       {
         params: {
-          filter: `orgEntityRef.id==${encodeURIComponent(id)}`,
+          filter: `orgEntityRef.id==${id}`,
         },
       }
     );
@@ -167,6 +168,18 @@ export class OrganizationService {
     organizationId: string,
     data: InviteUserRequest
   ): Promise<ApiResponse<OrganizationUser>> {
+    // Fetch organization name first
+    let orgName = '';
+    try {
+      const orgResponse = await cloudApi.get<Organization>(
+        API_ENDPOINTS.CLOUDAPI.ORGANIZATION_BY_ID(organizationId)
+      );
+      orgName = orgResponse.data.name || orgResponse.data.displayName || '';
+    } catch (error) {
+      console.error('Failed to fetch organization name:', error);
+      // Continue with empty name if lookup fails
+    }
+
     // Create user with organization reference - VMware Cloud Director approach
     const response = await cloudApi.post<OrganizationUser>(
       API_ENDPOINTS.CLOUDAPI.USERS,
@@ -174,7 +187,7 @@ export class OrganizationService {
         ...data,
         orgEntityRef: {
           id: organizationId,
-          name: 'Organization', // Organization name would need to be looked up separately
+          ...(orgName && { name: orgName }),
         },
       }
     );
@@ -190,9 +203,25 @@ export class OrganizationService {
    * Update a user's role in an organization
    */
   static async updateOrganizationUserRole(
-    _organizationId: string,
+    organizationId: string,
     data: UpdateUserRoleRequest
   ): Promise<ApiResponse<OrganizationUser>> {
+    // Validate organizationId (even though not strictly required for CloudAPI)
+    if (!organizationId) {
+      throw new Error('Organization ID is required');
+    }
+    // Fetch role name for proper entity reference
+    let roleName = '';
+    try {
+      const roleResponse = await cloudApi.get<Role>(
+        API_ENDPOINTS.CLOUDAPI.ROLE_BY_ID(data.role)
+      );
+      roleName = roleResponse.data.name || '';
+    } catch (error) {
+      console.error('Failed to fetch role name:', error);
+      // Continue with empty name if lookup fails
+    }
+
     // Update user role - VMware Cloud Director uses user ID directly
     const response = await cloudApi.put<OrganizationUser>(
       API_ENDPOINTS.CLOUDAPI.USER_BY_ID(data.user_id),
@@ -200,7 +229,7 @@ export class OrganizationService {
         roleEntityRefs: [
           {
             id: data.role,
-            name: 'Role', // Role name would need to be looked up separately
+            ...(roleName && { name: roleName }),
           },
         ],
       }
@@ -217,9 +246,19 @@ export class OrganizationService {
    * Remove a user from an organization
    */
   static async removeUserFromOrganization(
-    _organizationId: string,
+    organizationId: string,
     userId: string
   ): Promise<ApiResponse<null>> {
+    // Validate that the user belongs to the organization before deletion
+    const userResponse = await cloudApi.get(
+      API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId)
+    );
+    const userOrgId = userResponse.data?.orgEntityRef?.id;
+
+    if (userOrgId !== organizationId) {
+      throw new Error('User does not belong to the specified organization');
+    }
+
     // Remove user from organization - VMware Cloud Director approach
     await cloudApi.delete(API_ENDPOINTS.CLOUDAPI.USER_BY_ID(userId));
     // CloudAPI delete returns no content, create success response

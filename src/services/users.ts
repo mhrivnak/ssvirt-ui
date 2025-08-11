@@ -9,6 +9,32 @@ import type {
   PaginatedResponse,
 } from '../types';
 
+/**
+ * Helper function to build filter query strings safely
+ */
+function buildFilter(field: string, value: string): string {
+  return `${field}==${value}`;
+}
+
+/**
+ * Helper function to convert array responses to paginated format
+ */
+function convertArrayToPaginatedResponse<T>(
+  data: T[],
+  params?: UserQueryParams
+): PaginatedResponse<T> {
+  return {
+    data,
+    pagination: {
+      page: params?.page || 1,
+      per_page: params?.per_page || data.length,
+      total: data.length,
+      total_pages: 1,
+    },
+    success: true,
+  };
+}
+
 export class UserService {
   /**
    * Get all users with optional pagination and filtering
@@ -16,20 +42,39 @@ export class UserService {
   static async getUsers(
     params?: UserQueryParams
   ): Promise<PaginatedResponse<User>> {
-    const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
-      params,
-    });
-    // Convert array response to paginated format for compatibility
-    return {
-      data: response.data,
-      pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
-      },
-      success: true,
-    };
+    try {
+      const response = await cloudApi.get<User[]>(
+        API_ENDPOINTS.CLOUDAPI.USERS,
+        {
+          params,
+        }
+      );
+      // Convert array response to paginated format for compatibility
+      return {
+        data: response.data,
+        pagination: {
+          page: 1,
+          per_page: response.data.length,
+          total: response.data.length,
+          total_pages: 1,
+        },
+        success: true,
+      };
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      return {
+        data: [],
+        pagination: {
+          page: 1,
+          per_page: 0,
+          total: 0,
+          total_pages: 0,
+        },
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
   }
 
   /**
@@ -135,20 +180,10 @@ export class UserService {
   ): Promise<PaginatedResponse<User>> {
     const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
       params: {
-        filter: `orgEntityRef.id==${encodeURIComponent(organizationId)}`,
+        filter: buildFilter('orgEntityRef.id', organizationId),
       },
     });
-    // Convert array response to paginated format for compatibility
-    return {
-      data: response.data,
-      pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
-      },
-      success: true,
-    };
+    return convertArrayToPaginatedResponse(response.data);
   }
 
   /**
@@ -159,20 +194,10 @@ export class UserService {
   ): Promise<PaginatedResponse<User>> {
     const response = await cloudApi.get<User[]>(API_ENDPOINTS.CLOUDAPI.USERS, {
       params: {
-        filter: `roleEntityRefs.id==${encodeURIComponent(roleId)}`,
+        filter: buildFilter('roleEntityRefs.id', roleId),
       },
     });
-    // Convert array response to paginated format for compatibility
-    return {
-      data: response.data,
-      pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
-      },
-      success: true,
-    };
+    return convertArrayToPaginatedResponse(response.data);
   }
 
   /**

@@ -19,15 +19,35 @@ export class RoleService {
     const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
       params,
     });
-    // Convert array response to paginated format for compatibility
+
+    // Check for real pagination info in response headers or data
+    const totalCount = parseInt(response.headers?.['x-total-count'] || '0', 10);
+    const perPage = parseInt(response.headers?.['x-per-page'] || '25', 10);
+    const currentPage = parseInt(
+      response.headers?.['x-current-page'] || '1',
+      10
+    );
+
+    // Use real pagination if available, otherwise fall back to single-page metadata
+    const pagination =
+      totalCount > 0
+        ? {
+            page: currentPage,
+            per_page: perPage,
+            total: totalCount,
+            total_pages: Math.ceil(totalCount / perPage),
+          }
+        : {
+            // Fallback when API doesn't return pagination info - treat as single page
+            page: params?.page || 1,
+            per_page: params?.per_page || response.data.length,
+            total: response.data.length,
+            total_pages: 1,
+          };
+
     return {
       data: response.data,
-      pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
-      },
+      pagination,
       success: true,
     };
   }
@@ -143,7 +163,7 @@ export class RoleService {
   static async getRoleByName(name: string): Promise<ApiResponse<Role | null>> {
     const response = await cloudApi.get<Role[]>(API_ENDPOINTS.CLOUDAPI.ROLES, {
       params: {
-        filter: `name==${encodeURIComponent(name)}`,
+        filter: `name==${name}`,
       },
     });
 

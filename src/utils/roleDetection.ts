@@ -11,9 +11,19 @@ function matchesRole(roleName: string, expectedRole: string): boolean {
   // Case insensitive match
   if (roleName.toLowerCase() === expectedRole.toLowerCase()) return true;
 
-  // Check for common variations
-  const normalizedRole = roleName.toLowerCase().replace(/[^a-z]/g, '');
-  const normalizedExpected = expectedRole.toLowerCase().replace(/[^a-z]/g, '');
+  // Check for common variations with better normalization
+  // Keep letters, digits, and common separators (spaces, hyphens, underscores)
+  // Collapse multiple separators to single space, then trim
+  const normalizeString = (str: string): string => {
+    return str
+      .toLowerCase()
+      .replace(/[^a-z0-9\s\-_]/g, '') // Remove characters that aren't letters, digits, or common separators
+      .replace(/[\s\-_]+/g, ' ') // Collapse consecutive separators to single space
+      .trim();
+  };
+
+  const normalizedRole = normalizeString(roleName);
+  const normalizedExpected = normalizeString(expectedRole);
 
   return normalizedRole === normalizedExpected;
 }
@@ -22,6 +32,10 @@ function matchesRole(roleName: string, expectedRole: string): boolean {
  * Check if user has a specific role type
  */
 function hasRoleType(roles: string[], roleType: string): boolean {
+  // Defensive guard against null/undefined roles array
+  if (!Array.isArray(roles)) {
+    return false;
+  }
   return roles.some((role) => matchesRole(role, roleType));
 }
 
