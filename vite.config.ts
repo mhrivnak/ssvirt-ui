@@ -14,8 +14,8 @@ export default defineConfig({
       '/cloudapi': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-      }
-    }
+      },
+    },
   },
   test: {
     globals: true,

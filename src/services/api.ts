@@ -223,6 +223,9 @@ export class AuthService {
       // Reset API instance to pick up the new authentication tokens
       resetApiInstance();
 
+      // Dispatch a custom event to notify components of session update
+      window.dispatchEvent(new CustomEvent('session-updated'));
+
       return sessionData;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -256,6 +259,9 @@ export class AuthService {
 
       // Reset API instance to remove authentication headers
       resetApiInstance();
+
+      // Dispatch a custom event to notify components of session update
+      window.dispatchEvent(new CustomEvent('session-updated'));
     }
   }
 

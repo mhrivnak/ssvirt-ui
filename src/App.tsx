@@ -81,9 +81,16 @@ const App: React.FC = () => {
                 <Route
                   path={ROUTES.DASHBOARD}
                   element={
-                    <RoleAwareLayout>
-                      <RoleBasedDashboard />
-                    </RoleAwareLayout>
+                    <RoleProtectedRoute
+                      route={{
+                        path: ROUTES.DASHBOARD,
+                        component: RoleBasedDashboard,
+                      }}
+                    >
+                      <RoleAwareLayout>
+                        <RoleBasedDashboard />
+                      </RoleAwareLayout>
+                    </RoleProtectedRoute>
                   }
                 />
 
