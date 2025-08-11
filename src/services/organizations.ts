@@ -28,9 +28,12 @@ export class OrganizationService {
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
-      total: response.data.length,
-      page: 1,
-      per_page: response.data.length,
+      pagination: {
+        page: 1,
+        per_page: response.data.length,
+        total: response.data.length,
+        total_pages: 1
+      },
       success: true
     };
   }
@@ -139,9 +142,12 @@ export class OrganizationService {
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
-      total: response.data.length,
-      page: 1,
-      per_page: response.data.length,
+      pagination: {
+        page: 1,
+        per_page: response.data.length,
+        total: response.data.length,
+        total_pages: 1
+      },
       success: true
     };
   }
@@ -160,7 +166,7 @@ export class OrganizationService {
         ...data,
         orgEntityRef: {
           id: organizationId,
-          name: data.organizationName || 'Organization'
+          name: 'Organization' // Organization name would need to be looked up separately
         }
       }
     );
@@ -176,7 +182,7 @@ export class OrganizationService {
    * Update a user's role in an organization
    */
   static async updateOrganizationUserRole(
-    organizationId: string,
+    _organizationId: string,
     data: UpdateUserRoleRequest
   ): Promise<ApiResponse<OrganizationUser>> {
     // Update user role - VMware Cloud Director uses user ID directly
@@ -185,7 +191,7 @@ export class OrganizationService {
       {
         roleEntityRefs: [{
           id: data.role,
-          name: data.roleName || 'Role'
+          name: 'Role' // Role name would need to be looked up separately
         }]
       }
     );
@@ -201,7 +207,7 @@ export class OrganizationService {
    * Remove a user from an organization
    */
   static async removeUserFromOrganization(
-    organizationId: string,
+    _organizationId: string,
     userId: string
   ): Promise<ApiResponse<null>> {
     // Remove user from organization - VMware Cloud Director approach

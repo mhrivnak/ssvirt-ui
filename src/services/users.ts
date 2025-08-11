@@ -25,9 +25,12 @@ export class UserService {
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
-      total: response.data.length,
-      page: 1,
-      per_page: response.data.length,
+      pagination: {
+        page: 1,
+        per_page: response.data.length,
+        total: response.data.length,
+        total_pages: 1
+      },
       success: true
     };
   }
@@ -150,9 +153,12 @@ export class UserService {
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
-      total: response.data.length,
-      page: 1,
-      per_page: response.data.length,
+      pagination: {
+        page: 1,
+        per_page: response.data.length,
+        total: response.data.length,
+        total_pages: 1
+      },
       success: true
     };
   }
@@ -174,9 +180,12 @@ export class UserService {
     // Convert array response to paginated format for compatibility
     return {
       data: response.data,
-      total: response.data.length,
-      page: 1,
-      per_page: response.data.length,
+      pagination: {
+        page: 1,
+        per_page: response.data.length,
+        total: response.data.length,
+        total_pages: 1
+      },
       success: true
     };
   }
