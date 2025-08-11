@@ -116,9 +116,23 @@ export class UserService {
    */
   static async createUser(data: CreateUserRequest): Promise<ApiResponse<User>> {
     try {
+      // Transform data to match VMware Cloud Director API format
+      const apiData = {
+        username: data.username,
+        FullName: data.name || data.fullName || data.username, // API expects FullName (capital F) as required field
+        description: data.description,
+        email: data.email,
+        password: data.password,
+        roleEntityRefs: data.roleEntityRefs,
+        orgEntityRef: data.orgEntityRef,
+        deployedVmQuota: data.deployedVmQuota,
+        storedVmQuota: data.storedVmQuota,
+        enabled: data.enabled,
+      };
+
       const response = await cloudApi.post<User>(
         API_ENDPOINTS.CLOUDAPI.USERS,
-        data
+        apiData
       );
       // Convert direct response to wrapped format for compatibility
       return {
@@ -143,10 +157,18 @@ export class UserService {
    */
   static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
     try {
-      const { id, ...updateData } = data;
+      const { id, name, fullName, ...restData } = data;
+      
+      // Transform data to match VMware Cloud Director API format
+      const apiData = {
+        ...restData,
+        // Only include FullName if name or fullName is provided
+        ...(name || fullName ? { FullName: name || fullName } : {}),
+      };
+
       const response = await cloudApi.put<User>(
         API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
-        updateData
+        apiData
       );
       // Convert direct response to wrapped format for compatibility
       return {
