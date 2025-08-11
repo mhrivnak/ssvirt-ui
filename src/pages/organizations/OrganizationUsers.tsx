@@ -143,7 +143,7 @@ const OrganizationUsers: React.FC = () => {
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (user.email || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus =
@@ -161,20 +161,20 @@ const OrganizationUsers: React.FC = () => {
         bValue = b.fullName;
         break;
       case 'email':
-        aValue = a.email;
-        bValue = b.email;
+        aValue = a.email || '';
+        bValue = b.email || '';
         break;
       case 'role':
         aValue = a.role;
         bValue = b.role;
         break;
       case 'joined_at':
-        aValue = a.joined_at;
-        bValue = b.joined_at;
+        aValue = a.joined_at || '';
+        bValue = b.joined_at || '';
         break;
       default:
-        aValue = a.email;
-        bValue = b.email;
+        aValue = a.email || '';
+        bValue = b.email || '';
     }
 
     const comparison = aValue.localeCompare(bValue);

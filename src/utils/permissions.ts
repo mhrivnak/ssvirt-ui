@@ -9,8 +9,10 @@ export class PermissionChecker {
    * Check if user has System Administrator role
    */
   static isSystemAdmin(user: User): boolean {
-    return user.roleEntityRefs.some(
-      (role) => role.name === ROLE_NAMES.SYSTEM_ADMIN
+    return (
+      user.roleEntityRefs?.some(
+        (role) => role.name === ROLE_NAMES.SYSTEM_ADMIN
+      ) ?? false
     );
   }
 
@@ -20,20 +22,21 @@ export class PermissionChecker {
    * @param orgId Optional organization ID to check against user's org
    */
   static isOrgAdmin(user: User, orgId?: string): boolean {
-    const hasOrgAdminRole = user.roleEntityRefs.some(
-      (role) => role.name === ROLE_NAMES.ORG_ADMIN
-    );
+    const hasOrgAdminRole =
+      user.roleEntityRefs?.some((role) => role.name === ROLE_NAMES.ORG_ADMIN) ??
+      false;
 
     if (!orgId) return hasOrgAdminRole;
-    return hasOrgAdminRole && user.orgEntityRef.id === orgId;
+    return hasOrgAdminRole && user.orgEntityRef?.id === orgId;
   }
 
   /**
    * Check if user has vApp User role
    */
   static isVAppUser(user: User): boolean {
-    return user.roleEntityRefs.some(
-      (role) => role.name === ROLE_NAMES.VAPP_USER
+    return (
+      user.roleEntityRefs?.some((role) => role.name === ROLE_NAMES.VAPP_USER) ??
+      false
     );
   }
 
@@ -90,7 +93,7 @@ export class PermissionChecker {
    * Get user's role names as an array
    */
   static getUserRoleNames(user: User): string[] {
-    return user.roleEntityRefs.map((role) => role.name);
+    return user.roleEntityRefs?.map((role) => role.name) ?? [];
   }
 
   /**
@@ -98,6 +101,8 @@ export class PermissionChecker {
    */
   static getHighestRole(user: User): EntityRef | null {
     const roles = user.roleEntityRefs;
+
+    if (!roles) return null;
 
     // Priority order: System Admin > Org Admin > vApp User
     const systemAdmin = roles.find(
@@ -127,7 +132,11 @@ export class PermissionChecker {
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
       // System admins get empty array to indicate access to all orgs
-      accessibleOrganizations: isSystemAdmin ? [] : [user.orgEntityRef],
+      accessibleOrganizations: isSystemAdmin
+        ? []
+        : user.orgEntityRef
+          ? [user.orgEntityRef]
+          : [],
       canManageOrganization: (orgId: string) =>
         this.canManageOrganization(user, orgId),
     };
@@ -156,7 +165,7 @@ export class PermissionChecker {
     // Org admins can manage users in their org
     if (
       this.isOrgAdmin(actor) &&
-      actor.orgEntityRef.id === target.orgEntityRef.id
+      actor.orgEntityRef?.id === target.orgEntityRef?.id
     ) {
       // Org admins cannot delete or change roles of other org admins or system admins
       if (
