@@ -20,7 +20,7 @@ export class UserProfileService {
   static async getUserPreferences(): Promise<UserPreferences> {
     try {
       const response = await api.get<ApiResponse<UserPreferences>>(
-        API_ENDPOINTS.USER_PREFERENCES
+        API_ENDPOINTS.LEGACY.USER_PREFERENCES
       );
 
       if (response.data.success && response.data.data) {
@@ -44,7 +44,7 @@ export class UserProfileService {
   ): Promise<UserPreferences> {
     try {
       const response = await api.put<ApiResponse<UserPreferences>>(
-        API_ENDPOINTS.USER_PREFERENCES,
+        API_ENDPOINTS.LEGACY.USER_PREFERENCES,
         request
       );
 
@@ -67,7 +67,7 @@ export class UserProfileService {
   static async changePassword(request: ChangePasswordRequest): Promise<void> {
     try {
       const response = await api.put<ApiResponse<void>>(
-        API_ENDPOINTS.USER_PASSWORD,
+        API_ENDPOINTS.LEGACY.USER_PASSWORD,
         request
       );
 
@@ -86,7 +86,7 @@ export class UserProfileService {
   static async getSecuritySettings(): Promise<SecuritySetting[]> {
     try {
       const response = await api.get<ApiResponse<SecuritySetting[]>>(
-        API_ENDPOINTS.USER_SECURITY_SETTINGS
+        API_ENDPOINTS.LEGACY.USER_SECURITY_SETTINGS
       );
 
       if (response.data.success && response.data.data) {
@@ -110,7 +110,7 @@ export class UserProfileService {
   ): Promise<SecuritySetting> {
     try {
       const response = await api.put<ApiResponse<SecuritySetting>>(
-        API_ENDPOINTS.USER_SECURITY_SETTING(request.setting_id),
+        API_ENDPOINTS.LEGACY.USER_SECURITY_SETTING(request.setting_id),
         { enabled: request.enabled }
       );
 

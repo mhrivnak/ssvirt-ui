@@ -30,10 +30,15 @@ function safeBase64Encode(str: string): string {
 }
 
 // Create axios instance with base configuration
-const createApiInstance = (): AxiosInstance => {
+const createApiInstance = (apiPath = '/api'): AxiosInstance => {
   const config = getConfig();
+
+  // Normalize baseURL to prevent double slashes
+  const normalizedBaseURL = config.API_BASE_URL.replace(/\/+$/, '');
+  const normalizedApiPath = apiPath.startsWith('/') ? apiPath : `/${apiPath}`;
+
   const instance = axios.create({
-    baseURL: config.API_BASE_URL,
+    baseURL: `${normalizedBaseURL}${normalizedApiPath}`,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
@@ -128,23 +133,37 @@ export function removeTokenType(): void {
   sessionStorage.removeItem(VCD_TOKEN_TYPE_KEY);
 }
 
-// Create the API instance lazily (only when first accessed)
-let apiInstance: AxiosInstance | null = null;
+// Create the API instances lazily (only when first accessed)
+let legacyApiInstance: AxiosInstance | null = null;
+let cloudApiInstance: AxiosInstance | null = null;
 
 /**
- * Reset the API instance to force recreation with updated tokens
+ * Reset the API instances to force recreation with updated tokens
  */
 export function resetApiInstance(): void {
-  apiInstance = null;
+  legacyApiInstance = null;
+  cloudApiInstance = null;
 }
 
+// Legacy API instance for /api/ endpoints
 export const api = new Proxy({} as AxiosInstance, {
   get(_target, prop: keyof AxiosInstance) {
-    if (!apiInstance) {
-      console.log('🚀 Creating API instance (first access)');
-      apiInstance = createApiInstance();
+    if (!legacyApiInstance) {
+      console.log('🚀 Creating legacy API instance (first access)');
+      legacyApiInstance = createApiInstance('/api');
     }
-    return apiInstance[prop];
+    return legacyApiInstance[prop];
+  },
+});
+
+// CloudAPI instance for /cloudapi/ endpoints
+export const cloudApi = new Proxy({} as AxiosInstance, {
+  get(_target, prop: keyof AxiosInstance) {
+    if (!cloudApiInstance) {
+      console.log('🚀 Creating CloudAPI instance (first access)');
+      cloudApiInstance = createApiInstance('/cloudapi');
+    }
+    return cloudApiInstance[prop];
   },
 });
 
@@ -155,10 +174,10 @@ export class AuthService {
    */
   static async login(credentials: LoginRequest): Promise<SessionResponse> {
     try {
-      // Create a temporary instance without interceptors for login
+      // Create a temporary CloudAPI instance without interceptors for login
       const config = getConfig();
       const loginInstance = axios.create({
-        baseURL: config.API_BASE_URL,
+        baseURL: `${config.API_BASE_URL}/cloudapi`,
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +193,7 @@ export class AuthService {
       );
 
       const response = await loginInstance.post<SessionResponse>(
-        '/cloudapi/1.0.0/sessions',
+        '/1.0.0/sessions',
         {},
         {
           headers: {
@@ -224,7 +243,7 @@ export class AuthService {
     try {
       const sessionData = getSessionData();
       if (sessionData) {
-        await api.delete(`/cloudapi/1.0.0/sessions/${sessionData.id}`);
+        await cloudApi.delete(`/1.0.0/sessions/${sessionData.id}`);
       }
     } catch (error) {
       // Log error but don't throw - logout should always work locally

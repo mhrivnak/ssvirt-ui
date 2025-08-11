@@ -35,7 +35,7 @@ data:
         }
         
         upstream api_backend {
-            server ssvirt-backend:8080;
+            server ssvirt-api-server:8080;
         }
         
         server {
@@ -65,7 +65,7 @@ data:
                 proxy_next_upstream         error timeout;
             }
             
-            # Proxy API requests to backend
+            # Proxy legacy API requests to backend
             location /api/ {
                 proxy_pass http://api_backend/api/;
                 proxy_set_header Host $host;
@@ -74,6 +74,26 @@ data:
                 proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_set_header Connection "upgrade";
+                
+                # Proxy timeouts and error handling
+                proxy_connect_timeout       5s;
+                proxy_send_timeout          60s;
+                proxy_read_timeout          60s;
+                proxy_next_upstream         error timeout;
+            }
+            
+            # Proxy CloudAPI requests to backend
+            location /cloudapi/ {
+                proxy_pass http://api_backend/cloudapi/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                
+                # CloudAPI specific headers for VMware Cloud Director
+                proxy_set_header X-VMWARE-VCLOUD-TENANT-CONTEXT $http_x_vmware_vcloud_tenant_context;
                 
                 # Proxy timeouts and error handling
                 proxy_connect_timeout       5s;

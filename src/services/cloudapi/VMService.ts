@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { cloudApi } from '../api';
 import type {
   VCloudPaginatedResponse,
   VDC,
@@ -19,9 +19,8 @@ export class VMService {
    * Uses CloudAPI to get VDCs with proper organization filtering via JWT
    */
   static async getVDCs(): Promise<VCloudPaginatedResponse<VDC>> {
-    const response = await api.get<VCloudPaginatedResponse<VDC>>(
-      '/cloudapi/1.0.0/vdcs'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VDC>>('/1.0.0/vdcs');
     return response.data;
   }
 
@@ -41,11 +40,14 @@ export class VMService {
     if (params?.pageSize)
       queryParams.set('pageSize', params.pageSize.toString());
 
-    const url = `/cloudapi/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const url = `/1.0.0/catalogs/${encodeURIComponent(catalogId)}/catalogItems${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
-    const response = await api.get<VCloudPaginatedResponse<CatalogItem>>(url, {
-      signal: options?.signal,
-    });
+    const response = await cloudApi.get<VCloudPaginatedResponse<CatalogItem>>(
+      url,
+      {
+        signal: options?.signal,
+      }
+    );
     return response.data;
   }
 
@@ -59,8 +61,8 @@ export class VMService {
     vdcId: string,
     request: InstantiateTemplateRequest
   ): Promise<VCloudPaginatedResponse<VApp>> {
-    const response = await api.post<VCloudPaginatedResponse<VApp>>(
-      `/cloudapi/1.0.0/vdcs/${encodeURIComponent(vdcId)}/actions/instantiateTemplate`,
+    const response = await cloudApi.post<VCloudPaginatedResponse<VApp>>(
+      `/1.0.0/vdcs/${encodeURIComponent(vdcId)}/actions/instantiateTemplate`,
       request
     );
     return response.data;
@@ -72,8 +74,8 @@ export class VMService {
    * @param vappId The vApp URN
    */
   static async getVApp(vappId: string): Promise<VApp> {
-    const response = await api.get<VApp>(
-      `/cloudapi/1.0.0/vapps/${encodeURIComponent(vappId)}`
+    const response = await cloudApi.get<VApp>(
+      `/1.0.0/vapps/${encodeURIComponent(vappId)}`
     );
     return response.data;
   }
@@ -84,8 +86,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async getVM(vmId: string): Promise<VMCloudAPI> {
-    const response = await api.get<VMCloudAPI>(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}`
+    const response = await cloudApi.get<VMCloudAPI>(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}`
     );
     return response.data;
   }
@@ -96,8 +98,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async getVMHardware(vmId: string): Promise<VMHardwareSection> {
-    const response = await api.get<VMHardwareSection>(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`
+    const response = await cloudApi.get<VMHardwareSection>(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`
     );
     return response.data;
   }
@@ -107,9 +109,8 @@ export class VMService {
    * Used for VM management and overview pages
    */
   static async getVApps(): Promise<VCloudPaginatedResponse<VApp>> {
-    const response = await api.get<VCloudPaginatedResponse<VApp>>(
-      '/cloudapi/1.0.0/vapps'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VApp>>('/1.0.0/vapps');
     return response.data;
   }
 
@@ -118,9 +119,8 @@ export class VMService {
    * Provides organization-wide VM visibility
    */
   static async getVMs(): Promise<VCloudPaginatedResponse<VMCloudAPI>> {
-    const response = await api.get<VCloudPaginatedResponse<VMCloudAPI>>(
-      '/cloudapi/1.0.0/vms'
-    );
+    const response =
+      await cloudApi.get<VCloudPaginatedResponse<VMCloudAPI>>('/1.0.0/vms');
     return response.data;
   }
 
@@ -129,8 +129,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async powerOnVM(vmId: string): Promise<void> {
-    await api.post(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/actions/powerOn`
+    await cloudApi.post(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/powerOn`
     );
   }
 
@@ -139,8 +139,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async powerOffVM(vmId: string): Promise<void> {
-    await api.post(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/actions/powerOff`
+    await cloudApi.post(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/powerOff`
     );
   }
 
@@ -149,8 +149,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async rebootVM(vmId: string): Promise<void> {
-    await api.post(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reboot`
+    await cloudApi.post(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reboot`
     );
   }
 
@@ -159,8 +159,8 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async suspendVM(vmId: string): Promise<void> {
-    await api.post(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/actions/suspend`
+    await cloudApi.post(
+      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/suspend`
     );
   }
 
@@ -169,9 +169,7 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async resetVM(vmId: string): Promise<void> {
-    await api.post(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reset`
-    );
+    await cloudApi.post(`/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reset`);
   }
 
   /**
@@ -179,7 +177,7 @@ export class VMService {
    * @param vappId The vApp URN
    */
   static async deleteVApp(vappId: string): Promise<void> {
-    await api.delete(`/cloudapi/1.0.0/vapps/${encodeURIComponent(vappId)}`);
+    await cloudApi.delete(`/1.0.0/vapps/${encodeURIComponent(vappId)}`);
   }
 
   /**
@@ -187,6 +185,6 @@ export class VMService {
    * @param vmId The VM URN
    */
   static async deleteVM(vmId: string): Promise<void> {
-    await api.delete(`/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}`);
+    await cloudApi.delete(`/1.0.0/vms/${encodeURIComponent(vmId)}`);
   }
 }
