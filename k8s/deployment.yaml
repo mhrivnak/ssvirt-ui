@@ -20,6 +20,7 @@ spec:
         # Main UI container
         - name: ssvirt-ui
           image: quay.io/mhrivnak/ssvirt-ui:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: ui

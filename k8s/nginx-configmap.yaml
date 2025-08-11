@@ -35,7 +35,7 @@ data:
         }
         
         upstream api_backend {
-            server ssvirt-backend:8080;
+            server ssvirt-api-server:8080;
         }
         
         server {

@@ -32,8 +32,13 @@ function safeBase64Encode(str: string): string {
 // Create axios instance with base configuration
 const createApiInstance = (apiPath = '/api'): AxiosInstance => {
   const config = getConfig();
+
+  // Normalize baseURL to prevent double slashes
+  const normalizedBaseURL = config.API_BASE_URL.replace(/\/+$/, '');
+  const normalizedApiPath = apiPath.startsWith('/') ? apiPath : `/${apiPath}`;
+
   const instance = axios.create({
-    baseURL: `${config.API_BASE_URL}${apiPath}`,
+    baseURL: `${normalizedBaseURL}${normalizedApiPath}`,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
