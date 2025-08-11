@@ -168,8 +168,8 @@ const UserForm: React.FC<UserFormProps> = ({
     if (!isEditing) {
       if (!formData.password) {
         newErrors.password = 'Password is required for new users';
-      } else if (formData.password.length < 8) {
-        newErrors.password = 'Password must be at least 8 characters';
+      } else if (formData.password.length < 7) {
+        newErrors.password = 'Password must be at least 7 characters';
       }
 
       if (formData.password !== formData.confirmPassword) {
@@ -510,7 +510,7 @@ const UserForm: React.FC<UserFormProps> = ({
                       {!isEditing && (
                         <HelperText>
                           <HelperTextItem>
-                            Password must be at least 8 characters
+                            Password must be at least 7 characters
                           </HelperTextItem>
                         </HelperText>
                       )}

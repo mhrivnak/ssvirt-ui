@@ -191,11 +191,34 @@ export const useBulkUpdateUserStatus = () => {
       userIds: string[];
       enabled: boolean;
     }) => {
-      // Execute all updates concurrently
+      // Execute all updates concurrently with Promise.allSettled for partial failure handling
       const promises = userIds.map((id) =>
         UserService.toggleUserStatus(id, enabled)
       );
-      return Promise.all(promises);
+      const results = await Promise.allSettled(promises);
+      
+      // Separate successes from failures
+      const successes: string[] = [];
+      const failures: Array<{ id: string; error: string }> = [];
+      
+      results.forEach((result, index) => {
+        const userId = userIds[index];
+        if (result.status === 'fulfilled') {
+          successes.push(userId);
+        } else {
+          failures.push({
+            id: userId,
+            error: result.reason instanceof Error ? result.reason.message : 'Unknown error'
+          });
+        }
+      });
+      
+      // Log failures for debugging
+      if (failures.length > 0) {
+        console.warn('Bulk status update failed for some users:', failures);
+      }
+      
+      return { successes, failures, totalProcessed: userIds.length };
     },
     onSuccess: () => {
       // Invalidate users queries to refresh the list
@@ -212,9 +235,35 @@ export const useBulkDeleteUsers = () => {
 
   return useMutation({
     mutationFn: async (userIds: string[]) => {
-      // Execute all deletions concurrently
+      // Execute all deletions concurrently with Promise.allSettled for partial failure handling
       const promises = userIds.map((id) => UserService.deleteUser(id));
-      return Promise.all(promises);
+      const results = await Promise.allSettled(promises);
+      
+      // Map each result back to its userId with status and details
+      const resultArray = results.map((result, index) => {
+        const userId = userIds[index];
+        if (result.status === 'fulfilled') {
+          return {
+            id: userId,
+            status: 'fulfilled' as const,
+            value: result.value
+          };
+        } else {
+          return {
+            id: userId,
+            status: 'rejected' as const,
+            reason: result.reason instanceof Error ? result.reason.message : 'Unknown error'
+          };
+        }
+      });
+      
+      // Log failures for debugging
+      const failures = resultArray.filter(r => r.status === 'rejected');
+      if (failures.length > 0) {
+        console.warn('Bulk delete failed for some users:', failures);
+      }
+      
+      return resultArray;
     },
     onSuccess: () => {
       // Invalidate users queries to refresh the list

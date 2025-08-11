@@ -187,7 +187,6 @@ const UserRoleManager: React.FC<UserRoleManagerProps> = ({
 
                 {AVAILABLE_ROLES.map((role) => {
                   const isSelected = selectedRoles.includes(role.name);
-                  getRoleLevel(role.name);
 
                   return (
                     <StackItem key={role.id}>

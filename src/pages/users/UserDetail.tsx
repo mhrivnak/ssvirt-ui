@@ -51,6 +51,7 @@ import { useRole } from '../../hooks/useRole';
 import UserForm from './UserForm';
 import UserRoleManager from './UserRoleManager';
 import UserOrganizationManager from './UserOrganizationManager';
+import { sanitizeErrorForUser } from '../../utils/errorSanitization';
 
 const UserDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -143,7 +144,7 @@ const UserDetail: React.FC = () => {
       await toggleStatusMutation.mutateAsync({ id: user.id, enabled });
     } catch (error) {
       setErrorMessage(
-        `Failed to toggle user status: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to toggle user status: ${sanitizeErrorForUser(error)}`
       );
     }
   };

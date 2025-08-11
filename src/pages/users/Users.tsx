@@ -244,14 +244,14 @@ const Users: React.FC = () => {
     return org ? org.displayName || org.name : 'Unknown Organization';
   };
 
-  const getSortableProps = (columnKey: string) => ({
+  const getSortableProps = (columnKey: string, columnIndex: number) => ({
     sort: {
       sortBy: {
-        index: sortBy === columnKey ? 0 : undefined,
+        index: sortBy === columnKey ? columnIndex : undefined,
         direction: sortDirection,
       },
       onSort: () => handleSort(columnKey),
-      columnIndex: 0,
+      columnIndex,
     },
   });
 
@@ -607,9 +607,9 @@ const Users: React.FC = () => {
                           aria-label="Select all users"
                         />
                       </Th>
-                      <Th {...getSortableProps('name')}>Name</Th>
-                      <Th {...getSortableProps('username')}>Username</Th>
-                      <Th {...getSortableProps('email')}>Email</Th>
+                      <Th {...getSortableProps('name', 1)}>Name</Th>
+                      <Th {...getSortableProps('username', 2)}>Username</Th>
+                      <Th {...getSortableProps('email', 3)}>Email</Th>
                       <Th>Organization</Th>
                       <Th>Roles</Th>
                       <Th>Status</Th>
