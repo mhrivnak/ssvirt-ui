@@ -188,6 +188,12 @@ export const roleBasedRoutes: RouteConfig[] = [
     component: React.lazy(() => import('../pages/profile/UserProfile')),
   },
 
+  // Debug route for testing
+  {
+    path: '/debug',
+    component: React.lazy(() => import('../pages/debug/DebugRoute')),
+  },
+
   // Reports (system and org admins)
   {
     path: '/reports/*',
