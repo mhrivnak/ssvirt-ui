@@ -33,15 +33,9 @@ export function determineUserCapabilities(
 ): RoleCapabilities {
   const roles = sessionResponse.roles;
   
-  // Debug logging to help identify role format issues
-  console.log('🔍 Session roles:', roles);
-  console.log('🔍 Expected role constants:', ROLE_NAMES);
-
   const isSystemAdmin = hasRoleType(roles, ROLE_NAMES.SYSTEM_ADMIN);
   const isOrgAdmin = hasRoleType(roles, ROLE_NAMES.ORG_ADMIN);
   const isVappUser = hasRoleType(roles, ROLE_NAMES.VAPP_USER);
-
-  console.log('🔍 Role matches:', { isSystemAdmin, isOrgAdmin, isVappUser });
 
   return {
     canManageSystem: isSystemAdmin,
