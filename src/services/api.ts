@@ -210,11 +210,18 @@ export class AuthService {
       let tokenType = 'Bearer';
 
       if (authorizationHeader) {
-        // Parse the Authorization header (format: "Bearer <token>" or "<type> <token>")
-        const authParts = authorizationHeader.split(' ');
-        if (authParts.length === 2) {
-          tokenType = authParts[0];
-          accessToken = authParts[1];
+        // Parse the Authorization header robustly (format: "Bearer <token>" or "<type> <token>")
+        const authParts = authorizationHeader
+          .trim()
+          .split(/\s+/)
+          .filter((part: string) => part.length > 0);
+
+        if (authParts.length >= 2) {
+          // Normalize token type (case-insensitive comparison, set to 'Bearer' for bearer tokens)
+          const firstPart = authParts[0].toLowerCase();
+          tokenType = firstPart === 'bearer' ? 'Bearer' : authParts[0];
+          // Join remaining parts in case token has multiple segments
+          accessToken = authParts.slice(1).join(' ').trim();
         }
       }
 
@@ -240,6 +247,9 @@ export class AuthService {
 
       // Dispatch a custom event to notify components of session update
       window.dispatchEvent(new CustomEvent('session-updated'));
+
+      // Notify other tabs of session change via localStorage
+      localStorage.setItem('vcd-session-updated', Date.now().toString());
 
       return sessionData;
     } catch (error) {
@@ -277,6 +287,9 @@ export class AuthService {
 
       // Dispatch a custom event to notify components of session update
       window.dispatchEvent(new CustomEvent('session-updated'));
+
+      // Notify other tabs of session change via localStorage
+      localStorage.setItem('vcd-session-updated', Date.now().toString());
     }
   }
 

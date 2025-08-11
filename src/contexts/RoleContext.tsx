@@ -34,7 +34,11 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
 
     // Listen for storage events to detect session changes
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'vcd-session' || event.key === null) {
+      if (
+        event.key === 'vcd-session' ||
+        event.key === 'vcd-session-updated' ||
+        event.key === null
+      ) {
         loadSessionData();
       }
     };
