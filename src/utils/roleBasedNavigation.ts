@@ -28,8 +28,6 @@ export interface NavigationItem {
 export const getNavigationForRole = (
   capabilities: RoleCapabilities
 ): NavigationItem[] => {
-  console.log('🧭 Getting navigation for capabilities:', capabilities);
-  
   const baseNavigation: NavigationItem[] = [
     {
       id: 'dashboard',
@@ -86,7 +84,6 @@ export const getNavigationForRole = (
         icon: ChartLineIcon,
       },
     ];
-    console.log('🧭 Returning system admin navigation:', systemAdminNav);
     return systemAdminNav;
   }
 

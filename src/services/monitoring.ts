@@ -36,7 +36,7 @@ export const ResourceUsageService = {
           vm_count: number;
         };
       }>
-    >('/api/v1/monitoring/resource-usage', { params });
+    >('/v1/monitoring/resource-usage', { params });
     return response.data;
   },
 
@@ -48,7 +48,7 @@ export const ResourceUsageService = {
     params?: ResourceUsageQueryParams
   ) => {
     const response = await api.get<ApiResponse<OrganizationResourceUsage>>(
-      `/api/v1/monitoring/resource-usage/org/${orgId}`,
+      `/v1/monitoring/resource-usage/org/${orgId}`,
       { params }
     );
     return response.data;
@@ -62,7 +62,7 @@ export const ResourceUsageService = {
     params?: ResourceUsageQueryParams
   ) => {
     const response = await api.get<ApiResponse<VDCResourceUsage>>(
-      `/api/v1/monitoring/resource-usage/vdc/${vdcId}`,
+      `/v1/monitoring/resource-usage/vdc/${vdcId}`,
       { params }
     );
     return response.data;
@@ -76,7 +76,7 @@ export const ResourceUsageService = {
     params?: ResourceUsageQueryParams
   ) => {
     const response = await api.get<ApiResponse<VMResourceUsage>>(
-      `/api/v1/monitoring/resource-usage/vm/${vmId}`,
+      `/v1/monitoring/resource-usage/vm/${vmId}`,
       { params }
     );
     return response.data;
@@ -92,7 +92,7 @@ export const CostReportService = {
    */
   getCostReports: async (params?: CostReportQueryParams) => {
     const response = await api.get<PaginatedResponse<CostReport>>(
-      '/api/v1/monitoring/cost-reports',
+      '/v1/monitoring/cost-reports',
       { params }
     );
     return response.data;
@@ -103,7 +103,7 @@ export const CostReportService = {
    */
   getCostReport: async (reportId: string) => {
     const response = await api.get<ApiResponse<CostReport>>(
-      `/api/v1/monitoring/cost-reports/${reportId}`
+      `/v1/monitoring/cost-reports/${reportId}`
     );
     return response.data;
   },
@@ -121,7 +121,7 @@ export const CostReportService = {
     vdc_ids?: string[];
   }) => {
     const response = await api.post<ApiResponse<CostReport>>(
-      '/api/v1/monitoring/cost-reports',
+      '/v1/monitoring/cost-reports',
       params
     );
     return response.data;
@@ -132,7 +132,7 @@ export const CostReportService = {
    */
   deleteCostReport: async (reportId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/monitoring/cost-reports/${reportId}`
+      `/v1/monitoring/cost-reports/${reportId}`
     );
     return response.data;
   },
@@ -151,7 +151,7 @@ export const CapacityPlanningService = {
     forecast_days?: number;
   }) => {
     const response = await api.get<ApiResponse<CapacityPlanningData>>(
-      '/api/v1/monitoring/capacity-planning',
+      '/v1/monitoring/capacity-planning',
       { params }
     );
     return response.data;
@@ -167,7 +167,7 @@ export const CapacityPlanningService = {
   }) => {
     const response = await api.get<
       ApiResponse<{ recommendations: CapacityRecommendation[] }>
-    >('/api/v1/monitoring/capacity-planning/recommendations', { params });
+    >('/v1/monitoring/capacity-planning/recommendations', { params });
     return response.data;
   },
 };
@@ -181,7 +181,7 @@ export const AlertService = {
    */
   getUsageAlerts: async (params?: AlertQueryParams) => {
     const response = await api.get<PaginatedResponse<UsageAlert>>(
-      '/api/v1/monitoring/alerts',
+      '/v1/monitoring/alerts',
       { params }
     );
     return response.data;
@@ -192,7 +192,7 @@ export const AlertService = {
    */
   getUsageAlert: async (alertId: string) => {
     const response = await api.get<ApiResponse<UsageAlert>>(
-      `/api/v1/monitoring/alerts/${alertId}`
+      `/v1/monitoring/alerts/${alertId}`
     );
     return response.data;
   },
@@ -202,7 +202,7 @@ export const AlertService = {
    */
   resolveAlert: async (alertId: string, reason?: string) => {
     const response = await api.patch<ApiResponse<UsageAlert>>(
-      `/api/v1/monitoring/alerts/${alertId}/resolve`,
+      `/v1/monitoring/alerts/${alertId}/resolve`,
       { reason }
     );
     return response.data;
@@ -217,7 +217,7 @@ export const AlertService = {
     reason?: string
   ) => {
     const response = await api.patch<ApiResponse<UsageAlert>>(
-      `/api/v1/monitoring/alerts/${alertId}/suppress`,
+      `/v1/monitoring/alerts/${alertId}/suppress`,
       { duration_minutes, reason }
     );
     return response.data;
@@ -232,7 +232,7 @@ export const AlertService = {
     scope?: string;
   }) => {
     const response = await api.get<PaginatedResponse<AlertRule>>(
-      '/api/v1/monitoring/alert-rules',
+      '/v1/monitoring/alert-rules',
       { params }
     );
     return response.data;
@@ -245,7 +245,7 @@ export const AlertService = {
     rule: Omit<AlertRule, 'id' | 'created_at' | 'updated_at' | 'created_by'>
   ) => {
     const response = await api.post<ApiResponse<AlertRule>>(
-      '/api/v1/monitoring/alert-rules',
+      '/v1/monitoring/alert-rules',
       rule
     );
     return response.data;
@@ -261,7 +261,7 @@ export const AlertService = {
     >
   ) => {
     const response = await api.patch<ApiResponse<AlertRule>>(
-      `/api/v1/monitoring/alert-rules/${ruleId}`,
+      `/v1/monitoring/alert-rules/${ruleId}`,
       updates
     );
     return response.data;
@@ -272,7 +272,7 @@ export const AlertService = {
    */
   deleteAlertRule: async (ruleId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/monitoring/alert-rules/${ruleId}`
+      `/v1/monitoring/alert-rules/${ruleId}`
     );
     return response.data;
   },
@@ -287,7 +287,7 @@ export const DashboardService = {
    */
   getCustomDashboards: async (params?: { is_shared?: boolean }) => {
     const response = await api.get<PaginatedResponse<CustomDashboard>>(
-      '/api/v1/monitoring/dashboards',
+      '/v1/monitoring/dashboards',
       { params }
     );
     return response.data;
@@ -298,7 +298,7 @@ export const DashboardService = {
    */
   getCustomDashboard: async (dashboardId: string) => {
     const response = await api.get<ApiResponse<CustomDashboard>>(
-      `/api/v1/monitoring/dashboards/${dashboardId}`
+      `/v1/monitoring/dashboards/${dashboardId}`
     );
     return response.data;
   },
@@ -313,7 +313,7 @@ export const DashboardService = {
     >
   ) => {
     const response = await api.post<ApiResponse<CustomDashboard>>(
-      '/api/v1/monitoring/dashboards',
+      '/v1/monitoring/dashboards',
       dashboard
     );
     return response.data;
@@ -329,7 +329,7 @@ export const DashboardService = {
     >
   ) => {
     const response = await api.patch<ApiResponse<CustomDashboard>>(
-      `/api/v1/monitoring/dashboards/${dashboardId}`,
+      `/v1/monitoring/dashboards/${dashboardId}`,
       updates
     );
     return response.data;
@@ -340,7 +340,7 @@ export const DashboardService = {
    */
   deleteCustomDashboard: async (dashboardId: string) => {
     const response = await api.delete<ApiResponse<{ deleted: boolean }>>(
-      `/api/v1/monitoring/dashboards/${dashboardId}`
+      `/v1/monitoring/dashboards/${dashboardId}`
     );
     return response.data;
   },
@@ -350,7 +350,7 @@ export const DashboardService = {
    */
   cloneCustomDashboard: async (dashboardId: string, name: string) => {
     const response = await api.post<ApiResponse<CustomDashboard>>(
-      `/api/v1/monitoring/dashboards/${dashboardId}/clone`,
+      `/v1/monitoring/dashboards/${dashboardId}/clone`,
       { name }
     );
     return response.data;
@@ -367,7 +367,7 @@ export const ExportService = {
   requestExport: async (exportRequest: ExportRequest) => {
     try {
       const response = await api.post<ApiResponse<ExportJob>>(
-        '/api/v1/monitoring/export',
+        '/v1/monitoring/export',
         exportRequest
       );
       return response.data;
@@ -382,7 +382,7 @@ export const ExportService = {
    */
   getExportJob: async (jobId: string) => {
     const response = await api.get<ApiResponse<ExportJob>>(
-      `/api/v1/monitoring/export/${jobId}`
+      `/v1/monitoring/export/${jobId}`
     );
     return response.data;
   },
@@ -392,7 +392,7 @@ export const ExportService = {
    */
   getExportJobs: async (params?: { status?: string; limit?: number }) => {
     const response = await api.get<PaginatedResponse<ExportJob>>(
-      '/api/v1/monitoring/export',
+      '/v1/monitoring/export',
       { params }
     );
     return response.data;
@@ -403,7 +403,7 @@ export const ExportService = {
    */
   cancelExportJob: async (jobId: string) => {
     const response = await api.delete<ApiResponse<{ cancelled: boolean }>>(
-      `/api/v1/monitoring/export/${jobId}`
+      `/v1/monitoring/export/${jobId}`
     );
     return response.data;
   },
@@ -413,7 +413,7 @@ export const ExportService = {
    */
   downloadExportFile: async (jobId: string) => {
     const response = await api.get(
-      `/api/v1/monitoring/export/${jobId}/download`,
+      `/v1/monitoring/export/${jobId}/download`,
       {
         responseType: 'blob',
       }

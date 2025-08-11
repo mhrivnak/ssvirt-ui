@@ -19,7 +19,7 @@ export class OrganizationService {
     params?: OrganizationQueryParams
   ): Promise<PaginatedResponse<Organization>> {
     const response = await api.get<PaginatedResponse<Organization>>(
-      '/api/v1/organizations',
+      '/v1/organizations',
       {
         params,
       }
@@ -32,7 +32,7 @@ export class OrganizationService {
    */
   static async getOrganization(id: string): Promise<ApiResponse<Organization>> {
     const response = await api.get<ApiResponse<Organization>>(
-      `/api/v1/organizations/${id}`
+      `/v1/organizations/${id}`
     );
     return response.data;
   }
@@ -44,7 +44,7 @@ export class OrganizationService {
     data: CreateOrganizationRequest
   ): Promise<ApiResponse<Organization>> {
     const response = await api.post<ApiResponse<Organization>>(
-      '/api/v1/organizations',
+      '/v1/organizations',
       data
     );
     return response.data;
@@ -58,7 +58,7 @@ export class OrganizationService {
   ): Promise<ApiResponse<Organization>> {
     const { id, ...updateData } = data;
     const response = await api.put<ApiResponse<Organization>>(
-      `/api/v1/organizations/${id}`,
+      `/v1/organizations/${id}`,
       updateData
     );
     return response.data;
@@ -69,7 +69,7 @@ export class OrganizationService {
    */
   static async deleteOrganization(id: string): Promise<ApiResponse<null>> {
     const response = await api.delete<ApiResponse<null>>(
-      `/api/v1/organizations/${id}`
+      `/v1/organizations/${id}`
     );
     return response.data;
   }
@@ -82,7 +82,7 @@ export class OrganizationService {
     enabled: boolean
   ): Promise<ApiResponse<Organization>> {
     const response = await api.patch<ApiResponse<Organization>>(
-      `/api/v1/organizations/${id}`,
+      `/v1/organizations/${id}`,
       { enabled }
     );
     return response.data;
@@ -95,7 +95,7 @@ export class OrganizationService {
     id: string
   ): Promise<PaginatedResponse<OrganizationUser>> {
     const response = await api.get<PaginatedResponse<OrganizationUser>>(
-      `/api/v1/organizations/${id}/users`
+      `/v1/organizations/${id}/users`
     );
     return response.data;
   }
@@ -108,7 +108,7 @@ export class OrganizationService {
     data: InviteUserRequest
   ): Promise<ApiResponse<OrganizationUser>> {
     const response = await api.post<ApiResponse<OrganizationUser>>(
-      `/api/v1/organizations/${organizationId}/users/invite`,
+      `/v1/organizations/${organizationId}/users/invite`,
       data
     );
     return response.data;
@@ -122,7 +122,7 @@ export class OrganizationService {
     data: UpdateUserRoleRequest
   ): Promise<ApiResponse<OrganizationUser>> {
     const response = await api.put<ApiResponse<OrganizationUser>>(
-      `/api/v1/organizations/${organizationId}/users/${data.user_id}/role`,
+      `/v1/organizations/${organizationId}/users/${data.user_id}/role`,
       { role: data.role }
     );
     return response.data;
@@ -136,7 +136,7 @@ export class OrganizationService {
     userId: string
   ): Promise<ApiResponse<null>> {
     const response = await api.delete<ApiResponse<null>>(
-      `/api/v1/organizations/${organizationId}/users/${userId}`
+      `/v1/organizations/${organizationId}/users/${userId}`
     );
     return response.data;
   }

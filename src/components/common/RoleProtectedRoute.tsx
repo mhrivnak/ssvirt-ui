@@ -45,15 +45,6 @@ export const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({
   const userRoles = sessionData.roles;
   const hasAccess = canAccessRoute(route, userRoles, capabilities);
 
-  console.log('🔐 Route protection check:', {
-    path: route.path,
-    userRoles,
-    capabilities,
-    requiredRoles: route.requiredRoles,
-    requiredCapabilities: route.requiredCapabilities,
-    hasAccess,
-  });
-
   if (!hasAccess) {
     // Show access denied page
     return (

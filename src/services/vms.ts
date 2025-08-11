@@ -15,7 +15,7 @@ export class VMService {
    * Get all VMs with optional pagination and filtering
    */
   static async getVMs(params?: VMQueryParams): Promise<PaginatedResponse<VM>> {
-    const response = await api.get<PaginatedResponse<VM>>('/api/v1/vms', {
+    const response = await api.get<PaginatedResponse<VM>>('/v1/vms', {
       params,
     });
     return response.data;
@@ -29,7 +29,7 @@ export class VMService {
     params?: VMQueryParams
   ): Promise<PaginatedResponse<VM>> {
     const response = await api.get<PaginatedResponse<VM>>(
-      `/api/v1/vdcs/${vdcId}/vms`,
+      `/v1/vdcs/${vdcId}/vms`,
       {
         params,
       }
@@ -41,7 +41,7 @@ export class VMService {
    * Get a single VM by ID
    */
   static async getVM(id: string): Promise<ApiResponse<VM>> {
-    const response = await api.get<ApiResponse<VM>>(`/api/v1/vms/${id}`);
+    const response = await api.get<ApiResponse<VM>>(`/v1/vms/${id}`);
     return response.data;
   }
 
@@ -49,7 +49,7 @@ export class VMService {
    * Create a new VM
    */
   static async createVM(data: CreateVMRequest): Promise<ApiResponse<VM>> {
-    const response = await api.post<ApiResponse<VM>>('/api/v1/vms', data);
+    const response = await api.post<ApiResponse<VM>>('/v1/vms', data);
     return response.data;
   }
 
@@ -59,7 +59,7 @@ export class VMService {
   static async updateVM(data: UpdateVMRequest): Promise<ApiResponse<VM>> {
     const { id, ...updateData } = data;
     const response = await api.put<ApiResponse<VM>>(
-      `/api/v1/vms/${id}`,
+      `/v1/vms/${id}`,
       updateData
     );
     return response.data;
@@ -69,7 +69,7 @@ export class VMService {
    * Delete a VM
    */
   static async deleteVM(id: string): Promise<ApiResponse<null>> {
-    const response = await api.delete<ApiResponse<null>>(`/api/v1/vms/${id}`);
+    const response = await api.delete<ApiResponse<null>>(`/v1/vms/${id}`);
     return response.data;
   }
 
@@ -78,7 +78,7 @@ export class VMService {
    */
   static async powerOnVM(id: string): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.post<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${id}/power-on`
+      `/v1/vms/${id}/power-on`
     );
     return response.data;
   }
@@ -88,7 +88,7 @@ export class VMService {
    */
   static async powerOffVM(id: string): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.post<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${id}/power-off`
+      `/v1/vms/${id}/power-off`
     );
     return response.data;
   }
@@ -98,7 +98,7 @@ export class VMService {
    */
   static async rebootVM(id: string): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.post<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${id}/reboot`
+      `/v1/vms/${id}/reboot`
     );
     return response.data;
   }
@@ -108,7 +108,7 @@ export class VMService {
    */
   static async suspendVM(id: string): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.post<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${id}/suspend`
+      `/v1/vms/${id}/suspend`
     );
     return response.data;
   }
@@ -118,7 +118,7 @@ export class VMService {
    */
   static async resetVM(id: string): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.post<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${id}/reset`
+      `/v1/vms/${id}/reset`
     );
     return response.data;
   }
@@ -131,7 +131,7 @@ export class VMService {
     operationId: string
   ): Promise<ApiResponse<VMPowerOperation>> {
     const response = await api.get<ApiResponse<VMPowerOperation>>(
-      `/api/v1/vms/${vmId}/operations/${operationId}`
+      `/v1/vms/${vmId}/operations/${operationId}`
     );
     return response.data;
   }
@@ -143,7 +143,7 @@ export class VMService {
     vmIds: string[]
   ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
-      '/api/v1/vms/bulk/power-on',
+      '/v1/vms/bulk/power-on',
       { vm_ids: vmIds }
     );
     return response.data;
@@ -156,7 +156,7 @@ export class VMService {
     vmIds: string[]
   ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
-      '/api/v1/vms/bulk/power-off',
+      '/v1/vms/bulk/power-off',
       { vm_ids: vmIds }
     );
     return response.data;
@@ -169,7 +169,7 @@ export class VMService {
     vmIds: string[]
   ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
-      '/api/v1/vms/bulk/reboot',
+      '/v1/vms/bulk/reboot',
       { vm_ids: vmIds }
     );
     return response.data;
@@ -182,7 +182,7 @@ export class VMService {
     vmIds: string[]
   ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
-      '/api/v1/vms/bulk/suspend',
+      '/v1/vms/bulk/suspend',
       { vm_ids: vmIds }
     );
     return response.data;
@@ -195,7 +195,7 @@ export class VMService {
     vmIds: string[]
   ): Promise<ApiResponse<BulkVMPowerOperation>> {
     const response = await api.post<ApiResponse<BulkVMPowerOperation>>(
-      '/api/v1/vms/bulk/reset',
+      '/v1/vms/bulk/reset',
       { vm_ids: vmIds }
     );
     return response.data;

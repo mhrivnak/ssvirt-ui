@@ -43,14 +43,7 @@ const RoleAwareNavItem: React.FC<RoleAwareNavItemProps> = ({
       <NavItem
         isActive={itemIsActive}
         component={({ children, ...props }) => (
-          <Link 
-            to={item.to!} 
-            {...props}
-            onClick={(e) => {
-              console.log('🔗 Navigation link clicked:', item.to, e);
-              // Don't prevent default - let React Router handle it
-            }}
-          >
+          <Link to={item.to!} {...props}>
             {children}
           </Link>
         )}
