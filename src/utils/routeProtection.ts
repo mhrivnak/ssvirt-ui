@@ -158,6 +158,11 @@ export const roleBasedRoutes: RouteConfig[] = [
     component: React.lazy(() => import('../pages/vms/VMDetail')),
     requiredCapabilities: ['canManageVMs'],
   },
+  {
+    path: '/vapps/:id',
+    component: React.lazy(() => import('../pages/vapps/VAppDetail')),
+    requiredCapabilities: ['canManageVMs'],
+  },
 
   // vApp User specific routes
   {

@@ -1,7 +1,62 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { VMService } from '../services';
+import { VMService } from '../services/cloudapi/VMService';
 import { QUERY_KEYS } from '../types';
-import type { VMQueryParams, CreateVMRequest, UpdateVMRequest } from '../types';
+import type {
+  VMQueryParams,
+  CreateVMRequest,
+  UpdateVMRequest,
+  VCloudPaginatedResponse,
+  VMCloudAPI,
+  PaginatedResponse,
+  VM,
+} from '../types';
+
+/**
+ * Transform CloudAPI VM data to legacy format for backward compatibility
+ */
+const transformVMData = (cloudApiVM: VMCloudAPI): VM => {
+  return {
+    id: cloudApiVM.id,
+    name: cloudApiVM.name,
+    vapp_id: cloudApiVM.vapp?.id || '',
+    vapp_name: cloudApiVM.vapp?.name || '',
+    vm_name: cloudApiVM.name,
+    namespace: cloudApiVM.org?.name || '',
+    status: cloudApiVM.status,
+    cpu_count:
+      cloudApiVM.virtualHardwareSection?.items.find(
+        (item) => item.resourceType === 3
+      )?.virtualQuantity || 1,
+    memory_mb:
+      cloudApiVM.virtualHardwareSection?.items.find(
+        (item) => item.resourceType === 4
+      )?.virtualQuantity || 1024,
+    created_at: cloudApiVM.createdDate,
+    updated_at: cloudApiVM.lastModifiedDate,
+    vdc_id: cloudApiVM.vdc?.id || '',
+    vdc_name: cloudApiVM.vdc?.name || '',
+    org_id: cloudApiVM.org?.id || '',
+    org_name: cloudApiVM.org?.name || '',
+  };
+};
+
+/**
+ * Transform CloudAPI paginated response to legacy format
+ */
+const transformPaginatedResponse = (
+  cloudApiResponse: VCloudPaginatedResponse<VMCloudAPI>
+): PaginatedResponse<VM> => {
+  return {
+    success: true,
+    data: cloudApiResponse.values.map(transformVMData),
+    pagination: {
+      page: cloudApiResponse.page,
+      per_page: cloudApiResponse.pageSize,
+      total_pages: cloudApiResponse.pageCount,
+      total: cloudApiResponse.resultTotal,
+    },
+  };
+};
 
 /**
  * Hook to fetch all VMs
@@ -9,18 +64,40 @@ import type { VMQueryParams, CreateVMRequest, UpdateVMRequest } from '../types';
 export const useVMs = (params?: VMQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.vms, params],
-    queryFn: () => VMService.getVMs(params),
+    queryFn: async () => {
+      const cloudApiResponse = await VMService.getVMs();
+      return transformPaginatedResponse(cloudApiResponse);
+    },
     enabled: true,
   });
 };
 
 /**
- * Hook to fetch VMs by VDC
+ * Hook to fetch VMs by VDC - CloudAPI doesn't support VDC-specific filtering
+ * This is implemented by filtering the main VM list
  */
 export const useVMsByVDC = (vdcId: string, params?: VMQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.vmsByVdc(vdcId), params],
-    queryFn: () => VMService.getVMsByVDC(vdcId, params),
+    queryFn: async () => {
+      const cloudApiResponse = await VMService.getVMs();
+      const transformedResponse = transformPaginatedResponse(cloudApiResponse);
+      // Filter by VDC ID
+      const filteredVMs = transformedResponse.data.filter(
+        (vm) => vm.vdc_id === vdcId
+      );
+      return {
+        ...transformedResponse,
+        data: filteredVMs,
+        pagination: {
+          ...transformedResponse.pagination,
+          total: filteredVMs.length,
+          total_pages: Math.ceil(
+            filteredVMs.length / transformedResponse.pagination.per_page
+          ),
+        },
+      };
+    },
     enabled: !!vdcId,
   });
 };
@@ -31,19 +108,30 @@ export const useVMsByVDC = (vdcId: string, params?: VMQueryParams) => {
 export const useVM = (id: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.vm(id),
-    queryFn: () => VMService.getVM(id),
+    queryFn: async () => {
+      const cloudApiVM = await VMService.getVM(id);
+      return transformVMData(cloudApiVM);
+    },
     enabled: !!id,
   });
 };
 
 /**
- * Hook to create a new VM
+ * Hook to create a new VM via template instantiation
+ * CloudAPI uses vApp-based template instantiation instead of direct VM creation
  */
 export const useCreateVM = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateVMRequest) => VMService.createVM(data),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mutationFn: (_data: CreateVMRequest) => {
+      // Note: This needs to be updated to use template instantiation
+      // For now, throwing an error to indicate this needs implementation
+      throw new Error(
+        'VM creation via CloudAPI template instantiation not yet implemented'
+      );
+    },
     onSuccess: (_, variables) => {
       // Invalidate VMs list
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
@@ -64,12 +152,19 @@ export const useCreateVM = () => {
 
 /**
  * Hook to update a VM
+ * CloudAPI doesn't support direct VM updates - this would need to be implemented
+ * via specific hardware/configuration section updates
  */
 export const useUpdateVM = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateVMRequest) => VMService.updateVM(data),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mutationFn: (_data: UpdateVMRequest) => {
+      // Note: CloudAPI doesn't support generic VM updates
+      // This would need to be implemented via specific section updates
+      throw new Error('VM updates via CloudAPI not yet implemented');
+    },
     onSuccess: (response, variables) => {
       // Update the specific VM in cache
       queryClient.setQueryData(QUERY_KEYS.vm(variables.id), response);
@@ -211,110 +306,6 @@ export const useResetVM = () => {
   });
 };
 
-/**
- * Hook to bulk power on multiple VMs
- */
-export const useBulkPowerOnVMs = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmIds: string[]) => VMService.bulkPowerOnVMs(vmIds),
-    onSuccess: (_, vmIds) => {
-      // Invalidate VM data for all affected VMs
-      vmIds.forEach((vmId) => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
-    },
-    onError: (error) => {
-      console.error('Failed to bulk power on VMs:', error);
-    },
-  });
-};
-
-/**
- * Hook to bulk power off multiple VMs
- */
-export const useBulkPowerOffVMs = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmIds: string[]) => VMService.bulkPowerOffVMs(vmIds),
-    onSuccess: (_, vmIds) => {
-      // Invalidate VM data for all affected VMs
-      vmIds.forEach((vmId) => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
-    },
-    onError: (error) => {
-      console.error('Failed to bulk power off VMs:', error);
-    },
-  });
-};
-
-/**
- * Hook to bulk reboot multiple VMs
- */
-export const useBulkRebootVMs = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmIds: string[]) => VMService.bulkRebootVMs(vmIds),
-    onSuccess: (_, vmIds) => {
-      // Invalidate VM data for all affected VMs
-      vmIds.forEach((vmId) => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-    },
-    onError: (error) => {
-      console.error('Failed to bulk reboot VMs:', error);
-    },
-  });
-};
-
-/**
- * Hook to bulk suspend multiple VMs
- */
-export const useBulkSuspendVMs = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmIds: string[]) => VMService.bulkSuspendVMs(vmIds),
-    onSuccess: (_, vmIds) => {
-      // Invalidate VM data for all affected VMs
-      vmIds.forEach((vmId) => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
-    },
-    onError: (error) => {
-      console.error('Failed to bulk suspend VMs:', error);
-    },
-  });
-};
-
-/**
- * Hook to bulk reset multiple VMs
- */
-export const useBulkResetVMs = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmIds: string[]) => VMService.bulkResetVMs(vmIds),
-    onSuccess: (_, vmIds) => {
-      // Invalidate VM data for all affected VMs
-      vmIds.forEach((vmId) => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-    },
-    onError: (error) => {
-      console.error('Failed to bulk reset VMs:', error);
-    },
-  });
-};
+// Note: CloudAPI doesn't support bulk operations
+// Bulk operations would need to be implemented by iterating over individual VMs
+// This functionality has been removed to focus on core VM management

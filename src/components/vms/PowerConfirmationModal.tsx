@@ -23,8 +23,7 @@ interface PowerConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   action: 'POWER_ON' | 'POWER_OFF' | 'SUSPEND' | 'RESET' | 'REBOOT';
-  vm?: VM;
-  vmIds?: string[];
+  vm: VM; // Made required since we removed bulk operations
   isLoading?: boolean;
 }
 
@@ -34,7 +33,6 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
   onConfirm,
   action,
   vm,
-  vmIds,
   isLoading = false,
 }) => {
   const getActionConfig = () => {
@@ -86,12 +84,8 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
   };
 
   const config = getActionConfig();
-  const isBulkOperation = vmIds && vmIds.length > 1;
-  const targetDescription = isBulkOperation
-    ? `${vmIds.length} virtual machines`
-    : vm?.name || 'this virtual machine';
-
-  const title = isBulkOperation ? `${config.title}s` : config.title;
+  const targetDescription = vm.name || 'this virtual machine';
+  const title = config.title;
 
   return (
     <Modal
@@ -128,16 +122,6 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
             >
               This operation cannot be undone. Make sure you have saved any
               important work.
-            </Alert>
-          </StackItem>
-        )}
-
-        {isBulkOperation && (
-          <StackItem>
-            <Alert variant={AlertVariant.info} title="Bulk Operation" isInline>
-              This operation will be performed on {vmIds.length} virtual
-              machines. Some operations may fail if the VMs are not in the
-              correct state.
             </Alert>
           </StackItem>
         )}

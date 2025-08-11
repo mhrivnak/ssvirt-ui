@@ -22,18 +22,12 @@ import {
   useRebootVM,
   useSuspendVM,
   useResetVM,
-  useBulkPowerOnVMs,
-  useBulkPowerOffVMs,
-  useBulkRebootVMs,
-  useBulkSuspendVMs,
-  useBulkResetVMs,
 } from '../../hooks';
 import PowerConfirmationModal from './PowerConfirmationModal';
 import type { VM } from '../../types';
 
 interface VMPowerActionsProps {
-  vm?: VM;
-  vmIds?: string[];
+  vm: VM; // Made required since we removed bulk operations
   variant?: 'dropdown' | 'buttons';
   size?: 'sm' | 'md' | 'lg';
 }
@@ -42,7 +36,6 @@ type PowerAction = 'POWER_ON' | 'POWER_OFF' | 'SUSPEND' | 'RESET' | 'REBOOT';
 
 const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   vm,
-  vmIds,
   variant = 'dropdown',
   size = 'md',
 }) => {
@@ -58,74 +51,34 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   const suspendMutation = useSuspendVM();
   const resetMutation = useResetVM();
 
-  // Bulk operation hooks
-  const bulkPowerOnMutation = useBulkPowerOnVMs();
-  const bulkPowerOffMutation = useBulkPowerOffVMs();
-  const bulkRebootMutation = useBulkRebootVMs();
-  const bulkSuspendMutation = useBulkSuspendVMs();
-  const bulkResetMutation = useBulkResetVMs();
-
-  // Validate props after hooks (React hooks rules compliance)
-  if (!vm && (!vmIds || vmIds.length === 0)) {
-    console.warn('VMPowerActions: Either vm or vmIds prop must be provided');
-    return null;
-  }
-
-  const isBulkOperation = vmIds && vmIds.length > 0;
-  const targetVmIds = isBulkOperation ? vmIds : vm ? [vm.id] : [];
-
   const handlePowerAction = async (action: PowerAction) => {
-    if (targetVmIds.length === 0) return;
+    if (!vm?.id) return;
 
     try {
-      if (isBulkOperation) {
-        switch (action) {
-          case 'POWER_ON':
-            await bulkPowerOnMutation.mutateAsync(targetVmIds);
-            break;
-          case 'POWER_OFF':
-            await bulkPowerOffMutation.mutateAsync(targetVmIds);
-            break;
-          case 'REBOOT':
-            await bulkRebootMutation.mutateAsync(targetVmIds);
-            break;
-          case 'SUSPEND':
-            await bulkSuspendMutation.mutateAsync(targetVmIds);
-            break;
-          case 'RESET':
-            await bulkResetMutation.mutateAsync(targetVmIds);
-            break;
-        }
-      } else {
-        const vmId = targetVmIds[0];
-        switch (action) {
-          case 'POWER_ON':
-            await powerOnMutation.mutateAsync(vmId);
-            break;
-          case 'POWER_OFF':
-            await powerOffMutation.mutateAsync(vmId);
-            break;
-          case 'REBOOT':
-            await rebootMutation.mutateAsync(vmId);
-            break;
-          case 'SUSPEND':
-            await suspendMutation.mutateAsync(vmId);
-            break;
-          case 'RESET':
-            await resetMutation.mutateAsync(vmId);
-            break;
-        }
+      switch (action) {
+        case 'POWER_ON':
+          await powerOnMutation.mutateAsync(vm.id);
+          break;
+        case 'POWER_OFF':
+          await powerOffMutation.mutateAsync(vm.id);
+          break;
+        case 'REBOOT':
+          await rebootMutation.mutateAsync(vm.id);
+          break;
+        case 'SUSPEND':
+          await suspendMutation.mutateAsync(vm.id);
+          break;
+        case 'RESET':
+          await resetMutation.mutateAsync(vm.id);
+          break;
       }
       setConfirmationAction(null);
       setError(null); // Clear any previous errors on success
     } catch (error) {
-      console.error(`Failed to ${action.toLowerCase()} VM(s):`, error);
+      console.error(`Failed to ${action.toLowerCase()} VM:`, error);
       const actionLabel = getActionLabel(action).toLowerCase();
-      const targetDesc = isBulkOperation
-        ? `${targetVmIds.length} VMs`
-        : `VM ${vm?.name || 'Unknown'}`;
       setError(
-        `Failed to ${actionLabel.replace(' all', '')} ${targetDesc}. Please try again.`
+        `Failed to ${actionLabel} VM ${vm.name || 'Unknown'}. Please try again.`
       );
     }
   };
@@ -154,14 +107,14 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
       SUSPEND: 'Suspend',
       RESET: 'Reset',
     };
-    return isBulkOperation ? `${labels[action]} All` : labels[action];
+    return labels[action];
   };
 
   const isActionDisabled = (action: PowerAction) => {
-    if (!vm && !isBulkOperation) return true;
+    if (!vm) return true;
 
-    // For single VM, check status compatibility
-    if (vm && !isBulkOperation) {
+    // Check status compatibility
+    if (vm) {
       const status = vm.status;
       switch (action) {
         case 'POWER_ON':
@@ -180,15 +133,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   };
 
   const isLoading = () => {
-    if (isBulkOperation) {
-      return (
-        bulkPowerOnMutation.isPending ||
-        bulkPowerOffMutation.isPending ||
-        bulkRebootMutation.isPending ||
-        bulkSuspendMutation.isPending ||
-        bulkResetMutation.isPending
-      );
-    }
     return (
       powerOnMutation.isPending ||
       powerOffMutation.isPending ||
@@ -250,7 +194,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
           }
           action={confirmationAction!}
           vm={vm}
-          vmIds={vmIds}
           isLoading={isLoading()}
         />
       </>
@@ -284,7 +227,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
             isDisabled={isLoading()}
             variant="primary"
           >
-            {isBulkOperation ? 'Power Actions' : 'Actions'}
+            Actions
             <EllipsisVIcon />
           </MenuToggle>
         )}
@@ -311,7 +254,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
         }
         action={confirmationAction!}
         vm={vm}
-        vmIds={vmIds}
         isLoading={isLoading()}
       />
     </>
