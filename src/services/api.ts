@@ -205,9 +205,24 @@ export class AuthService {
       const sessionData = response.data;
 
       // Extract VMware Cloud Director authentication tokens from response headers
-      const accessToken = response.headers['x-vmware-vcloud-access-token'];
-      const tokenType =
-        response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+      const authorizationHeader = response.headers['authorization'];
+      let accessToken: string | undefined;
+      let tokenType = 'Bearer';
+
+      if (authorizationHeader) {
+        // Parse the Authorization header (format: "Bearer <token>" or "<type> <token>")
+        const authParts = authorizationHeader.split(' ');
+        if (authParts.length === 2) {
+          tokenType = authParts[0];
+          accessToken = authParts[1];
+        }
+      }
+
+      // Fallback to legacy header names if Authorization header not found
+      if (!accessToken) {
+        accessToken = response.headers['x-vmware-vcloud-access-token'];
+        tokenType = response.headers['x-vmware-vcloud-token-type'] || 'Bearer';
+      }
 
       if (!accessToken) {
         throw new Error(
