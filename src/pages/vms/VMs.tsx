@@ -69,7 +69,13 @@ import {
   PowerOperationStatus,
   VMCreationWizard,
 } from '../../components/vms';
-import type { VM, VMStatus, VMQueryParams, VMCloudAPI, VApp } from '../../types';
+import type {
+  VM,
+  VMStatus,
+  VMQueryParams,
+  VMCloudAPI,
+  VApp,
+} from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -164,11 +170,11 @@ const VMs: React.FC = () => {
   const { data: orgsResponse } = useOrganizations();
   const { operations: powerOperations } = usePowerOperationTracking();
 
-  const vAppsByVDC = vAppsByVDCData?.vAppsByVDC || [];
   const organizations = orgsResponse?.data || [];
 
   // Filter and search logic
   const filteredVAppsByVDC = useMemo(() => {
+    const vAppsByVDC = vAppsByVDCData?.vAppsByVDC || [];
     const currentVAppsByVDC = vAppsByVDC || [];
 
     return currentVAppsByVDC
@@ -206,7 +212,7 @@ const VMs: React.FC = () => {
         };
       })
       .filter((vdcGroup) => vdcGroup.vApps.length > 0); // Only show VDCs with matching vApps
-  }, [vAppsByVDC, filters]);
+  }, [vAppsByVDCData?.vAppsByVDC, filters]);
 
   // Calculate totals
   const totalVApps = filteredVAppsByVDC.reduce(
