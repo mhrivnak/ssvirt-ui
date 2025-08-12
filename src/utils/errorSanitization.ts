@@ -7,12 +7,12 @@ function deriveRawMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  
+
   // Handle Error objects
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   // Handle objects that might be API responses
   if (error && typeof error === 'object') {
     const errorObj = error as {
@@ -26,7 +26,7 @@ function deriveRawMessage(error: unknown): string {
       message?: string;
       error?: string;
     };
-    
+
     // Check for Axios-like response structure
     if (typeof errorObj.response?.data?.message === 'string') {
       return errorObj.response.data.message;
@@ -34,12 +34,12 @@ function deriveRawMessage(error: unknown): string {
     if (typeof errorObj.response?.statusText === 'string') {
       return errorObj.response.statusText;
     }
-    
+
     // Check for fetch-like response
     if (typeof errorObj.statusText === 'string') {
       return errorObj.statusText;
     }
-    
+
     // Check for RFC7807 problem+json format
     if (typeof errorObj.detail === 'string') {
       return errorObj.detail;
@@ -47,7 +47,7 @@ function deriveRawMessage(error: unknown): string {
     if (typeof errorObj.title === 'string') {
       return errorObj.title;
     }
-    
+
     // Check for common message fields
     if (typeof errorObj.message === 'string') {
       return errorObj.message;
@@ -56,7 +56,7 @@ function deriveRawMessage(error: unknown): string {
       return errorObj.error;
     }
   }
-  
+
   // Fallback for unknown error types
   return 'An unexpected error occurred';
 }
@@ -84,19 +84,31 @@ export function sanitizeErrorForUser(error: unknown): string {
 
   // Remove PII and sensitive information patterns
   // Email addresses
-  message = message.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL]');
-  
+  message = message.replace(
+    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    '[EMAIL]'
+  );
+
   // UUIDs (v4 style)
-  message = message.replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi, '[UUID]');
-  
+  message = message.replace(
+    /\b[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+    '[UUID]'
+  );
+
   // IPv4 addresses
   message = message.replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g, '[IP]');
-  
+
   // JWTs and three-segment base64 tokens
-  message = message.replace(/\b[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[JWT]');
-  
+  message = message.replace(
+    /\b[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,
+    '[JWT]'
+  );
+
   // Bearer tokens and authorization headers
-  message = message.replace(/\bAuthorization:\s*Bearer\s+[A-Za-z0-9+/=_-]+/gi, 'Authorization: Bearer [TOKEN]');
+  message = message.replace(
+    /\bAuthorization:\s*Bearer\s+[A-Za-z0-9+/=_-]+/gi,
+    'Authorization: Bearer [TOKEN]'
+  );
   message = message.replace(/\bBearer\s+[A-Za-z0-9+/=_-]+/gi, 'Bearer [TOKEN]');
 
   // Remove potential tokens (anything that looks like a long random string)
