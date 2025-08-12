@@ -158,7 +158,7 @@ export class UserService {
   static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
     try {
       const { id, name, fullName, ...restData } = data;
-      
+
       // Transform data to match VMware Cloud Director API format
       const apiData = {
         ...restData,

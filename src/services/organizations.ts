@@ -134,14 +134,13 @@ export class OrganizationService {
     id: string
   ): Promise<PaginatedResponse<OrganizationUser>> {
     // Get users filtered by organization - VMware Cloud Director uses global users API with filtering
-    const response = await cloudApi.get<VCloudPaginatedResponse<OrganizationUser>>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      {
-        params: {
-          filter: `orgEntityRef.id==${id}`,
-        },
-      }
-    );
+    const response = await cloudApi.get<
+      VCloudPaginatedResponse<OrganizationUser>
+    >(API_ENDPOINTS.CLOUDAPI.USERS, {
+      params: {
+        filter: `orgEntityRef.id==${id}`,
+      },
+    });
     // Handle VCloudPaginatedResponse format
     return {
       data: response.data.values || [],

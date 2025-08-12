@@ -196,11 +196,11 @@ export const useBulkUpdateUserStatus = () => {
         UserService.toggleUserStatus(id, enabled)
       );
       const results = await Promise.allSettled(promises);
-      
+
       // Separate successes from failures
       const successes: string[] = [];
       const failures: Array<{ id: string; error: string }> = [];
-      
+
       results.forEach((result, index) => {
         const userId = userIds[index];
         if (result.status === 'fulfilled') {
@@ -208,16 +208,19 @@ export const useBulkUpdateUserStatus = () => {
         } else {
           failures.push({
             id: userId,
-            error: result.reason instanceof Error ? result.reason.message : 'Unknown error'
+            error:
+              result.reason instanceof Error
+                ? result.reason.message
+                : 'Unknown error',
           });
         }
       });
-      
+
       // Log failures for debugging
       if (failures.length > 0) {
         console.warn('Bulk status update failed for some users:', failures);
       }
-      
+
       return { successes, failures, totalProcessed: userIds.length };
     },
     onSuccess: () => {
@@ -238,7 +241,7 @@ export const useBulkDeleteUsers = () => {
       // Execute all deletions concurrently with Promise.allSettled for partial failure handling
       const promises = userIds.map((id) => UserService.deleteUser(id));
       const results = await Promise.allSettled(promises);
-      
+
       // Map each result back to its userId with status and details
       const resultArray = results.map((result, index) => {
         const userId = userIds[index];
@@ -246,23 +249,26 @@ export const useBulkDeleteUsers = () => {
           return {
             id: userId,
             status: 'fulfilled' as const,
-            value: result.value
+            value: result.value,
           };
         } else {
           return {
             id: userId,
             status: 'rejected' as const,
-            reason: result.reason instanceof Error ? result.reason.message : 'Unknown error'
+            reason:
+              result.reason instanceof Error
+                ? result.reason.message
+                : 'Unknown error',
           };
         }
       });
-      
+
       // Log failures for debugging
-      const failures = resultArray.filter(r => r.status === 'rejected');
+      const failures = resultArray.filter((r) => r.status === 'rejected');
       if (failures.length > 0) {
         console.warn('Bulk delete failed for some users:', failures);
       }
-      
+
       return resultArray;
     },
     onSuccess: () => {

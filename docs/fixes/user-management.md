@@ -15,6 +15,7 @@ System user management features will be available in a future update.
 The user management infrastructure exists but the UI components are missing:
 
 ### ✅ What's Already Available
+
 - **Backend Service**: Complete `UserService` with full CRUD operations using CloudAPI endpoints
 - **React Hooks**: Comprehensive user management hooks in `src/hooks/`
 - **Types & Interfaces**: User-related TypeScript interfaces defined
@@ -22,6 +23,7 @@ The user management infrastructure exists but the UI components are missing:
 - **Organization-level User Management**: `OrganizationUsers.tsx` exists for org-specific user management
 
 ### ❌ What's Missing
+
 - **System-wide User Management Pages**: No UI components for admin-level user management
 - **User List Page**: No equivalent to `VMs.tsx` or `Organizations.tsx` for users
 - **User Detail/Edit Pages**: No user profile editing for administrators
@@ -30,13 +32,17 @@ The user management infrastructure exists but the UI components are missing:
 ## Required Implementation
 
 ### 1. **Replace AdminRoutes Placeholder**
+
 **File**: `src/pages/admin/AdminRoutes.tsx`
 
 **Current**:
+
 ```tsx
 const AdminUsers: React.FC = () => (
   <PageSection>
-    <Title headingLevel="h1" size="xl">System User Management</Title>
+    <Title headingLevel="h1" size="xl">
+      System User Management
+    </Title>
     <Alert variant={AlertVariant.info} title="Feature Coming Soon">
       System user management features will be available in a future update.
     </Alert>
@@ -45,13 +51,14 @@ const AdminUsers: React.FC = () => (
 ```
 
 **Needs**: Replace with proper routing to user management components:
+
 ```tsx
 {
   path: 'users',
   component: React.lazy(() => import('../users/Users')),
 },
 {
-  path: 'users/create', 
+  path: 'users/create',
   component: React.lazy(() => import('../users/UserForm')),
 },
 {
@@ -63,8 +70,10 @@ const AdminUsers: React.FC = () => (
 ### 2. **Create User Management Pages**
 
 #### **Users List Page** (`src/pages/users/Users.tsx`)
+
 **Pattern**: Follow `src/pages/organizations/Organizations.tsx` structure
 **Features Needed**:
+
 - User list table with pagination, sorting, filtering
 - Search by username, email, or organization
 - Filter by role (System Admin, Org Admin, vApp User)
@@ -77,8 +86,10 @@ const AdminUsers: React.FC = () => (
 **Data Source**: Use existing `useUsers()` hook from `src/hooks/`
 
 #### **User Detail Page** (`src/pages/users/UserDetail.tsx`)
+
 **Pattern**: Follow `src/pages/organizations/OrganizationDetail.tsx` structure
 **Features Needed**:
+
 - User profile information display
 - Role assignments and management
 - Organization membership
@@ -87,11 +98,13 @@ const AdminUsers: React.FC = () => (
 - Enable/disable user actions
 - Edit user button
 
-#### **User Form Page** (`src/pages/users/UserForm.tsx`)  
+#### **User Form Page** (`src/pages/users/UserForm.tsx`)
+
 **Pattern**: Follow `src/pages/organizations/OrganizationForm.tsx` structure
 **Features Needed**:
+
 - Create new user form
-- Edit existing user form  
+- Edit existing user form
 - Fields: username, email, full name, password (create only)
 - Organization assignment dropdown
 - Role assignment (multiple roles support)
@@ -101,7 +114,9 @@ const AdminUsers: React.FC = () => (
 ### 3. **Update Navigation & Routing**
 
 #### **Route Protection** (`src/utils/routeProtection.ts`)
+
 Add routes for user management:
+
 ```tsx
 {
   path: '/admin/users',
@@ -121,18 +136,21 @@ Add routes for user management:
 ```
 
 #### **Navigation** (`src/utils/roleBasedNavigation.ts`)
+
 Navigation already correctly points to `/admin/users` - no changes needed.
 
 ### 4. **Additional Hooks (If Needed)**
 
 Most hooks already exist in `src/hooks/`:
+
 - ✅ `useUsers()` - Get all users with filtering
-- ✅ `useCreateUser()` - Create new user  
+- ✅ `useCreateUser()` - Create new user
 - ✅ `useUpdateUser()` - Update existing user
 - ✅ `useDeleteUser()` - Delete user
 - ✅ User role management hooks
 
 **May Need**:
+
 - `useUsersByOrganization()` hook (might already exist)
 - `useUserRoles()` for role assignment UI
 - `useUserPermissions()` for detailed permission display
@@ -142,7 +160,7 @@ Most hooks already exist in `src/hooks/`:
 ```
 src/pages/users/
 ├── Users.tsx              # Main user list page
-├── UserDetail.tsx         # User detail/view page  
+├── UserDetail.tsx         # User detail/view page
 ├── UserForm.tsx           # Create/edit user form
 ├── UserFilters.tsx        # Advanced filtering component
 ├── UserActions.tsx        # Bulk actions component
@@ -153,18 +171,21 @@ src/pages/users/
 ### 6. **Integration Points**
 
 #### **With Organizations**
+
 - Users belong to organizations
 - Filter users by organization
 - Organization admins can manage their org users (already implemented in `OrganizationUsers.tsx`)
 - System admins can manage all users across all organizations
 
-#### **With Roles**  
+#### **With Roles**
+
 - Users have role assignments
 - Display user roles in user list
 - Role-based filtering
 - Role assignment/management interface
 
 #### **With Existing User Profile**
+
 - `src/pages/profile/UserProfile.tsx` exists for self-service user profile editing
 - Admin user management should be separate from self-service profile management
 - May share some common components (user forms, etc.)
@@ -172,18 +193,21 @@ src/pages/users/
 ## Implementation Priority
 
 ### Phase 1: Basic User List (High Priority)
+
 1. Create `Users.tsx` page with basic user list
 2. Update `AdminRoutes.tsx` to route to Users page
 3. Basic filtering and search functionality
 4. User actions (view, edit, delete)
 
-### Phase 2: User Detail & Management (Medium Priority)  
+### Phase 2: User Detail & Management (Medium Priority)
+
 1. Create `UserDetail.tsx` page
 2. Create `UserForm.tsx` for create/edit
 3. Role assignment interface
 4. Enable/disable user functionality
 
 ### Phase 3: Advanced Features (Lower Priority)
+
 1. Bulk operations on users
 2. Advanced filtering and search
 3. User audit/activity logs
@@ -193,22 +217,26 @@ src/pages/users/
 ## Technical Considerations
 
 ### **Data Fetching**
-- Use existing CloudAPI `UserService` 
+
+- Use existing CloudAPI `UserService`
 - Leverage existing React Query hooks for caching and real-time updates
 - Handle pagination properly for large user lists
 
 ### **Role-Based Access**
+
 - Only System Administrators should access `/admin/users/*` routes
 - Organization Administrators use existing `/org-users` for their organization
 - Proper permission checks on all user management operations
 
 ### **User Experience**
+
 - Follow existing PatternFly design patterns used in Organizations and VMs pages
 - Consistent navigation and breadcrumb structure
 - Loading states, error handling, and empty states
 - Responsive design for mobile/tablet access
 
 ### **Performance**
+
 - Implement proper pagination for large user lists
 - Use React Query caching to avoid unnecessary API calls
 - Debounced search and filtering
