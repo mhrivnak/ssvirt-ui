@@ -70,12 +70,7 @@ import {
   VMCreationWizard,
 } from '../../components/vms';
 import { transformVMData } from '../../utils/vmTransformers';
-import type {
-  VM,
-  VMStatus,
-  VMQueryParams,
-  VApp,
-} from '../../types';
+import type { VM, VMStatus, VMQueryParams, VApp } from '../../types';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
