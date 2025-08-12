@@ -96,18 +96,22 @@ export interface User {
   id: string; // URN format: urn:vcloud:user:uuid
   username: string;
   fullName: string;
+  name?: string; // Alias for fullName for compatibility
   description?: string;
-  email: string;
-  roleEntityRefs: EntityRef[]; // Array of role references
-  orgEntityRef: EntityRef; // Organization reference
-  deployedVmQuota: number;
-  storedVmQuota: number;
+  email?: string;
+  roleEntityRefs?: EntityRef[]; // Array of role references
+  orgEntityRef?: EntityRef; // Organization reference
+  deployedVmQuota?: number;
+  storedVmQuota?: number;
   nameInSource?: string;
   enabled: boolean;
-  isGroupRole: boolean;
-  providerType: string;
-  locked: boolean;
-  stranded: boolean;
+  isGroupRole?: boolean;
+  providerType?: string;
+  locked?: boolean;
+  stranded?: boolean;
+  createdDate?: string;
+  lastModified?: string;
+  lastLogin?: string;
 }
 
 // Role Capabilities
@@ -523,6 +527,8 @@ export interface UserQueryParams
     FilterParams {
   orgId?: string;
   roleId?: string;
+  role?: string; // Role name filter
+  organization_id?: string; // Organization ID filter
 }
 
 export interface RoleQueryParams
@@ -1663,12 +1669,13 @@ export interface CreateAutomationWorkflowRequest {
 // User Management API Request Types
 export interface CreateUserRequest {
   username: string;
-  fullName: string;
+  fullName?: string;
+  name?: string; // Alias for fullName
   description?: string;
-  email: string;
+  email?: string;
   password: string;
-  roleEntityRefs: EntityRef[]; // Array of role references
-  orgEntityRef: EntityRef; // Organization reference
+  roleEntityRefs?: EntityRef[]; // Array of role references
+  orgEntityRef?: EntityRef; // Organization reference
   deployedVmQuota?: number;
   storedVmQuota?: number;
   nameInSource?: string;
@@ -1681,8 +1688,10 @@ export interface UpdateUserRequest {
   id: string; // URN format: urn:vcloud:user:uuid
   username?: string;
   fullName?: string;
+  name?: string; // Alias for fullName
   description?: string;
   email?: string;
+  password?: string; // Allow password updates
   roleEntityRefs?: EntityRef[]; // Array of role references
   orgEntityRef?: EntityRef; // Organization reference
   deployedVmQuota?: number;

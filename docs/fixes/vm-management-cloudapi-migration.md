@@ -15,12 +15,14 @@ The VM management system was designed to use VMware Cloud Director CloudAPI endp
 ## Required Changes
 
 ### 1. **Update VM Hooks to Use CloudAPI Service**
-- **File**: `src/hooks/useVMs.ts` 
+
+- **File**: `src/hooks/useVMs.ts`
 - **Change**: Import and use `VMService` from `src/services/cloudapi/VMService.ts` instead of `src/services/vms.ts`
 - **Current**: `import { VMService } from '../services';` (legacy)
 - **Should be**: `import { VMService } from '../services/cloudapi/VMService';` (CloudAPI)
 
 ### 2. **Update VMs Page Component**
+
 - **File**: `src/pages/vms/VMs.tsx`
 - **Changes needed**:
   - Update imports to use CloudAPI VM hooks
@@ -29,46 +31,56 @@ The VM management system was designed to use VMware Cloud Director CloudAPI endp
   - Handle the different data structure (CloudAPI uses `values` array vs legacy `data` array)
 
 ### 3. **Response Format Differences**
+
 According to the documentation:
+
 - **Legacy**: Returns `PaginatedResponse<VM>` with `{ data: VM[], pagination: {...} }`
 - **CloudAPI**: Returns `VCloudPaginatedResponse<VMCloudAPI>` with `{ values: VMCloudAPI[], resultTotal, page, pageSize }`
 
 ### 4. **VM Data Structure Changes**
+
 - **Legacy VM fields**: `id`, `name`, `status`, `vdc_id`, `org_id`, `cpu_count`, `memory_mb`, `created_at`
 - **CloudAPI VM fields**: VMware Cloud Director URN format IDs, different field names and structure
 
 ### 5. **Power Operations Migration**
+
 - **Current**: Legacy endpoints like `/v1/vms/{id}/power-on`
 - **Should use**: CloudAPI endpoints like `/cloudapi/1.0.0/vms/{vmId}/actions/powerOn`
 
 ### 6. **VM Creation Migration**
+
 - **Current**: Direct VM creation via `/v1/vms`
 - **Should use**: vApp-based template instantiation via `/cloudapi/1.0.0/vdcs/{vdcId}/actions/instantiateTemplate`
 
 ## Implementation Priority
 
 ### 1. **High Priority** (Critical for basic functionality):
-   - Fix `useVMs` hook to use CloudAPI service
-   - Update VMs page to handle CloudAPI response format
-   - Update VM type imports and data mapping
+
+- Fix `useVMs` hook to use CloudAPI service
+- Update VMs page to handle CloudAPI response format
+- Update VM type imports and data mapping
 
 ### 2. **Medium Priority** (For full functionality):
-   - Update power operations to use CloudAPI endpoints
-   - Update VM detail page
-   - Update bulk operations
+
+- Update power operations to use CloudAPI endpoints
+- Update VM detail page
+- Update bulk operations
 
 ### 3. **Lower Priority** (For creation workflow):
-   - Replace VM creation wizard with template instantiation workflow
-   - Update catalog integration for template selection
+
+- Replace VM creation wizard with template instantiation workflow
+- Update catalog integration for template selection
 
 ## Files to Modify
 
 ### Critical Path:
+
 1. `src/hooks/useVMs.ts` - Change service import
 2. `src/pages/vms/VMs.tsx` - Update response handling and data mapping
 3. `src/types/index.ts` - Ensure VM type exports include CloudAPI types
 
 ### Supporting Files:
+
 4. `src/hooks/useCloudAPIVMs.ts` - May need updates for compatibility
 5. `src/components/vms/VMPowerActions.tsx` - Update to use CloudAPI power operations
 6. `src/pages/vms/VMDetail.tsx` - Update for CloudAPI VM data structure
@@ -76,6 +88,7 @@ According to the documentation:
 ## Technical Details
 
 ### Expected CloudAPI Response Format:
+
 ```typescript
 {
   "resultTotal": 25,
@@ -98,6 +111,7 @@ According to the documentation:
 ```
 
 ### Data Mapping Requirements:
+
 - Convert CloudAPI `values` array to legacy `data` array format
 - Map CloudAPI pagination format to legacy pagination format
 - Handle URN-based IDs vs simple string IDs

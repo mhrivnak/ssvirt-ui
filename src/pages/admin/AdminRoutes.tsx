@@ -6,17 +6,7 @@ import {
   Alert,
   AlertVariant,
 } from '@patternfly/react-core';
-
-const AdminUsers: React.FC = () => (
-  <PageSection>
-    <Title headingLevel="h1" size="xl">
-      System User Management
-    </Title>
-    <Alert variant={AlertVariant.info} title="Feature Coming Soon">
-      System user management features will be available in a future update.
-    </Alert>
-  </PageSection>
-);
+import { Users, UserDetail, UserForm } from '../users';
 
 const AdminRoles: React.FC = () => (
   <PageSection>
@@ -55,7 +45,10 @@ const AdminMonitoring: React.FC = () => (
 const AdminRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="users/*" element={<AdminUsers />} />
+      <Route path="users" element={<Users />} />
+      <Route path="users/create" element={<UserForm />} />
+      <Route path="users/:id" element={<UserDetail />} />
+      <Route path="users/:id/edit" element={<UserForm />} />
       <Route path="roles" element={<AdminRoles />} />
       <Route path="settings" element={<AdminSettings />} />
       <Route path="monitoring" element={<AdminMonitoring />} />

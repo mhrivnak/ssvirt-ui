@@ -96,6 +96,23 @@ export {
   useUpdateSecuritySetting,
 } from './useUserProfile';
 
+// Export user management hooks
+export {
+  useUsers,
+  useUser,
+  useCurrentUser,
+  useCreateUser,
+  useUpdateUser,
+  useDeleteUser,
+  useToggleUserStatus,
+  useUsersByOrganization,
+  useUsersByRole,
+  useUpdateUserRoles,
+  useUpdateUserOrganization,
+  useBulkUpdateUserStatus,
+  useBulkDeleteUsers,
+} from './useUsers';
+
 // Export monitoring hooks
 export {
   useGlobalResourceUsage,

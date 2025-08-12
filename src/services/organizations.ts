@@ -11,6 +11,7 @@ import type {
   Role,
   ApiResponse,
   PaginatedResponse,
+  VCloudPaginatedResponse,
 } from '../types';
 
 export class OrganizationService {
@@ -20,30 +21,23 @@ export class OrganizationService {
   static async getOrganizations(
     params?: OrganizationQueryParams
   ): Promise<PaginatedResponse<Organization>> {
-    const response = await cloudApi.get<Organization[]>(
+    const response = await cloudApi.get<VCloudPaginatedResponse<Organization>>(
       API_ENDPOINTS.CLOUDAPI.ORGANIZATIONS,
       {
         params,
       }
     );
     console.log('🏢 CloudAPI organizations response:', response);
-    console.log('🏢 Response data type:', typeof response.data);
-    console.log('🏢 Response data isArray:', Array.isArray(response.data));
     console.log('🏢 Response data:', response.data);
 
-    // Ensure we have an array
-    const organizationsArray = Array.isArray(response.data)
-      ? response.data
-      : [];
-
-    // Convert array response to paginated format for compatibility
+    // Handle VCloudPaginatedResponse format
     return {
-      data: organizationsArray,
+      data: response.data.values ?? [],
       pagination: {
-        page: 1,
-        per_page: organizationsArray.length,
-        total: organizationsArray.length,
-        total_pages: 1,
+        page: response.data.page ?? 0,
+        per_page: response.data.pageSize ?? 0,
+        total: response.data.resultTotal ?? 0,
+        total_pages: response.data.pageCount ?? 0,
       },
       success: true,
     };
@@ -140,22 +134,21 @@ export class OrganizationService {
     id: string
   ): Promise<PaginatedResponse<OrganizationUser>> {
     // Get users filtered by organization - VMware Cloud Director uses global users API with filtering
-    const response = await cloudApi.get<OrganizationUser[]>(
-      API_ENDPOINTS.CLOUDAPI.USERS,
-      {
-        params: {
-          filter: `orgEntityRef.id==${id}`,
-        },
-      }
-    );
-    // Convert array response to paginated format for compatibility
+    const response = await cloudApi.get<
+      VCloudPaginatedResponse<OrganizationUser>
+    >(API_ENDPOINTS.CLOUDAPI.USERS, {
+      params: {
+        filter: `orgEntityRef.id=="${id}"`,
+      },
+    });
+    // Handle VCloudPaginatedResponse format
     return {
-      data: response.data,
+      data: response.data.values ?? [],
       pagination: {
-        page: 1,
-        per_page: response.data.length,
-        total: response.data.length,
-        total_pages: 1,
+        page: response.data.page ?? 0,
+        per_page: response.data.pageSize ?? 0,
+        total: response.data.resultTotal ?? 0,
+        total_pages: response.data.pageCount ?? 0,
       },
       success: true,
     };

@@ -7,6 +7,7 @@ import type {
   UpdateUserRequest,
   ApiResponse,
   PaginatedResponse,
+  VCloudPaginatedResponse,
 } from '../types';
 
 /**
@@ -14,25 +15,6 @@ import type {
  */
 function buildFilter(field: string, value: string): string {
   return `${field}==${value}`;
-}
-
-/**
- * Helper function to convert array responses to paginated format
- */
-function convertArrayToPaginatedResponse<T>(
-  data: T[],
-  params?: UserQueryParams
-): PaginatedResponse<T> {
-  return {
-    data,
-    pagination: {
-      page: params?.page || 1,
-      per_page: params?.per_page || data.length,
-      total: data.length,
-      total_pages: 1,
-    },
-    success: true,
-  };
 }
 
 export class UserService {
@@ -43,20 +25,20 @@ export class UserService {
     params?: UserQueryParams
   ): Promise<PaginatedResponse<User>> {
     try {
-      const response = await cloudApi.get<User[]>(
+      const response = await cloudApi.get<VCloudPaginatedResponse<User>>(
         API_ENDPOINTS.CLOUDAPI.USERS,
         {
           params,
         }
       );
-      // Convert array response to paginated format for compatibility
+      // Convert VCloudPaginatedResponse to our PaginatedResponse format
       return {
-        data: response.data,
+        data: response.data.values || [],
         pagination: {
-          page: 1,
-          per_page: response.data.length,
-          total: response.data.length,
-          total_pages: 1,
+          page: response.data.page,
+          per_page: response.data.pageSize,
+          total: response.data.resultTotal,
+          total_pages: response.data.pageCount,
         },
         success: true,
       };
@@ -134,9 +116,23 @@ export class UserService {
    */
   static async createUser(data: CreateUserRequest): Promise<ApiResponse<User>> {
     try {
+      // Transform data to match VMware Cloud Director API format
+      const apiData = {
+        username: data.username,
+        FullName: data.name || data.fullName || data.username, // API expects FullName (capital F) as required field
+        description: data.description,
+        email: data.email,
+        password: data.password,
+        roleEntityRefs: data.roleEntityRefs,
+        orgEntityRef: data.orgEntityRef,
+        deployedVmQuota: data.deployedVmQuota,
+        storedVmQuota: data.storedVmQuota,
+        enabled: data.enabled,
+      };
+
       const response = await cloudApi.post<User>(
         API_ENDPOINTS.CLOUDAPI.USERS,
-        data
+        apiData
       );
       // Convert direct response to wrapped format for compatibility
       return {
@@ -161,10 +157,18 @@ export class UserService {
    */
   static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
     try {
-      const { id, ...updateData } = data;
+      const { id, name, fullName, ...restData } = data;
+
+      // Transform data to match VMware Cloud Director API format
+      const apiData = {
+        ...restData,
+        // Only include FullName if name or fullName is provided
+        ...(name || fullName ? { FullName: name || fullName } : {}),
+      };
+
       const response = await cloudApi.put<User>(
         API_ENDPOINTS.CLOUDAPI.USER_BY_ID(id),
-        updateData
+        apiData
       );
       // Convert direct response to wrapped format for compatibility
       return {
@@ -245,7 +249,7 @@ export class UserService {
     organizationId: string
   ): Promise<PaginatedResponse<User>> {
     try {
-      const response = await cloudApi.get<User[]>(
+      const response = await cloudApi.get<VCloudPaginatedResponse<User>>(
         API_ENDPOINTS.CLOUDAPI.USERS,
         {
           params: {
@@ -253,7 +257,16 @@ export class UserService {
           },
         }
       );
-      return convertArrayToPaginatedResponse(response.data);
+      return {
+        data: response.data.values || [],
+        pagination: {
+          page: response.data.page,
+          per_page: response.data.pageSize,
+          total: response.data.resultTotal,
+          total_pages: response.data.pageCount,
+        },
+        success: true,
+      };
     } catch (error) {
       console.error('Failed to get users by organization:', error);
       return {
@@ -278,7 +291,7 @@ export class UserService {
     roleId: string
   ): Promise<PaginatedResponse<User>> {
     try {
-      const response = await cloudApi.get<User[]>(
+      const response = await cloudApi.get<VCloudPaginatedResponse<User>>(
         API_ENDPOINTS.CLOUDAPI.USERS,
         {
           params: {
@@ -286,7 +299,16 @@ export class UserService {
           },
         }
       );
-      return convertArrayToPaginatedResponse(response.data);
+      return {
+        data: response.data.values || [],
+        pagination: {
+          page: response.data.page,
+          per_page: response.data.pageSize,
+          total: response.data.resultTotal,
+          total_pages: response.data.pageCount,
+        },
+        success: true,
+      };
     } catch (error) {
       console.error('Failed to get users by role:', error);
       return {
