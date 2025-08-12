@@ -47,12 +47,15 @@ export {
   useRebootVM,
   useSuspendVM,
   useResetVM,
-  useBulkPowerOnVMs,
-  useBulkPowerOffVMs,
-  useBulkRebootVMs,
-  useBulkSuspendVMs,
-  useBulkResetVMs,
 } from './useVMs';
+
+export {
+  useVApps,
+  useVApp,
+  useVAppsByVDC,
+  useVAppsByVDCId,
+  useDeleteVApp,
+} from './useVApps';
 
 // Export CloudAPI VM hooks
 export {
@@ -64,13 +67,13 @@ export {
   useVMDetails,
   useVMHardware,
   useCloudAPIVMs,
-  useVApps,
+  useVApps as useCloudAPIVApps,
   usePowerOnVM as useCloudAPIPowerOnVM,
   usePowerOffVM as useCloudAPIPowerOffVM,
   useRebootVM as useCloudAPIRebootVM,
   useSuspendVM as useCloudAPISuspendVM,
   useResetVM as useCloudAPIResetVM,
-  useDeleteVApp,
+  useDeleteVApp as useCloudAPIDeleteVApp,
   useDeleteVM as useCloudAPIDeleteVM,
 } from './useCloudAPIVMs';
 

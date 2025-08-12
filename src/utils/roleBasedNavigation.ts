@@ -73,7 +73,7 @@ export const getNavigationForRole = (
       },
       {
         id: 'vms',
-        label: 'All Virtual Machines',
+        label: 'Virtual Applications',
         to: '/vms',
         icon: VirtualMachineIcon,
       },
@@ -105,7 +105,7 @@ export const getNavigationForRole = (
       },
       {
         id: 'vms',
-        label: 'Virtual Machines',
+        label: 'Virtual Applications',
         to: '/vms',
         icon: VirtualMachineIcon,
       },
