@@ -85,7 +85,7 @@ export function sanitizeErrorForUser(error: unknown): string {
   // Remove PII and sensitive information patterns
   // Email addresses
   message = message.replace(
-    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/gi,
     '[EMAIL]'
   );
 
