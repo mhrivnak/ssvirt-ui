@@ -1096,7 +1096,9 @@ const VMs: React.FC = () => {
               <SplitItem>
                 <Button
                   variant="link"
-                  onClick={() => setDeleteConfirmation({ isOpen: false, vApp: null })}
+                  onClick={() =>
+                    setDeleteConfirmation({ isOpen: false, vApp: null })
+                  }
                   isDisabled={deleteVAppMutation.isPending}
                 >
                   Cancel
