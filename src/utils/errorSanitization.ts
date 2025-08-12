@@ -49,3 +49,4 @@ export function sanitizeErrorForUser(error: unknown): string {
  * Alias for sanitizeErrorForUser for backward compatibility
  */
 export const sanitizeErrorMessage = sanitizeErrorForUser;
+
