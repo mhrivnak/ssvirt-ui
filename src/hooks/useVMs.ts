@@ -1,102 +1,112 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
 import { QUERY_KEYS } from '../types';
+import { transformVMData } from '../utils/vmTransformers';
 import type {
   VMQueryParams,
   CreateVMRequest,
   UpdateVMRequest,
-  VCloudPaginatedResponse,
-  VMCloudAPI,
   PaginatedResponse,
   VM,
 } from '../types';
 
 /**
- * Transform CloudAPI VM data to legacy format for backward compatibility
- */
-const transformVMData = (cloudApiVM: VMCloudAPI): VM => {
-  return {
-    id: cloudApiVM.id,
-    name: cloudApiVM.name,
-    vapp_id: cloudApiVM.vapp?.id || '',
-    vapp_name: cloudApiVM.vapp?.name || '',
-    vm_name: cloudApiVM.name,
-    namespace: cloudApiVM.org?.name || '',
-    status: cloudApiVM.status,
-    cpu_count:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 3
-      )?.virtualQuantity || 1,
-    memory_mb:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 4
-      )?.virtualQuantity || 1024,
-    created_at: cloudApiVM.createdDate,
-    updated_at: cloudApiVM.lastModifiedDate,
-    vdc_id: cloudApiVM.vdc?.id || '',
-    vdc_name: cloudApiVM.vdc?.name || '',
-    org_id: cloudApiVM.org?.id || '',
-    org_name: cloudApiVM.org?.name || '',
-  };
-};
-
-/**
- * Transform CloudAPI paginated response to legacy format
- */
-const transformPaginatedResponse = (
-  cloudApiResponse: VCloudPaginatedResponse<VMCloudAPI>
-): PaginatedResponse<VM> => {
-  return {
-    success: true,
-    data: cloudApiResponse.values.map(transformVMData),
-    pagination: {
-      page: cloudApiResponse.page,
-      per_page: cloudApiResponse.pageSize,
-      total_pages: cloudApiResponse.pageCount,
-      total: cloudApiResponse.resultTotal,
-    },
-  };
-};
-
-/**
- * Hook to fetch all VMs
+ * Hook to fetch all VMs with client-side filtering and pagination
  */
 export const useVMs = (params?: VMQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.vms, params],
     queryFn: async () => {
       const cloudApiResponse = await VMService.getVMs();
-      return transformPaginatedResponse(cloudApiResponse);
+      let vms = cloudApiResponse.values.map(transformVMData);
+
+      // Apply client-side filtering
+      if (params?.vm_status) {
+        vms = vms.filter((vm) => vm.status === params.vm_status);
+      }
+      if (params?.vdc_id) {
+        vms = vms.filter((vm) => vm.vdc_id === params.vdc_id);
+      }
+      if (params?.search) {
+        const searchLower = params.search.toLowerCase();
+        vms = vms.filter(
+          (vm) =>
+            vm.name.toLowerCase().includes(searchLower) ||
+            vm.vapp_name.toLowerCase().includes(searchLower) ||
+            vm.namespace.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Apply client-side pagination
+      const page = params?.page || 1;
+      const per_page = params?.per_page || 20;
+      const total = vms.length;
+      const total_pages = Math.ceil(total / per_page);
+      const start = (page - 1) * per_page;
+      const end = start + per_page;
+      const paginatedVMs = vms.slice(start, end);
+
+      return {
+        success: true,
+        data: paginatedVMs,
+        pagination: {
+          page,
+          per_page,
+          total,
+          total_pages,
+        },
+      } as PaginatedResponse<VM>;
     },
     enabled: true,
   });
 };
 
 /**
- * Hook to fetch VMs by VDC - CloudAPI doesn't support VDC-specific filtering
- * This is implemented by filtering the main VM list
+ * Hook to fetch VMs by VDC with client-side filtering and pagination
  */
 export const useVMsByVDC = (vdcId: string, params?: VMQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.vmsByVdc(vdcId), params],
     queryFn: async () => {
       const cloudApiResponse = await VMService.getVMs();
-      const transformedResponse = transformPaginatedResponse(cloudApiResponse);
+      let vms = cloudApiResponse.values.map(transformVMData);
+
       // Filter by VDC ID
-      const filteredVMs = transformedResponse.data.filter(
-        (vm) => vm.vdc_id === vdcId
-      );
+      vms = vms.filter((vm) => vm.vdc_id === vdcId);
+
+      // Apply additional client-side filtering
+      if (params?.vm_status) {
+        vms = vms.filter((vm) => vm.status === params.vm_status);
+      }
+      if (params?.search) {
+        const searchLower = params.search.toLowerCase();
+        vms = vms.filter(
+          (vm) =>
+            vm.name.toLowerCase().includes(searchLower) ||
+            vm.vapp_name.toLowerCase().includes(searchLower) ||
+            vm.namespace.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Apply client-side pagination
+      const page = params?.page || 1;
+      const per_page = params?.per_page || 20;
+      const total = vms.length;
+      const total_pages = Math.ceil(total / per_page);
+      const start = (page - 1) * per_page;
+      const end = start + per_page;
+      const paginatedVMs = vms.slice(start, end);
+
       return {
-        ...transformedResponse,
-        data: filteredVMs,
+        success: true,
+        data: paginatedVMs,
         pagination: {
-          ...transformedResponse.pagination,
-          total: filteredVMs.length,
-          total_pages: Math.ceil(
-            filteredVMs.length / transformedResponse.pagination.per_page
-          ),
+          page,
+          per_page,
+          total,
+          total_pages,
         },
-      };
+      } as PaginatedResponse<VM>;
     },
     enabled: !!vdcId,
   });

@@ -52,37 +52,9 @@ import {
 } from '@patternfly/react-icons';
 import { useVApp, usePowerOperationTracking } from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
-import type { VM, VMStatus, VMCloudAPI } from '../../types';
+import { transformVMData } from '../../utils/vmTransformers';
+import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
-
-/**
- * Transform CloudAPI VM data to legacy format for backward compatibility
- */
-const transformVMData = (cloudApiVM: VMCloudAPI): VM => {
-  return {
-    id: cloudApiVM.id,
-    name: cloudApiVM.name,
-    vapp_id: cloudApiVM.vapp?.id || '',
-    vapp_name: cloudApiVM.vapp?.name || '',
-    vm_name: cloudApiVM.name,
-    namespace: cloudApiVM.org?.name || '',
-    status: cloudApiVM.status,
-    cpu_count:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 3
-      )?.virtualQuantity || 1,
-    memory_mb:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 4
-      )?.virtualQuantity || 1024,
-    created_at: cloudApiVM.createdDate,
-    updated_at: cloudApiVM.lastModifiedDate,
-    vdc_id: cloudApiVM.vdc?.id || '',
-    vdc_name: cloudApiVM.vdc?.name || '',
-    org_id: cloudApiVM.org?.id || '',
-    org_name: cloudApiVM.org?.name || '',
-  };
-};
 
 const VAppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -156,6 +128,7 @@ const VAppDetail: React.FC = () => {
   }
 
   if (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return (
       <PageSection>
         <Alert
@@ -163,7 +136,7 @@ const VAppDetail: React.FC = () => {
           title="Error loading vApp"
           isInline
         >
-          {error.message}
+          {errorMessage}
         </Alert>
       </PageSection>
     );
@@ -245,29 +218,34 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>VDC</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <Link
-                          to={ROUTES.VDC_DETAIL.replace(
-                            ':id',
-                            vApp.vdc?.id || ''
-                          )}
-                          className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                        >
-                          {vApp.vdc?.name || 'Unknown'}
-                        </Link>
+                        {vApp.vdc?.id ? (
+                          <Link
+                            to={ROUTES.VDC_DETAIL.replace(':id', vApp.vdc.id)}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {vApp.vdc.name || 'Unknown'}
+                          </Link>
+                        ) : (
+                          vApp.vdc?.name || 'Unknown'
+                        )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Organization</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <Link
-                          to={ROUTES.ORGANIZATION_DETAIL.replace(
-                            ':id',
-                            vApp.org?.id || ''
-                          )}
-                          className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                        >
-                          {vApp.org?.name || 'Unknown'}
-                        </Link>
+                        {vApp.org?.id ? (
+                          <Link
+                            to={ROUTES.ORGANIZATION_DETAIL.replace(
+                              ':id',
+                              vApp.org.id
+                            )}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {vApp.org.name || 'Unknown'}
+                          </Link>
+                        ) : (
+                          vApp.org?.name || 'Unknown'
+                        )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                   </DescriptionList>
