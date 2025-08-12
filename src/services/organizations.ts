@@ -32,12 +32,12 @@ export class OrganizationService {
 
     // Handle VCloudPaginatedResponse format
     return {
-      data: response.data.values || [],
+      data: response.data.values ?? [],
       pagination: {
-        page: response.data.page,
-        per_page: response.data.pageSize,
-        total: response.data.resultTotal,
-        total_pages: response.data.pageCount,
+        page: response.data.page ?? 0,
+        per_page: response.data.pageSize ?? 0,
+        total: response.data.resultTotal ?? 0,
+        total_pages: response.data.pageCount ?? 0,
       },
       success: true,
     };
@@ -138,17 +138,17 @@ export class OrganizationService {
       VCloudPaginatedResponse<OrganizationUser>
     >(API_ENDPOINTS.CLOUDAPI.USERS, {
       params: {
-        filter: `orgEntityRef.id==${id}`,
+        filter: `orgEntityRef.id=="${id}"`,
       },
     });
     // Handle VCloudPaginatedResponse format
     return {
-      data: response.data.values || [],
+      data: response.data.values ?? [],
       pagination: {
-        page: response.data.page,
-        per_page: response.data.pageSize,
-        total: response.data.resultTotal,
-        total_pages: response.data.pageCount,
+        page: response.data.page ?? 0,
+        per_page: response.data.pageSize ?? 0,
+        total: response.data.resultTotal ?? 0,
+        total_pages: response.data.pageCount ?? 0,
       },
       success: true,
     };

@@ -23,7 +23,7 @@ export const useUsers = (params?: UserQueryParams) => {
  */
 export const useUser = (id: string) => {
   return useQuery({
-    queryKey: [...QUERY_KEYS.users, id],
+    queryKey: QUERY_KEYS.user(id),
     queryFn: () => UserService.getUser(id),
     enabled: !!id,
   });
@@ -67,7 +67,7 @@ export const useUpdateUser = () => {
       // Invalidate users queries and specific user query
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
       queryClient.invalidateQueries({
-        queryKey: [...QUERY_KEYS.users, variables.id],
+        queryKey: QUERY_KEYS.user(variables.id),
       });
     },
   });
@@ -101,7 +101,7 @@ export const useToggleUserStatus = () => {
       // Invalidate users queries and specific user query
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
       queryClient.invalidateQueries({
-        queryKey: [...QUERY_KEYS.users, variables.id],
+        queryKey: QUERY_KEYS.user(variables.id),
       });
     },
   });
@@ -204,7 +204,15 @@ export const useBulkUpdateUserStatus = () => {
       results.forEach((result, index) => {
         const userId = userIds[index];
         if (result.status === 'fulfilled') {
-          successes.push(userId);
+          // Check if the API response indicates success
+          if (result.value?.success !== false) {
+            successes.push(userId);
+          } else {
+            failures.push({
+              id: userId,
+              error: result.value?.error || 'Operation failed',
+            });
+          }
         } else {
           failures.push({
             id: userId,
@@ -246,11 +254,20 @@ export const useBulkDeleteUsers = () => {
       const resultArray = results.map((result, index) => {
         const userId = userIds[index];
         if (result.status === 'fulfilled') {
-          return {
-            id: userId,
-            status: 'fulfilled' as const,
-            value: result.value,
-          };
+          // Check if API response indicates success
+          if (result.value?.success !== false) {
+            return {
+              id: userId,
+              status: 'fulfilled' as const,
+              value: result.value,
+            };
+          } else {
+            return {
+              id: userId,
+              status: 'rejected' as const,
+              reason: result.value?.message || 'Operation failed',
+            };
+          }
         } else {
           return {
             id: userId,
