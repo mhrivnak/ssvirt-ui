@@ -87,7 +87,9 @@ const OrganizationDetail: React.FC = () => {
   // For system admins: use admin API with org ID
   // For regular users: use public API (organization-scoped)
   const isSystemAdmin = userPermissions?.canManageSystem && !!id;
-  const { data: adminVdcsResponse } = useVDCs(id || '', undefined);
+  const { data: adminVdcsResponse } = useVDCs(id || '', undefined, {
+    enabled: isSystemAdmin,
+  });
   const { data: publicVdcsResponse } = useOrganizationVDCs(
     undefined,
     !isSystemAdmin

@@ -29,7 +29,8 @@ const isPermissionError = (error: unknown): boolean => {
  */
 export const useVDCs = (
   orgIdOrParams?: string | VDCApiQueryParams,
-  adminParams?: VDCQueryParams
+  adminParams?: VDCQueryParams,
+  options?: { enabled?: boolean }
 ) => {
   const { data: userPermissions } = useUserPermissions();
 
@@ -62,6 +63,7 @@ export const useVDCs = (
       }
     },
     enabled:
+      (options?.enabled ?? true) &&
       userPermissions?.canViewVDCs &&
       (userPermissions?.canManageSystem ? !!orgId : true),
     staleTime: 5 * 60 * 1000, // 5 minutes

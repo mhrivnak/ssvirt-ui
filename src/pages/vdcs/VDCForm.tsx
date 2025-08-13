@@ -62,7 +62,7 @@ const VDCForm: React.FC = () => {
       },
     },
     providerVdc: {
-      id: 'urn:vcloud:providervdc:placeholder-id', // Placeholder - would be populated from available provider VDCs
+      id: '',
     },
     nicQuota: 100,
     networkQuota: 50,
@@ -76,20 +76,25 @@ const VDCForm: React.FC = () => {
 
   // Load existing VDC data for editing
   useEffect(() => {
-    if (isEditing && existingVDC) {
-      setFormData({
-        name: existingVDC.name,
-        description: existingVDC.description || '',
-        allocationModel: existingVDC.allocationModel,
-        computeCapacity: existingVDC.computeCapacity,
-        providerVdc: existingVDC.providerVdc,
-        nicQuota: existingVDC.nicQuota,
-        networkQuota: existingVDC.networkQuota,
-        vdcStorageProfiles: existingVDC.vdcStorageProfiles,
-        isThinProvision: existingVDC.isThinProvision,
-        isEnabled: existingVDC.isEnabled,
-      });
+    if (!isEditing || !existingVDC) {
+      return;
     }
+
+    setFormData({
+      name: existingVDC.name || '',
+      description: existingVDC.description || '',
+      allocationModel: existingVDC.allocationModel || 'PayAsYouGo',
+      computeCapacity: existingVDC.computeCapacity || {
+        cpu: { allocated: 1000, limit: 10000, units: 'MHz' },
+        memory: { allocated: 1024, limit: 10240, units: 'MB' },
+      },
+      providerVdc: existingVDC.providerVdc || { id: '' },
+      nicQuota: existingVDC.nicQuota || 100,
+      networkQuota: existingVDC.networkQuota || 50,
+      vdcStorageProfiles: existingVDC.vdcStorageProfiles || [],
+      isThinProvision: existingVDC.isThinProvision ?? true,
+      isEnabled: existingVDC.isEnabled ?? true,
+    });
   }, [isEditing, existingVDC]);
 
   // For creation, organization ID is required
@@ -125,7 +130,7 @@ const VDCForm: React.FC = () => {
       newErrors.name = 'VDC name is required';
     }
 
-    if (!formData.providerVdc.id) {
+    if (!formData.providerVdc?.id || formData.providerVdc.id.trim() === '') {
       newErrors.providerVdc = 'Provider VDC selection is required';
     }
 
@@ -158,8 +163,16 @@ const VDCForm: React.FC = () => {
 
     try {
       if (isEditing) {
+        if (!organizationId) {
+          console.error('Organization ID is required for VDC updates');
+          setErrors({
+            organizationId:
+              'Organization context is missing. Cannot update VDC.',
+          });
+          return;
+        }
         await updateVDCMutation.mutateAsync({
-          orgId: organizationId!,
+          orgId: organizationId,
           vdcId: vdcId!,
           data: formData,
         });
@@ -171,7 +184,11 @@ const VDCForm: React.FC = () => {
       }
 
       // Navigate back to organization detail page where VDCs are displayed
-      navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId!));
+      if (organizationId) {
+        navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId));
+      } else {
+        navigate(ROUTES.VDCS);
+      }
     } catch (error) {
       console.error('Failed to save VDC:', error);
     } finally {
