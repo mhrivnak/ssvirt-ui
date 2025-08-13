@@ -20,7 +20,7 @@ export class VDCAdminService {
     params?: VDCAdminQueryParams
   ): Promise<VCloudPaginatedResponse<VDC>> {
     const response = await api.get<VCloudPaginatedResponse<VDC>>(
-      `/api/admin/org/${encodeURIComponent(orgId)}/vdcs`,
+      `/admin/org/${encodeURIComponent(orgId)}/vdcs`,
       { params }
     );
     return response.data;
@@ -31,7 +31,7 @@ export class VDCAdminService {
    */
   static async getVDC(orgId: string, vdcId: string): Promise<VDC> {
     const response = await api.get<VDC>(
-      `/api/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`
+      `/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`
     );
     return response.data;
   }
@@ -41,7 +41,7 @@ export class VDCAdminService {
    */
   static async createVDC(orgId: string, data: CreateVDCRequest): Promise<VDC> {
     const response = await api.post<VDC>(
-      `/api/admin/org/${encodeURIComponent(orgId)}/vdcs`,
+      `/admin/org/${encodeURIComponent(orgId)}/vdcs`,
       data
     );
     return response.data;
@@ -56,7 +56,7 @@ export class VDCAdminService {
     data: UpdateVDCRequest
   ): Promise<VDC> {
     const response = await api.put<VDC>(
-      `/api/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`,
+      `/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`,
       data
     );
     return response.data;
@@ -67,7 +67,7 @@ export class VDCAdminService {
    */
   static async deleteVDC(orgId: string, vdcId: string): Promise<void> {
     await api.delete(
-      `/api/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`
+      `/admin/org/${encodeURIComponent(orgId)}/vdcs/${encodeURIComponent(vdcId)}`
     );
   }
 }
