@@ -124,7 +124,10 @@ export const useVDC = (vdcIdOrOrgId: string, vdcId?: string) => {
 /**
  * Hook to fetch VDCs for current user's organization(s) (public API)
  */
-export const useOrganizationVDCs = (params?: VDCPublicQueryParams) => {
+export const useOrganizationVDCs = (
+  params?: VDCPublicQueryParams,
+  enabled = true
+) => {
   // Serialize params to ensure stable queryKey
   const serializedParams = useMemo(() => {
     return params ? JSON.stringify(params) : '';
@@ -133,6 +136,7 @@ export const useOrganizationVDCs = (params?: VDCPublicQueryParams) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.vdcs, 'organization', serializedParams],
     queryFn: () => VDCService.getVDCs(params),
+    enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
   });
@@ -148,9 +152,14 @@ export const useCreateVDC = () => {
     mutationFn: ({ orgId, data }: { orgId: string; data: CreateVDCRequest }) =>
       VDCService.createVDC(orgId, data),
     onSuccess: (_, variables) => {
-      // Invalidate VDCs list for the organization
+      // Invalidate VDCs list for the organization (admin API)
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.vdcsByOrg(variables.orgId),
+      });
+
+      // Also invalidate organization VDCs list (public API) to ensure organization detail page refreshes
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEYS.vdcs, 'organization'],
       });
     },
     onError: (error) => {
@@ -179,9 +188,14 @@ export const useUpdateVDC = () => {
       // Update the specific VDC in cache
       queryClient.setQueryData(QUERY_KEYS.vdc(variables.vdcId), response);
 
-      // Invalidate VDCs list for the organization
+      // Invalidate VDCs list for the organization (admin API)
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.vdcsByOrg(variables.orgId),
+      });
+
+      // Also invalidate organization VDCs list (public API) to ensure organization detail page refreshes
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEYS.vdcs, 'organization'],
       });
     },
     onError: (error) => {
@@ -203,9 +217,14 @@ export const useDeleteVDC = () => {
       // Remove from cache
       queryClient.removeQueries({ queryKey: QUERY_KEYS.vdc(variables.vdcId) });
 
-      // Invalidate VDCs list for the organization
+      // Invalidate VDCs list for the organization (admin API)
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.vdcsByOrg(variables.orgId),
+      });
+
+      // Also invalidate organization VDCs list (public API) to ensure organization detail page refreshes
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEYS.vdcs, 'organization'],
       });
 
       // Invalidate VMs that might be associated with this VDC

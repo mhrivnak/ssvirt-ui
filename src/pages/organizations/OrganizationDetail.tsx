@@ -55,6 +55,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   useOrganization,
   useToggleOrganizationStatus,
+  useVDCs,
   useOrganizationVDCs,
   useCatalogs,
   useUserPermissions,
@@ -82,8 +83,18 @@ const OrganizationDetail: React.FC = () => {
   } = useOrganization(isCreateMode ? '' : id || '');
   const { data: userPermissions } = useUserPermissions();
 
-  // Use organization-scoped VDC access
-  const { data: vdcsResponse } = useOrganizationVDCs();
+  // Use appropriate VDC hook based on user permissions
+  // For system admins: use admin API with org ID
+  // For regular users: use public API (organization-scoped)
+  const isSystemAdmin = userPermissions?.canManageSystem && !!id;
+  const { data: adminVdcsResponse } = useVDCs(id || '', undefined);
+  const { data: publicVdcsResponse } = useOrganizationVDCs(
+    undefined,
+    !isSystemAdmin
+  );
+
+  // Choose the appropriate response based on user permissions
+  const vdcsResponse = isSystemAdmin ? adminVdcsResponse : publicVdcsResponse;
 
   // Create permission guard for organization management
   const canManageThisOrg =
@@ -417,7 +428,11 @@ const OrganizationDetail: React.FC = () => {
                     <Button
                       variant="link"
                       isInline
-                      onClick={() => navigate(`/vdcs/${vdc.id}`)}
+                      onClick={() =>
+                        navigate(`/vdcs/${vdc.id}`, {
+                          state: { organizationId: organization.id },
+                        })
+                      }
                     >
                       {vdc.name}
                     </Button>
@@ -441,11 +456,17 @@ const OrganizationDetail: React.FC = () => {
                       items={[
                         {
                           title: 'View Details',
-                          onClick: () => navigate(`/vdcs/${vdc.id}`),
+                          onClick: () =>
+                            navigate(`/vdcs/${vdc.id}`, {
+                              state: { organizationId: organization.id },
+                            }),
                         },
                         {
                           title: 'Edit',
-                          onClick: () => navigate(`/vdcs/${vdc.id}/edit`),
+                          onClick: () =>
+                            navigate(`/vdcs/${vdc.id}/edit`, {
+                              state: { organizationId: organization.id },
+                            }),
                         },
                         {
                           title: 'View VMs',

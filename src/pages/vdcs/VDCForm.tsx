@@ -35,10 +35,10 @@ const VDCForm: React.FC = () => {
   const navigate = useNavigate();
   const { capabilities } = useRole();
   const isEditing = !!vdcId;
-  
+
   // Get organization ID from navigation state or show error if missing
   const organizationId = location.state?.organizationId;
-  
+
   // Hooks for VDC operations
   const createVDCMutation = useCreateVDC();
   const updateVDCMutation = useUpdateVDC();
@@ -96,7 +96,11 @@ const VDCForm: React.FC = () => {
   if (!isEditing && !organizationId) {
     return (
       <PageSection>
-        <Alert variant={AlertVariant.danger} title="Invalid Parameters" isInline>
+        <Alert
+          variant={AlertVariant.danger}
+          title="Invalid Parameters"
+          isInline
+        >
           Organization ID is required to create a VDC.
         </Alert>
       </PageSection>
@@ -125,11 +129,17 @@ const VDCForm: React.FC = () => {
       newErrors.providerVdc = 'Provider VDC selection is required';
     }
 
-    if (formData.computeCapacity.cpu.allocated > formData.computeCapacity.cpu.limit) {
+    if (
+      formData.computeCapacity.cpu.allocated >
+      formData.computeCapacity.cpu.limit
+    ) {
       newErrors.cpuAllocated = 'CPU allocated cannot exceed CPU limit';
     }
 
-    if (formData.computeCapacity.memory.allocated > formData.computeCapacity.memory.limit) {
+    if (
+      formData.computeCapacity.memory.allocated >
+      formData.computeCapacity.memory.limit
+    ) {
       newErrors.memoryAllocated = 'Memory allocated cannot exceed memory limit';
     }
 
@@ -139,7 +149,7 @@ const VDCForm: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -148,18 +158,18 @@ const VDCForm: React.FC = () => {
 
     try {
       if (isEditing) {
-        await updateVDCMutation.mutateAsync({ 
-          orgId: organizationId!, 
-          vdcId: vdcId!, 
-          data: formData 
+        await updateVDCMutation.mutateAsync({
+          orgId: organizationId!,
+          vdcId: vdcId!,
+          data: formData,
         });
       } else {
-        await createVDCMutation.mutateAsync({ 
-          orgId: organizationId!, 
-          data: formData 
+        await createVDCMutation.mutateAsync({
+          orgId: organizationId!,
+          data: formData,
         });
       }
-      
+
       // Navigate back to organization detail page where VDCs are displayed
       navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId!));
     } catch (error) {
@@ -181,7 +191,11 @@ const VDCForm: React.FC = () => {
   if (isEditing && isLoadingVDC) {
     return (
       <PageSection>
-        <Alert variant={AlertVariant.info} title="Loading VDC details..." isInline />
+        <Alert
+          variant={AlertVariant.info}
+          title="Loading VDC details..."
+          isInline
+        />
       </PageSection>
     );
   }
@@ -199,9 +213,7 @@ const VDCForm: React.FC = () => {
               <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={ROUTES.VDCS}>
-                Virtual Data Centers
-              </Link>
+              <Link to={ROUTES.VDCS}>Virtual Data Centers</Link>
             </BreadcrumbItem>
             <BreadcrumbItem isActive>
               {isEditing ? 'Edit VDC' : 'Create VDC'}
@@ -212,7 +224,9 @@ const VDCForm: React.FC = () => {
         {/* Header */}
         <StackItem>
           <Title headingLevel="h1" size="xl">
-            {isEditing ? 'Edit Virtual Data Center' : 'Create Virtual Data Center'}
+            {isEditing
+              ? 'Edit Virtual Data Center'
+              : 'Create Virtual Data Center'}
           </Title>
         </StackItem>
 
@@ -223,9 +237,10 @@ const VDCForm: React.FC = () => {
             title="Provider VDC Required"
             isInline
           >
-            This form requires a Provider VDC to be configured. The Provider VDC field
-            is currently set to a placeholder value. In a production environment, this
-            would be populated from available Provider VDCs in your vCloud Director setup.
+            This form requires a Provider VDC to be configured. The Provider VDC
+            field is currently set to a placeholder value. In a production
+            environment, this would be populated from available Provider VDCs in
+            your vCloud Director setup.
           </Alert>
         </StackItem>
 
@@ -237,19 +252,19 @@ const VDCForm: React.FC = () => {
                 <Grid hasGutter>
                   {/* Basic Information */}
                   <GridItem span={12}>
-                    <Title headingLevel="h2" size="lg">Basic Information</Title>
+                    <Title headingLevel="h2" size="lg">
+                      Basic Information
+                    </Title>
                   </GridItem>
-                  
+
                   <GridItem span={6}>
-                    <FormGroup
-                      label="VDC Name"
-                      fieldId="vdc-name"
-                      isRequired
-                    >
+                    <FormGroup label="VDC Name" fieldId="vdc-name" isRequired>
                       <TextInput
                         id="vdc-name"
                         value={formData.name}
-                        onChange={(_, value) => setFormData({ ...formData, name: value })}
+                        onChange={(_, value) =>
+                          setFormData({ ...formData, name: value })
+                        }
                         validated={errors.name ? 'error' : 'default'}
                         placeholder="Enter VDC name"
                       />
@@ -265,28 +280,39 @@ const VDCForm: React.FC = () => {
                       <FormSelect
                         id="allocation-model"
                         value={formData.allocationModel}
-                        onChange={(_, value) => setFormData({ 
-                          ...formData, 
-                          allocationModel: value as CreateVDCRequest['allocationModel']
-                        })}
+                        onChange={(_, value) =>
+                          setFormData({
+                            ...formData,
+                            allocationModel:
+                              value as CreateVDCRequest['allocationModel'],
+                          })
+                        }
                       >
-                        <FormSelectOption value="PayAsYouGo" label="Pay As You Go" />
-                        <FormSelectOption value="AllocationPool" label="Allocation Pool" />
-                        <FormSelectOption value="ReservationPool" label="Reservation Pool" />
+                        <FormSelectOption
+                          value="PayAsYouGo"
+                          label="Pay As You Go"
+                        />
+                        <FormSelectOption
+                          value="AllocationPool"
+                          label="Allocation Pool"
+                        />
+                        <FormSelectOption
+                          value="ReservationPool"
+                          label="Reservation Pool"
+                        />
                         <FormSelectOption value="Flex" label="Flex" />
                       </FormSelect>
                     </FormGroup>
                   </GridItem>
 
                   <GridItem span={12}>
-                    <FormGroup
-                      label="Description"
-                      fieldId="vdc-description"
-                    >
+                    <FormGroup label="Description" fieldId="vdc-description">
                       <TextArea
                         id="vdc-description"
                         value={formData.description}
-                        onChange={(_, value) => setFormData({ ...formData, description: value })}
+                        onChange={(_, value) =>
+                          setFormData({ ...formData, description: value })
+                        }
                         placeholder="Enter VDC description (optional)"
                         rows={3}
                       />
@@ -295,7 +321,9 @@ const VDCForm: React.FC = () => {
 
                   {/* Compute Capacity */}
                   <GridItem span={12}>
-                    <Title headingLevel="h2" size="lg">Compute Capacity</Title>
+                    <Title headingLevel="h2" size="lg">
+                      Compute Capacity
+                    </Title>
                   </GridItem>
 
                   <GridItem span={6}>
@@ -306,37 +334,48 @@ const VDCForm: React.FC = () => {
                       <NumberInput
                         id="cpu-allocated"
                         value={formData.computeCapacity.cpu.allocated}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            cpu: {
-                              ...formData.computeCapacity.cpu,
-                              allocated: Math.max(0, formData.computeCapacity.cpu.allocated - 100)
-                            }
-                          }
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            cpu: {
-                              ...formData.computeCapacity.cpu,
-                              allocated: formData.computeCapacity.cpu.allocated + 100
-                            }
-                          }
-                        })}
-                        onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 0;
+                        onMinus={() =>
                           setFormData({
                             ...formData,
                             computeCapacity: {
                               ...formData.computeCapacity,
                               cpu: {
                                 ...formData.computeCapacity.cpu,
-                                allocated: value
-                              }
-                            }
+                                allocated: Math.max(
+                                  0,
+                                  formData.computeCapacity.cpu.allocated - 100
+                                ),
+                              },
+                            },
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              cpu: {
+                                ...formData.computeCapacity.cpu,
+                                allocated:
+                                  formData.computeCapacity.cpu.allocated + 100,
+                              },
+                            },
+                          })
+                        }
+                        onChange={(event) => {
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 0;
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              cpu: {
+                                ...formData.computeCapacity.cpu,
+                                allocated: value,
+                              },
+                            },
                           });
                         }}
                         min={0}
@@ -346,44 +385,51 @@ const VDCForm: React.FC = () => {
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="CPU Limit (MHz)"
-                      fieldId="cpu-limit"
-                    >
+                    <FormGroup label="CPU Limit (MHz)" fieldId="cpu-limit">
                       <NumberInput
                         id="cpu-limit"
                         value={formData.computeCapacity.cpu.limit}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            cpu: {
-                              ...formData.computeCapacity.cpu,
-                              limit: Math.max(0, formData.computeCapacity.cpu.limit - 100)
-                            }
-                          }
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            cpu: {
-                              ...formData.computeCapacity.cpu,
-                              limit: formData.computeCapacity.cpu.limit + 100
-                            }
-                          }
-                        })}
-                        onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 0;
+                        onMinus={() =>
                           setFormData({
                             ...formData,
                             computeCapacity: {
                               ...formData.computeCapacity,
                               cpu: {
                                 ...formData.computeCapacity.cpu,
-                                limit: value
-                              }
-                            }
+                                limit: Math.max(
+                                  0,
+                                  formData.computeCapacity.cpu.limit - 100
+                                ),
+                              },
+                            },
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              cpu: {
+                                ...formData.computeCapacity.cpu,
+                                limit: formData.computeCapacity.cpu.limit + 100,
+                              },
+                            },
+                          })
+                        }
+                        onChange={(event) => {
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 0;
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              cpu: {
+                                ...formData.computeCapacity.cpu,
+                                limit: value,
+                              },
+                            },
                           });
                         }}
                         min={0}
@@ -400,37 +446,50 @@ const VDCForm: React.FC = () => {
                       <NumberInput
                         id="memory-allocated"
                         value={formData.computeCapacity.memory.allocated}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            memory: {
-                              ...formData.computeCapacity.memory,
-                              allocated: Math.max(0, formData.computeCapacity.memory.allocated - 512)
-                            }
-                          }
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            memory: {
-                              ...formData.computeCapacity.memory,
-                              allocated: formData.computeCapacity.memory.allocated + 512
-                            }
-                          }
-                        })}
-                        onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 0;
+                        onMinus={() =>
                           setFormData({
                             ...formData,
                             computeCapacity: {
                               ...formData.computeCapacity,
                               memory: {
                                 ...formData.computeCapacity.memory,
-                                allocated: value
-                              }
-                            }
+                                allocated: Math.max(
+                                  0,
+                                  formData.computeCapacity.memory.allocated -
+                                    512
+                                ),
+                              },
+                            },
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              memory: {
+                                ...formData.computeCapacity.memory,
+                                allocated:
+                                  formData.computeCapacity.memory.allocated +
+                                  512,
+                              },
+                            },
+                          })
+                        }
+                        onChange={(event) => {
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 0;
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              memory: {
+                                ...formData.computeCapacity.memory,
+                                allocated: value,
+                              },
+                            },
                           });
                         }}
                         min={0}
@@ -440,44 +499,52 @@ const VDCForm: React.FC = () => {
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="Memory Limit (MB)"
-                      fieldId="memory-limit"
-                    >
+                    <FormGroup label="Memory Limit (MB)" fieldId="memory-limit">
                       <NumberInput
                         id="memory-limit"
                         value={formData.computeCapacity.memory.limit}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            memory: {
-                              ...formData.computeCapacity.memory,
-                              limit: Math.max(0, formData.computeCapacity.memory.limit - 512)
-                            }
-                          }
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          computeCapacity: {
-                            ...formData.computeCapacity,
-                            memory: {
-                              ...formData.computeCapacity.memory,
-                              limit: formData.computeCapacity.memory.limit + 512
-                            }
-                          }
-                        })}
-                        onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 0;
+                        onMinus={() =>
                           setFormData({
                             ...formData,
                             computeCapacity: {
                               ...formData.computeCapacity,
                               memory: {
                                 ...formData.computeCapacity.memory,
-                                limit: value
-                              }
-                            }
+                                limit: Math.max(
+                                  0,
+                                  formData.computeCapacity.memory.limit - 512
+                                ),
+                              },
+                            },
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              memory: {
+                                ...formData.computeCapacity.memory,
+                                limit:
+                                  formData.computeCapacity.memory.limit + 512,
+                              },
+                            },
+                          })
+                        }
+                        onChange={(event) => {
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 0;
+                          setFormData({
+                            ...formData,
+                            computeCapacity: {
+                              ...formData.computeCapacity,
+                              memory: {
+                                ...formData.computeCapacity.memory,
+                                limit: value,
+                              },
+                            },
                           });
                         }}
                         min={0}
@@ -488,27 +555,36 @@ const VDCForm: React.FC = () => {
 
                   {/* Network Configuration */}
                   <GridItem span={12}>
-                    <Title headingLevel="h2" size="lg">Network Configuration</Title>
+                    <Title headingLevel="h2" size="lg">
+                      Network Configuration
+                    </Title>
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="NIC Quota"
-                      fieldId="nic-quota"
-                    >
+                    <FormGroup label="NIC Quota" fieldId="nic-quota">
                       <NumberInput
                         id="nic-quota"
                         value={formData.nicQuota}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          nicQuota: Math.max(1, (formData.nicQuota || 100) - 10)
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          nicQuota: (formData.nicQuota || 100) + 10
-                        })}
+                        onMinus={() =>
+                          setFormData({
+                            ...formData,
+                            nicQuota: Math.max(
+                              1,
+                              (formData.nicQuota || 100) - 10
+                            ),
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            nicQuota: (formData.nicQuota || 100) + 10,
+                          })
+                        }
                         onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 100;
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 100;
                           setFormData({ ...formData, nicQuota: value });
                         }}
                         min={1}
@@ -518,23 +594,30 @@ const VDCForm: React.FC = () => {
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="Network Quota"
-                      fieldId="network-quota"
-                    >
+                    <FormGroup label="Network Quota" fieldId="network-quota">
                       <NumberInput
                         id="network-quota"
                         value={formData.networkQuota}
-                        onMinus={() => setFormData({
-                          ...formData,
-                          networkQuota: Math.max(1, (formData.networkQuota || 50) - 5)
-                        })}
-                        onPlus={() => setFormData({
-                          ...formData,
-                          networkQuota: (formData.networkQuota || 50) + 5
-                        })}
+                        onMinus={() =>
+                          setFormData({
+                            ...formData,
+                            networkQuota: Math.max(
+                              1,
+                              (formData.networkQuota || 50) - 5
+                            ),
+                          })
+                        }
+                        onPlus={() =>
+                          setFormData({
+                            ...formData,
+                            networkQuota: (formData.networkQuota || 50) + 5,
+                          })
+                        }
                         onChange={(event) => {
-                          const value = parseInt((event.target as HTMLInputElement).value) || 50;
+                          const value =
+                            parseInt(
+                              (event.target as HTMLInputElement).value
+                            ) || 50;
                           setFormData({ ...formData, networkQuota: value });
                         }}
                         min={1}
@@ -545,38 +628,38 @@ const VDCForm: React.FC = () => {
 
                   {/* Options */}
                   <GridItem span={12}>
-                    <Title headingLevel="h2" size="lg">Options</Title>
+                    <Title headingLevel="h2" size="lg">
+                      Options
+                    </Title>
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="Thin Provision"
-                      fieldId="thin-provision"
-                    >
+                    <FormGroup label="Thin Provision" fieldId="thin-provision">
                       <Switch
                         id="thin-provision"
                         isChecked={formData.isThinProvision}
-                        onChange={(_, checked) => setFormData({ 
-                          ...formData, 
-                          isThinProvision: checked 
-                        })}
+                        onChange={(_, checked) =>
+                          setFormData({
+                            ...formData,
+                            isThinProvision: checked,
+                          })
+                        }
                         label="Enabled"
                       />
                     </FormGroup>
                   </GridItem>
 
                   <GridItem span={6}>
-                    <FormGroup
-                      label="VDC Status"
-                      fieldId="vdc-enabled"
-                    >
+                    <FormGroup label="VDC Status" fieldId="vdc-enabled">
                       <Switch
                         id="vdc-enabled"
                         isChecked={formData.isEnabled}
-                        onChange={(_, checked) => setFormData({ 
-                          ...formData, 
-                          isEnabled: checked 
-                        })}
+                        onChange={(_, checked) =>
+                          setFormData({
+                            ...formData,
+                            isEnabled: checked,
+                          })
+                        }
                         label="Enabled"
                       />
                     </FormGroup>
