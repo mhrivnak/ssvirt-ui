@@ -9,14 +9,29 @@ import {
   Stack,
   StackItem,
 } from '@patternfly/react-core';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { useRole } from '../../hooks/useRole';
 import { ROUTES } from '../../utils/constants';
 
 const VDCForm: React.FC = () => {
-  const { orgId, vdcId } = useParams<{ orgId: string; vdcId?: string }>();
+  const { id: vdcId } = useParams<{ id?: string }>();
+  const location = useLocation();
   const { capabilities } = useRole();
   const isEditing = !!vdcId;
+  
+  // Get organization ID from navigation state or show error if missing
+  const organizationId = location.state?.organizationId;
+  
+  // For creation, organization ID is required
+  if (!isEditing && !organizationId) {
+    return (
+      <PageSection>
+        <Alert variant={AlertVariant.danger} title="Invalid Parameters" isInline>
+          Organization ID and VDC ID are required.
+        </Alert>
+      </PageSection>
+    );
+  }
 
   // Check if user has system admin privileges
   if (!capabilities.canManageSystem) {
@@ -42,7 +57,7 @@ const VDCForm: React.FC = () => {
               <Link to={ROUTES.ORGANIZATIONS}>Organizations</Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={ROUTES.ORGANIZATION_VDCS.replace(':id', orgId || '')}>
+              <Link to={ROUTES.VDCS}>
                 Virtual Data Centers
               </Link>
             </BreadcrumbItem>
