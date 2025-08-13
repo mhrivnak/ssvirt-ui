@@ -20,16 +20,26 @@ import {
   BreadcrumbItem,
 } from '@patternfly/react-core';
 import { NetworkIcon, EditIcon } from '@patternfly/react-icons';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useVDC, useUserPermissions } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
 
 const VDCDetail: React.FC = () => {
-  const { orgId, vdcId } = useParams<{ orgId: string; vdcId: string }>();
+  const { orgId, vdcId, id } = useParams<{
+    orgId?: string;
+    vdcId?: string;
+    id?: string;
+  }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { data: userPermissions, isLoading: isLoadingPermissions } =
     useUserPermissions();
+
+  // Get organization ID from URL params or navigation state
+  const organizationId = orgId || location.state?.organizationId;
+  // Get VDC ID from URL params - could be in 'vdcId' or 'id' depending on route
+  const vdcIdentifier = vdcId || id;
 
   // Call hooks before any early returns - use role-based API routing
   const {
@@ -37,8 +47,10 @@ const VDCDetail: React.FC = () => {
     isLoading,
     error,
   } = useVDC(
-    userPermissions?.canManageSystem ? orgId || '' : vdcId || '',
-    userPermissions?.canManageSystem ? vdcId : undefined
+    userPermissions?.canManageSystem
+      ? organizationId || ''
+      : vdcIdentifier || '',
+    userPermissions?.canManageSystem ? vdcIdentifier : undefined
   );
 
   // Show loading spinner while permissions are loading
@@ -61,10 +73,10 @@ const VDCDetail: React.FC = () => {
     );
   }
 
-  // For admin users, both orgId and vdcId are required. For regular users, only vdcId is needed
+  // For admin users, both organizationId and vdcIdentifier are required. For regular users, only vdcIdentifier is needed
   if (
-    (userPermissions?.canManageSystem && (!orgId || !vdcId)) ||
-    (!userPermissions?.canManageSystem && !vdcId)
+    (userPermissions?.canManageSystem && (!organizationId || !vdcIdentifier)) ||
+    (!userPermissions?.canManageSystem && !vdcIdentifier)
   ) {
     return (
       <PageSection>
@@ -155,9 +167,9 @@ const VDCDetail: React.FC = () => {
                 variant="primary"
                 icon={<EditIcon />}
                 onClick={() =>
-                  navigate(
-                    `${ROUTES.ORGANIZATIONS}/${orgId}/vdcs/${vdcId}/edit`
-                  )
+                  navigate(`/vdcs/${vdcIdentifier}/edit`, {
+                    state: { organizationId },
+                  })
                 }
               >
                 Edit VDC
