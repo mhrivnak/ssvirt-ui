@@ -160,8 +160,8 @@ const VDCForm: React.FC = () => {
         });
       }
       
-      // Navigate back to VDCs list on success
-      navigate(ROUTES.VDCS);
+      // Navigate back to organization detail page where VDCs are displayed
+      navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId!));
     } catch (error) {
       console.error('Failed to save VDC:', error);
     } finally {
@@ -170,7 +170,12 @@ const VDCForm: React.FC = () => {
   };
 
   const handleCancel = () => {
-    navigate(ROUTES.VDCS);
+    // Navigate back to organization detail page, or VDCS if no organization context
+    if (organizationId) {
+      navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId));
+    } else {
+      navigate(ROUTES.ORGANIZATIONS);
+    }
   };
 
   if (isEditing && isLoadingVDC) {
