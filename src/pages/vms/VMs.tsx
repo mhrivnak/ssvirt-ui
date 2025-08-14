@@ -993,7 +993,8 @@ const VMs: React.FC = () => {
               {filters.vdc_id && (
                 <li>
                   VDC:{' '}
-                  {vdcs.find((v) => v.id === filters.vdc_id)?.name || 'Unknown VDC'}
+                  {vdcs.find((v) => v.id === filters.vdc_id)?.name ||
+                    'Unknown VDC'}
                 </li>
               )}
               {!hasActiveFilters && <li>No filters applied</li>}
