@@ -56,7 +56,7 @@ Based on the [SSVirt API Reference](https://raw.githubusercontent.com/mhrivnak/s
 #### Catalog Item Operations
 - **List Items**: `GET /cloudapi/1.0.0/catalogs/{catalogUrn}/catalogItems`
   - Query Parameters: `page`, `pageSize`
-  - Response: JSON array of catalog item objects
+  - Response: VCloudPaginatedResponse containing `resultTotal` (total item count), `pageCount` (total pages), and `values` (array of catalog item objects)
 - **Item Details**: `GET /cloudapi/1.0.0/catalogs/{catalogUrn}/catalogItems/{itemId}`
   - Response: Detailed catalog item object
 

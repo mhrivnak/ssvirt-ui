@@ -29,7 +29,7 @@ const DeleteCatalogModal: React.FC<DeleteCatalogModalProps> = ({
   const [confirmationText, setConfirmationText] = useState('');
   const deleteCatalogMutation = useDeleteCatalog();
 
-  const isConfirmationValid = catalog && confirmationText === catalog.name;
+  const isConfirmationValid = !!(catalog && confirmationText === catalog.name);
 
   const handleDelete = async () => {
     if (!catalog || !isConfirmationValid) {

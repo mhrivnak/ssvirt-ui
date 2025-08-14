@@ -213,6 +213,15 @@ export const roleBasedRoutes: RouteConfig[] = [
       ROLE_NAMES.VAPP_USER,
     ],
   },
+  {
+    path: '/catalogs/:catalogId/items/:itemId',
+    component: React.lazy(() => import('../pages/catalogs/CatalogItemDetail')),
+    requiredRoles: [
+      ROLE_NAMES.SYSTEM_ADMIN,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.VAPP_USER,
+    ],
+  },
 
   // Profile (all authenticated users)
   {

@@ -235,7 +235,7 @@ const CreateCatalogModal: React.FC<CreateCatalogModalProps> = ({
               </Button>
               <Button
                 variant="primary"
-                onClick={handleSubmit}
+                type="submit"
                 isLoading={createCatalogMutation.isPending}
                 isDisabled={createCatalogMutation.isPending}
               >

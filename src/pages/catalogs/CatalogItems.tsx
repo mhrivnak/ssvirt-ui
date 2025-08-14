@@ -90,15 +90,17 @@ const CatalogItems: React.FC = () => {
   const catalogItems = catalogItemsResponse?.values || [];
   const totalItems = catalogItemsResponse?.resultTotal || 0;
 
-  const isLoading = isCatalogLoading || isItemsLoading;
-  const error = catalogError || itemsError;
-
   const handleItemSelect = (item: CatalogItem) => {
     console.log('Selected catalog item:', item);
   };
 
   const handleItemViewDetails = (item: CatalogItem) => {
-    navigate(`/catalogs/${catalogId}/items/${item.id}`);
+    navigate(
+      ROUTES.CATALOG_ITEM_DETAIL.replace(':catalogId', catalogId!).replace(
+        ':itemId',
+        item.id
+      )
+    );
   };
 
   const handleSearch = (value: string) => {
@@ -121,15 +123,16 @@ const CatalogItems: React.FC = () => {
     setPage(1);
   };
 
-  if (isLoading) {
+  // Handle catalog-level loading and errors
+  if (isCatalogLoading) {
     return (
       <PageSection>
-        <LoadingSpinner />
+        <LoadingSpinner message="Loading catalog..." />
       </PageSection>
     );
   }
 
-  if (error || !catalog) {
+  if (catalogError || !catalog) {
     return (
       <PageSection>
         <EmptyState icon={CatalogIcon}>
@@ -137,8 +140,9 @@ const CatalogItems: React.FC = () => {
             Catalog not found
           </Title>
           <EmptyStateBody>
-            The catalog you're looking for doesn't exist or you don't have
-            permission to view it.
+            {catalogError instanceof Error
+              ? catalogError.message
+              : "The catalog you're looking for doesn't exist or you don't have permission to view it."}
           </EmptyStateBody>
           <Button
             variant="primary"
@@ -335,7 +339,11 @@ const CatalogItems: React.FC = () => {
                 <StackItem>{toolbar}</StackItem>
 
                 <StackItem>
-                  {isItemsLoading ? <LoadingSpinner /> : renderCatalogItems()}
+                  {isItemsLoading ? (
+                    <LoadingSpinner message="Loading catalog items..." />
+                  ) : (
+                    renderCatalogItems()
+                  )}
                 </StackItem>
 
                 {totalItems > pageSize && (
