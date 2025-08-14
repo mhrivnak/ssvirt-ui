@@ -33,7 +33,7 @@ import {
 } from '@patternfly/react-icons';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useUser, useCreateUser, useUpdateUser } from '../../hooks/useUsers';
-import { useOrganizations } from '../../hooks';
+import { useOrganizations, useAllRoles } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import type { User, CreateUserRequest, UpdateUserRequest } from '../../types';
 
@@ -66,12 +66,6 @@ interface FormErrors {
   general?: string;
 }
 
-const AVAILABLE_ROLES = [
-  { value: 'System Administrator', label: 'System Administrator' },
-  { value: 'Organization Administrator', label: 'Organization Administrator' },
-  { value: 'vApp User', label: 'vApp User' },
-];
-
 const UserForm: React.FC<UserFormProps> = ({
   initialData,
   onCancel,
@@ -102,11 +96,43 @@ const UserForm: React.FC<UserFormProps> = ({
     isEditing && !initialData && id && id !== 'create' ? id : ''
   );
   const { data: organizationsResponse } = useOrganizations();
+  const {
+    data: rolesData,
+    isLoading: rolesLoading,
+    error: rolesError,
+  } = useAllRoles();
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
   const user = initialData || userResponse?.data;
   const organizations = organizationsResponse?.data || [];
+
+  // Fallback roles if API fails
+  const fallbackRoles = [
+    {
+      id: 'urn:vcloud:role:system-admin',
+      name: 'System Administrator',
+      description: 'Full system administration privileges',
+      bundleKey: 'role.system.admin',
+      readOnly: true,
+    },
+    {
+      id: 'urn:vcloud:role:org-admin',
+      name: 'Organization Administrator',
+      description: 'Organization administration privileges',
+      bundleKey: 'role.org.admin',
+      readOnly: true,
+    },
+    {
+      id: 'urn:vcloud:role:vapp-user',
+      name: 'vApp User',
+      description: 'Virtual application user privileges',
+      bundleKey: 'role.vapp.user',
+      readOnly: true,
+    },
+  ];
+
+  const roles = rolesData || (rolesError ? fallbackRoles : []);
 
   // Load user data for editing
   useEffect(() => {
@@ -207,10 +233,23 @@ const UserForm: React.FC<UserFormProps> = ({
       const organization = organizations.find(
         (org) => org.id === formData.organizationId
       );
-      const roleEntityRefs = formData.roles.map((roleName) => ({
-        id: roleName, // In real app, you'd map role names to IDs
-        name: roleName,
-      }));
+
+      if (!organization && formData.organizationId) {
+        throw new Error(
+          `Organization with ID '${formData.organizationId}' not found`
+        );
+      }
+
+      const roleEntityRefs = formData.roles.map((roleName) => {
+        const role = roles.find((r) => r.name === roleName);
+        if (!role) {
+          throw new Error(`Role '${roleName}' not found`);
+        }
+        return {
+          id: role.id, // Use the proper URN ID from the role data
+          name: role.name,
+        };
+      });
 
       if (isEditing && user) {
         const updateData: UpdateUserRequest = {
@@ -298,7 +337,7 @@ const UserForm: React.FC<UserFormProps> = ({
     handleInputChange('roles', newRoles);
   };
 
-  if (isLoading) {
+  if (isLoading || rolesLoading) {
     return (
       <PageSection>
         <LoadingSpinner />
@@ -594,19 +633,41 @@ const UserForm: React.FC<UserFormProps> = ({
 
                   <StackItem>
                     <FormGroup label="Roles" isRequired fieldId="roles">
+                      {rolesError && (
+                        <Alert
+                          variant={AlertVariant.warning}
+                          title="Role Loading Error"
+                          isInline
+                        >
+                          Unable to load roles from server. Using default roles.
+                        </Alert>
+                      )}
                       <Stack>
-                        {AVAILABLE_ROLES.map((role) => (
-                          <StackItem key={role.value}>
-                            <Checkbox
-                              label={role.label}
-                              id={`role-${role.value}`}
-                              isChecked={formData.roles.includes(role.value)}
-                              onChange={(_, checked) =>
-                                handleRoleChange(role.value, checked)
-                              }
-                            />
+                        {roles.length === 0 ? (
+                          <StackItem>
+                            <Alert
+                              variant={AlertVariant.info}
+                              title="No Roles Available"
+                              isInline
+                            >
+                              No roles are currently available. Please contact
+                              your administrator.
+                            </Alert>
                           </StackItem>
-                        ))}
+                        ) : (
+                          roles.map((role) => (
+                            <StackItem key={role.id}>
+                              <Checkbox
+                                label={role.name}
+                                id={`role-${role.id}`}
+                                isChecked={formData.roles.includes(role.name)}
+                                onChange={(_, checked) =>
+                                  handleRoleChange(role.name, checked)
+                                }
+                              />
+                            </StackItem>
+                          ))
+                        )}
                       </Stack>
                       {errors.roles && (
                         <HelperText>

@@ -117,17 +117,34 @@ export class UserService {
   static async createUser(data: CreateUserRequest): Promise<ApiResponse<User>> {
     try {
       // Transform data to match VMware Cloud Director API format
+      // Explicitly exclude any 'roles' field and only include expected fields
+      const {
+        username,
+        name,
+        fullName,
+        description,
+        email,
+        password,
+        roleEntityRefs,
+        orgEntityRef,
+        deployedVmQuota,
+        storedVmQuota,
+        enabled,
+      } = data;
+
       const apiData = {
-        username: data.username,
-        FullName: data.name || data.fullName || data.username, // API expects FullName (capital F) as required field
-        description: data.description,
-        email: data.email,
-        password: data.password,
-        roleEntityRefs: data.roleEntityRefs,
-        orgEntityRef: data.orgEntityRef,
-        deployedVmQuota: data.deployedVmQuota,
-        storedVmQuota: data.storedVmQuota,
-        enabled: data.enabled,
+        username,
+        FullName: name || fullName || username, // API expects FullName (capital F) as required field
+        description,
+        email,
+        password,
+        roleEntityRefs,
+        orgEntityRef,
+        // Add organizationID field if orgEntityRef is provided
+        ...(orgEntityRef ? { organizationID: orgEntityRef.id } : {}),
+        deployedVmQuota,
+        storedVmQuota,
+        enabled,
       };
 
       const response = await cloudApi.post<User>(
@@ -157,11 +174,41 @@ export class UserService {
    */
   static async updateUser(data: UpdateUserRequest): Promise<ApiResponse<User>> {
     try {
-      const { id, name, fullName, ...restData } = data;
-
       // Transform data to match VMware Cloud Director API format
+      // Explicitly exclude id and any unwanted fields, only include expected fields
+      const {
+        id,
+        username,
+        name,
+        fullName,
+        description,
+        email,
+        password,
+        roleEntityRefs,
+        orgEntityRef,
+        deployedVmQuota,
+        storedVmQuota,
+        nameInSource,
+        enabled,
+        isGroupRole,
+        providerType,
+      } = data;
+
       const apiData = {
-        ...restData,
+        username,
+        description,
+        email,
+        password,
+        roleEntityRefs,
+        orgEntityRef,
+        // Add organizationID field if orgEntityRef is provided
+        ...(orgEntityRef ? { organizationID: orgEntityRef.id } : {}),
+        deployedVmQuota,
+        storedVmQuota,
+        nameInSource,
+        enabled,
+        isGroupRole,
+        providerType,
         // Only include FullName if name or fullName is provided
         ...(name || fullName ? { FullName: name || fullName } : {}),
       };

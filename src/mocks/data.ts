@@ -9,6 +9,7 @@ import type {
   DashboardStats,
   RecentActivity,
   User,
+  Role,
   VMStatus,
   VAppStatus,
   UserPermissions,
@@ -22,7 +23,7 @@ export const generateMockUser = (): User => ({
   description: 'Mock User',
   email: 'john.doe@example.com',
   roleEntityRefs: [
-    { name: 'Organization Administrator', id: 'urn:vcloud:role:1' },
+    { name: 'Organization Administrator', id: 'urn:vcloud:role:org-admin' },
   ],
   orgEntityRef: { name: 'Organization', id: 'urn:vcloud:org:1' },
   deployedVmQuota: 10,
@@ -34,6 +35,30 @@ export const generateMockUser = (): User => ({
   locked: false,
   stranded: false,
 });
+
+export const generateMockRoles = (): Role[] => [
+  {
+    id: 'urn:vcloud:role:system-admin',
+    name: 'System Administrator',
+    description: 'Full system administration privileges',
+    bundleKey: 'role.system.admin',
+    readOnly: true,
+  },
+  {
+    id: 'urn:vcloud:role:org-admin',
+    name: 'Organization Administrator',
+    description: 'Organization administration privileges',
+    bundleKey: 'role.org.admin',
+    readOnly: true,
+  },
+  {
+    id: 'urn:vcloud:role:vapp-user',
+    name: 'vApp User',
+    description: 'Virtual application user privileges',
+    bundleKey: 'role.vapp.user',
+    readOnly: true,
+  },
+];
 
 export const generateMockOrganizations = (): Organization[] => [
   {
