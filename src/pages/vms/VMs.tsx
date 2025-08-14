@@ -259,7 +259,7 @@ const VMs: React.FC = () => {
       search: preset.filters.search || '',
       status: preset.filters.vm_status || '',
       org_id: preset.filters.organization_id || '',
-      vdc_id: '', // Reset VDC selection when applying preset
+      vdc_id: preset.filters.vdc_id || '',
     });
     setIsPresetDropdownOpen(false);
   };
@@ -274,6 +274,7 @@ const VMs: React.FC = () => {
         search: filters.search || undefined,
         vm_status: filters.status || undefined,
         organization_id: filters.org_id || undefined,
+        vdc_id: filters.vdc_id || undefined,
       },
     };
 
@@ -987,6 +988,12 @@ const VMs: React.FC = () => {
                     organizations.find((o) => o.id === filters.org_id)
                       ?.displayName
                   }
+                </li>
+              )}
+              {filters.vdc_id && (
+                <li>
+                  VDC:{' '}
+                  {vdcs.find((v) => v.id === filters.vdc_id)?.name || 'Unknown VDC'}
                 </li>
               )}
               {!hasActiveFilters && <li>No filters applied</li>}
