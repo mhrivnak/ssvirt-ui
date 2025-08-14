@@ -1,4 +1,5 @@
-import { api } from '../api';
+import { cloudApi } from '../api';
+import { API_ENDPOINTS } from '../../utils/constants';
 import type {
   VDC,
   VDCPublicQueryParams,
@@ -17,8 +18,8 @@ export class VDCPublicService {
   static async getVDCs(
     params?: VDCPublicQueryParams
   ): Promise<VCloudPaginatedResponse<VDC>> {
-    const response = await api.get<VCloudPaginatedResponse<VDC>>(
-      '/cloudapi/1.0.0/vdcs',
+    const response = await cloudApi.get<VCloudPaginatedResponse<VDC>>(
+      API_ENDPOINTS.CLOUDAPI.VDCS,
       { params }
     );
     return response.data;
@@ -29,8 +30,8 @@ export class VDCPublicService {
    * GET /cloudapi/1.0.0/vdcs/{vdc_urn}
    */
   static async getVDC(vdcId: string): Promise<VDC> {
-    const response = await api.get<VDC>(
-      `/cloudapi/1.0.0/vdcs/${encodeURIComponent(vdcId)}`
+    const response = await cloudApi.get<VDC>(
+      API_ENDPOINTS.CLOUDAPI.VDC_BY_ID(vdcId)
     );
     return response.data;
   }

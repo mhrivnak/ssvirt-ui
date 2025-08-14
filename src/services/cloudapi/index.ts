@@ -6,3 +6,4 @@ export { VDCService } from './VDCService';
 export { VDCAdminService } from './VDCAdminService';
 export { VDCPublicService } from './VDCPublicService';
 export { CatalogService } from './CatalogService';
+export { VAppService } from './VAppService';

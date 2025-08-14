@@ -13,13 +13,18 @@ import {
   Flex,
   FlexItem,
 } from '@patternfly/react-core';
-import { InfoCircleIcon, PlayIcon } from '@patternfly/react-icons';
+import {
+  InfoCircleIcon,
+  PlayIcon,
+  PlusCircleIcon,
+} from '@patternfly/react-icons';
 import type { CatalogItem } from '../../types';
 
 interface CatalogItemCardProps {
   catalogItem: CatalogItem;
   onSelect?: (item: CatalogItem) => void;
   onViewDetails?: (item: CatalogItem) => void;
+  onCreateVApp?: (item: CatalogItem) => void;
   showActions?: boolean;
 }
 
@@ -27,6 +32,7 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
   catalogItem,
   onSelect,
   onViewDetails,
+  onCreateVApp,
   showActions = true,
 }) => {
   const formatDate = (dateString: string | undefined) => {
@@ -144,10 +150,22 @@ const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
                 </Button>
               </SplitItem>
             )}
-            {onSelect && (
+            {onCreateVApp && (
               <SplitItem>
                 <Button
                   variant="primary"
+                  size="sm"
+                  icon={<PlusCircleIcon />}
+                  onClick={() => onCreateVApp(catalogItem)}
+                >
+                  Create vApp
+                </Button>
+              </SplitItem>
+            )}
+            {onSelect && (
+              <SplitItem>
+                <Button
+                  variant="secondary"
                   size="sm"
                   icon={<PlayIcon />}
                   onClick={() => onSelect(catalogItem)}

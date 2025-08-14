@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { AxiosError } from 'axios';
 import { VDCService } from '../services';
+import { VDCPublicService } from '../services/cloudapi/VDCPublicService';
 import { QUERY_KEYS } from '../types';
 import { useUserPermissions } from './usePermissions';
 import type {
@@ -237,5 +238,38 @@ export const useDeleteVDC = () => {
     onError: (error) => {
       console.error('Failed to delete VDC:', error);
     },
+  });
+};
+
+/**
+ * Hook to fetch VDCs where the user can create vApps
+ * Filters organization VDCs based on user permissions
+ */
+export const useAccessibleVDCs = (enabled = true) => {
+  const { data: userPermissions } = useUserPermissions();
+
+  return useQuery({
+    queryKey: [...QUERY_KEYS.vdcs, 'accessible-for-vapp-creation'],
+    queryFn: async () => {
+      // Use public API to get VDCs accessible to current user's organization(s)
+      // This works for both admin and regular users
+      const vdcsResponse = await VDCPublicService.getVDCs();
+
+      // Filter VDCs where user can create vApps
+      // For now, if user can view VDCs, they can create vApps in them
+      // This can be enhanced later with more granular permissions
+      return {
+        ...vdcsResponse,
+        values: vdcsResponse.values.filter(
+          () =>
+            userPermissions?.canManageVDCs || userPermissions?.canManageSystem
+        ),
+      };
+    },
+    enabled:
+      enabled &&
+      (userPermissions?.canManageVDCs || userPermissions?.canManageSystem),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 };

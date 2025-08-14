@@ -32,14 +32,19 @@ import {
 import { VirtualMachineIcon } from '@patternfly/react-icons';
 import { useCatalog, useCatalogItems } from '../../hooks/useCatalogs';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import CatalogItemCard from '../../components/catalogs/CatalogItemCard';
+import CreateVAppModal from '../../components/vapps/CreateVAppModal';
 import { ROUTES } from '../../utils/constants';
-import type { CatalogItemQueryParams } from '../../types';
+import type { CatalogItemQueryParams, CatalogItem } from '../../types';
 
 const CatalogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTabKey, setActiveTabKey] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedCatalogItem, setSelectedCatalogItem] =
+    useState<CatalogItem | null>(null);
+  const [isCreateVAppModalOpen, setIsCreateVAppModalOpen] = useState(false);
   const pageSize = 12;
 
   const {
@@ -84,6 +89,18 @@ const CatalogDetail: React.FC = () => {
   useEffect(() => {
     setPage(1);
   }, [searchTerm]);
+
+  // Handler for opening the vApp creation modal
+  const handleCreateVApp = (catalogItem: CatalogItem) => {
+    setSelectedCatalogItem(catalogItem);
+    setIsCreateVAppModalOpen(true);
+  };
+
+  // Handler for closing the vApp creation modal
+  const handleCloseCreateVAppModal = () => {
+    setSelectedCatalogItem(null);
+    setIsCreateVAppModalOpen(false);
+  };
 
   // Handle missing id parameter
   if (!id) {
@@ -314,56 +331,11 @@ const CatalogDetail: React.FC = () => {
                         <Grid hasGutter>
                           {filteredItems.map((item) => (
                             <GridItem key={item.id} span={6}>
-                              <Card isSelectable>
-                                <CardBody>
-                                  <Stack hasGutter>
-                                    <StackItem>
-                                      <Split hasGutter>
-                                        <SplitItem>
-                                          <VirtualMachineIcon
-                                            style={{ fontSize: '24px' }}
-                                          />
-                                        </SplitItem>
-                                        <SplitItem isFilled>
-                                          <Title headingLevel="h4" size="md">
-                                            {item.name}
-                                          </Title>
-                                        </SplitItem>
-                                        <SplitItem>
-                                          <Badge color="blue">
-                                            v{item.versionNumber}
-                                          </Badge>
-                                        </SplitItem>
-                                      </Split>
-                                    </StackItem>
-                                    <StackItem>
-                                      <p className="pf-v6-u-color-200">
-                                        {item.description ||
-                                          'No description available'}
-                                      </p>
-                                    </StackItem>
-                                    <StackItem>
-                                      <Stack>
-                                        <StackItem>
-                                          <Badge>
-                                            {item.entity?.templateSpec
-                                              ?.parameters?.length || 0}{' '}
-                                            parameters
-                                          </Badge>
-                                        </StackItem>
-                                        <StackItem>
-                                          <small className="pf-v6-u-color-200">
-                                            Created:{' '}
-                                            {new Date(
-                                              item.creationDate
-                                            ).toLocaleDateString()}
-                                          </small>
-                                        </StackItem>
-                                      </Stack>
-                                    </StackItem>
-                                  </Stack>
-                                </CardBody>
-                              </Card>
+                              <CatalogItemCard
+                                catalogItem={item}
+                                onCreateVApp={handleCreateVApp}
+                                showActions={true}
+                              />
                             </GridItem>
                           ))}
                         </Grid>
@@ -390,6 +362,15 @@ const CatalogDetail: React.FC = () => {
           </Tabs>
         </StackItem>
       </Stack>
+
+      {/* vApp Creation Modal */}
+      {selectedCatalogItem && (
+        <CreateVAppModal
+          isOpen={isCreateVAppModalOpen}
+          onClose={handleCloseCreateVAppModal}
+          catalogItem={selectedCatalogItem}
+        />
+      )}
     </PageSection>
   );
 };
