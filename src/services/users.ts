@@ -131,7 +131,7 @@ export class UserService {
         storedVmQuota,
         enabled,
       } = data;
-      
+
       const apiData = {
         username,
         FullName: name || fullName || username, // API expects FullName (capital F) as required field
@@ -193,7 +193,7 @@ export class UserService {
         isGroupRole,
         providerType,
       } = data;
-      
+
       const apiData = {
         username,
         description,

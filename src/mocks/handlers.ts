@@ -754,7 +754,7 @@ export const handlers = [
   http.get('/cloudapi/1.0.0/users', ({ request }) => {
     const url = new URL(request.url);
     const searchParam = url.searchParams.get('search');
-    
+
     // Generate mock users
     let users = [
       generateMockUser(),
@@ -770,7 +770,7 @@ export const handlers = [
       },
       {
         ...generateMockUser(),
-        id: 'urn:vcloud:user:3', 
+        id: 'urn:vcloud:user:3',
         username: 'bob.wilson@example.com',
         fullName: 'Bob Wilson',
         email: 'bob.wilson@example.com',
@@ -779,23 +779,24 @@ export const handlers = [
         ],
       },
     ];
-    
+
     // Filter by search if provided
     if (searchParam) {
-      users = users.filter(user => 
-        user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
-        user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchParam.toLowerCase())
+      users = users.filter(
+        (user) =>
+          user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
+          user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchParam.toLowerCase())
       );
     }
-    
+
     return HttpResponse.json(createCloudApiPaginatedResponse(users, 1, 25));
   }),
 
   http.get('/cloudapi/1.0.0/users/:userUrn', ({ params }) => {
     const { userUrn } = params;
     const decodedUrn = decodeURIComponent(userUrn as string);
-    
+
     // Generate mock user based on URN
     let user = generateMockUser();
     if (decodedUrn.includes('user:2')) {
@@ -813,7 +814,7 @@ export const handlers = [
       user = {
         ...user,
         id: 'urn:vcloud:user:3',
-        username: 'bob.wilson@example.com', 
+        username: 'bob.wilson@example.com',
         fullName: 'Bob Wilson',
         email: 'bob.wilson@example.com',
         roleEntityRefs: [
@@ -821,18 +822,18 @@ export const handlers = [
         ],
       };
     }
-    
+
     return HttpResponse.json(createApiResponse(user));
   }),
 
   http.put('/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
     const { userUrn } = params;
-    const updateData = await request.json() as UserUpdateRequest;
-    
+    const updateData = (await request.json()) as UserUpdateRequest;
+
     // Get the existing user (for simulation)
     let user = generateMockUser();
     const decodedUrn = decodeURIComponent(userUrn as string);
-    
+
     if (decodedUrn.includes('user:2')) {
       user = {
         ...user,
@@ -846,11 +847,11 @@ export const handlers = [
         ...user,
         id: 'urn:vcloud:user:3',
         username: 'bob.wilson@example.com',
-        fullName: 'Bob Wilson', 
+        fullName: 'Bob Wilson',
         email: 'bob.wilson@example.com',
       };
     }
-    
+
     // Merge the update data
     const updatedUser = {
       ...user,
@@ -859,13 +860,13 @@ export const handlers = [
       // Handle FullName -> fullName mapping
       fullName: updateData.FullName || updateData.fullName || user.fullName,
     };
-    
+
     return HttpResponse.json(updatedUser);
   }),
 
   http.post('/cloudapi/1.0.0/users', async ({ request }) => {
-    const createData = await request.json() as UserCreateRequest;
-    
+    const createData = (await request.json()) as UserCreateRequest;
+
     // Create a new user with a unique ID
     const newUser = {
       ...generateMockUser(),
@@ -877,7 +878,7 @@ export const handlers = [
       orgEntityRef: createData.orgEntityRef,
       roleEntityRefs: createData.roleEntityRefs || [],
     };
-    
+
     return HttpResponse.json(createApiResponse(newUser), { status: 201 });
   }),
 
@@ -885,7 +886,7 @@ export const handlers = [
   http.get('/api/cloudapi/1.0.0/users', ({ request }) => {
     const url = new URL(request.url);
     const searchParam = url.searchParams.get('search');
-    
+
     // Generate mock users (same logic as above)
     let users = [
       generateMockUser(),
@@ -901,7 +902,7 @@ export const handlers = [
       },
       {
         ...generateMockUser(),
-        id: 'urn:vcloud:user:3', 
+        id: 'urn:vcloud:user:3',
         username: 'bob.wilson@example.com',
         fullName: 'Bob Wilson',
         email: 'bob.wilson@example.com',
@@ -910,22 +911,23 @@ export const handlers = [
         ],
       },
     ];
-    
+
     if (searchParam) {
-      users = users.filter(user => 
-        user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
-        user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchParam.toLowerCase())
+      users = users.filter(
+        (user) =>
+          user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
+          user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchParam.toLowerCase())
       );
     }
-    
+
     return HttpResponse.json(createCloudApiPaginatedResponse(users, 1, 25));
   }),
 
   http.get('/api/cloudapi/1.0.0/users/:userUrn', ({ params }) => {
     const { userUrn } = params;
     const decodedUrn = decodeURIComponent(userUrn as string);
-    
+
     let user = generateMockUser();
     if (decodedUrn.includes('user:2')) {
       user = {
@@ -942,7 +944,7 @@ export const handlers = [
       user = {
         ...user,
         id: 'urn:vcloud:user:3',
-        username: 'bob.wilson@example.com', 
+        username: 'bob.wilson@example.com',
         fullName: 'Bob Wilson',
         email: 'bob.wilson@example.com',
         roleEntityRefs: [
@@ -950,48 +952,51 @@ export const handlers = [
         ],
       };
     }
-    
+
     return HttpResponse.json(createApiResponse(user));
   }),
 
-  http.put('/api/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
-    const { userUrn } = params;
-    const updateData = await request.json() as UserUpdateRequest;
-    
-    let user = generateMockUser();
-    const decodedUrn = decodeURIComponent(userUrn as string);
-    
-    if (decodedUrn.includes('user:2')) {
-      user = {
+  http.put(
+    '/api/cloudapi/1.0.0/users/:userUrn',
+    async ({ params, request }) => {
+      const { userUrn } = params;
+      const updateData = (await request.json()) as UserUpdateRequest;
+
+      let user = generateMockUser();
+      const decodedUrn = decodeURIComponent(userUrn as string);
+
+      if (decodedUrn.includes('user:2')) {
+        user = {
+          ...user,
+          id: 'urn:vcloud:user:2',
+          username: 'jane.smith@example.com',
+          fullName: 'Jane Smith',
+          email: 'jane.smith@example.com',
+        };
+      } else if (decodedUrn.includes('user:3')) {
+        user = {
+          ...user,
+          id: 'urn:vcloud:user:3',
+          username: 'bob.wilson@example.com',
+          fullName: 'Bob Wilson',
+          email: 'bob.wilson@example.com',
+        };
+      }
+
+      const updatedUser = {
         ...user,
-        id: 'urn:vcloud:user:2',
-        username: 'jane.smith@example.com',
-        fullName: 'Jane Smith',
-        email: 'jane.smith@example.com',
+        ...updateData,
+        id: decodedUrn,
+        fullName: updateData.FullName || updateData.fullName || user.fullName,
       };
-    } else if (decodedUrn.includes('user:3')) {
-      user = {
-        ...user,
-        id: 'urn:vcloud:user:3',
-        username: 'bob.wilson@example.com',
-        fullName: 'Bob Wilson', 
-        email: 'bob.wilson@example.com',
-      };
+
+      return HttpResponse.json(updatedUser);
     }
-    
-    const updatedUser = {
-      ...user,
-      ...updateData,
-      id: decodedUrn,
-      fullName: updateData.FullName || updateData.fullName || user.fullName,
-    };
-    
-    return HttpResponse.json(updatedUser);
-  }),
+  ),
 
   http.post('/api/cloudapi/1.0.0/users', async ({ request }) => {
-    const createData = await request.json() as UserCreateRequest;
-    
+    const createData = (await request.json()) as UserCreateRequest;
+
     const newUser = {
       ...generateMockUser(),
       id: `urn:vcloud:user:${Date.now()}`,
@@ -1002,7 +1007,7 @@ export const handlers = [
       orgEntityRef: createData.orgEntityRef,
       roleEntityRefs: createData.roleEntityRefs || [],
     };
-    
+
     return HttpResponse.json(createApiResponse(newUser), { status: 201 });
   }),
 
