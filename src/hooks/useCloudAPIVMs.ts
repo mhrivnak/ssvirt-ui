@@ -191,11 +191,13 @@ export const useCloudAPIVMs = () => {
 
 /**
  * Hook to get all vApps using CloudAPI
+ * Note: This hook is deprecated. Use useVAppsByVDC from useVApps.ts instead
+ * since vApps are VDC-scoped resources.
  */
 export const useVApps = () => {
   return useQuery({
     queryKey: QUERY_KEYS.vapps,
-    queryFn: () => VMService.getVApps(),
+    queryFn: () => Promise.resolve({ values: [] }), // Return empty result since global vApps don't exist
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
   });

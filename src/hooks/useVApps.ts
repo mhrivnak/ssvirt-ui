@@ -1,17 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
-import { cloudApi } from '../services/api';
 import { QUERY_KEYS } from '../types';
-import type { VCloudPaginatedResponse, VApp, VDC } from '../types';
 
 /**
- * Hook to fetch all vApps
+ * Hook to fetch vApps for a specific VDC
+ * Since vApps are scoped to VDCs, this replaces the global getVApps
  */
-export const useVApps = () => {
+export const useVApps = (vdcId: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.vapps,
-    queryFn: () => VMService.getVApps(),
-    enabled: true,
+    queryKey: ['vapps', vdcId],
+    queryFn: () => VMService.getVAppsByVDC(vdcId),
+    enabled: !!vdcId,
   });
 };
 
@@ -29,39 +28,44 @@ export const useVApp = (id: string) => {
 /**
  * Hook to fetch vApps grouped by VDC
  * Returns a structure that groups vApps by their VDC for easy display
+ * Note: This fetches all VDCs first, then gets vApps for each VDC
  */
 export const useVAppsByVDC = () => {
   return useQuery({
     queryKey: ['vapps-by-vdc'],
     queryFn: async () => {
-      // Get all vApps and VDCs in parallel
-      const [vAppsResponse, vdcsResponse] = await Promise.all([
-        VMService.getVApps(),
-        VMService.getVDCs(),
-      ]);
+      // First get all VDCs
+      const vdcsResponse = await VMService.getVDCs();
 
-      // Group vApps by VDC
-      const vAppsByVDC = new Map<string, { vdc: VDC; vApps: VApp[] }>();
-
-      // Initialize all VDCs (even those without vApps)
-      vdcsResponse.values.forEach((vdc) => {
-        vAppsByVDC.set(vdc.id, {
-          vdc,
-          vApps: [],
-        });
-      });
-
-      // Add vApps to their respective VDCs
-      vAppsResponse.values.forEach((vApp) => {
-        const vdcId = vApp.vdc?.id;
-        if (vdcId && vAppsByVDC.has(vdcId)) {
-          vAppsByVDC.get(vdcId)!.vApps.push(vApp);
+      // Then get vApps for each VDC in parallel
+      const vAppPromises = vdcsResponse.values.map(async (vdc) => {
+        try {
+          const vAppsResponse = await VMService.getVAppsByVDC(vdc.id);
+          return {
+            vdc,
+            vApps: vAppsResponse.values,
+          };
+        } catch (error) {
+          // If a VDC has no vApps or there's an error, return empty vApps array
+          console.warn(`Failed to fetch vApps for VDC ${vdc.id}:`, error);
+          return {
+            vdc,
+            vApps: [],
+          };
         }
       });
 
+      const vAppsByVDC = await Promise.all(vAppPromises);
+
+      // Calculate totals
+      const totalVApps = vAppsByVDC.reduce(
+        (sum, vdcGroup) => sum + vdcGroup.vApps.length,
+        0
+      );
+
       return {
-        vAppsByVDC: Array.from(vAppsByVDC.values()),
-        totalVApps: vAppsResponse.resultTotal,
+        vAppsByVDC,
+        totalVApps,
         totalVDCs: vdcsResponse.resultTotal,
       };
     },
@@ -71,19 +75,10 @@ export const useVAppsByVDC = () => {
 
 /**
  * Hook to fetch vApps for a specific VDC using the VDC-specific endpoint
+ * This is an alias for useVApps for backward compatibility
  */
 export const useVAppsByVDCId = (vdcId: string) => {
-  return useQuery({
-    queryKey: ['vapps-by-vdc-id', vdcId],
-    queryFn: async () => {
-      // Use the VDC-specific endpoint for better performance
-      const response = await cloudApi.get<VCloudPaginatedResponse<VApp>>(
-        `/1.0.0/vdcs/${encodeURIComponent(vdcId)}/vapps`
-      );
-      return response.data;
-    },
-    enabled: !!vdcId,
-  });
+  return useVApps(vdcId);
 };
 
 /**

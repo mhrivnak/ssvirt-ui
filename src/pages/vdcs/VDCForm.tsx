@@ -62,7 +62,7 @@ const VDCForm: React.FC = () => {
       },
     },
     providerVdc: {
-      id: '',
+      id: 'provider-vdc-placeholder-001', // Placeholder for demo purposes
     },
     nicQuota: 100,
     networkQuota: 50,
@@ -88,7 +88,9 @@ const VDCForm: React.FC = () => {
         cpu: { allocated: 1000, limit: 10000, units: 'MHz' },
         memory: { allocated: 1024, limit: 10240, units: 'MB' },
       },
-      providerVdc: existingVDC.providerVdc || { id: '' },
+      providerVdc: existingVDC.providerVdc || {
+        id: 'provider-vdc-placeholder-001',
+      },
       nicQuota: existingVDC.nicQuota || 100,
       networkQuota: existingVDC.networkQuota || 50,
       vdcStorageProfiles: existingVDC.vdcStorageProfiles || [],
@@ -154,11 +156,14 @@ const VDCForm: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    console.log('VDC Form submitted with data:', formData);
 
     if (!validateForm()) {
+      console.log('Form validation failed, errors:', errors);
       return;
     }
 
+    console.log('Form validation passed, submitting VDC creation request');
     setIsSubmitting(true);
 
     try {
@@ -177,13 +182,21 @@ const VDCForm: React.FC = () => {
           data: formData,
         });
       } else {
+        console.log(
+          'Creating VDC with orgId:',
+          organizationId,
+          'and data:',
+          formData
+        );
         await createVDCMutation.mutateAsync({
           orgId: organizationId!,
           data: formData,
         });
+        console.log('VDC creation request completed successfully');
       }
 
       // Navigate back to organization detail page where VDCs are displayed
+      console.log('Navigating after successful VDC operation');
       if (organizationId) {
         navigate(ROUTES.ORGANIZATION_DETAIL.replace(':id', organizationId));
       } else {
@@ -254,10 +267,11 @@ const VDCForm: React.FC = () => {
             title="Provider VDC Required"
             isInline
           >
-            This form requires a Provider VDC to be configured. The Provider VDC
-            field is currently set to a placeholder value. In a production
-            environment, this would be populated from available Provider VDCs in
-            your vCloud Director setup.
+            This form uses a placeholder Provider VDC for demonstration
+            purposes. The Provider VDC is automatically set to
+            'provider-vdc-placeholder-001'. In a production environment, this
+            would be populated from available Provider VDCs in your vCloud
+            Director setup.
           </Alert>
         </StackItem>
 

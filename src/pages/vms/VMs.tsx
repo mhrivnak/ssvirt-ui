@@ -60,10 +60,13 @@ import {
 } from '@patternfly/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  useVAppsByVDC,
+  useVApps,
+  useVDCs,
+  useOrganizationVDCs,
   useOrganizations,
   usePowerOperationTracking,
   useDeleteVApp,
+  useUserPermissions,
 } from '../../hooks';
 import {
   VMPowerActions,
@@ -85,6 +88,7 @@ interface VAppFilters {
   search: string;
   status: VMStatus | '';
   org_id: string;
+  vdc_id: string;
 }
 
 // Default filter presets (moved outside component to avoid dependency issues)
@@ -114,8 +118,8 @@ const VMs: React.FC = () => {
     search: '',
     status: '',
     org_id: '',
+    vdc_id: '',
   });
-  const [expandedVDCs, setExpandedVDCs] = useState<Set<string>>(new Set());
   const [selectedVApps, setSelectedVApps] = useState<string[]>([]);
   // Note: Sorting removed for vApp-centric view - could be re-implemented per VDC if needed
   const [showPresetModal, setShowPresetModal] = useState(false);
@@ -124,6 +128,7 @@ const VMs: React.FC = () => {
   // Dropdown states
   const [isStatusSelectOpen, setIsStatusSelectOpen] = useState(false);
   const [isOrgSelectOpen, setIsOrgSelectOpen] = useState(false);
+  const [isVDCSelectOpen, setIsVDCSelectOpen] = useState(false);
   const [isPresetDropdownOpen, setIsPresetDropdownOpen] = useState(false);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
   const [isCreateVMWizardOpen, setIsCreateVMWizardOpen] = useState(false);
@@ -139,69 +144,72 @@ const VMs: React.FC = () => {
     useState<FilterPreset[]>(defaultPresets);
 
   // Data fetching
-  const { data: vAppsByVDCData, isLoading, error } = useVAppsByVDC();
+  const { data: userPermissions } = useUserPermissions();
   const { data: orgsResponse } = useOrganizations();
+
+  // For VDCs, we need different approaches based on user role
+  const isSystemAdmin = userPermissions?.canManageSystem;
+
+  // For system admins: get VDCs for the selected organization only
+  // For regular users: get VDCs from their accessible organizations
+  const { data: adminVdcsResponse } = useVDCs(filters.org_id, undefined, {
+    enabled: isSystemAdmin && !!filters.org_id,
+  });
+
+  const { data: userVdcsResponse } = useOrganizationVDCs(
+    undefined,
+    !isSystemAdmin
+  );
+
+  // Choose appropriate VDCs based on user role
+  const vdcsResponse = isSystemAdmin ? adminVdcsResponse : userVdcsResponse;
+
+  const { data: vAppsResponse, isLoading, error } = useVApps(filters.vdc_id);
   const { operations: powerOperations } = usePowerOperationTracking();
 
   // Mutations
   const deleteVAppMutation = useDeleteVApp();
 
   const organizations = orgsResponse?.data || [];
+  const vdcs = vdcsResponse?.values || [];
+  const vApps = useMemo(() => vAppsResponse?.values || [], [vAppsResponse]);
 
-  // Filter and search logic
-  const filteredVAppsByVDC = useMemo(() => {
-    const vAppsByVDC = vAppsByVDCData?.vAppsByVDC || [];
-    const currentVAppsByVDC = vAppsByVDC || [];
+  // Filter and search logic for vApps in selected VDC
+  const filteredVApps = useMemo(() => {
+    if (!filters.vdc_id) return [];
 
-    return currentVAppsByVDC
-      .map((vdcGroup) => {
-        const filteredVApps = vdcGroup.vApps.filter((vApp) => {
-          // Search filter
-          if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            const matchesName = vApp.name.toLowerCase().includes(searchLower);
-            const matchesVM = vApp.vms?.some((vm) =>
-              vm.name.toLowerCase().includes(searchLower)
-            );
-            if (!matchesName && !matchesVM) return false;
-          }
+    return vApps.filter((vApp) => {
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesName = vApp.name.toLowerCase().includes(searchLower);
+        const matchesVM = vApp.vms?.some((vm) =>
+          vm.name.toLowerCase().includes(searchLower)
+        );
+        if (!matchesName && !matchesVM) return false;
+      }
 
-          // Status filter - check if any VM in vApp matches status
-          if (filters.status) {
-            const hasMatchingStatus = vApp.vms?.some(
-              (vm) => vm.status === filters.status
-            );
-            if (!hasMatchingStatus) return false;
-          }
+      // Status filter - check if any VM in vApp matches status
+      if (filters.status) {
+        const hasMatchingStatus = vApp.vms?.some(
+          (vm) => vm.status === filters.status
+        );
+        if (!hasMatchingStatus) return false;
+      }
 
-          // Organization filter
-          if (filters.org_id && vApp.org?.id !== filters.org_id) {
-            return false;
-          }
+      // Organization filter
+      if (filters.org_id && vApp.org?.id !== filters.org_id) {
+        return false;
+      }
 
-          return true;
-        });
-
-        return {
-          ...vdcGroup,
-          vApps: filteredVApps,
-        };
-      })
-      .filter((vdcGroup) => vdcGroup.vApps.length > 0); // Only show VDCs with matching vApps
-  }, [vAppsByVDCData?.vAppsByVDC, filters]);
+      return true;
+    });
+  }, [vApps, filters]);
 
   // Calculate totals
-  const totalVApps = filteredVAppsByVDC.reduce(
-    (sum, vdcGroup) => sum + vdcGroup.vApps.length,
-    0
-  );
-  const totalVMs = filteredVAppsByVDC.reduce(
-    (sum, vdcGroup) =>
-      sum +
-      vdcGroup.vApps.reduce(
-        (vappSum, vApp) => vappSum + (vApp.vms?.length || 0),
-        0
-      ),
+  const totalVApps = filteredVApps.length;
+  const totalVMs = filteredVApps.reduce(
+    (sum, vApp) => sum + (vApp.vms?.length || 0),
     0
   );
 
@@ -232,6 +240,7 @@ const VMs: React.FC = () => {
       search: '',
       status: '',
       org_id: '',
+      vdc_id: '',
     });
   };
 
@@ -243,18 +252,6 @@ const VMs: React.FC = () => {
     }
   };
 
-  const handleToggleVDC = (vdcId: string) => {
-    setExpandedVDCs((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(vdcId)) {
-        newSet.delete(vdcId);
-      } else {
-        newSet.add(vdcId);
-      }
-      return newSet;
-    });
-  };
-
   // Note: Sorting functionality removed for vApp-centric view
 
   const handleApplyPreset = (preset: FilterPreset) => {
@@ -262,6 +259,7 @@ const VMs: React.FC = () => {
       search: preset.filters.search || '',
       status: preset.filters.vm_status || '',
       org_id: preset.filters.organization_id || '',
+      vdc_id: preset.filters.vdc_id || '',
     });
     setIsPresetDropdownOpen(false);
   };
@@ -276,6 +274,7 @@ const VMs: React.FC = () => {
         search: filters.search || undefined,
         vm_status: filters.status || undefined,
         organization_id: filters.org_id || undefined,
+        vdc_id: filters.vdc_id || undefined,
       },
     };
 
@@ -409,7 +408,8 @@ const VMs: React.FC = () => {
     },
   ];
 
-  const hasActiveFilters = filters.search || filters.status || filters.org_id;
+  const hasActiveFilters =
+    filters.search || filters.status || filters.org_id || filters.vdc_id;
 
   if (error) {
     return (
@@ -525,7 +525,45 @@ const VMs: React.FC = () => {
                     </Select>
                   </ToolbarItem>
 
-                  {/* VDC Filter removed - now shown as expandable groups */}
+                  {/* VDC Filter */}
+                  <ToolbarItem>
+                    <Select
+                      id="vdc-select"
+                      isOpen={isVDCSelectOpen}
+                      selected={filters.vdc_id}
+                      onSelect={(_, selection) => {
+                        handleFilterChange('vdc_id', selection as string);
+                        setIsVDCSelectOpen(false);
+                      }}
+                      onOpenChange={setIsVDCSelectOpen}
+                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          onClick={() => setIsVDCSelectOpen(!isVDCSelectOpen)}
+                          isExpanded={isVDCSelectOpen}
+                          isDisabled={isSystemAdmin && !filters.org_id}
+                        >
+                          {filters.vdc_id
+                            ? vdcs.find((vdc) => vdc.id === filters.vdc_id)
+                                ?.name || 'Unknown VDC'
+                            : isSystemAdmin && !filters.org_id
+                              ? 'Select Organization first'
+                              : vdcs.length === 0
+                                ? 'No VDCs available'
+                                : 'Select VDC'}
+                        </MenuToggle>
+                      )}
+                    >
+                      <SelectList>
+                        <SelectOption value="">Select VDC</SelectOption>
+                        {vdcs.map((vdc) => (
+                          <SelectOption key={vdc.id} value={vdc.id}>
+                            {vdc.name}
+                          </SelectOption>
+                        ))}
+                      </SelectList>
+                    </Select>
+                  </ToolbarItem>
 
                   {/* Organization Filter */}
                   <ToolbarItem>
@@ -667,8 +705,9 @@ const VMs: React.FC = () => {
                   {/* Results Summary */}
                   <ToolbarItem align={{ default: 'alignEnd' }}>
                     <span className="pf-v6-u-color-200">
-                      {totalVApps} vApps, {totalVMs} VMs across{' '}
-                      {filteredVAppsByVDC.length} VDCs
+                      {filters.vdc_id
+                        ? `${totalVApps} vApps, ${totalVMs} VMs in selected VDC`
+                        : 'Select a VDC to view vApps'}
                     </span>
                   </ToolbarItem>
                 </ToolbarContent>
@@ -692,6 +731,8 @@ const VMs: React.FC = () => {
                   `status: ${VM_STATUS_LABELS[filters.status as VMStatus]}`,
                 filters.org_id &&
                   `org: ${organizations.find((o) => o.id === filters.org_id)?.displayName}`,
+                filters.vdc_id &&
+                  `vdc: ${vdcs.find((v) => v.id === filters.vdc_id)?.name}`,
               ]
                 .filter(Boolean)
                 .join(', ')}
@@ -707,7 +748,21 @@ const VMs: React.FC = () => {
                 <Bullseye>
                   <Spinner size="xl" />
                 </Bullseye>
-              ) : filteredVAppsByVDC.length === 0 ? (
+              ) : !filters.vdc_id ? (
+                <EmptyState variant={EmptyStateVariant.lg}>
+                  <VirtualMachineIcon />
+                  <Title headingLevel="h4" size="lg">
+                    {isSystemAdmin && !filters.org_id
+                      ? 'Select an Organization and VDC'
+                      : 'Select a VDC to view vApps'}
+                  </Title>
+                  <EmptyStateBody>
+                    {isSystemAdmin && !filters.org_id
+                      ? 'Virtual Applications are organized by Virtual Data Center within Organizations. As a System Administrator, please first select an Organization, then select a VDC to view its vApps.'
+                      : 'Virtual Applications are organized by Virtual Data Center. Please select a VDC from the filter above to view its vApps.'}
+                  </EmptyStateBody>
+                </EmptyState>
+              ) : filteredVApps.length === 0 ? (
                 <EmptyState variant={EmptyStateVariant.lg}>
                   <VirtualMachineIcon />
                   <Title headingLevel="h4" size="lg">
@@ -737,236 +792,153 @@ const VMs: React.FC = () => {
                   </EmptyStateActions>
                 </EmptyState>
               ) : (
-                <Stack hasGutter>
-                  {filteredVAppsByVDC.map((vdcGroup) => (
-                    <StackItem key={vdcGroup.vdc.id}>
-                      <Card>
-                        <CardBody>
-                          <Stack hasGutter>
-                            {/* VDC Header */}
-                            <StackItem>
-                              <Split hasGutter>
-                                <SplitItem isFilled>
-                                  <Button
-                                    variant="link"
-                                    onClick={() =>
-                                      handleToggleVDC(vdcGroup.vdc.id)
-                                    }
+                <Table variant={TableVariant.compact}>
+                  <Thead>
+                    <Tr>
+                      <Th>vApp Name</Th>
+                      <Th>VMs</Th>
+                      <Th>Status</Th>
+                      <Th>Organization</Th>
+                      <Th>Created</Th>
+                      <Th>Actions</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {filteredVApps.map((vApp) => (
+                      <React.Fragment key={vApp.id}>
+                        {/* vApp Row */}
+                        <Tr style={{ backgroundColor: '#f8f9fa' }}>
+                          <Td>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                              }}
+                            >
+                              <Checkbox
+                                id={`select-vapp-${vApp.id}`}
+                                isChecked={selectedVApps.includes(vApp.id)}
+                                onChange={(_, checked) =>
+                                  handleSelectVApp(vApp.id, checked)
+                                }
+                                aria-label={`Select vApp ${vApp.name}`}
+                              />
+                              <Link
+                                to={`/vapps/${vApp.id}`}
+                                className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                              >
+                                <strong>{vApp.name}</strong>
+                              </Link>
+                            </div>
+                          </Td>
+                          <Td>{vApp.vms?.length || 0} VMs</Td>
+                          <Td>
+                            {vApp.vms?.length ? (
+                              <div>
+                                {vApp.vms.map((vm, index) => (
+                                  <div
+                                    key={vm.id}
                                     style={{
-                                      padding: 0,
-                                      fontSize: '1.1rem',
-                                      fontWeight: 'bold',
+                                      display: 'inline-block',
+                                      marginRight: '4px',
                                     }}
                                   >
-                                    {expandedVDCs.has(vdcGroup.vdc.id)
-                                      ? '▼'
-                                      : '▶'}{' '}
-                                    {vdcGroup.vdc.name}
-                                  </Button>
-                                  <p
-                                    className="pf-v6-u-color-200"
-                                    style={{ margin: '4px 0 0 20px' }}
-                                  >
-                                    {vdcGroup.vApps.length} vApps,{' '}
-                                    {vdcGroup.vApps.reduce(
-                                      (sum, vApp) =>
-                                        sum + (vApp.vms?.length || 0),
-                                      0
-                                    )}{' '}
-                                    VMs
-                                  </p>
-                                </SplitItem>
-                                <SplitItem>
-                                  <Link
-                                    to={ROUTES.VDC_DETAIL.replace(
-                                      ':id',
-                                      vdcGroup.vdc.id
-                                    )}
-                                    className="pf-v6-c-button pf-v6-m-link"
-                                  >
-                                    View VDC Details
-                                  </Link>
-                                </SplitItem>
-                              </Split>
-                            </StackItem>
-
-                            {/* vApps in this VDC */}
-                            {expandedVDCs.has(vdcGroup.vdc.id) && (
-                              <StackItem>
-                                <Table variant={TableVariant.compact}>
-                                  <Thead>
-                                    <Tr>
-                                      <Th>vApp Name</Th>
-                                      <Th>VMs</Th>
-                                      <Th>Status</Th>
-                                      <Th>Organization</Th>
-                                      <Th>Created</Th>
-                                      <Th>Actions</Th>
-                                    </Tr>
-                                  </Thead>
-                                  <Tbody>
-                                    {vdcGroup.vApps.map((vApp) => (
-                                      <React.Fragment key={vApp.id}>
-                                        {/* vApp Row */}
-                                        <Tr
-                                          style={{ backgroundColor: '#f8f9fa' }}
-                                        >
-                                          <Td>
-                                            <div
-                                              style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                              }}
-                                            >
-                                              <Checkbox
-                                                id={`select-vapp-${vApp.id}`}
-                                                isChecked={selectedVApps.includes(
-                                                  vApp.id
-                                                )}
-                                                onChange={(_, checked) =>
-                                                  handleSelectVApp(
-                                                    vApp.id,
-                                                    checked
-                                                  )
-                                                }
-                                                aria-label={`Select vApp ${vApp.name}`}
-                                              />
-                                              <Link
-                                                to={`/vapps/${vApp.id}`}
-                                                className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                                              >
-                                                <strong>{vApp.name}</strong>
-                                              </Link>
-                                            </div>
-                                          </Td>
-                                          <Td>{vApp.vms?.length || 0} VMs</Td>
-                                          <Td>
-                                            {vApp.vms?.length ? (
-                                              <div>
-                                                {vApp.vms.map((vm, index) => (
-                                                  <div
-                                                    key={vm.id}
-                                                    style={{
-                                                      display: 'inline-block',
-                                                      marginRight: '4px',
-                                                    }}
-                                                  >
-                                                    {getStatusBadge(vm.status)}
-                                                    {index <
-                                                      vApp.vms!.length - 1 &&
-                                                      ', '}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            ) : (
-                                              <span className="pf-v6-u-color-200">
-                                                No VMs
-                                              </span>
-                                            )}
-                                          </Td>
-                                          <Td>
-                                            <Link
-                                              to={ROUTES.ORGANIZATION_DETAIL.replace(
-                                                ':id',
-                                                vApp.org?.id || ''
-                                              )}
-                                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                                            >
-                                              {vApp.org?.name || 'Unknown'}
-                                            </Link>
-                                          </Td>
-                                          <Td>
-                                            {vApp.createdDate
-                                              ? formatDate(vApp.createdDate)
-                                              : 'Unknown'}
-                                          </Td>
-                                          <Td>
-                                            <ActionsColumn
-                                              items={getVAppActions(vApp)}
-                                            />
-                                          </Td>
-                                        </Tr>
-
-                                        {/* VM Rows (nested under vApp) */}
-                                        {vApp.vms?.map((vmCloudAPI) => {
-                                          const vm =
-                                            transformVMData(vmCloudAPI);
-                                          return (
-                                            <Tr
-                                              key={`vm-${vm.id}`}
-                                              style={{
-                                                backgroundColor: '#fdfdfd',
-                                                borderLeft: '3px solid #0066cc',
-                                              }}
-                                            >
-                                              <Td
-                                                style={{ paddingLeft: '2rem' }}
-                                              >
-                                                <Link
-                                                  to={`/vms/${vm.id}`}
-                                                  className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                                                >
-                                                  {vm.name}
-                                                </Link>
-                                              </Td>
-                                              <Td>
-                                                {vm.cpu_count} cores,{' '}
-                                                {formatMemory(vm.memory_mb)}
-                                              </Td>
-                                              <Td>
-                                                {getStatusBadge(vm.status)}
-                                              </Td>
-                                              <Td>—</Td>
-                                              <Td>
-                                                {vm.created_at
-                                                  ? formatDate(vm.created_at)
-                                                  : 'Unknown'}
-                                              </Td>
-                                              <Td>
-                                                <div
-                                                  style={{
-                                                    display: 'flex',
-                                                    gap: '8px',
-                                                    alignItems: 'center',
-                                                  }}
-                                                >
-                                                  <VMPowerActions
-                                                    vm={vm}
-                                                    variant="dropdown"
-                                                    size="sm"
-                                                  />
-                                                  <ActionsColumn
-                                                    items={getVMActions(vm)}
-                                                  />
-                                                </div>
-                                              </Td>
-                                            </Tr>
-                                          );
-                                        })}
-                                      </React.Fragment>
-                                    ))}
-                                  </Tbody>
-                                </Table>
-                              </StackItem>
+                                    {getStatusBadge(vm.status)}
+                                    {index < vApp.vms!.length - 1 && ', '}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="pf-v6-u-color-200">No VMs</span>
                             )}
-                          </Stack>
-                        </CardBody>
-                      </Card>
-                    </StackItem>
-                  ))}
-                </Stack>
+                          </Td>
+                          <Td>
+                            <Link
+                              to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                ':id',
+                                vApp.org?.id || ''
+                              )}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              {vApp.org?.name || 'Unknown'}
+                            </Link>
+                          </Td>
+                          <Td>
+                            {vApp.createdDate
+                              ? formatDate(vApp.createdDate)
+                              : 'Unknown'}
+                          </Td>
+                          <Td>
+                            <ActionsColumn items={getVAppActions(vApp)} />
+                          </Td>
+                        </Tr>
+
+                        {/* VM Rows (nested under vApp) */}
+                        {vApp.vms?.map((vmCloudAPI) => {
+                          const vm = transformVMData(vmCloudAPI);
+                          return (
+                            <Tr
+                              key={`vm-${vm.id}`}
+                              style={{
+                                backgroundColor: '#fdfdfd',
+                                borderLeft: '3px solid #0066cc',
+                              }}
+                            >
+                              <Td style={{ paddingLeft: '2rem' }}>
+                                <Link
+                                  to={`/vms/${vm.id}`}
+                                  className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                                >
+                                  {vm.name}
+                                </Link>
+                              </Td>
+                              <Td>
+                                {vm.cpu_count} cores,{' '}
+                                {formatMemory(vm.memory_mb)}
+                              </Td>
+                              <Td>{getStatusBadge(vm.status)}</Td>
+                              <Td>—</Td>
+                              <Td>
+                                {vm.created_at
+                                  ? formatDate(vm.created_at)
+                                  : 'Unknown'}
+                              </Td>
+                              <Td>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    gap: '8px',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <VMPowerActions
+                                    vm={vm}
+                                    variant="dropdown"
+                                    size="sm"
+                                  />
+                                  <ActionsColumn items={getVMActions(vm)} />
+                                </div>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </Tbody>
+                </Table>
               )}
             </CardBody>
           </Card>
         </StackItem>
 
         {/* Summary */}
-        {totalVApps > 0 && (
+        {totalVApps > 0 && filters.vdc_id && (
           <StackItem>
             <Alert variant={AlertVariant.info} isInline title="Summary">
-              Total: {totalVApps} vApps with {totalVMs} VMs across{' '}
-              {filteredVAppsByVDC.length} VDCs
+              Total: {totalVApps} vApps with {totalVMs} VMs in{' '}
+              {vdcs.find((v) => v.id === filters.vdc_id)?.name ||
+                'selected VDC'}
             </Alert>
           </StackItem>
         )}
@@ -1016,6 +988,13 @@ const VMs: React.FC = () => {
                     organizations.find((o) => o.id === filters.org_id)
                       ?.displayName
                   }
+                </li>
+              )}
+              {filters.vdc_id && (
+                <li>
+                  VDC:{' '}
+                  {vdcs.find((v) => v.id === filters.vdc_id)?.name ||
+                    'Unknown VDC'}
                 </li>
               )}
               {!hasActiveFilters && <li>No filters applied</li>}

@@ -105,12 +105,16 @@ export class VMService {
   }
 
   /**
-   * List all vApps accessible to the current user
-   * Used for VM management and overview pages
+   * List vApps for a specific VDC
+   * vApps are only accessible within the context of a VDC
+   * @param vdcId The VDC URN or ID
    */
-  static async getVApps(): Promise<VCloudPaginatedResponse<VApp>> {
-    const response =
-      await cloudApi.get<VCloudPaginatedResponse<VApp>>('/1.0.0/vapps');
+  static async getVAppsByVDC(
+    vdcId: string
+  ): Promise<VCloudPaginatedResponse<VApp>> {
+    const response = await cloudApi.get<VCloudPaginatedResponse<VApp>>(
+      `/1.0.0/vdcs/${encodeURIComponent(vdcId)}/vapps`
+    );
     return response.data;
   }
 
