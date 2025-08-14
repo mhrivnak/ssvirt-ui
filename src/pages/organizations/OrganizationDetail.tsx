@@ -61,6 +61,8 @@ import {
   useUserPermissions,
 } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import CreateCatalogModal from '../../components/catalogs/CreateCatalogModal';
+import DeleteCatalogModal from '../../components/catalogs/DeleteCatalogModal';
 import type { VDC, Catalog } from '../../types';
 import { ROUTES } from '../../utils/constants';
 import OrganizationForm from './OrganizationForm';
@@ -70,6 +72,12 @@ const OrganizationDetail: React.FC = () => {
   const navigate = useNavigate();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isCreateCatalogModalOpen, setIsCreateCatalogModalOpen] =
+    useState(false);
+  const [deleteCatalogModal, setDeleteCatalogModal] = useState<{
+    isOpen: boolean;
+    catalog: Catalog | null;
+  }>({ isOpen: false, catalog: null });
   const toggleStatusMutation = useToggleOrganizationStatus();
 
   // Check if this is the create route
@@ -488,7 +496,23 @@ const OrganizationDetail: React.FC = () => {
 
   const catalogsTabContent = (
     <Card>
-      <CardTitle>Catalogs</CardTitle>
+      <CardTitle>
+        <Split>
+          <SplitItem isFilled>Catalogs</SplitItem>
+          {canManageThisOrg && (
+            <SplitItem>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<PlusCircleIcon />}
+                onClick={() => setIsCreateCatalogModalOpen(true)}
+              >
+                Create Catalog
+              </Button>
+            </SplitItem>
+          )}
+        </Split>
+      </CardTitle>
       <CardBody>
         {catalogs.length === 0 ? (
           <EmptyState icon={CatalogIcon}>
@@ -496,15 +520,28 @@ const OrganizationDetail: React.FC = () => {
               No Catalogs
             </Title>
             <EmptyStateBody>
-              This organization doesn't have any catalogs yet.
+              This organization doesn't have any catalogs yet.{' '}
+              {canManageThisOrg
+                ? 'Create one to get started.'
+                : 'Contact an administrator to create catalogs.'}
             </EmptyStateBody>
-            <Button
-              variant="link"
-              icon={<ExternalLinkAltIcon />}
-              onClick={() => navigate('/catalogs')}
-            >
-              Browse All Catalogs
-            </Button>
+            {canManageThisOrg ? (
+              <Button
+                variant="primary"
+                icon={<PlusCircleIcon />}
+                onClick={() => setIsCreateCatalogModalOpen(true)}
+              >
+                Create Catalog
+              </Button>
+            ) : (
+              <Button
+                variant="link"
+                icon={<ExternalLinkAltIcon />}
+                onClick={() => navigate('/catalogs')}
+              >
+                Browse All Catalogs
+              </Button>
+            )}
           </EmptyState>
         ) : (
           <Table aria-label="Catalogs table" variant="compact">
@@ -554,8 +591,22 @@ const OrganizationDetail: React.FC = () => {
                         {
                           title: 'Browse Templates',
                           onClick: () =>
-                            navigate(`/catalogs/${catalog.id}/templates`),
+                            navigate(`/catalogs/${catalog.id}/items`),
                         },
+                        ...(canManageThisOrg
+                          ? [
+                              { isSeparator: true },
+                              {
+                                title: 'Delete',
+                                onClick: () =>
+                                  setDeleteCatalogModal({
+                                    isOpen: true,
+                                    catalog,
+                                  }),
+                                isDanger: true,
+                              },
+                            ]
+                          : []),
                       ]}
                     />
                   </Td>
@@ -703,6 +754,25 @@ const OrganizationDetail: React.FC = () => {
           </Tabs>
         </StackItem>
       </Stack>
+
+      {/* Catalog Management Modals */}
+      {organization && (
+        <>
+          <CreateCatalogModal
+            isOpen={isCreateCatalogModalOpen}
+            onClose={() => setIsCreateCatalogModalOpen(false)}
+            organizationId={organization.id}
+            organizationName={organization.displayName}
+          />
+          <DeleteCatalogModal
+            isOpen={deleteCatalogModal.isOpen}
+            onClose={() =>
+              setDeleteCatalogModal({ isOpen: false, catalog: null })
+            }
+            catalog={deleteCatalogModal.catalog}
+          />
+        </>
+      )}
     </PageSection>
   );
 };

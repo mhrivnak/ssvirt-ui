@@ -185,16 +185,33 @@ export const roleBasedRoutes: RouteConfig[] = [
     ],
   },
 
-  // Catalogs (available to org admins and vApp users)
+  // Catalogs (available to system admins, org admins and vApp users)
   {
     path: '/catalogs',
     component: React.lazy(() => import('../pages/catalogs/Catalogs')),
-    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER],
+    requiredRoles: [
+      ROLE_NAMES.SYSTEM_ADMIN,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.VAPP_USER,
+    ],
   },
   {
     path: '/catalogs/:id',
     component: React.lazy(() => import('../pages/catalogs/CatalogDetail')),
-    requiredRoles: [ROLE_NAMES.ORG_ADMIN, ROLE_NAMES.VAPP_USER],
+    requiredRoles: [
+      ROLE_NAMES.SYSTEM_ADMIN,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.VAPP_USER,
+    ],
+  },
+  {
+    path: '/catalogs/:catalogId/items',
+    component: React.lazy(() => import('../pages/catalogs/CatalogItems')),
+    requiredRoles: [
+      ROLE_NAMES.SYSTEM_ADMIN,
+      ROLE_NAMES.ORG_ADMIN,
+      ROLE_NAMES.VAPP_USER,
+    ],
   },
 
   // Profile (all authenticated users)
