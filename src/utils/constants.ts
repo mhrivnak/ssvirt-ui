@@ -175,6 +175,8 @@ export const ROUTES = {
   VDC_MONITORING: '/vdcs/:id/monitoring',
   CATALOGS: '/catalogs',
   CATALOG_DETAIL: '/catalogs/:id',
+  CATALOG_ITEMS: '/catalogs/:catalogId/items',
+  CATALOG_ITEM_DETAIL: '/catalogs/:catalogId/items/:itemId',
   // Monitoring & Analytics
   MONITORING: '/monitoring',
   MONITORING_COSTS: '/monitoring/cost-reports',

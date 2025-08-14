@@ -433,6 +433,8 @@ export interface Catalog {
   name: string; // Catalog name
   description: string; // Catalog description
   org: OrgReference; // Organization reference
+  readonly orgId?: string; // Organization ID for convenience
+  readonly orgName?: string; // Organization name for convenience
   isPublished: boolean; // Whether catalog is published externally
   isSubscribed: boolean; // Whether catalog is subscribed from external source
   creationDate: string; // ISO-8601 timestamp
