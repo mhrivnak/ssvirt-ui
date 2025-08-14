@@ -4,6 +4,29 @@ import type {
   ApiResponse,
   VCloudPaginatedResponse,
 } from '../types';
+
+// Types for request bodies
+interface UserUpdateRequest {
+  name?: string;
+  fullName?: string;
+  FullName?: string;
+  email?: string;
+  enabled?: boolean;
+  orgEntityRef?: { id: string; name: string };
+  roleEntityRefs?: Array<{ id: string; name: string }>;
+  password?: string;
+}
+
+interface UserCreateRequest {
+  username: string;
+  name?: string;
+  FullName?: string;
+  email?: string;
+  enabled?: boolean;
+  orgEntityRef?: { id: string; name: string };
+  roleEntityRefs?: Array<{ id: string; name: string }>;
+  password: string;
+}
 import {
   generateMockOrganizations,
   generateMockVDCs,
@@ -802,7 +825,7 @@ export const handlers = [
 
   http.put('/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
     const { userUrn } = params;
-    const updateData = await request.json() as any;
+    const updateData = await request.json() as UserUpdateRequest;
     
     // Get the existing user (for simulation)
     let user = generateMockUser();
@@ -839,18 +862,18 @@ export const handlers = [
   }),
 
   http.post('/cloudapi/1.0.0/users', async ({ request }) => {
-    const createData = await request.json();
+    const createData = await request.json() as UserCreateRequest;
     
     // Create a new user with a unique ID
     const newUser = {
       ...generateMockUser(),
       id: `urn:vcloud:user:${Date.now()}`, // Generate unique ID
-      username: (createData as any).username,
-      fullName: (createData as any).name || (createData as any).FullName,
-      email: (createData as any).email,
-      enabled: (createData as any).enabled ?? true,
-      orgEntityRef: (createData as any).orgEntityRef,
-      roleEntityRefs: (createData as any).roleEntityRefs || [],
+      username: createData.username,
+      fullName: createData.name || createData.FullName,
+      email: createData.email,
+      enabled: createData.enabled ?? true,
+      orgEntityRef: createData.orgEntityRef,
+      roleEntityRefs: createData.roleEntityRefs || [],
     };
     
     return HttpResponse.json(createApiResponse(newUser), { status: 201 });
@@ -931,7 +954,7 @@ export const handlers = [
 
   http.put('/api/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
     const { userUrn } = params;
-    const updateData = await request.json() as any;
+    const updateData = await request.json() as UserUpdateRequest;
     
     let user = generateMockUser();
     const decodedUrn = decodeURIComponent(userUrn as string);
@@ -965,17 +988,17 @@ export const handlers = [
   }),
 
   http.post('/api/cloudapi/1.0.0/users', async ({ request }) => {
-    const createData = await request.json();
+    const createData = await request.json() as UserCreateRequest;
     
     const newUser = {
       ...generateMockUser(),
       id: `urn:vcloud:user:${Date.now()}`,
-      username: (createData as any).username,
-      fullName: (createData as any).name || (createData as any).FullName,
-      email: (createData as any).email,
-      enabled: (createData as any).enabled ?? true,
-      orgEntityRef: (createData as any).orgEntityRef,
-      roleEntityRefs: (createData as any).roleEntityRefs || [],
+      username: createData.username,
+      fullName: createData.name || createData.FullName,
+      email: createData.email,
+      enabled: createData.enabled ?? true,
+      orgEntityRef: createData.orgEntityRef,
+      roleEntityRefs: createData.roleEntityRefs || [],
     };
     
     return HttpResponse.json(createApiResponse(newUser), { status: 201 });
