@@ -13,6 +13,7 @@ import {
   generateMockDashboardStats,
   generateMockRecentActivity,
   generateMockUser,
+  generateMockRoles,
   generateMockVApp,
   generateMockCloudApiVMs,
   generateMockVApps,
@@ -723,4 +724,334 @@ export const handlers = [
       });
     }
   ),
+
+  // Users API endpoints
+  http.get('/cloudapi/1.0.0/users', ({ request }) => {
+    const url = new URL(request.url);
+    const searchParam = url.searchParams.get('search');
+    
+    // Generate mock users
+    let users = [
+      generateMockUser(),
+      {
+        ...generateMockUser(),
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        roleEntityRefs: [
+          { name: 'System Administrator', id: 'urn:vcloud:role:system-admin' },
+        ],
+      },
+      {
+        ...generateMockUser(),
+        id: 'urn:vcloud:user:3', 
+        username: 'bob.wilson@example.com',
+        fullName: 'Bob Wilson',
+        email: 'bob.wilson@example.com',
+        roleEntityRefs: [
+          { name: 'vApp User', id: 'urn:vcloud:role:vapp-user' },
+        ],
+      },
+    ];
+    
+    // Filter by search if provided
+    if (searchParam) {
+      users = users.filter(user => 
+        user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
+        user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchParam.toLowerCase())
+      );
+    }
+    
+    return HttpResponse.json(createCloudApiPaginatedResponse(users, 1, 25));
+  }),
+
+  http.get('/cloudapi/1.0.0/users/:userUrn', ({ params }) => {
+    const { userUrn } = params;
+    const decodedUrn = decodeURIComponent(userUrn as string);
+    
+    // Generate mock user based on URN
+    let user = generateMockUser();
+    if (decodedUrn.includes('user:2')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        roleEntityRefs: [
+          { name: 'System Administrator', id: 'urn:vcloud:role:system-admin' },
+        ],
+      };
+    } else if (decodedUrn.includes('user:3')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:3',
+        username: 'bob.wilson@example.com', 
+        fullName: 'Bob Wilson',
+        email: 'bob.wilson@example.com',
+        roleEntityRefs: [
+          { name: 'vApp User', id: 'urn:vcloud:role:vapp-user' },
+        ],
+      };
+    }
+    
+    return HttpResponse.json(createApiResponse(user));
+  }),
+
+  http.put('/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
+    const { userUrn } = params;
+    const updateData = await request.json() as any;
+    
+    // Get the existing user (for simulation)
+    let user = generateMockUser();
+    const decodedUrn = decodeURIComponent(userUrn as string);
+    
+    if (decodedUrn.includes('user:2')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+      };
+    } else if (decodedUrn.includes('user:3')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:3',
+        username: 'bob.wilson@example.com',
+        fullName: 'Bob Wilson', 
+        email: 'bob.wilson@example.com',
+      };
+    }
+    
+    // Merge the update data
+    const updatedUser = {
+      ...user,
+      ...updateData,
+      id: decodedUrn, // Preserve the original ID
+      // Handle FullName -> fullName mapping
+      fullName: updateData.FullName || updateData.fullName || user.fullName,
+    };
+    
+    return HttpResponse.json(updatedUser);
+  }),
+
+  http.post('/cloudapi/1.0.0/users', async ({ request }) => {
+    const createData = await request.json();
+    
+    // Create a new user with a unique ID
+    const newUser = {
+      ...generateMockUser(),
+      id: `urn:vcloud:user:${Date.now()}`, // Generate unique ID
+      username: (createData as any).username,
+      fullName: (createData as any).name || (createData as any).FullName,
+      email: (createData as any).email,
+      enabled: (createData as any).enabled ?? true,
+      orgEntityRef: (createData as any).orgEntityRef,
+      roleEntityRefs: (createData as any).roleEntityRefs || [],
+    };
+    
+    return HttpResponse.json(createApiResponse(newUser), { status: 201 });
+  }),
+
+  // Additional user endpoints for /api/cloudapi path
+  http.get('/api/cloudapi/1.0.0/users', ({ request }) => {
+    const url = new URL(request.url);
+    const searchParam = url.searchParams.get('search');
+    
+    // Generate mock users (same logic as above)
+    let users = [
+      generateMockUser(),
+      {
+        ...generateMockUser(),
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        roleEntityRefs: [
+          { name: 'System Administrator', id: 'urn:vcloud:role:system-admin' },
+        ],
+      },
+      {
+        ...generateMockUser(),
+        id: 'urn:vcloud:user:3', 
+        username: 'bob.wilson@example.com',
+        fullName: 'Bob Wilson',
+        email: 'bob.wilson@example.com',
+        roleEntityRefs: [
+          { name: 'vApp User', id: 'urn:vcloud:role:vapp-user' },
+        ],
+      },
+    ];
+    
+    if (searchParam) {
+      users = users.filter(user => 
+        user.username.toLowerCase().includes(searchParam.toLowerCase()) ||
+        user.fullName?.toLowerCase().includes(searchParam.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchParam.toLowerCase())
+      );
+    }
+    
+    return HttpResponse.json(createCloudApiPaginatedResponse(users, 1, 25));
+  }),
+
+  http.get('/api/cloudapi/1.0.0/users/:userUrn', ({ params }) => {
+    const { userUrn } = params;
+    const decodedUrn = decodeURIComponent(userUrn as string);
+    
+    let user = generateMockUser();
+    if (decodedUrn.includes('user:2')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        roleEntityRefs: [
+          { name: 'System Administrator', id: 'urn:vcloud:role:system-admin' },
+        ],
+      };
+    } else if (decodedUrn.includes('user:3')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:3',
+        username: 'bob.wilson@example.com', 
+        fullName: 'Bob Wilson',
+        email: 'bob.wilson@example.com',
+        roleEntityRefs: [
+          { name: 'vApp User', id: 'urn:vcloud:role:vapp-user' },
+        ],
+      };
+    }
+    
+    return HttpResponse.json(createApiResponse(user));
+  }),
+
+  http.put('/api/cloudapi/1.0.0/users/:userUrn', async ({ params, request }) => {
+    const { userUrn } = params;
+    const updateData = await request.json() as any;
+    
+    let user = generateMockUser();
+    const decodedUrn = decodeURIComponent(userUrn as string);
+    
+    if (decodedUrn.includes('user:2')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:2',
+        username: 'jane.smith@example.com',
+        fullName: 'Jane Smith',
+        email: 'jane.smith@example.com',
+      };
+    } else if (decodedUrn.includes('user:3')) {
+      user = {
+        ...user,
+        id: 'urn:vcloud:user:3',
+        username: 'bob.wilson@example.com',
+        fullName: 'Bob Wilson', 
+        email: 'bob.wilson@example.com',
+      };
+    }
+    
+    const updatedUser = {
+      ...user,
+      ...updateData,
+      id: decodedUrn,
+      fullName: updateData.FullName || updateData.fullName || user.fullName,
+    };
+    
+    return HttpResponse.json(updatedUser);
+  }),
+
+  http.post('/api/cloudapi/1.0.0/users', async ({ request }) => {
+    const createData = await request.json();
+    
+    const newUser = {
+      ...generateMockUser(),
+      id: `urn:vcloud:user:${Date.now()}`,
+      username: (createData as any).username,
+      fullName: (createData as any).name || (createData as any).FullName,
+      email: (createData as any).email,
+      enabled: (createData as any).enabled ?? true,
+      orgEntityRef: (createData as any).orgEntityRef,
+      roleEntityRefs: (createData as any).roleEntityRefs || [],
+    };
+    
+    return HttpResponse.json(createApiResponse(newUser), { status: 201 });
+  }),
+
+  // Roles API endpoints - handle both /cloudapi and /api/cloudapi paths
+  http.get('/cloudapi/1.0.0/roles', ({ request }) => {
+    const url = new URL(request.url);
+    const searchParam = url.searchParams.get('search');
+
+    let roles = generateMockRoles();
+
+    // Filter by search if provided
+    if (searchParam) {
+      roles = roles.filter((role) =>
+        role.name.toLowerCase().includes(searchParam.toLowerCase())
+      );
+    }
+
+    return HttpResponse.json(createCloudApiPaginatedResponse(roles, 1, 25));
+  }),
+
+  http.get('/cloudapi/1.0.0/roles/:roleUrn', ({ params }) => {
+    const { roleUrn } = params;
+    const roles = generateMockRoles();
+    const role = roles.find(
+      (r) => r.id === decodeURIComponent(roleUrn as string)
+    );
+
+    if (!role) {
+      return HttpResponse.json(
+        {
+          message: 'The requested role could not be found',
+          details: `Role with URN ${roleUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(createApiResponse(role));
+  }),
+
+  // Additional roles endpoints for /api/cloudapi path (in case of different base URL config)
+  http.get('/api/cloudapi/1.0.0/roles', ({ request }) => {
+    const url = new URL(request.url);
+    const searchParam = url.searchParams.get('search');
+
+    let roles = generateMockRoles();
+
+    // Filter by search if provided
+    if (searchParam) {
+      roles = roles.filter((role) =>
+        role.name.toLowerCase().includes(searchParam.toLowerCase())
+      );
+    }
+
+    return HttpResponse.json(createCloudApiPaginatedResponse(roles, 1, 25));
+  }),
+
+  http.get('/api/cloudapi/1.0.0/roles/:roleUrn', ({ params }) => {
+    const { roleUrn } = params;
+    const roles = generateMockRoles();
+    const role = roles.find(
+      (r) => r.id === decodeURIComponent(roleUrn as string)
+    );
+
+    if (!role) {
+      return HttpResponse.json(
+        {
+          message: 'The requested role could not be found',
+          details: `Role with URN ${roleUrn} not found`,
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json(createApiResponse(role));
+  }),
 ];

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { api } from '../api';
+import { cloudApi } from '../api';
 import type {
   ApiResponse,
   VCloudPaginatedResponse,
@@ -18,8 +18,8 @@ export class CloudApiRoleService {
     params?: RoleQueryParams
   ): Promise<VCloudPaginatedResponse<Role>> {
     try {
-      const response = await api.get<VCloudPaginatedResponse<Role>>(
-        '/cloudapi/1.0.0/roles',
+      const response = await cloudApi.get<VCloudPaginatedResponse<Role>>(
+        '/1.0.0/roles',
         { params }
       );
       return response.data;
@@ -38,9 +38,8 @@ export class CloudApiRoleService {
    */
   static async getAllRoles(): Promise<Role[]> {
     try {
-      const response = await api.get<VCloudPaginatedResponse<Role>>(
-        '/cloudapi/1.0.0/roles'
-      );
+      const response =
+        await cloudApi.get<VCloudPaginatedResponse<Role>>('/1.0.0/roles');
       return response.data.values;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -57,8 +56,8 @@ export class CloudApiRoleService {
    */
   static async getRole(id: string): Promise<ApiResponse<Role>> {
     try {
-      const response = await api.get<ApiResponse<Role>>(
-        `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`
+      const response = await cloudApi.get<ApiResponse<Role>>(
+        `/1.0.0/roles/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {
@@ -75,10 +74,9 @@ export class CloudApiRoleService {
    */
   static async getRoleByName(name: string): Promise<ApiResponse<Role>> {
     try {
-      const response = await api.get<ApiResponse<Role>>(
-        '/cloudapi/1.0.0/roles',
-        { params: { search: name } }
-      );
+      const response = await cloudApi.get<ApiResponse<Role>>('/1.0.0/roles', {
+        params: { search: name },
+      });
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -97,8 +95,8 @@ export class CloudApiRoleService {
     roleData: Omit<Role, 'id'>
   ): Promise<ApiResponse<Role>> {
     try {
-      const response = await api.post<ApiResponse<Role>>(
-        '/cloudapi/1.0.0/roles',
+      const response = await cloudApi.post<ApiResponse<Role>>(
+        '/1.0.0/roles',
         roleData
       );
       return response.data;
@@ -120,8 +118,8 @@ export class CloudApiRoleService {
     roleData: Partial<Role>
   ): Promise<ApiResponse<Role>> {
     try {
-      const response = await api.put<ApiResponse<Role>>(
-        `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`,
+      const response = await cloudApi.put<ApiResponse<Role>>(
+        `/1.0.0/roles/${encodeURIComponent(id)}`,
         roleData
       );
       return response.data;
@@ -140,8 +138,8 @@ export class CloudApiRoleService {
    */
   static async deleteRole(id: string): Promise<ApiResponse<void>> {
     try {
-      const response = await api.delete<ApiResponse<void>>(
-        `/cloudapi/1.0.0/roles/${encodeURIComponent(id)}`
+      const response = await cloudApi.delete<ApiResponse<void>>(
+        `/1.0.0/roles/${encodeURIComponent(id)}`
       );
       return response.data;
     } catch (error) {

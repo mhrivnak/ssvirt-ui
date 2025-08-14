@@ -148,3 +148,14 @@ export {
   useCancelExportJob,
   useDownloadExportFile,
 } from './useMonitoring';
+
+// Export role management hooks
+export {
+  useRoles,
+  useAllRoles,
+  useRole,
+  useRoleByName,
+  useCreateRole,
+  useUpdateRole,
+  useDeleteRole,
+} from './useRoles';
