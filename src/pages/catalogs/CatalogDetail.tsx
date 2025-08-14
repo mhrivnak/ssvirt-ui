@@ -74,6 +74,12 @@ const CatalogDetail: React.FC = () => {
     );
   }, [catalogItemsResponse?.values, searchTerm]);
 
+  // Get actual template count from fetched data
+  const actualTemplateCount =
+    catalogItemsResponse?.resultTotal ??
+    catalogItemsResponse?.values?.length ??
+    0;
+
   // Reset page to 1 when search term changes
   useEffect(() => {
     setPage(1);
@@ -165,9 +171,7 @@ const CatalogDetail: React.FC = () => {
                   </Badge>
                 </StackItem>
                 <StackItem>
-                  <Badge color="green">
-                    {catalog.numberOfVAppTemplates} Templates
-                  </Badge>
+                  <Badge color="green">{actualTemplateCount} Templates</Badge>
                 </StackItem>
               </Stack>
             </SplitItem>
@@ -230,7 +234,7 @@ const CatalogDetail: React.FC = () => {
                         Number of Templates
                       </DescriptionListTerm>
                       <DescriptionListDescription>
-                        {catalog.numberOfVAppTemplates}
+                        {actualTemplateCount}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
@@ -260,9 +264,7 @@ const CatalogDetail: React.FC = () => {
             <Tab
               eventKey={1}
               title={
-                <TabTitleText>
-                  Templates ({catalog.numberOfVAppTemplates})
-                </TabTitleText>
+                <TabTitleText>Templates ({actualTemplateCount})</TabTitleText>
               }
             >
               <Stack hasGutter>
@@ -316,7 +318,7 @@ const CatalogDetail: React.FC = () => {
                                 <CardBody>
                                   <Stack hasGutter>
                                     <StackItem>
-                                      <Split>
+                                      <Split hasGutter>
                                         <SplitItem>
                                           <VirtualMachineIcon
                                             style={{ fontSize: '24px' }}
