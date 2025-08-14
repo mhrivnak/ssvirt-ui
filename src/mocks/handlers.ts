@@ -852,13 +852,33 @@ export const handlers = [
       };
     }
 
-    // Merge the update data
+    // Selectively merge update data to avoid unintentional overwrites
     const updatedUser = {
       ...user,
-      ...updateData,
       id: decodedUrn, // Preserve the original ID
-      // Handle FullName -> fullName mapping
-      fullName: updateData.FullName || updateData.fullName || user.fullName,
+      // Only update fields that are explicitly provided
+      ...(updateData.name !== undefined && { name: updateData.name }),
+      ...(updateData.email !== undefined && { email: updateData.email }),
+      ...(updateData.enabled !== undefined && { enabled: updateData.enabled }),
+      ...(updateData.orgEntityRef !== undefined && {
+        orgEntityRef: updateData.orgEntityRef,
+      }),
+      ...(updateData.organizationID !== undefined && {
+        organizationID: updateData.organizationID,
+      }),
+      ...(updateData.roleEntityRefs !== undefined && {
+        roleEntityRefs: updateData.roleEntityRefs,
+      }),
+      ...(updateData.password !== undefined && {
+        password: updateData.password,
+      }),
+      // Handle FullName -> fullName mapping (prefer FullName then fullName)
+      fullName:
+        updateData.FullName !== undefined
+          ? updateData.FullName
+          : updateData.fullName !== undefined
+            ? updateData.fullName
+            : user.fullName,
     };
 
     return HttpResponse.json(updatedUser);
@@ -983,11 +1003,35 @@ export const handlers = [
         };
       }
 
+      // Selectively merge update data to avoid unintentional overwrites
       const updatedUser = {
         ...user,
-        ...updateData,
-        id: decodedUrn,
-        fullName: updateData.FullName || updateData.fullName || user.fullName,
+        id: decodedUrn, // Preserve the original ID
+        // Only update fields that are explicitly provided
+        ...(updateData.name !== undefined && { name: updateData.name }),
+        ...(updateData.email !== undefined && { email: updateData.email }),
+        ...(updateData.enabled !== undefined && {
+          enabled: updateData.enabled,
+        }),
+        ...(updateData.orgEntityRef !== undefined && {
+          orgEntityRef: updateData.orgEntityRef,
+        }),
+        ...(updateData.organizationID !== undefined && {
+          organizationID: updateData.organizationID,
+        }),
+        ...(updateData.roleEntityRefs !== undefined && {
+          roleEntityRefs: updateData.roleEntityRefs,
+        }),
+        ...(updateData.password !== undefined && {
+          password: updateData.password,
+        }),
+        // Handle FullName -> fullName mapping (prefer FullName then fullName)
+        fullName:
+          updateData.FullName !== undefined
+            ? updateData.FullName
+            : updateData.fullName !== undefined
+              ? updateData.fullName
+              : user.fullName,
       };
 
       return HttpResponse.json(updatedUser);
