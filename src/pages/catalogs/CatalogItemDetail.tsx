@@ -8,7 +8,7 @@ import {
   StackItem,
   Split,
   SplitItem,
-  Badge,
+  Label,
   Alert,
   AlertVariant,
   DescriptionList,
@@ -19,7 +19,7 @@ import {
   BreadcrumbItem,
   Button,
 } from '@patternfly/react-core';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, generatePath } from 'react-router-dom';
 import { useCatalog, useCatalogItem } from '../../hooks';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ROUTES } from '../../utils/constants';
@@ -102,13 +102,17 @@ const CatalogItemDetail: React.FC = () => {
                 </Link>
               </BreadcrumbItem>
               <BreadcrumbItem>
-                <Link to={ROUTES.CATALOG_DETAIL.replace(':id', catalog.id)}>
+                <Link
+                  to={generatePath(ROUTES.CATALOG_DETAIL, { id: catalog.id })}
+                >
                   {catalog.name}
                 </Link>
               </BreadcrumbItem>
               <BreadcrumbItem>
                 <Link
-                  to={ROUTES.CATALOG_ITEMS.replace(':catalogId', catalog.id)}
+                  to={generatePath(ROUTES.CATALOG_ITEMS, {
+                    catalogId: catalog.id,
+                  })}
                 >
                   Catalog Items
                 </Link>
@@ -142,13 +146,17 @@ const CatalogItemDetail: React.FC = () => {
                 </Link>
               </BreadcrumbItem>
               <BreadcrumbItem>
-                <Link to={ROUTES.CATALOG_DETAIL.replace(':id', catalog.id)}>
+                <Link
+                  to={generatePath(ROUTES.CATALOG_DETAIL, { id: catalog.id })}
+                >
                   {catalog.name}
                 </Link>
               </BreadcrumbItem>
               <BreadcrumbItem>
                 <Link
-                  to={ROUTES.CATALOG_ITEMS.replace(':catalogId', catalog.id)}
+                  to={generatePath(ROUTES.CATALOG_ITEMS, {
+                    catalogId: catalog.id,
+                  })}
                 >
                   Catalog Items
                 </Link>
@@ -189,12 +197,18 @@ const CatalogItemDetail: React.FC = () => {
               </Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={ROUTES.CATALOG_DETAIL.replace(':id', catalog.id)}>
+              <Link
+                to={generatePath(ROUTES.CATALOG_DETAIL, { id: catalog.id })}
+              >
                 {catalog.name}
               </Link>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <Link to={ROUTES.CATALOG_ITEMS.replace(':catalogId', catalog.id)}>
+              <Link
+                to={generatePath(ROUTES.CATALOG_ITEMS, {
+                  catalogId: catalog.id,
+                })}
+              >
                 Catalog Items
               </Link>
             </BreadcrumbItem>
@@ -215,7 +229,8 @@ const CatalogItemDetail: React.FC = () => {
               <Stack>
                 {catalogItem.status && (
                   <StackItem>
-                    <Badge
+                    <Label
+                      isCompact
                       color={
                         catalogItem.status.toLowerCase() === 'resolved'
                           ? 'green'
@@ -223,12 +238,14 @@ const CatalogItemDetail: React.FC = () => {
                       }
                     >
                       {catalogItem.status}
-                    </Badge>
+                    </Label>
                   </StackItem>
                 )}
                 {catalogItem.versionNumber && (
                   <StackItem>
-                    <Badge color="blue">v{catalogItem.versionNumber}</Badge>
+                    <Label isCompact color="blue">
+                      v{catalogItem.versionNumber}
+                    </Label>
                   </StackItem>
                 )}
               </Stack>
@@ -258,7 +275,11 @@ const CatalogItemDetail: React.FC = () => {
                 <DescriptionListGroup>
                   <DescriptionListTerm>Catalog</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <Link to={ROUTES.CATALOG_DETAIL.replace(':id', catalog.id)}>
+                    <Link
+                      to={generatePath(ROUTES.CATALOG_DETAIL, {
+                        id: catalog.id,
+                      })}
+                    >
                       {catalog.name}
                     </Link>
                   </DescriptionListDescription>
@@ -288,7 +309,8 @@ const CatalogItemDetail: React.FC = () => {
                   <DescriptionListGroup>
                     <DescriptionListTerm>Status</DescriptionListTerm>
                     <DescriptionListDescription>
-                      <Badge
+                      <Label
+                        isCompact
                         color={
                           catalogItem.status.toLowerCase() === 'resolved'
                             ? 'green'
@@ -296,7 +318,7 @@ const CatalogItemDetail: React.FC = () => {
                         }
                       >
                         {catalogItem.status}
-                      </Badge>
+                      </Label>
                     </DescriptionListDescription>
                   </DescriptionListGroup>
                 )}
@@ -339,9 +361,7 @@ const CatalogItemDetail: React.FC = () => {
               <Button
                 variant="secondary"
                 onClick={() =>
-                  navigate(
-                    ROUTES.CATALOG_ITEMS.replace(':catalogId', catalogId)
-                  )
+                  navigate(generatePath(ROUTES.CATALOG_ITEMS, { catalogId }))
                 }
               >
                 Back to Catalog Items
