@@ -140,6 +140,8 @@ export class UserService {
         password,
         roleEntityRefs,
         orgEntityRef,
+        // Add organizationID field if orgEntityRef is provided
+        ...(orgEntityRef ? { organizationID: orgEntityRef.id } : {}),
         deployedVmQuota,
         storedVmQuota,
         enabled,
@@ -199,6 +201,8 @@ export class UserService {
         password,
         roleEntityRefs,
         orgEntityRef,
+        // Add organizationID field if orgEntityRef is provided
+        ...(orgEntityRef ? { organizationID: orgEntityRef.id } : {}),
         deployedVmQuota,
         storedVmQuota,
         nameInSource,

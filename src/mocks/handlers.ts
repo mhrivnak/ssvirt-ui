@@ -13,6 +13,7 @@ interface UserUpdateRequest {
   email?: string;
   enabled?: boolean;
   orgEntityRef?: { id: string; name: string };
+  organizationID?: string;
   roleEntityRefs?: Array<{ id: string; name: string }>;
   password?: string;
 }
@@ -24,6 +25,7 @@ interface UserCreateRequest {
   email?: string;
   enabled?: boolean;
   orgEntityRef?: { id: string; name: string };
+  organizationID?: string;
   roleEntityRefs?: Array<{ id: string; name: string }>;
   password: string;
 }

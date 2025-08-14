@@ -233,6 +233,11 @@ const UserForm: React.FC<UserFormProps> = ({
       const organization = organizations.find(
         (org) => org.id === formData.organizationId
       );
+      
+      if (!organization && formData.organizationId) {
+        throw new Error(`Organization with ID '${formData.organizationId}' not found`);
+      }
+      
       const roleEntityRefs = formData.roles.map((roleName) => {
         const role = roles.find((r) => r.name === roleName);
         if (!role) {
