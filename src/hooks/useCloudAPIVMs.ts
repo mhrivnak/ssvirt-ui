@@ -115,11 +115,8 @@ export const useInstantiateTemplate = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
 
       // Cache the new vApp
-      if (response.values?.[0]) {
-        queryClient.setQueryData(
-          QUERY_KEYS.vapp(response.values[0].id),
-          response.values[0]
-        );
+      if (response.id) {
+        queryClient.setQueryData(QUERY_KEYS.vapp(response.id), response);
       }
     },
 
