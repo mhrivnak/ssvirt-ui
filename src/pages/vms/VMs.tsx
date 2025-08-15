@@ -172,11 +172,15 @@ const VMs: React.FC = () => {
 
   const organizations = orgsResponse?.data || [];
   const vdcs = vdcsResponse?.values || [];
-  const vApps = useMemo(() => vAppsResponse?.values || [], [vAppsResponse]);
+  const vApps = useMemo(() => {
+    return vAppsResponse?.values || [];
+  }, [vAppsResponse]);
 
   // Filter and search logic for vApps in selected VDC
   const filteredVApps = useMemo(() => {
-    if (!filters.vdc_id) return [];
+    if (!filters.vdc_id) {
+      return [];
+    }
 
     return vApps.filter((vApp) => {
       // Search filter
@@ -197,10 +201,10 @@ const VMs: React.FC = () => {
         if (!hasMatchingStatus) return false;
       }
 
-      // Organization filter
-      if (filters.org_id && vApp.org?.id !== filters.org_id) {
-        return false;
-      }
+      // Note: Organization filter removed because the API endpoint
+      // /vdcs/{vdcId}/vapps already returns vApps for the specific VDC,
+      // and each VDC belongs to a specific organization, so this filter
+      // is redundant and was causing vApps to be filtered out.
 
       return true;
     });
