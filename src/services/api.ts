@@ -368,14 +368,17 @@ export class AuthService {
     );
 
     // Extract user's organizations
-    const accessibleOrganizations = sessionData.operatingOrg
-      ? [
-          {
-            id: sessionData.operatingOrg.id,
-            name: sessionData.operatingOrg.name,
-          },
-        ]
-      : [{ id: sessionData.org.id, name: sessionData.org.name }];
+    // [] means all organizations / global scope
+    const accessibleOrganizations = isSystemAdmin
+      ? [] // System admins have access to all organizations
+      : sessionData.operatingOrg
+        ? [
+            {
+              id: sessionData.operatingOrg.id,
+              name: sessionData.operatingOrg.name,
+            },
+          ]
+        : [{ id: sessionData.org.id, name: sessionData.org.name }];
 
     return {
       canCreateOrganizations: isSystemAdmin,
