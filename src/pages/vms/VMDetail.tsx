@@ -57,7 +57,8 @@ import {
   EllipsisVIcon,
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
-import { useVMs, usePowerOperationTracking } from '../../hooks';
+import { useVMDetails, usePowerOperationTracking } from '../../hooks';
+import { transformVMData } from '../../utils/vmTransformers';
 import {
   VMPowerActions,
   PowerOperationStatus,
@@ -138,19 +139,20 @@ const VMDetail: React.FC = () => {
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
 
-  // In a real app, this would use the individual VM endpoint
-  const { data: vmsResponse, isLoading, error } = useVMs({});
+  // Use the CloudAPI to get individual VM details by ID
+  const { data: vmCloudAPI, isLoading, error } = useVMDetails(id);
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
-  const fetchedVM = vmsResponse?.data?.find((v: VM) => v.id === id);
-  const vm = localVM || fetchedVM;
+
+  // Transform CloudAPI VM to legacy format
+  const vm = vmCloudAPI ? transformVMData(vmCloudAPI) : localVM || undefined;
   const { operations: powerOperations } = usePowerOperationTracking();
 
   // Initialize local VM state when fetched VM changes
   useEffect(() => {
-    if (fetchedVM && !localVM) {
-      setLocalVM(fetchedVM);
+    if (vm && !localVM) {
+      setLocalVM(vm);
     }
-  }, [fetchedVM, localVM]);
+  }, [vm, localVM]);
 
   const handleTabClick = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
