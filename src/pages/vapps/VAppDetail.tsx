@@ -344,6 +344,18 @@ const VAppDetail: React.FC = () => {
                               const vmId = vmCloudAPI.href
                                 ? extractVMIdFromHref(vmCloudAPI.href)
                                 : vmCloudAPI.id;
+
+                              // Add defensive check for VM data
+                              if (!vm || !vm.id) {
+                                console.warn(
+                                  'Invalid VM data:',
+                                  vm,
+                                  'from CloudAPI VM:',
+                                  vmCloudAPI
+                                );
+                                return null;
+                              }
+
                               return (
                                 <Tr key={vmCloudAPI.id}>
                                   <Td>

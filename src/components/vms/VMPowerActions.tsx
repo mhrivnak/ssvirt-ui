@@ -107,7 +107,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
       SUSPEND: 'Suspend',
       RESET: 'Reset',
     };
-    return labels[action];
+    return labels[action] || 'Action';
   };
 
   const isActionDisabled = (action: PowerAction) => {

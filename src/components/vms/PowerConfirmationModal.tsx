@@ -80,12 +80,20 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
           description: 'This will gracefully restart the virtual machine.',
           isDestructive: false,
         };
+      default:
+        return {
+          title: 'VM Action',
+          icon: <ExclamationTriangleIcon />,
+          variant: 'primary' as const,
+          description: 'Perform action on virtual machine.',
+          isDestructive: false,
+        };
     }
   };
 
   const config = getActionConfig();
-  const targetDescription = vm.name || 'this virtual machine';
-  const title = config.title;
+  const targetDescription = vm?.name || 'this virtual machine';
+  const title = config?.title || 'VM Action';
 
   return (
     <Modal
