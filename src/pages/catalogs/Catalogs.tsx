@@ -24,9 +24,12 @@ import {
   Breadcrumb,
   BreadcrumbItem,
 } from '@patternfly/react-core';
-import { CatalogIcon, StarIcon } from '@patternfly/react-icons';
+import { CatalogIcon, StarIcon, PlusIcon } from '@patternfly/react-icons';
 import { useCatalogs } from '../../hooks/useCatalogs';
+import { useUserPermissions } from '../../hooks/usePermissions';
+import { useOrganizations } from '../../hooks/useOrganizations';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import CreateCatalogModal from '../../components/catalogs/CreateCatalogModal';
 import type { Catalog, CatalogQueryParams } from '../../types';
 
 const Catalogs: React.FC = () => {
@@ -35,6 +38,17 @@ const Catalogs: React.FC = () => {
   // Search and filter state
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
+
+  // Modal state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
+  const [selectedOrgName, setSelectedOrgName] = useState<string>('');
+
+  // User permissions
+  const { data: userPermissions } = useUserPermissions();
+
+  // Organizations (for System Admins)
+  const { data: organizationsResponse } = useOrganizations(undefined);
 
   // Favorites state (using localStorage for persistence)
   const [favorites, setFavorites] = useState<Set<string>>(() => {
@@ -81,6 +95,22 @@ const Catalogs: React.FC = () => {
 
   const handleCatalogClick = (catalog: Catalog) => {
     navigate(`/catalogs/${catalog.id}`);
+  };
+
+  const handleCreateCatalogClick = () => {
+    const organizations = organizationsResponse?.data || [];
+
+    if (organizations.length === 0) {
+      console.error('No organizations available for catalog creation');
+      return;
+    }
+
+    // For System Admins, default to the first organization
+    // In a real implementation, this could open an organization selector first
+    const defaultOrg = organizations[0];
+    setSelectedOrgId(defaultOrg.id);
+    setSelectedOrgName(defaultOrg.name);
+    setIsCreateModalOpen(true);
   };
 
   if (error) {
@@ -140,6 +170,19 @@ const Catalogs: React.FC = () => {
             <CardBody>
               <Toolbar>
                 <ToolbarContent>
+                  {/* Create Catalog Button - only for System Admins */}
+                  {userPermissions?.canManageSystem && (
+                    <ToolbarItem>
+                      <Button
+                        variant="primary"
+                        icon={<PlusIcon />}
+                        onClick={() => handleCreateCatalogClick()}
+                      >
+                        Create Catalog
+                      </Button>
+                    </ToolbarItem>
+                  )}
+
                   <ToolbarItem align={{ default: 'alignEnd' }}>
                     {totalCount > 0 && (
                       <Pagination
@@ -274,6 +317,20 @@ const Catalogs: React.FC = () => {
           </StackItem>
         )}
       </Stack>
+
+      {/* Create Catalog Modal */}
+      {userPermissions?.canManageSystem && selectedOrgId && (
+        <CreateCatalogModal
+          isOpen={isCreateModalOpen}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setSelectedOrgId('');
+            setSelectedOrgName('');
+          }}
+          organizationId={selectedOrgId}
+          organizationName={selectedOrgName}
+        />
+      )}
     </PageSection>
   );
 };
