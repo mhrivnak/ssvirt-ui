@@ -224,6 +224,7 @@ export interface UserPermissions {
   canManageOrganizations: boolean;
   canViewVDCs: boolean;
   canManageVDCs: boolean;
+  canCreateVApps: boolean;
   accessibleOrganizations: EntityRef[];
   canManageOrganization?: (orgId: string) => boolean;
 }

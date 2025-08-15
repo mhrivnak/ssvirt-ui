@@ -124,6 +124,7 @@ export class PermissionChecker {
    */
   static getUserPermissions(user: User): UserPermissions {
     const isSystemAdmin = this.canManageSystem(user);
+    const isOrgAdmin = this.isOrgAdmin(user);
     return {
       canCreateOrganizations: this.canCreateOrganizations(user),
       canManageUsers: this.canManageUsers(user),
@@ -131,6 +132,7 @@ export class PermissionChecker {
       canManageOrganizations: isSystemAdmin,
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
+      canCreateVApps: isSystemAdmin || isOrgAdmin, // System Admins and Org Admins can create vApps
       // System admins get empty array to indicate access to all orgs
       accessibleOrganizations: isSystemAdmin
         ? []

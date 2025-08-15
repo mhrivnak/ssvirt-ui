@@ -362,23 +362,32 @@ export class AuthService {
       (role) => role === ROLE_NAMES.SYSTEM_ADMIN
     );
 
+    // Check if user has organization admin role
+    const isOrgAdmin = sessionData.roles.some(
+      (role) => role === ROLE_NAMES.ORG_ADMIN
+    );
+
     // Extract user's organizations
-    const accessibleOrganizations = sessionData.operatingOrg
-      ? [
-          {
-            id: sessionData.operatingOrg.id,
-            name: sessionData.operatingOrg.name,
-          },
-        ]
-      : [{ id: sessionData.org.id, name: sessionData.org.name }];
+    // [] means all organizations / global scope
+    const accessibleOrganizations = isSystemAdmin
+      ? [] // System admins have access to all organizations
+      : sessionData.operatingOrg
+        ? [
+            {
+              id: sessionData.operatingOrg.id,
+              name: sessionData.operatingOrg.name,
+            },
+          ]
+        : [{ id: sessionData.org.id, name: sessionData.org.name }];
 
     return {
       canCreateOrganizations: isSystemAdmin,
-      canManageUsers: isSystemAdmin,
+      canManageUsers: isSystemAdmin || isOrgAdmin,
       canManageSystem: isSystemAdmin,
       canManageOrganizations: isSystemAdmin,
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
+      canCreateVApps: isSystemAdmin || isOrgAdmin, // Organization Admins can create vApps
       accessibleOrganizations,
     };
   }
