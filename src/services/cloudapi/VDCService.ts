@@ -52,6 +52,7 @@ export class VDCService {
         canManageOrganizations: false,
         canViewVDCs: false, // Fail closed - no access by default
         canManageVDCs: false,
+        canCreateVApps: false,
         accessibleOrganizations: [],
       };
     }

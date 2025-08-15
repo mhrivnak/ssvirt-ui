@@ -256,13 +256,12 @@ export const useAccessibleVDCs = (enabled = true) => {
       const vdcsResponse = await VDCPublicService.getVDCs();
 
       // Return VDCs where user can create vApps
-      // If user has global VDC or system management permissions, they can create vApps in any VDC
-      // This can be enhanced later with more granular per-VDC permissions
-      if (userPermissions?.canManageVDCs || userPermissions?.canManageSystem) {
+      // System Admins and Organization Admins can create vApps in accessible VDCs
+      if (userPermissions?.canCreateVApps) {
         return vdcsResponse;
       }
 
-      // If user doesn't have global permissions, return empty array
+      // If user doesn't have vApp creation permissions, return empty array
       // In the future, this could check per-VDC permissions like:
       // vdcsResponse.values.filter(vdc => vdc.isAccessible || vdc.permissions?.canCreateVApps)
       return {
@@ -270,9 +269,7 @@ export const useAccessibleVDCs = (enabled = true) => {
         values: [],
       };
     },
-    enabled:
-      enabled &&
-      (userPermissions?.canManageVDCs || userPermissions?.canManageSystem),
+    enabled: enabled && (userPermissions?.canCreateVApps ?? false),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
   });

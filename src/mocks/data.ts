@@ -707,6 +707,7 @@ export const generateMockUserPermissions = (): UserPermissions => ({
   canManageOrganizations: false,
   canViewVDCs: true,
   canManageVDCs: false,
+  canCreateVApps: false, // Regular users cannot create vApps
   accessibleOrganizations: [
     {
       id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
@@ -722,6 +723,7 @@ export const generateMockAdminPermissions = (): UserPermissions => ({
   canManageOrganizations: true,
   canViewVDCs: true,
   canManageVDCs: true,
+  canCreateVApps: true, // System admins can create vApps
   accessibleOrganizations: [
     {
       id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
@@ -734,6 +736,23 @@ export const generateMockAdminPermissions = (): UserPermissions => ({
     {
       id: 'urn:vcloud:org:11111111-2222-3333-4444-555555555ghi',
       name: 'Operations',
+    },
+  ],
+});
+
+// Mock Organization Administrator permissions
+export const generateMockOrgAdminPermissions = (): UserPermissions => ({
+  canCreateOrganizations: false,
+  canManageUsers: true, // Org admins can manage users in their org
+  canManageSystem: false,
+  canManageOrganizations: false,
+  canViewVDCs: true,
+  canManageVDCs: false, // Cannot manage VDCs globally
+  canCreateVApps: true, // Organization Admins can create vApps
+  accessibleOrganizations: [
+    {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
     },
   ],
 });
