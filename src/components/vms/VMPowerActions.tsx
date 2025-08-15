@@ -9,20 +9,8 @@ import {
   AlertVariant,
 } from '@patternfly/react-core';
 import type { MenuToggleElement } from '@patternfly/react-core';
-import {
-  PlayIcon,
-  PowerOffIcon,
-  PauseIcon,
-  RedoIcon,
-  EllipsisVIcon,
-} from '@patternfly/react-icons';
-import {
-  usePowerOnVM,
-  usePowerOffVM,
-  useRebootVM,
-  useSuspendVM,
-  useResetVM,
-} from '../../hooks';
+import { PlayIcon, PowerOffIcon, EllipsisVIcon } from '@patternfly/react-icons';
+import { usePowerOnVM, usePowerOffVM } from '../../hooks';
 import PowerConfirmationModal from './PowerConfirmationModal';
 import type { VM } from '../../types';
 
@@ -32,7 +20,7 @@ interface VMPowerActionsProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-type PowerAction = 'POWER_ON' | 'POWER_OFF' | 'SUSPEND' | 'RESET' | 'REBOOT';
+type PowerAction = 'POWER_ON' | 'POWER_OFF';
 
 const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   vm,
@@ -54,9 +42,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   // Single VM hooks
   const powerOnMutation = usePowerOnVM();
   const powerOffMutation = usePowerOffVM();
-  const rebootMutation = useRebootVM();
-  const suspendMutation = useSuspendVM();
-  const resetMutation = useResetVM();
 
   const handlePowerAction = async (action: PowerAction) => {
     if (!vm?.id || !action) return;
@@ -68,15 +53,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
           break;
         case 'POWER_OFF':
           await powerOffMutation.mutateAsync(vm.id);
-          break;
-        case 'REBOOT':
-          await rebootMutation.mutateAsync(vm.id);
-          break;
-        case 'SUSPEND':
-          await suspendMutation.mutateAsync(vm.id);
-          break;
-        case 'RESET':
-          await resetMutation.mutateAsync(vm.id);
           break;
       }
       setConfirmationAction(null);
@@ -96,11 +72,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
         return <PlayIcon />;
       case 'POWER_OFF':
         return <PowerOffIcon />;
-      case 'REBOOT':
-      case 'RESET':
-        return <RedoIcon />;
-      case 'SUSPEND':
-        return <PauseIcon />;
       default:
         return null;
     }
@@ -111,9 +82,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
     const labels = {
       POWER_ON: 'Power On',
       POWER_OFF: 'Power Off',
-      REBOOT: 'Reboot',
-      SUSPEND: 'Suspend',
-      RESET: 'Reset',
     };
     return labels[action] || 'Action';
   };
@@ -128,9 +96,6 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
         case 'POWER_ON':
           return status === 'POWERED_ON';
         case 'POWER_OFF':
-        case 'SUSPEND':
-        case 'REBOOT':
-        case 'RESET':
           return status !== 'POWERED_ON';
         default:
           return false;
@@ -141,22 +106,10 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   };
 
   const isLoading = () => {
-    return (
-      powerOnMutation.isPending ||
-      powerOffMutation.isPending ||
-      rebootMutation.isPending ||
-      suspendMutation.isPending ||
-      resetMutation.isPending
-    );
+    return powerOnMutation.isPending || powerOffMutation.isPending;
   };
 
-  const actions: PowerAction[] = [
-    'POWER_ON',
-    'POWER_OFF',
-    'REBOOT',
-    'SUSPEND',
-    'RESET',
-  ];
+  const actions: PowerAction[] = ['POWER_ON', 'POWER_OFF'];
 
   if (variant === 'buttons') {
     return (
@@ -179,11 +132,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
           {actions.map((action) => (
             <Button
               key={action}
-              variant={
-                action === 'POWER_OFF' || action === 'RESET'
-                  ? 'danger'
-                  : 'secondary'
-              }
+              variant={action === 'POWER_OFF' ? 'danger' : 'secondary'}
               size={size === 'md' ? 'default' : size}
               icon={getActionIcon(action)}
               isDisabled={isActionDisabled(action) || isLoading()}

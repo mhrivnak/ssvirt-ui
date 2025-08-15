@@ -12,8 +12,6 @@ import {
 import {
   PlayIcon,
   PowerOffIcon,
-  PauseIcon,
-  RedoIcon,
   ExclamationTriangleIcon,
 } from '@patternfly/react-icons';
 import type { VM } from '../../types';
@@ -22,7 +20,7 @@ interface PowerConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  action: 'POWER_ON' | 'POWER_OFF' | 'SUSPEND' | 'RESET' | 'REBOOT';
+  action: 'POWER_ON' | 'POWER_OFF';
   vm: VM; // Made required since we removed bulk operations
   isLoading?: boolean;
 }
@@ -62,32 +60,6 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
           description:
             'This will forcefully shut down the virtual machine. Any unsaved data may be lost.',
           isDestructive: true,
-        };
-      case 'SUSPEND':
-        return {
-          title: 'Suspend VM',
-          icon: <PauseIcon />,
-          variant: 'primary' as const,
-          description:
-            'This will suspend the virtual machine, saving its current state.',
-          isDestructive: false,
-        };
-      case 'RESET':
-        return {
-          title: 'Reset VM',
-          icon: <RedoIcon />,
-          variant: 'danger' as const,
-          description:
-            'This will forcefully restart the virtual machine. Any unsaved data may be lost.',
-          isDestructive: true,
-        };
-      case 'REBOOT':
-        return {
-          title: 'Reboot VM',
-          icon: <RedoIcon />,
-          variant: 'warning' as const,
-          description: 'This will gracefully restart the virtual machine.',
-          isDestructive: false,
         };
       default:
         return {

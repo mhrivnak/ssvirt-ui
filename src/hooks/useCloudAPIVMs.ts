@@ -235,57 +235,6 @@ export const usePowerOffVM = () => {
 };
 
 /**
- * Hook to reboot VM
- */
-export const useRebootVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmId: string) => VMService.rebootVM(vmId),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM and vApp queries to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVMs });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
-    },
-  });
-};
-
-/**
- * Hook to suspend VM
- */
-export const useSuspendVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmId: string) => VMService.suspendVM(vmId),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM and vApp queries to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVMs });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
-    },
-  });
-};
-
-/**
- * Hook to reset VM
- */
-export const useResetVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (vmId: string) => VMService.resetVM(vmId),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM and vApp queries to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudApiVMs });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
-    },
-  });
-};
-
-/**
  * Hook to delete vApp
  */
 export const useDeleteVApp = () => {

@@ -44,9 +44,6 @@ export {
   useDeleteVM,
   usePowerOnVM,
   usePowerOffVM,
-  useRebootVM,
-  useSuspendVM,
-  useResetVM,
 } from './useVMs';
 
 export {
@@ -70,9 +67,6 @@ export {
   useVApps as useCloudAPIVApps,
   usePowerOnVM as useCloudAPIPowerOnVM,
   usePowerOffVM as useCloudAPIPowerOffVM,
-  useRebootVM as useCloudAPIRebootVM,
-  useSuspendVM as useCloudAPISuspendVM,
-  useResetVM as useCloudAPIResetVM,
   useDeleteVApp as useCloudAPIDeleteVApp,
   useDeleteVM as useCloudAPIDeleteVM,
 } from './useCloudAPIVMs';

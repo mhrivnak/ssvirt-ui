@@ -149,34 +149,6 @@ export class VMService {
   }
 
   /**
-   * Reboot a VM
-   * @param vmId The VM URN
-   */
-  static async rebootVM(vmId: string): Promise<void> {
-    await cloudApi.post(
-      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reboot`
-    );
-  }
-
-  /**
-   * Suspend a VM
-   * @param vmId The VM URN
-   */
-  static async suspendVM(vmId: string): Promise<void> {
-    await cloudApi.post(
-      `/1.0.0/vms/${encodeURIComponent(vmId)}/actions/suspend`
-    );
-  }
-
-  /**
-   * Reset a VM
-   * @param vmId The VM URN
-   */
-  static async resetVM(vmId: string): Promise<void> {
-    await cloudApi.post(`/1.0.0/vms/${encodeURIComponent(vmId)}/actions/reset`);
-  }
-
-  /**
    * Delete a vApp (and all contained VMs)
    * @param vappId The vApp URN
    */
