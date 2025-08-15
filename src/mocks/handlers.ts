@@ -689,6 +689,22 @@ export const handlers = [
     );
   }),
 
+  // Get vApps for a specific VDC
+  http.get('/cloudapi/1.0.0/vdcs/:vdcId/vapps', ({ params, request }) => {
+    const { vdcId } = params;
+    const decodedVdcId = decodeURIComponent(vdcId as string);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    // Filter vApps by VDC
+    const vdcVApps = vappStore.filter((vapp) => vapp.vdc?.id === decodedVdcId);
+
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vdcVApps, page, pageSize)
+    );
+  }),
+
   // Get specific vApp
   http.get('/cloudapi/1.0.0/vapps/:vappUrn', ({ params }) => {
     const { vappUrn } = params;
@@ -728,18 +744,36 @@ export const handlers = [
   // Template instantiation endpoint
   http.post(
     '/cloudapi/1.0.0/vdcs/:vdcUrn/actions/instantiateTemplate',
-    async ({ request }) => {
+    async ({ params, request }) => {
+      const { vdcUrn } = params;
+      const decodedVdcUrn = decodeURIComponent(vdcUrn as string);
+
       const body = (await request.json()) as {
         name?: string;
         description?: string;
         [key: string]: unknown;
       };
 
+      // Look up the matching VDC from generateMockVDCs()
+      const vdcs = generateMockVDCs();
+      const targetVdc = vdcs.find((vdc) => vdc.id === decodedVdcUrn);
+
       // Create a new vApp based on the template instantiation request
       const vapp = generateMockVApp(body?.name, body?.description);
 
       // Update status to INSTANTIATING initially
       vapp.status = 'INSTANTIATING';
+
+      // Assign the correct VDC and organization information
+      if (targetVdc) {
+        vapp.vdc = { id: targetVdc.id, name: targetVdc.name };
+        if (targetVdc.org) {
+          vapp.org = {
+            id: targetVdc.org.id,
+            name: targetVdc.org.name ?? targetVdc.org.id,
+          };
+        }
+      }
 
       // Add to store for consistent access
       vappStore.push(vapp);
