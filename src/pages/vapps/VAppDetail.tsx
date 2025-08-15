@@ -104,18 +104,18 @@ const VAppDetail: React.FC = () => {
     });
   };
 
-  const extractVMIdFromHref = (href: string): string => {
+  const extractVMIdFromHref = (href: string): string | null => {
     // Extract VM ID from href like "https://vcd.example.com/cloudapi/1.0.0/vms/urn:vcloud:vm:..."
     const parts = href.split('/vms/');
     if (parts.length > 1) {
       return decodeURIComponent(parts[1]);
     }
-    return href; // fallback to the full href if parsing fails
+    return null; // return null on parse failure
   };
 
   const getVMActions = (vmCloudAPI: VMCloudAPI) => {
     const vmId = vmCloudAPI.href
-      ? extractVMIdFromHref(vmCloudAPI.href)
+      ? extractVMIdFromHref(vmCloudAPI.href) || vmCloudAPI.id
       : vmCloudAPI.id;
     return [
       {
@@ -342,7 +342,8 @@ const VAppDetail: React.FC = () => {
                             {vApp.vms.map((vmCloudAPI) => {
                               const vm = transformVMData(vmCloudAPI);
                               const vmId = vmCloudAPI.href
-                                ? extractVMIdFromHref(vmCloudAPI.href)
+                                ? extractVMIdFromHref(vmCloudAPI.href) ||
+                                  vmCloudAPI.id
                                 : vmCloudAPI.id;
 
                               // Add defensive check for VM data
