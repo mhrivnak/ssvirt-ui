@@ -25,7 +25,10 @@ export const generateMockUser = (): User => ({
   roleEntityRefs: [
     { name: 'Organization Administrator', id: 'urn:vcloud:role:org-admin' },
   ],
-  orgEntityRef: { name: 'Organization', id: 'urn:vcloud:org:1' },
+  orgEntityRef: {
+    name: 'Organization',
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+  },
   deployedVmQuota: 10,
   storedVmQuota: 20,
   nameInSource: 'john.doe@example.com',
@@ -62,7 +65,7 @@ export const generateMockRoles = (): Role[] => [
 
 export const generateMockOrganizations = (): Organization[] => [
   {
-    id: 'urn:vcloud:org:1',
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
     name: 'engineering',
     displayName: 'Engineering',
     description: 'Engineering department organization',
@@ -73,14 +76,17 @@ export const generateMockOrganizations = (): Organization[] => [
     runningVMCount: 5,
     userCount: 8,
     diskCount: 10,
-    managedBy: { name: 'System', id: 'urn:vcloud:org:system' },
+    managedBy: {
+      name: 'System',
+      id: 'urn:vcloud:org:00000000-0000-0000-0000-000000000000',
+    },
     canManageOrgs: true,
     canPublish: true,
     maskedEventTaskUsername: 'admin',
     directlyManagedOrgCount: 1,
   },
   {
-    id: 'urn:vcloud:org:2',
+    id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
     name: 'qa',
     displayName: 'Quality Assurance',
     description: 'QA testing environment',
@@ -91,14 +97,17 @@ export const generateMockOrganizations = (): Organization[] => [
     runningVMCount: 3,
     userCount: 4,
     diskCount: 6,
-    managedBy: { name: 'System', id: 'urn:vcloud:org:system' },
+    managedBy: {
+      name: 'System',
+      id: 'urn:vcloud:org:00000000-0000-0000-0000-000000000000',
+    },
     canManageOrgs: false,
     canPublish: false,
     maskedEventTaskUsername: 'qa-admin',
     directlyManagedOrgCount: 0,
   },
   {
-    id: 'urn:vcloud:org:3',
+    id: 'urn:vcloud:org:11111111-2222-3333-4444-555555555ghi',
     name: 'staging',
     displayName: 'Staging Environment',
     description: 'Pre-production staging',
@@ -109,7 +118,10 @@ export const generateMockOrganizations = (): Organization[] => [
     runningVMCount: 0,
     userCount: 2,
     diskCount: 0,
-    managedBy: { name: 'System', id: 'urn:vcloud:org:system' },
+    managedBy: {
+      name: 'System',
+      id: 'urn:vcloud:org:00000000-0000-0000-0000-000000000000',
+    },
     canManageOrgs: false,
     canPublish: false,
     maskedEventTaskUsername: 'staging-admin',
@@ -152,7 +164,7 @@ export const generateMockVDCs = (): VDC[] => [
     isEnabled: true,
     org: {
       name: 'Engineering',
-      id: 'urn:vcloud:org:engineering',
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
     },
     creationDate: '2024-01-15T10:30:00Z',
     lastModified: '2024-01-15T10:30:00Z',
@@ -191,7 +203,7 @@ export const generateMockVDCs = (): VDC[] => [
     isEnabled: true,
     org: {
       name: 'QA',
-      id: 'urn:vcloud:org:qa',
+      id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
     },
     creationDate: '2024-01-16T11:30:00Z',
     lastModified: '2024-01-16T11:30:00Z',
@@ -695,7 +707,12 @@ export const generateMockUserPermissions = (): UserPermissions => ({
   canManageOrganizations: false,
   canViewVDCs: true,
   canManageVDCs: false,
-  accessibleOrganizations: [{ id: 'urn:vcloud:org:1', name: 'Engineering' }],
+  accessibleOrganizations: [
+    {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
+  ],
 });
 
 export const generateMockAdminPermissions = (): UserPermissions => ({
@@ -706,9 +723,18 @@ export const generateMockAdminPermissions = (): UserPermissions => ({
   canViewVDCs: true,
   canManageVDCs: true,
   accessibleOrganizations: [
-    { id: 'urn:vcloud:org:1', name: 'Engineering' },
-    { id: 'urn:vcloud:org:2', name: 'Quality Assurance' },
-    { id: 'urn:vcloud:org:3', name: 'Operations' },
+    {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
+    {
+      id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
+      name: 'Quality Assurance',
+    },
+    {
+      id: 'urn:vcloud:org:11111111-2222-3333-4444-555555555ghi',
+      name: 'Operations',
+    },
   ],
 });
 
@@ -728,7 +754,10 @@ export const generateMockVApp = (
   vms: [],
   networks: [],
   owner: { id: 'urn:vcloud:user:1', name: 'john.doe@example.com' },
-  org: { id: 'urn:vcloud:org:1', name: 'Engineering' },
+  org: {
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+    name: 'Engineering',
+  },
   vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
 });
 
@@ -744,7 +773,10 @@ export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
   lastModifiedDate: new Date().toISOString(),
   vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
   vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
-  org: { id: 'urn:vcloud:org:1', name: 'Engineering' },
+  org: {
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+    name: 'Engineering',
+  },
 });
 
 // Mock CloudAPI VMs collection
@@ -759,16 +791,25 @@ export const generateMockVApps = (): VApp[] => [
   {
     ...generateMockVApp('web-tier', 'Web application tier'),
     vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
-    org: { id: 'urn:vcloud:org:engineering', name: 'Engineering' },
+    org: {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
   },
   {
     ...generateMockVApp('data-tier', 'Database tier'),
     vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
-    org: { id: 'urn:vcloud:org:engineering', name: 'Engineering' },
+    org: {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
   },
   {
     ...generateMockVApp('api-tier', 'API services tier'),
     vdc: { id: 'urn:vcloud:vdc:qa-test-vdc', name: 'qa-test-vdc' },
-    org: { id: 'urn:vcloud:org:qa', name: 'QA' },
+    org: {
+      id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
+      name: 'QA',
+    },
   },
 ];

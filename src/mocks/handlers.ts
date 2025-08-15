@@ -744,18 +744,36 @@ export const handlers = [
   // Template instantiation endpoint
   http.post(
     '/cloudapi/1.0.0/vdcs/:vdcUrn/actions/instantiateTemplate',
-    async ({ request }) => {
+    async ({ params, request }) => {
+      const { vdcUrn } = params;
+      const decodedVdcUrn = decodeURIComponent(vdcUrn as string);
+
       const body = (await request.json()) as {
         name?: string;
         description?: string;
         [key: string]: unknown;
       };
 
+      // Look up the matching VDC from generateMockVDCs()
+      const vdcs = generateMockVDCs();
+      const targetVdc = vdcs.find((vdc) => vdc.id === decodedVdcUrn);
+
       // Create a new vApp based on the template instantiation request
       const vapp = generateMockVApp(body?.name, body?.description);
 
       // Update status to INSTANTIATING initially
       vapp.status = 'INSTANTIATING';
+
+      // Assign the correct VDC and organization information
+      if (targetVdc) {
+        vapp.vdc = { id: targetVdc.id, name: targetVdc.name };
+        if (targetVdc.org) {
+          vapp.org = {
+            id: targetVdc.org.id,
+            name: targetVdc.org.name ?? targetVdc.org.id,
+          };
+        }
+      }
 
       // Add to store for consistent access
       vappStore.push(vapp);
