@@ -756,7 +756,19 @@ export const generateMockCloudApiVMs = (): VMCloudAPI[] => [
 
 // Mock CloudAPI vApps collection
 export const generateMockVApps = (): VApp[] => [
-  generateMockVApp('web-tier', 'Web application tier'),
-  generateMockVApp('data-tier', 'Database tier'),
-  generateMockVApp('api-tier', 'API services tier'),
+  {
+    ...generateMockVApp('web-tier', 'Web application tier'),
+    vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
+    org: { id: 'urn:vcloud:org:engineering', name: 'Engineering' },
+  },
+  {
+    ...generateMockVApp('data-tier', 'Database tier'),
+    vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
+    org: { id: 'urn:vcloud:org:engineering', name: 'Engineering' },
+  },
+  {
+    ...generateMockVApp('api-tier', 'API services tier'),
+    vdc: { id: 'urn:vcloud:vdc:qa-test-vdc', name: 'qa-test-vdc' },
+    org: { id: 'urn:vcloud:org:qa', name: 'QA' },
+  },
 ];

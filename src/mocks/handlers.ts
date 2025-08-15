@@ -689,6 +689,22 @@ export const handlers = [
     );
   }),
 
+  // Get vApps for a specific VDC
+  http.get('/cloudapi/1.0.0/vdcs/:vdcId/vapps', ({ params, request }) => {
+    const { vdcId } = params;
+    const decodedVdcId = decodeURIComponent(vdcId as string);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
+
+    // Filter vApps by VDC
+    const vdcVApps = vappStore.filter((vapp) => vapp.vdc?.id === decodedVdcId);
+
+    return HttpResponse.json(
+      createCloudApiPaginatedResponse(vdcVApps, page, pageSize)
+    );
+  }),
+
   // Get specific vApp
   http.get('/cloudapi/1.0.0/vapps/:vappUrn', ({ params }) => {
     const { vappUrn } = params;
