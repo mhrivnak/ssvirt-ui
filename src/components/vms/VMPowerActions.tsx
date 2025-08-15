@@ -39,6 +39,13 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   variant = 'dropdown',
   size = 'md',
 }) => {
+  // Debug logging to understand the VM object
+  React.useEffect(() => {
+    console.log('VMPowerActions mounted with VM:', vm);
+    if (!vm) {
+      console.warn('VMPowerActions received null/undefined VM');
+    }
+  }, [vm]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [confirmationAction, setConfirmationAction] =
     useState<PowerAction | null>(null);
@@ -52,7 +59,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   const resetMutation = useResetVM();
 
   const handlePowerAction = async (action: PowerAction) => {
-    if (!vm?.id) return;
+    if (!vm?.id || !action) return;
 
     try {
       switch (action) {
@@ -75,8 +82,8 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
       setConfirmationAction(null);
       setError(null); // Clear any previous errors on success
     } catch (error) {
-      console.error(`Failed to ${action.toLowerCase()} VM:`, error);
-      const actionLabel = getActionLabel(action).toLowerCase();
+      console.error(`Failed to ${action?.toLowerCase?.()} VM:`, error);
+      const actionLabel = (getActionLabel(action) || 'action').toLowerCase();
       setError(
         `Failed to ${actionLabel} VM ${vm.name || 'Unknown'}. Please try again.`
       );
@@ -100,6 +107,7 @@ const VMPowerActions: React.FC<VMPowerActionsProps> = ({
   };
 
   const getActionLabel = (action: PowerAction) => {
+    if (!action) return 'Action';
     const labels = {
       POWER_ON: 'Power On',
       POWER_OFF: 'Power Off',

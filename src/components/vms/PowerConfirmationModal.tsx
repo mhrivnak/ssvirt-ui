@@ -36,6 +36,15 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
   isLoading = false,
 }) => {
   const getActionConfig = () => {
+    if (!action) {
+      return {
+        title: 'VM Action',
+        icon: <ExclamationTriangleIcon />,
+        variant: 'primary' as const,
+        description: 'Perform action on virtual machine.',
+        isDestructive: false,
+      };
+    }
     switch (action) {
       case 'POWER_ON':
         return {
@@ -110,7 +119,9 @@ const PowerConfirmationModal: React.FC<PowerConfirmationModalProps> = ({
             <Content>
               <strong>
                 Are you sure you want to{' '}
-                {action.toLowerCase().replace('_', ' ')} {targetDescription}?
+                {action?.toLowerCase?.()?.replace?.('_', ' ') ||
+                  'perform action on'}{' '}
+                {targetDescription}?
               </strong>
             </Content>
           </div>
