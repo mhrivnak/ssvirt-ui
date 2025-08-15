@@ -53,7 +53,7 @@ import {
 import { useVApp, usePowerOperationTracking } from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import { transformVMData } from '../../utils/vmTransformers';
-import type { VM, VMStatus } from '../../types';
+import type { VMStatus, VMCloudAPI } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
 const VAppDetail: React.FC = () => {
@@ -104,18 +104,33 @@ const VAppDetail: React.FC = () => {
     });
   };
 
-  const getVMActions = (vm: VM) => [
-    {
-      title: 'View Details',
-      onClick: () => window.open(`/vms/${vm.id}`, '_blank'),
-    },
-    { isSeparator: true },
-    {
-      title: 'Delete',
-      onClick: () => console.log('Delete VM:', vm.id),
-      isDanger: true,
-    },
-  ];
+  const extractVMIdFromHref = (href: string): string => {
+    // Extract VM ID from href like "https://vcd.example.com/cloudapi/1.0.0/vms/urn:vcloud:vm:..."
+    const parts = href.split('/vms/');
+    if (parts.length > 1) {
+      return decodeURIComponent(parts[1]);
+    }
+    return href; // fallback to the full href if parsing fails
+  };
+
+  const getVMActions = (vmCloudAPI: VMCloudAPI) => {
+    const vmId = vmCloudAPI.href
+      ? extractVMIdFromHref(vmCloudAPI.href)
+      : vmCloudAPI.id;
+    return [
+      {
+        title: 'View Details',
+        onClick: () =>
+          window.open(`/vms/${encodeURIComponent(vmId)}`, '_blank'),
+      },
+      { isSeparator: true },
+      {
+        title: 'Delete',
+        onClick: () => console.log('Delete VM:', vmId),
+        isDanger: true,
+      },
+    ];
+  };
 
   if (isLoading) {
     return (
@@ -326,24 +341,35 @@ const VAppDetail: React.FC = () => {
                           <Tbody>
                             {vApp.vms.map((vmCloudAPI) => {
                               const vm = transformVMData(vmCloudAPI);
+                              const vmId = vmCloudAPI.href
+                                ? extractVMIdFromHref(vmCloudAPI.href)
+                                : vmCloudAPI.id;
                               return (
-                                <Tr key={vm.id}>
+                                <Tr key={vmCloudAPI.id}>
                                   <Td>
                                     <div>
                                       <Link
-                                        to={`/vms/${vm.id}`}
+                                        to={`/vms/${encodeURIComponent(vmId)}`}
                                         className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                       >
-                                        <strong>{vm.name}</strong>
+                                        <strong>{vmCloudAPI.name}</strong>
                                       </Link>
                                     </div>
                                   </Td>
-                                  <Td>{getStatusBadge(vm.status)}</Td>
-                                  <Td>{vm.cpu_count} cores</Td>
-                                  <Td>{formatMemory(vm.memory_mb)}</Td>
+                                  <Td>{getStatusBadge(vmCloudAPI.status)}</Td>
                                   <Td>
-                                    {vm.created_at
-                                      ? formatDate(vm.created_at)
+                                    {vm.cpu_count
+                                      ? `${vm.cpu_count} cores`
+                                      : 'N/A'}
+                                  </Td>
+                                  <Td>
+                                    {vm.memory_mb
+                                      ? formatMemory(vm.memory_mb)
+                                      : 'N/A'}
+                                  </Td>
+                                  <Td>
+                                    {vmCloudAPI.createdDate
+                                      ? formatDate(vmCloudAPI.createdDate)
                                       : 'Unknown'}
                                   </Td>
                                   <Td>
@@ -359,7 +385,9 @@ const VAppDetail: React.FC = () => {
                                         variant="dropdown"
                                         size="sm"
                                       />
-                                      <ActionsColumn items={getVMActions(vm)} />
+                                      <ActionsColumn
+                                        items={getVMActions(vmCloudAPI)}
+                                      />
                                     </div>
                                   </Td>
                                 </Tr>
