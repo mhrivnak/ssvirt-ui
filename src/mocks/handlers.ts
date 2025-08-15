@@ -560,9 +560,20 @@ export const handlers = [
   // Get specific VM
   http.get('/cloudapi/1.0.0/vms/:vmUrn', ({ params }) => {
     const { vmUrn } = params;
-    const vm = vmStore.find(
-      (v) => v.id === decodeURIComponent(vmUrn as string)
-    );
+    const decodedVmUrn = decodeURIComponent(vmUrn as string);
+
+    // First try to find in standalone VM store
+    let vm = vmStore.find((v) => v.id === decodedVmUrn);
+
+    // If not found, search in vApps
+    if (!vm) {
+      for (const vapp of vappStore) {
+        if (vapp.vms) {
+          vm = vapp.vms.find((v) => v.id === decodedVmUrn);
+          if (vm) break;
+        }
+      }
+    }
 
     if (!vm) {
       return HttpResponse.json(

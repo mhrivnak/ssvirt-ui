@@ -741,25 +741,79 @@ export const generateMockAdminPermissions = (): UserPermissions => ({
 // Mock CloudAPI vApp generator
 export const generateMockVApp = (
   name?: string,
-  description?: string
-): VApp => ({
-  id: `urn:vcloud:vapp:${Math.random().toString(36).slice(2, 11)}`,
-  name: name || 'test-vapp',
-  description: description || 'Mock vApp for testing',
-  status: 'INSTANTIATING' as VAppStatus,
-  href: 'https://vcd.example.com/cloudapi/1.0.0/vapps/mock-vapp-id',
-  type: 'application/json',
-  createdDate: new Date().toISOString(),
-  lastModifiedDate: new Date().toISOString(),
-  vms: [],
-  networks: [],
-  owner: { id: 'urn:vcloud:user:1', name: 'john.doe@example.com' },
-  org: {
-    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
-    name: 'Engineering',
-  },
-  vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
-});
+  description?: string,
+  includeVMs?: boolean
+): VApp => {
+  const vappId = `urn:vcloud:vapp:${Math.random().toString(36).slice(2, 11)}`;
+  const vapp: VApp = {
+    id: vappId,
+    name: name || 'test-vapp',
+    description: description || 'Mock vApp for testing',
+    status: 'INSTANTIATING' as VAppStatus,
+    href: `https://vcd.example.com/cloudapi/1.0.0/vapps/${encodeURIComponent(vappId)}`,
+    type: 'application/json',
+    createdDate: new Date().toISOString(),
+    lastModifiedDate: new Date().toISOString(),
+    vms: [],
+    networks: [],
+    owner: { id: 'urn:vcloud:user:1', name: 'john.doe@example.com' },
+    org: {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
+    vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+  };
+
+  // Add VMs if requested
+  if (includeVMs) {
+    const vmName = name ? `${name}-vm` : 'test-vm';
+    const vmId = `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`;
+    vapp.vms = [
+      {
+        id: vmId,
+        name: `${vmName}-01`,
+        description: `VM in ${vapp.name}`,
+        status: 'POWERED_ON' as VMStatus,
+        href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}`,
+        type: 'application/json',
+        createdDate: new Date().toISOString(),
+        lastModifiedDate: new Date().toISOString(),
+        vapp: { id: vappId, name: vapp.name },
+        vdc: vapp.vdc,
+        org: vapp.org,
+        virtualHardwareSection: {
+          items: [
+            {
+              id: 1,
+              resourceType: 3,
+              elementName: 'CPU',
+              quantity: 2,
+              virtualQuantity: 2,
+              virtualQuantityUnits: 'hertz * 10^6',
+            },
+            {
+              id: 2,
+              resourceType: 4,
+              elementName: 'Memory',
+              quantity: 4096,
+              virtualQuantity: 4096,
+              virtualQuantityUnits: 'byte * 2^20',
+            },
+          ],
+          links: [
+            {
+              rel: 'edit',
+              href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`,
+              type: 'application/json',
+            },
+          ],
+        },
+      },
+    ];
+  }
+
+  return vapp;
+};
 
 // Mock CloudAPI VM generator
 export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
@@ -777,6 +831,33 @@ export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
     id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
     name: 'Engineering',
   },
+  virtualHardwareSection: {
+    items: [
+      {
+        id: 1,
+        resourceType: 3,
+        elementName: 'CPU',
+        quantity: 2,
+        virtualQuantity: 2,
+        virtualQuantityUnits: 'hertz * 10^6',
+      },
+      {
+        id: 2,
+        resourceType: 4,
+        elementName: 'Memory',
+        quantity: 4096,
+        virtualQuantity: 4096,
+        virtualQuantityUnits: 'byte * 2^20',
+      },
+    ],
+    links: [
+      {
+        rel: 'edit',
+        href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id/virtualHardwareSection',
+        type: 'application/json',
+      },
+    ],
+  },
 });
 
 // Mock CloudAPI VMs collection
@@ -787,29 +868,34 @@ export const generateMockCloudApiVMs = (): VMCloudAPI[] => [
 ];
 
 // Mock CloudAPI vApps collection
-export const generateMockVApps = (): VApp[] => [
-  {
-    ...generateMockVApp('web-tier', 'Web application tier'),
-    vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
-    org: {
-      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
-      name: 'Engineering',
-    },
-  },
-  {
-    ...generateMockVApp('data-tier', 'Database tier'),
-    vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
-    org: {
-      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
-      name: 'Engineering',
-    },
-  },
-  {
-    ...generateMockVApp('api-tier', 'API services tier'),
-    vdc: { id: 'urn:vcloud:vdc:qa-test-vdc', name: 'qa-test-vdc' },
-    org: {
-      id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
-      name: 'QA',
-    },
-  },
-];
+export const generateMockVApps = (): VApp[] => {
+  const webTierVApp = generateMockVApp(
+    'web-tier',
+    'Web application tier',
+    true
+  );
+  webTierVApp.vdc = { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' };
+  webTierVApp.org = {
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+    name: 'Engineering',
+  };
+  webTierVApp.status = 'POWERED_ON';
+
+  const dataTierVApp = generateMockVApp('data-tier', 'Database tier', true);
+  dataTierVApp.vdc = { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' };
+  dataTierVApp.org = {
+    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+    name: 'Engineering',
+  };
+  dataTierVApp.status = 'POWERED_ON';
+
+  const apiTierVApp = generateMockVApp('api-tier', 'API services tier', true);
+  apiTierVApp.vdc = { id: 'urn:vcloud:vdc:qa-test-vdc', name: 'qa-test-vdc' };
+  apiTierVApp.org = {
+    id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
+    name: 'QA',
+  };
+  apiTierVApp.status = 'POWERED_OFF';
+
+  return [webTierVApp, dataTierVApp, apiTierVApp];
+};
