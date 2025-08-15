@@ -237,8 +237,8 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
       });
 
       // Set the created vApp ID for progress monitoring
-      if (response.values?.[0]?.id) {
-        setCreatedVAppId(response.values[0].id);
+      if (response.id) {
+        setCreatedVAppId(response.id);
       }
 
       setShowProgress(true);

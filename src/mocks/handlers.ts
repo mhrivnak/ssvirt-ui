@@ -744,8 +744,8 @@ export const handlers = [
       // Add to store for consistent access
       vappStore.push(vapp);
 
-      return HttpResponse.json(createCloudApiPaginatedResponse([vapp], 1, 25), {
-        status: 202,
+      return HttpResponse.json(vapp, {
+        status: 201,
       });
     }
   ),

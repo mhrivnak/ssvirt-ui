@@ -60,8 +60,8 @@ export class VMService {
   static async instantiateTemplate(
     vdcId: string,
     request: InstantiateTemplateRequest
-  ): Promise<VCloudPaginatedResponse<VApp>> {
-    const response = await cloudApi.post<VCloudPaginatedResponse<VApp>>(
+  ): Promise<VApp> {
+    const response = await cloudApi.post<VApp>(
       `/1.0.0/vdcs/${encodeURIComponent(vdcId)}/actions/instantiateTemplate`,
       request
     );
