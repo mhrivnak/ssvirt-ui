@@ -651,27 +651,6 @@ export const handlers = [
     );
   }),
 
-  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/reboot', () => {
-    return HttpResponse.json(
-      { message: 'VM reboot initiated' },
-      { status: 202 }
-    );
-  }),
-
-  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/suspend', () => {
-    return HttpResponse.json(
-      { message: 'VM suspend initiated' },
-      { status: 202 }
-    );
-  }),
-
-  http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/reset', () => {
-    return HttpResponse.json(
-      { message: 'VM reset initiated' },
-      { status: 202 }
-    );
-  }),
-
   // Delete VM
   http.delete('/cloudapi/1.0.0/vms/:vmUrn', ({ params }) => {
     const { vmUrn } = params;

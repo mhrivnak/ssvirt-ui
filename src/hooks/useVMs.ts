@@ -258,64 +258,6 @@ export const usePowerOffVM = () => {
   });
 };
 
-/**
- * Hook to reboot a VM
- */
-export const useRebootVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => VMService.rebootVM(id),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM data to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-    },
-    onError: (error) => {
-      console.error('Failed to reboot VM:', error);
-    },
-  });
-};
-
-/**
- * Hook to suspend a VM
- */
-export const useSuspendVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => VMService.suspendVM(id),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM data to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
-    },
-    onError: (error) => {
-      console.error('Failed to suspend VM:', error);
-    },
-  });
-};
-
-/**
- * Hook to reset a VM
- */
-export const useResetVM = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => VMService.resetVM(id),
-    onSuccess: (_, vmId) => {
-      // Invalidate VM data to refresh status
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vm(vmId) });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vms });
-    },
-    onError: (error) => {
-      console.error('Failed to reset VM:', error);
-    },
-  });
-};
-
 // Note: CloudAPI doesn't support bulk operations
 // Bulk operations would need to be implemented by iterating over individual VMs
 // This functionality has been removed to focus on core VM management
