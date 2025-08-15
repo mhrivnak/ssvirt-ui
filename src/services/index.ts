@@ -8,6 +8,7 @@ export {
   CloudApiOrganizationService,
   VDCService,
   CatalogService,
+  VAppService,
 } from './cloudapi';
 
 // Export domain services

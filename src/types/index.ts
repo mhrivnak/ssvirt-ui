@@ -616,6 +616,22 @@ export type VAppStatus =
   | 'FAILED'
   | 'UNKNOWN';
 
+// vApp Creation Types
+export interface CreateVAppFromTemplateRequest {
+  name: string;
+  description?: string;
+  catalogItem: {
+    id: string;
+    name?: string;
+  };
+}
+
+export interface CreateVAppFormData {
+  name: string;
+  description: string;
+  vdcId: string;
+}
+
 // Enhanced VM interface for CloudAPI
 export interface VMCloudAPI {
   id: string; // URN format

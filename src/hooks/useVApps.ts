@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { VMService } from '../services/cloudapi/VMService';
+import { VAppService } from '../services/cloudapi/VAppService';
 import { QUERY_KEYS } from '../types';
+import type { CreateVAppFromTemplateRequest } from '../types';
 
 /**
  * Hook to fetch vApps for a specific VDC
@@ -104,5 +106,49 @@ export const useDeleteVApp = () => {
     onError: (error) => {
       console.error('Failed to delete vApp:', error);
     },
+  });
+};
+
+/**
+ * Hook to create a vApp from a catalog template
+ */
+export const useCreateVApp = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      vdcId,
+      request,
+    }: {
+      vdcId: string;
+      request: CreateVAppFromTemplateRequest;
+    }) => VAppService.createFromTemplate(vdcId, request),
+    onSuccess: (newVApp, variables) => {
+      // Invalidate vApps lists to show the new vApp
+      queryClient.invalidateQueries({ queryKey: ['vapps', variables.vdcId] });
+      queryClient.invalidateQueries({ queryKey: ['vapps-by-vdc'] });
+      queryClient.invalidateQueries({ queryKey: ['vapps-by-vdc-id'] });
+
+      // Invalidate dashboard stats as vApp count changed
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.dashboardStats });
+
+      // Add the new vApp to cache for immediate access
+      queryClient.setQueryData(QUERY_KEYS.vapp(newVApp.id), newVApp);
+    },
+    onError: (error) => {
+      console.error('Failed to create vApp:', error);
+    },
+  });
+};
+
+/**
+ * Hook to validate vApp name uniqueness within a VDC
+ */
+export const useVAppNameValidation = (vdcId: string, name: string) => {
+  return useQuery({
+    queryKey: ['vapp-name-validation', vdcId, name],
+    queryFn: () => VAppService.validateVAppName(vdcId, name),
+    enabled: !!vdcId && !!name && name.trim().length > 0,
+    staleTime: 5000, // Cache for 5 seconds to avoid excessive API calls
   });
 };
