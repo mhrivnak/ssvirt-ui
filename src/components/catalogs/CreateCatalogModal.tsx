@@ -63,11 +63,15 @@ const CreateCatalogModal: React.FC<CreateCatalogModalProps> = ({
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
+    console.log('Create Catalog form submitted!');
     event.preventDefault();
 
     if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
+
+    console.log('Form validation passed, creating catalog...');
 
     const createRequest: CreateCatalogRequest = {
       name: formData.name.trim(),
@@ -214,34 +218,35 @@ const CreateCatalogModal: React.FC<CreateCatalogModalProps> = ({
                     </small>
                   </FormGroup>
                 </StackItem>
+
+                {/* Form Buttons */}
+                <StackItem>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <Button
+                      variant="link"
+                      onClick={handleClose}
+                      isDisabled={createCatalogMutation.isPending}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      isLoading={createCatalogMutation.isPending}
+                      isDisabled={createCatalogMutation.isPending}
+                    >
+                      Create Catalog
+                    </Button>
+                  </div>
+                </StackItem>
               </Stack>
             </Form>
-          </StackItem>
-
-          <StackItem>
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <Button
-                variant="link"
-                onClick={handleClose}
-                isDisabled={createCatalogMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                isLoading={createCatalogMutation.isPending}
-                isDisabled={createCatalogMutation.isPending}
-              >
-                Create Catalog
-              </Button>
-            </div>
           </StackItem>
         </Stack>
       </div>
