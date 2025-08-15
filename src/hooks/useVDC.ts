@@ -255,15 +255,19 @@ export const useAccessibleVDCs = (enabled = true) => {
       // This works for both admin and regular users
       const vdcsResponse = await VDCPublicService.getVDCs();
 
-      // Filter VDCs where user can create vApps
-      // For now, if user can view VDCs, they can create vApps in them
-      // This can be enhanced later with more granular permissions
+      // Return VDCs where user can create vApps
+      // If user has global VDC or system management permissions, they can create vApps in any VDC
+      // This can be enhanced later with more granular per-VDC permissions
+      if (userPermissions?.canManageVDCs || userPermissions?.canManageSystem) {
+        return vdcsResponse;
+      }
+
+      // If user doesn't have global permissions, return empty array
+      // In the future, this could check per-VDC permissions like:
+      // vdcsResponse.values.filter(vdc => vdc.isAccessible || vdc.permissions?.canCreateVApps)
       return {
         ...vdcsResponse,
-        values: vdcsResponse.values.filter(
-          () =>
-            userPermissions?.canManageVDCs || userPermissions?.canManageSystem
-        ),
+        values: [],
       };
     },
     enabled:
