@@ -59,14 +59,14 @@ export class VAppService {
     };
 
     // Make the API call directly using the correct format
-    const response = await cloudApi.post<VCloudPaginatedResponse<VApp>>(
+    const response = await cloudApi.post<VApp>(
       `/1.0.0/vdcs/${encodeURIComponent(vdcId)}/actions/instantiateTemplate`,
       apiRequest
     );
 
-    // The API returns a paginated response, but we expect the first vApp
-    if (response.data.values && response.data.values.length > 0) {
-      return response.data.values[0];
+    // The API returns a single vApp object, not a paginated collection
+    if (response.data && response.data.id) {
+      return response.data;
     }
 
     throw new Error('Failed to create vApp: No vApp returned from API');
