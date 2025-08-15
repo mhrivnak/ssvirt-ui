@@ -781,6 +781,33 @@ export const generateMockVApp = (
         vapp: { id: vappId, name: vapp.name },
         vdc: vapp.vdc,
         org: vapp.org,
+        virtualHardwareSection: {
+          items: [
+            {
+              id: 1,
+              resourceType: 3,
+              elementName: 'CPU',
+              quantity: 2,
+              virtualQuantity: 2,
+              virtualQuantityUnits: 'hertz * 10^6',
+            },
+            {
+              id: 2,
+              resourceType: 4,
+              elementName: 'Memory',
+              quantity: 4096,
+              virtualQuantity: 4096,
+              virtualQuantityUnits: 'byte * 2^20',
+            },
+          ],
+          links: [
+            {
+              rel: 'edit',
+              href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`,
+              type: 'application/json',
+            },
+          ],
+        },
       },
     ];
   }
@@ -803,6 +830,33 @@ export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
   org: {
     id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
     name: 'Engineering',
+  },
+  virtualHardwareSection: {
+    items: [
+      {
+        id: 1,
+        resourceType: 3,
+        elementName: 'CPU',
+        quantity: 2,
+        virtualQuantity: 2,
+        virtualQuantityUnits: 'hertz * 10^6',
+      },
+      {
+        id: 2,
+        resourceType: 4,
+        elementName: 'Memory',
+        quantity: 4096,
+        virtualQuantity: 4096,
+        virtualQuantityUnits: 'byte * 2^20',
+      },
+    ],
+    links: [
+      {
+        rel: 'edit',
+        href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id/virtualHardwareSection',
+        type: 'application/json',
+      },
+    ],
   },
 });
 
