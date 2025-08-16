@@ -130,6 +130,8 @@ const VAppDetail: React.FC = () => {
       setVdcLoading(true);
       try {
         const vdc = await VDCPublicService.getVDC(vdcId);
+        console.log('VDC data structure:', vdc);
+        console.log('VDC.org field:', vdc.org);
         setVdcData(vdc);
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
@@ -457,7 +459,7 @@ const VAppDetail: React.FC = () => {
                               'Unknown Organization'}
                           </Link>
                         ) : (
-                          'No organization specified'
+                          `No organization specified (Debug: vdcData=${!!vdcData}, vdcData.org=${JSON.stringify(vdcData?.org)}, vApp.org=${JSON.stringify(vApp.org)})`
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
