@@ -14,7 +14,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "preview": "vite preview",
-    "serve": "serve dist -l 8080"
+    "serve": "npx serve dist -l 8080 -s"
   },
   "dependencies": {
     "@patternfly/react-core": "^6.3.1",
