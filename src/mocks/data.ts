@@ -773,6 +773,7 @@ export const generateMockVApp = (
     type: 'application/json',
     createdDate: new Date().toISOString(),
     lastModifiedDate: new Date().toISOString(),
+    vdcId: 'urn:vcloud:vdc:44444444-4444-4444-4444-444444444444',
     vms: [],
     networks: [],
     owner: { id: 'urn:vcloud:user:1', name: 'john.doe@example.com' },
