@@ -63,7 +63,7 @@ import {
 } from '../../components/common';
 import { transformVMData } from '../../utils/vmTransformers';
 import { VMService } from '../../services/cloudapi/VMService';
-import { VDCService } from '../../services/cloudapi/VDCService';
+import { VDCPublicService } from '../../services/cloudapi/VDCPublicService';
 import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -122,20 +122,14 @@ const VAppDetail: React.FC = () => {
     // Try to get VDC ID from either vdcId field or vdc.id field
     const vdcId = vApp.vdcId || vApp.vdc?.id;
     
-    console.log('VDC lookup - vApp:', vApp);
-    console.log('VDC lookup - vdcId:', vdcId);
-    
     if (!vdcId) {
-      console.log('No VDC ID found in vApp data');
       return;
     }
 
     const fetchVDCDetails = async () => {
-      console.log('Starting VDC fetch for:', vdcId);
       setVdcLoading(true);
       try {
-        const vdc = await VDCService.getVDC(vdcId);
-        console.log('VDC fetch successful:', vdc);
+        const vdc = await VDCPublicService.getVDC(vdcId);
         setVdcData(vdc);
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
