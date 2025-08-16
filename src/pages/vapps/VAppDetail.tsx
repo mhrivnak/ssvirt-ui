@@ -122,15 +122,20 @@ const VAppDetail: React.FC = () => {
     // Try to get VDC ID from either vdcId field or vdc.id field
     const vdcId = vApp.vdcId || vApp.vdc?.id;
     
+    console.log('VDC lookup - vApp:', vApp);
+    console.log('VDC lookup - vdcId:', vdcId);
+    
     if (!vdcId) {
       console.log('No VDC ID found in vApp data');
       return;
     }
 
     const fetchVDCDetails = async () => {
+      console.log('Starting VDC fetch for:', vdcId);
       setVdcLoading(true);
       try {
         const vdc = await VDCService.getVDC(vdcId);
+        console.log('VDC fetch successful:', vdc);
         setVdcData(vdc);
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
@@ -356,7 +361,7 @@ const VAppDetail: React.FC = () => {
                 {vApp.name}
               </Title>
               <p className="pf-v6-u-color-200">
-                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || `Unknown VDC (vdcId: ${vApp.vdcId || 'missing'}, vdc.id: ${vApp.vdc?.id || 'missing'})`)}
+                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || 'Unknown VDC')}
               </p>
             </SplitItem>
             <SplitItem>
@@ -426,7 +431,7 @@ const VAppDetail: React.FC = () => {
                             {vApp.vdc.name || vApp.vdc.id || 'Unknown VDC'}
                           </Link>
                         ) : (
-                          `No VDC specified (vdcId: ${vApp.vdcId || 'missing'}, vdc.id: ${vApp.vdc?.id || 'missing'})`
+                          'No VDC specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -458,7 +463,7 @@ const VAppDetail: React.FC = () => {
                               'Unknown Organization'}
                           </Link>
                         ) : (
-                          `No organization specified (vdc.org: ${vdcData?.org?.name || 'missing'}, vapp.org: ${vApp.org?.name || 'missing'})`
+                          'No organization specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
