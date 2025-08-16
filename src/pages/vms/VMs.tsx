@@ -246,13 +246,6 @@ const VMs: React.FC = () => {
     }
   }, [filters.org_id, vdcs, filters.vdc_id, updateVDC]);
 
-  // Clear VDC when organization changes
-  useEffect(() => {
-    if (filters.org_id !== persistedFilters.org_id) {
-      setFilters((prev) => ({ ...prev, vdc_id: persistedFilters.vdc_id }));
-    }
-  }, [persistedFilters.org_id, persistedFilters.vdc_id, filters.org_id]);
-
   // Clear selections when filters change
   useEffect(() => {
     setSelectedVApps([]);
@@ -261,10 +254,15 @@ const VMs: React.FC = () => {
   const handleFilterChange = (key: keyof VAppFilters, value: string) => {
     if (key === 'org_id') {
       updateOrganization(value);
+      // Clear VDC when organization changes
+      updateVDC('');
+      setFilters((prev) => ({ ...prev, org_id: value, vdc_id: '' }));
     } else if (key === 'vdc_id') {
       updateVDC(value);
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    } else {
+      setFilters((prev) => ({ ...prev, [key]: value }));
     }
-    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClearFilters = () => {
