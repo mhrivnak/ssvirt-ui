@@ -362,6 +362,31 @@ const VMs: React.FC = () => {
     );
   };
 
+  const getVAppStatusBadge = (status: string) => {
+    const statusConfig = {
+      INSTANTIATING: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      RESOLVED: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      DEPLOYED: { color: 'green' as const, icon: PlayIcon },
+      POWERED_ON: { color: 'green' as const, icon: PlayIcon },
+      POWERED_OFF: { color: 'red' as const, icon: PowerOffIcon },
+      MIXED: { color: 'orange' as const, icon: ExclamationTriangleIcon },
+      FAILED: { color: 'red' as const, icon: ExclamationTriangleIcon },
+      UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      color: 'grey' as const,
+      icon: ExclamationTriangleIcon,
+    };
+    const IconComponent = config.icon;
+
+    return (
+      <Label color={config.color} icon={<IconComponent />}>
+        {status}
+      </Label>
+    );
+  };
+
   const formatMemory = (memoryMb: number) => {
     if (memoryMb >= 1024) {
       return `${(memoryMb / 1024).toFixed(1)} GB`;
@@ -833,7 +858,6 @@ const VMs: React.FC = () => {
                       <Th>vApp Name</Th>
                       <Th>VMs</Th>
                       <Th>Status</Th>
-                      <Th>Organization</Th>
                       <Th>Created</Th>
                       <Th>Actions</Th>
                     </Tr>
@@ -868,37 +892,7 @@ const VMs: React.FC = () => {
                             </div>
                           </Td>
                           <Td>{vApp.vms?.length || 0} VMs</Td>
-                          <Td>
-                            {vApp.vms?.length ? (
-                              <div>
-                                {vApp.vms.map((vm, index) => (
-                                  <div
-                                    key={vm.id}
-                                    style={{
-                                      display: 'inline-block',
-                                      marginRight: '4px',
-                                    }}
-                                  >
-                                    {getStatusBadge(vm.status)}
-                                    {index < vApp.vms!.length - 1 && ', '}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="pf-v6-u-color-200">No VMs</span>
-                            )}
-                          </Td>
-                          <Td>
-                            <Link
-                              to={ROUTES.ORGANIZATION_DETAIL.replace(
-                                ':id',
-                                vApp.org?.id || ''
-                              )}
-                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                            >
-                              {vApp.org?.name || 'Unknown'}
-                            </Link>
-                          </Td>
+                          <Td>{getVAppStatusBadge(vApp.status)}</Td>
                           <Td>
                             {vApp.createdDate
                               ? formatDate(vApp.createdDate)
