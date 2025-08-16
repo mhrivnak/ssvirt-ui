@@ -281,10 +281,6 @@ export interface VDC {
   isThinProvision: boolean;
   isEnabled: boolean;
   // Standard CloudAPI fields
-  org?: {
-    name: string;
-    id: string;
-  };
   creationDate?: string;
   lastModified?: string;
   status?: number;

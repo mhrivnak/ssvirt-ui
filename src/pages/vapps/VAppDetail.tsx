@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -55,6 +55,7 @@ import {
   usePowerOperationTracking,
   useStateChangeDetection,
   useAutoRefreshState,
+  useIsSystemAdmin,
 } from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import {
@@ -64,8 +65,9 @@ import {
 import { transformVMData } from '../../utils/vmTransformers';
 import { VMService } from '../../services/cloudapi/VMService';
 import { VDCPublicService } from '../../services/cloudapi/VDCPublicService';
+import { VDCAdminService } from '../../services/cloudapi/VDCAdminService';
 import { OrganizationService } from '../../services/cloudapi/OrganizationService';
-import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC, Organization } from '../../types';
+import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
 interface VMDetailData {
@@ -83,8 +85,15 @@ const VAppDetail: React.FC = () => {
   );
   const [vdcData, setVdcData] = useState<VDC | null>(null);
   const [vdcLoading, setVdcLoading] = useState(false);
-  const [orgData, setOrgData] = useState<Organization | null>(null);
-  const [orgLoading, setOrgLoading] = useState(false);
+  const [orgData, setOrgData] = useState<{ id: string; name: string; displayName: string } | null>(
+    null
+  );
+
+  // Track attempted fetches to prevent hot loops
+  const attemptedFetches = useRef<Set<string>>(new Set());
+
+  // Get user permissions to determine if they are System Admin
+  const { isSystemAdmin } = useIsSystemAdmin();
 
   // Auto-refresh state management
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
@@ -120,56 +129,123 @@ const VAppDetail: React.FC = () => {
 
   // Fetch VDC details when vApp data is available
   useEffect(() => {
-    if (!vApp) return;
-    
-    // Try to get VDC ID from either vdcId field or vdc.id field
-    const vdcId = vApp.vdcId || vApp.vdc?.id;
-    
-    if (!vdcId) {
+    if (!vApp) {
+      setVdcData(null);
+      setOrgData(null);
       return;
     }
 
+    // Try to get VDC ID from either vdcId field or vdc.id field
+    const vdcId = vApp.vdcId || vApp.vdc?.id;
+
+    if (!vdcId) {
+      setVdcData(null);
+      setOrgData(null);
+      return;
+    }
+
+    // Create a unique key for this fetch attempt to prevent retries
+    const fetchKey = `${vApp.id}-${vdcId}-${isSystemAdmin}`;
+
+    // Check if we've already attempted this fetch
+    if (attemptedFetches.current.has(fetchKey)) {
+      return;
+    }
+
+    // Mark this fetch as attempted
+    attemptedFetches.current.add(fetchKey);
+
+    let isCancelled = false;
+
     const fetchVDCDetails = async () => {
+      if (isCancelled) return;
+
       setVdcLoading(true);
       try {
-        const vdc = await VDCPublicService.getVDC(vdcId);
-        setVdcData(vdc);
+        if (isSystemAdmin) {
+          // For system admins, try to get organization information through admin API
+          // But fall back to public API if it fails
+          try {
+            const orgsResponse = await OrganizationService.getOrganizations();
+
+            if (
+              !isCancelled &&
+              orgsResponse.values &&
+              orgsResponse.values.length > 0
+            ) {
+              // Store the organization data separately since VDC response doesn't include it
+              const firstOrg = orgsResponse.values[0];
+              setOrgData({ id: firstOrg.id, name: firstOrg.name, displayName: firstOrg.displayName });
+
+              // Try to get VDC details from admin API for the first organization
+              try {
+                const vdc = await VDCAdminService.getVDC(
+                  orgsResponse.values[0].id,
+                  vdcId
+                );
+                if (!isCancelled) {
+                  setVdcData(vdc);
+                }
+              } catch (adminError) {
+                console.warn(
+                  'Admin VDC API failed, falling back to public API:',
+                  adminError
+                );
+                // Fallback to public API
+                if (!isCancelled) {
+                  const vdc = await VDCPublicService.getVDC(vdcId);
+                  setVdcData(vdc);
+                }
+              }
+            } else if (!isCancelled) {
+              // No organizations found, use public API
+              const vdc = await VDCPublicService.getVDC(vdcId);
+              setVdcData(vdc);
+            }
+          } catch (orgError) {
+            console.warn(
+              'Failed to fetch organizations, falling back to public VDC API:',
+              orgError
+            );
+            // If organizations API fails, fall back to public VDC API
+            if (!isCancelled) {
+              const vdc = await VDCPublicService.getVDC(vdcId);
+              setVdcData(vdc);
+            }
+          }
+        } else {
+          // For regular users, use public API
+          const vdc = await VDCPublicService.getVDC(vdcId);
+          if (!isCancelled) {
+            setVdcData(vdc);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
-        setVdcData(null);
+        if (!isCancelled) {
+          setVdcData(null);
+        }
       } finally {
-        setVdcLoading(false);
+        if (!isCancelled) {
+          setVdcLoading(false);
+        }
       }
     };
 
     fetchVDCDetails();
-  }, [vApp?.vdcId, vApp?.vdc?.id]);
 
-  // Fetch organization details when VDC data is available
-  useEffect(() => {
-    if (!vdcData?.id) return;
-
-    const fetchOrganizationDetails = async () => {
-      setOrgLoading(true);
-      try {
-        // Get all organizations and find the one that contains this VDC
-        const orgsResponse = await OrganizationService.getOrganizations();
-        
-        // For now, we'll use the first organization as we can't easily match VDC to org
-        // In a real scenario, we'd need admin API access or different approach
-        if (orgsResponse.values && orgsResponse.values.length > 0) {
-          setOrgData(orgsResponse.values[0]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch organization details:', error);
-        setOrgData(null);
-      } finally {
-        setOrgLoading(false);
-      }
+    // Cleanup function to prevent state updates if component unmounts or effect re-runs
+    return () => {
+      isCancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vApp?.id, vApp?.vdcId, vApp?.vdc?.id, isSystemAdmin]);
 
-    fetchOrganizationDetails();
-  }, [vdcData?.id]);
+  // Clear attempted fetches cache when vApp changes
+  useEffect(() => {
+    attemptedFetches.current.clear();
+    setOrgData(null);
+  }, [vApp?.id]);
 
   // Fetch VM details for all VMs in the vApp
   useEffect(() => {
@@ -384,7 +460,10 @@ const VAppDetail: React.FC = () => {
                 {vApp.name}
               </Title>
               <p className="pf-v6-u-color-200">
-                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || 'Unknown VDC')}
+                vApp in{' '}
+                {vdcLoading
+                  ? 'Loading VDC...'
+                  : vdcData?.name || vApp.vdc?.name || 'Unknown VDC'}
               </p>
             </SplitItem>
             <SplitItem>
@@ -458,48 +537,41 @@ const VAppDetail: React.FC = () => {
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Organization</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {orgLoading || vdcLoading ? (
-                          <Spinner size="sm" />
-                        ) : orgData ? (
-                          <Link
-                            to={ROUTES.ORGANIZATION_DETAIL.replace(
-                              ':id',
-                              orgData.id
-                            )}
-                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                          >
-                            {orgData.name || orgData.displayName}
-                          </Link>
-                        ) : vdcData?.org ? (
-                          <Link
-                            to={ROUTES.ORGANIZATION_DETAIL.replace(
-                              ':id',
-                              vdcData.org.id
-                            )}
-                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                          >
-                            {vdcData.org.name}
-                          </Link>
-                        ) : vApp.org?.id ? (
-                          <Link
-                            to={ROUTES.ORGANIZATION_DETAIL.replace(
-                              ':id',
-                              vApp.org.id
-                            )}
-                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                          >
-                            {vApp.org.name ||
-                              vApp.org.id ||
-                              'Unknown Organization'}
-                          </Link>
-                        ) : (
-                          'No organization available'
-                        )}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
+                    {/* Only show Organization field for System Administrators */}
+                    {isSystemAdmin && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>Organization</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {vdcLoading ? (
+                            <Spinner size="sm" />
+                          ) : orgData ? (
+                            <Link
+                              to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                ':id',
+                                orgData.id
+                              )}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              {orgData.displayName}
+                            </Link>
+                          ) : vApp.org?.id ? (
+                            <Link
+                              to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                ':id',
+                                vApp.org.id
+                              )}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              {vApp.org.name ||
+                                vApp.org.id ||
+                                'Unknown Organization'}
+                            </Link>
+                          ) : (
+                            'Organization not available'
+                          )}
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                    )}
                   </DescriptionList>
                 </GridItem>
                 <GridItem span={6}>

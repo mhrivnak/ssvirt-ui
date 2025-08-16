@@ -162,10 +162,6 @@ export const generateMockVDCs = (): VDC[] => [
     ],
     isThinProvision: true,
     isEnabled: true,
-    org: {
-      name: 'Engineering',
-      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
-    },
     creationDate: '2024-01-15T10:30:00Z',
     lastModified: '2024-01-15T10:30:00Z',
   },
@@ -201,10 +197,6 @@ export const generateMockVDCs = (): VDC[] => [
     ],
     isThinProvision: false,
     isEnabled: true,
-    org: {
-      name: 'QA',
-      id: 'urn:vcloud:org:87654321-4321-4321-4321-210987654def',
-    },
     creationDate: '2024-01-16T11:30:00Z',
     lastModified: '2024-01-16T11:30:00Z',
   },
