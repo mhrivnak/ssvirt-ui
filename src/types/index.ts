@@ -578,9 +578,11 @@ export interface VApp {
   href: string;
   type: string;
   createdDate: string;
+  createdAt?: string; // Alternative field name from API
   lastModifiedDate: string;
   vms?: VMCloudAPI[];
   networks?: VAppNetwork[];
+  numberOfVMs?: number; // VM count from API response
   owner?: EntityRef;
   org?: EntityRef;
   vdc?: EntityRef;

@@ -891,11 +891,13 @@ const VMs: React.FC = () => {
                               </Link>
                             </div>
                           </Td>
-                          <Td>{vApp.vms?.length || 0} VMs</Td>
+                          <Td>
+                            {vApp.numberOfVMs || vApp.vms?.length || 0} VMs
+                          </Td>
                           <Td>{getVAppStatusBadge(vApp.status)}</Td>
                           <Td>
-                            {vApp.createdDate
-                              ? formatDate(vApp.createdDate)
+                            {vApp.createdAt || vApp.createdDate
+                              ? formatDate(vApp.createdAt || vApp.createdDate)
                               : 'Unknown'}
                           </Td>
                           <Td>
