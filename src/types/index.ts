@@ -581,7 +581,7 @@ export interface VApp {
   createdAt?: string; // Alternative field name from API
   lastModifiedDate: string;
   updatedAt?: string; // Alternative field name from API
-  vdcId: string; // VDC URN format - direct reference to VDC
+  vdcId?: string; // VDC URN format - direct reference to VDC (may not always be present)
   vms?: VMCloudAPI[];
   networks?: VAppNetwork[];
   numberOfVMs?: number; // VM count from API response

@@ -117,12 +117,20 @@ const VAppDetail: React.FC = () => {
 
   // Fetch VDC details when vApp data is available
   useEffect(() => {
-    if (!vApp?.vdcId) return;
+    if (!vApp) return;
+    
+    // Try to get VDC ID from either vdcId field or vdc.id field
+    const vdcId = vApp.vdcId || vApp.vdc?.id;
+    
+    if (!vdcId) {
+      console.log('No VDC ID found in vApp data');
+      return;
+    }
 
     const fetchVDCDetails = async () => {
       setVdcLoading(true);
       try {
-        const vdc = await VDCService.getVDC(vApp.vdcId);
+        const vdc = await VDCService.getVDC(vdcId);
         setVdcData(vdc);
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
@@ -133,7 +141,7 @@ const VAppDetail: React.FC = () => {
     };
 
     fetchVDCDetails();
-  }, [vApp?.vdcId]);
+  }, [vApp?.vdcId, vApp?.vdc?.id]);
 
   // Fetch VM details for all VMs in the vApp
   useEffect(() => {
@@ -348,7 +356,7 @@ const VAppDetail: React.FC = () => {
                 {vApp.name}
               </Title>
               <p className="pf-v6-u-color-200">
-                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || 'Unknown VDC')}
+                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || `Unknown VDC (vdcId: ${vApp.vdcId || 'missing'}, vdc.id: ${vApp.vdc?.id || 'missing'})`)}
               </p>
             </SplitItem>
             <SplitItem>
@@ -418,7 +426,7 @@ const VAppDetail: React.FC = () => {
                             {vApp.vdc.name || vApp.vdc.id || 'Unknown VDC'}
                           </Link>
                         ) : (
-                          'No VDC specified'
+                          `No VDC specified (vdcId: ${vApp.vdcId || 'missing'}, vdc.id: ${vApp.vdc?.id || 'missing'})`
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -450,7 +458,7 @@ const VAppDetail: React.FC = () => {
                               'Unknown Organization'}
                           </Link>
                         ) : (
-                          'No organization specified'
+                          `No organization specified (vdc.org: ${vdcData?.org?.name || 'missing'}, vapp.org: ${vApp.org?.name || 'missing'})`
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
