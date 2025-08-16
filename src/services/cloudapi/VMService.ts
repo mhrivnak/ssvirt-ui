@@ -72,10 +72,17 @@ export class VMService {
    * Get vApp details and status
    * Used for monitoring the creation progress and getting container information
    * @param vappId The vApp URN
+   * @param options Optional request options including AbortSignal
    */
-  static async getVApp(vappId: string): Promise<VApp> {
+  static async getVApp(
+    vappId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<VApp> {
     const response = await cloudApi.get<VApp>(
-      `/1.0.0/vapps/${encodeURIComponent(vappId)}`
+      `/1.0.0/vapps/${encodeURIComponent(vappId)}`,
+      {
+        signal: options?.signal,
+      }
     );
     return response.data;
   }
@@ -84,10 +91,17 @@ export class VMService {
    * Get VM details
    * Provides detailed information about a specific VM within a vApp
    * @param vmId The VM URN
+   * @param options Optional request options including AbortSignal
    */
-  static async getVM(vmId: string): Promise<VMCloudAPI> {
+  static async getVM(
+    vmId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<VMCloudAPI> {
     const response = await cloudApi.get<VMCloudAPI>(
-      `/1.0.0/vms/${encodeURIComponent(vmId)}`
+      `/1.0.0/vms/${encodeURIComponent(vmId)}`,
+      {
+        signal: options?.signal,
+      }
     );
     return response.data;
   }

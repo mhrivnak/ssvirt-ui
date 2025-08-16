@@ -88,9 +88,16 @@ const VAppDetail: React.FC = () => {
 
   const { operations: powerOperations } = usePowerOperationTracking();
 
-  // State change detection for visual indicators
+  // State change detection for visual indicators with derived fields
+  const derivedVApp = vApp
+    ? {
+        ...vApp,
+        vmsCount: vApp.vms?.length ?? 0,
+      }
+    : undefined;
+
   const { changedFields } = useStateChangeDetection(
-    vApp as Record<string, unknown> | undefined,
+    derivedVApp as Record<string, unknown> | undefined,
     ['status', 'powerState', 'deployed', 'vmsCount']
   );
 

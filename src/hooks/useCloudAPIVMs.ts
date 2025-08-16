@@ -175,7 +175,7 @@ export const useVMDetailsWithAutoRefresh = (
 
   return useQuery({
     queryKey: QUERY_KEYS.cloudApiVM(vmId || ''),
-    queryFn: () => VMService.getVM(vmId!),
+    queryFn: ({ signal }) => VMService.getVM(vmId!, { signal }),
     enabled: !!vmId,
     refetchInterval: autoRefresh ? refetchInterval : false,
     refetchIntervalInBackground: false, // Pause when tab is not active

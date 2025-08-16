@@ -29,8 +29,19 @@ export function useAutoRefreshState(
   defaultEnabled = true
 ): [boolean, (enabled: boolean) => void] {
   const [isEnabled, setIsEnabled] = useState(() => {
-    const stored = localStorage.getItem(storageKey);
-    return stored ? JSON.parse(stored) : defaultEnabled;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (!stored) return defaultEnabled;
+      return JSON.parse(stored);
+    } catch (error) {
+      // Clear corrupted value and return default
+      localStorage.removeItem(storageKey);
+      console.warn(
+        `Failed to parse localStorage value for ${storageKey}:`,
+        error
+      );
+      return defaultEnabled;
+    }
   });
 
   const setEnabled = (enabled: boolean) => {

@@ -41,7 +41,7 @@ export const useVAppWithAutoRefresh = (
 
   return useQuery({
     queryKey: QUERY_KEYS.vapp(id),
-    queryFn: () => VMService.getVApp(id),
+    queryFn: ({ signal }) => VMService.getVApp(id, { signal }),
     enabled: !!id,
     refetchInterval: autoRefresh ? refetchInterval : false,
     refetchIntervalInBackground: false, // Pause when tab is not active

@@ -237,12 +237,12 @@ const optimizePollingQueries = (queryClient: QueryClient) => {
 The implementation will use existing CloudAPI endpoints with optimized request patterns:
 
 **vApp Details Polling**:
-```
+```http
 GET /cloudapi/1.0.0/vApps/{vapp_id}
 ```
 
 **VM Details Polling**:
-```
+```http
 GET /cloudapi/1.0.0/vms/{vm_id}
 ```
 
