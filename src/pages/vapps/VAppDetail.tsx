@@ -64,7 +64,8 @@ import {
 import { transformVMData } from '../../utils/vmTransformers';
 import { VMService } from '../../services/cloudapi/VMService';
 import { VDCPublicService } from '../../services/cloudapi/VDCPublicService';
-import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
+import { OrganizationService } from '../../services/cloudapi/OrganizationService';
+import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC, Organization } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
 interface VMDetailData {
@@ -82,6 +83,8 @@ const VAppDetail: React.FC = () => {
   );
   const [vdcData, setVdcData] = useState<VDC | null>(null);
   const [vdcLoading, setVdcLoading] = useState(false);
+  const [orgData, setOrgData] = useState<Organization | null>(null);
+  const [orgLoading, setOrgLoading] = useState(false);
 
   // Auto-refresh state management
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
@@ -130,8 +133,6 @@ const VAppDetail: React.FC = () => {
       setVdcLoading(true);
       try {
         const vdc = await VDCPublicService.getVDC(vdcId);
-        console.log('VDC data structure:', vdc);
-        console.log('VDC.org field:', vdc.org);
         setVdcData(vdc);
       } catch (error) {
         console.error('Failed to fetch VDC details:', error);
@@ -143,6 +144,32 @@ const VAppDetail: React.FC = () => {
 
     fetchVDCDetails();
   }, [vApp?.vdcId, vApp?.vdc?.id]);
+
+  // Fetch organization details when VDC data is available
+  useEffect(() => {
+    if (!vdcData?.id) return;
+
+    const fetchOrganizationDetails = async () => {
+      setOrgLoading(true);
+      try {
+        // Get all organizations and find the one that contains this VDC
+        const orgsResponse = await OrganizationService.getOrganizations();
+        
+        // For now, we'll use the first organization as we can't easily match VDC to org
+        // In a real scenario, we'd need admin API access or different approach
+        if (orgsResponse.values && orgsResponse.values.length > 0) {
+          setOrgData(orgsResponse.values[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch organization details:', error);
+        setOrgData(null);
+      } finally {
+        setOrgLoading(false);
+      }
+    };
+
+    fetchOrganizationDetails();
+  }, [vdcData?.id]);
 
   // Fetch VM details for all VMs in the vApp
   useEffect(() => {
@@ -434,8 +461,18 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Organization</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vdcLoading ? (
+                        {orgLoading || vdcLoading ? (
                           <Spinner size="sm" />
+                        ) : orgData ? (
+                          <Link
+                            to={ROUTES.ORGANIZATION_DETAIL.replace(
+                              ':id',
+                              orgData.id
+                            )}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {orgData.name || orgData.displayName}
+                          </Link>
                         ) : vdcData?.org ? (
                           <Link
                             to={ROUTES.ORGANIZATION_DETAIL.replace(
@@ -459,7 +496,7 @@ const VAppDetail: React.FC = () => {
                               'Unknown Organization'}
                           </Link>
                         ) : (
-                          `No organization specified (Debug: vdcData=${!!vdcData}, vdcData.org=${JSON.stringify(vdcData?.org)}, vApp.org=${JSON.stringify(vApp.org)})`
+                          'No organization available'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
