@@ -168,19 +168,18 @@ export const handlers = [
 
     // Apply organization filter
     if (organizationId) {
-      vdcs = vdcs.filter((vdc) => vdc.org?.id === organizationId);
+      vdcs = vdcs.filter(() => true);
     }
 
     return HttpResponse.json(createPaginatedResponse(vdcs, page, perPage));
   }),
 
-  http.get(`${BASE_URL}/organizations/:orgId/vdcs`, ({ params, request }) => {
-    const { orgId } = params;
+  http.get(`${BASE_URL}/organizations/:orgId/vdcs`, ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const perPage = parseInt(url.searchParams.get('per_page') || '10');
 
-    const vdcs = generateMockVDCs().filter((vdc) => vdc.org?.id === orgId);
+    const vdcs = generateMockVDCs().filter(() => true);
     return HttpResponse.json(createPaginatedResponse(vdcs, page, perPage));
   }),
 
@@ -505,37 +504,30 @@ export const handlers = [
   }),
 
   // CloudAPI Admin VDCs endpoints (Admin API)
-  http.get('/api/admin/org/:orgId/vdcs', ({ params, request }) => {
-    const { orgId } = params;
-    const decodedOrgId = decodeURIComponent(orgId as string);
+  http.get('/api/admin/org/:orgId/vdcs', ({ request }) => {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '25');
 
     // For admin API, return VDCs for the specific organization
-    const vdcs = generateMockVDCs().filter(
-      (vdc) => vdc.org?.id === decodedOrgId
-    );
+    const vdcs = generateMockVDCs().filter(() => true);
     return HttpResponse.json(
       createCloudApiPaginatedResponse(vdcs, page, pageSize)
     );
   }),
 
   http.get('/api/admin/org/:orgId/vdcs/:vdcId', ({ params }) => {
-    const { orgId, vdcId } = params;
-    const decodedOrgId = decodeURIComponent(orgId as string);
+    const { vdcId } = params;
     const decodedVdcId = decodeURIComponent(vdcId as string);
     const vdcs = generateMockVDCs();
-    const vdc = vdcs.find(
-      (v) => v.id === decodedVdcId && v.org?.id === decodedOrgId
-    );
+    const vdc = vdcs.find((v) => v.id === decodedVdcId);
 
     if (!vdc) {
       return HttpResponse.json(
         {
           error: 'VDC not found',
           message: 'The requested VDC could not be found',
-          details: `VDC with ID ${vdcId} not found in organization ${orgId}`,
+          details: `VDC with ID ${vdcId} not found`,
         },
         { status: 404 }
       );
@@ -757,12 +749,8 @@ export const handlers = [
       // Assign the correct VDC and organization information
       if (targetVdc) {
         vapp.vdc = { id: targetVdc.id, name: targetVdc.name };
-        if (targetVdc.org) {
-          vapp.org = {
-            id: targetVdc.org.id,
-            name: targetVdc.org.name ?? targetVdc.org.id,
-          };
-        }
+        // Note: VDC doesn't include org field per API reference
+        // Organization info would be available through other means in real implementation
       }
 
       // Add to store for consistent access

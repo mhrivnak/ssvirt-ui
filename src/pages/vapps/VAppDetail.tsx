@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -55,6 +55,7 @@ import {
   usePowerOperationTracking,
   useStateChangeDetection,
   useAutoRefreshState,
+  useIsSystemAdmin,
 } from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import {
@@ -62,12 +63,39 @@ import {
   StateChangeIndicator,
 } from '../../components/common';
 import { transformVMData } from '../../utils/vmTransformers';
-import type { VMStatus, VMCloudAPI } from '../../types';
+import { VMService } from '../../services/cloudapi/VMService';
+import { VDCPublicService } from '../../services/cloudapi/VDCPublicService';
+import { VDCAdminService } from '../../services/cloudapi/VDCAdminService';
+import { OrganizationService } from '../../services/cloudapi/OrganizationService';
+import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
+
+interface VMDetailData {
+  vm: VMCloudAPI;
+  hardware?: VMHardwareSection;
+  loading: boolean;
+  error?: string;
+}
 
 const VAppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
+  const [vmDetails, setVmDetails] = useState<Map<string, VMDetailData>>(
+    new Map()
+  );
+  const [vdcData, setVdcData] = useState<VDC | null>(null);
+  const [vdcLoading, setVdcLoading] = useState(false);
+  const [orgData, setOrgData] = useState<{
+    id: string;
+    name: string;
+    displayName: string;
+  } | null>(null);
+
+  // Track attempted fetches to prevent hot loops
+  const attemptedFetches = useRef<Set<string>>(new Set());
+
+  // Get user permissions to determine if they are System Admin
+  const { isSystemAdmin } = useIsSystemAdmin();
 
   // Auto-refresh state management
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
@@ -101,6 +129,192 @@ const VAppDetail: React.FC = () => {
     ['status', 'powerState', 'deployed', 'vmsCount']
   );
 
+  // Fetch VDC details when vApp data is available
+  useEffect(() => {
+    if (!vApp) {
+      setVdcData(null);
+      setOrgData(null);
+      return;
+    }
+
+    // Try to get VDC ID from either vdcId field or vdc.id field
+    const vdcId = vApp.vdcId || vApp.vdc?.id;
+
+    if (!vdcId) {
+      setVdcData(null);
+      setOrgData(null);
+      return;
+    }
+
+    // Create a unique key for this fetch attempt to prevent retries
+    const fetchKey = `${vApp.id}-${vdcId}-${isSystemAdmin}`;
+
+    // Check if we've already attempted this fetch
+    if (attemptedFetches.current.has(fetchKey)) {
+      return;
+    }
+
+    // Mark this fetch as attempted
+    attemptedFetches.current.add(fetchKey);
+
+    let isCancelled = false;
+
+    const fetchVDCDetails = async () => {
+      if (isCancelled) return;
+
+      setVdcLoading(true);
+      try {
+        if (isSystemAdmin) {
+          // For system admins, try to get organization information through admin API
+          // But fall back to public API if it fails
+          try {
+            const orgsResponse = await OrganizationService.getOrganizations();
+
+            if (
+              !isCancelled &&
+              orgsResponse.values &&
+              orgsResponse.values.length > 0
+            ) {
+              // Store the organization data separately since VDC response doesn't include it
+              const firstOrg = orgsResponse.values[0];
+              setOrgData({
+                id: firstOrg.id,
+                name: firstOrg.name,
+                displayName: firstOrg.displayName,
+              });
+
+              // Try to get VDC details from admin API for the first organization
+              try {
+                const vdc = await VDCAdminService.getVDC(
+                  orgsResponse.values[0].id,
+                  vdcId
+                );
+                if (!isCancelled) {
+                  setVdcData(vdc);
+                }
+              } catch (adminError) {
+                console.warn(
+                  'Admin VDC API failed, falling back to public API:',
+                  adminError
+                );
+                // Fallback to public API
+                if (!isCancelled) {
+                  const vdc = await VDCPublicService.getVDC(vdcId);
+                  setVdcData(vdc);
+                }
+              }
+            } else if (!isCancelled) {
+              // No organizations found, use public API
+              const vdc = await VDCPublicService.getVDC(vdcId);
+              setVdcData(vdc);
+            }
+          } catch (orgError) {
+            console.warn(
+              'Failed to fetch organizations, falling back to public VDC API:',
+              orgError
+            );
+            // If organizations API fails, fall back to public VDC API
+            if (!isCancelled) {
+              const vdc = await VDCPublicService.getVDC(vdcId);
+              setVdcData(vdc);
+            }
+          }
+        } else {
+          // For regular users, use public API
+          const vdc = await VDCPublicService.getVDC(vdcId);
+          if (!isCancelled) {
+            setVdcData(vdc);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch VDC details:', error);
+        if (!isCancelled) {
+          setVdcData(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setVdcLoading(false);
+        }
+      }
+    };
+
+    fetchVDCDetails();
+
+    // Cleanup function to prevent state updates if component unmounts or effect re-runs
+    return () => {
+      isCancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vApp?.id, vApp?.vdcId, vApp?.vdc?.id, isSystemAdmin]);
+
+  // Clear attempted fetches cache when vApp changes
+  useEffect(() => {
+    attemptedFetches.current.clear();
+    setOrgData(null);
+  }, [vApp?.id]);
+
+  // Fetch VM details for all VMs in the vApp
+  useEffect(() => {
+    if (!vApp?.vms || vApp.vms.length === 0) return;
+
+    const fetchVMDetails = async () => {
+      const newVmDetails = new Map<string, VMDetailData>();
+
+      for (const vmCloudAPI of vApp.vms!) {
+        const vmId = vmCloudAPI.href
+          ? extractVMIdFromHref(vmCloudAPI.href) || vmCloudAPI.id
+          : vmCloudAPI.id;
+
+        // Check if VM already has the necessary data
+        const hasHardwareData =
+          !!vmCloudAPI.hardware?.numCpus && !!vmCloudAPI.hardware?.memoryMB;
+        const hasCreatedDate =
+          !!vmCloudAPI.createdAt || !!vmCloudAPI.createdDate;
+
+        // If VM already has all necessary data, use it directly
+        if (hasHardwareData && hasCreatedDate) {
+          newVmDetails.set(vmId, {
+            vm: vmCloudAPI,
+            hardware: undefined, // Hardware data is embedded in the VM object
+            loading: false,
+          });
+          continue;
+        }
+
+        // Initialize loading state for VMs that need additional data
+        newVmDetails.set(vmId, {
+          vm: vmCloudAPI,
+          loading: true,
+        });
+
+        try {
+          // Fetch VM details and hardware in parallel
+          const [vmDetail, vmHardware] = await Promise.all([
+            VMService.getVM(vmId),
+            VMService.getVMHardware(vmId).catch(() => undefined), // Hardware might not be available
+          ]);
+
+          newVmDetails.set(vmId, {
+            vm: vmDetail,
+            hardware: vmHardware,
+            loading: false,
+          });
+        } catch (error) {
+          console.error(`Failed to fetch details for VM ${vmId}:`, error);
+          newVmDetails.set(vmId, {
+            vm: vmCloudAPI, // Fallback to original data
+            loading: false,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      setVmDetails(newVmDetails);
+    };
+
+    fetchVMDetails();
+  }, [vApp?.vms]);
+
   const getStatusBadge = (status: VMStatus) => {
     const statusConfig = {
       POWERED_ON: { color: 'green' as const, icon: PlayIcon },
@@ -127,6 +341,31 @@ const VAppDetail: React.FC = () => {
     );
   };
 
+  const getVAppStatusBadge = (status: string) => {
+    const statusConfig = {
+      INSTANTIATING: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      RESOLVED: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      DEPLOYED: { color: 'green' as const, icon: PlayIcon },
+      POWERED_ON: { color: 'green' as const, icon: PlayIcon },
+      POWERED_OFF: { color: 'red' as const, icon: PowerOffIcon },
+      MIXED: { color: 'orange' as const, icon: ExclamationTriangleIcon },
+      FAILED: { color: 'red' as const, icon: ExclamationTriangleIcon },
+      UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      color: 'grey' as const,
+      icon: ExclamationTriangleIcon,
+    };
+    const IconComponent = config.icon;
+
+    return (
+      <Label color={config.color} icon={<IconComponent />}>
+        {status}
+      </Label>
+    );
+  };
+
   const formatMemory = (memoryMb: number) => {
     if (memoryMb >= 1024) {
       return `${(memoryMb / 1024).toFixed(1)} GB`;
@@ -142,6 +381,14 @@ const VAppDetail: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const getCPUFromVM = (vm: VMCloudAPI): number => {
+    return vm.hardware?.numCpus || 0;
+  };
+
+  const getMemoryFromVM = (vm: VMCloudAPI): number => {
+    return vm.hardware?.memoryMB || 0;
   };
 
   const extractVMIdFromHref = (href: string): string | null => {
@@ -231,7 +478,10 @@ const VAppDetail: React.FC = () => {
                 {vApp.name}
               </Title>
               <p className="pf-v6-u-color-200">
-                vApp in {vApp.vdc?.name || 'Unknown VDC'}
+                vApp in{' '}
+                {vdcLoading
+                  ? 'Loading VDC...'
+                  : vdcData?.name || vApp.vdc?.name || 'Unknown VDC'}
               </p>
             </SplitItem>
             <SplitItem>
@@ -284,36 +534,62 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>VDC</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.vdc?.id ? (
+                        {vdcLoading ? (
+                          <Spinner size="sm" />
+                        ) : vdcData ? (
+                          <Link
+                            to={ROUTES.VDC_DETAIL.replace(':id', vdcData.id)}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {vdcData.name}
+                          </Link>
+                        ) : vApp.vdc?.id ? (
                           <Link
                             to={ROUTES.VDC_DETAIL.replace(':id', vApp.vdc.id)}
                             className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                           >
-                            {vApp.vdc.name || 'Unknown'}
+                            {vApp.vdc.name || vApp.vdc.id || 'Unknown VDC'}
                           </Link>
                         ) : (
-                          vApp.vdc?.name || 'Unknown'
+                          'No VDC specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Organization</DescriptionListTerm>
-                      <DescriptionListDescription>
-                        {vApp.org?.id ? (
-                          <Link
-                            to={ROUTES.ORGANIZATION_DETAIL.replace(
-                              ':id',
-                              vApp.org.id
-                            )}
-                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                          >
-                            {vApp.org.name || 'Unknown'}
-                          </Link>
-                        ) : (
-                          vApp.org?.name || 'Unknown'
-                        )}
-                      </DescriptionListDescription>
-                    </DescriptionListGroup>
+                    {/* Only show Organization field for System Administrators */}
+                    {isSystemAdmin && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>Organization</DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {vdcLoading ? (
+                            <Spinner size="sm" />
+                          ) : orgData ? (
+                            <Link
+                              to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                ':id',
+                                orgData.id
+                              )}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              {orgData.displayName}
+                            </Link>
+                          ) : vApp.org?.id ? (
+                            <Link
+                              to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                ':id',
+                                vApp.org.id
+                              )}
+                              className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                            >
+                              {vApp.org.name ||
+                                vApp.org.id ||
+                                'Unknown Organization'}
+                            </Link>
+                          ) : (
+                            'Organization not available'
+                          )}
+                        </DescriptionListDescription>
+                      </DescriptionListGroup>
+                    )}
                   </DescriptionList>
                 </GridItem>
                 <GridItem span={6}>
@@ -324,11 +600,9 @@ const VAppDetail: React.FC = () => {
                         <StateChangeIndicator
                           isChanged={changedFields.has('status')}
                         >
-                          {vApp.status ? (
-                            <Label color="blue">{vApp.status}</Label>
-                          ) : (
-                            'Unknown'
-                          )}
+                          {vApp.status
+                            ? getVAppStatusBadge(vApp.status)
+                            : 'Unknown'}
                         </StateChangeIndicator>
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -345,16 +619,16 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Created</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.createdDate
-                          ? formatDate(vApp.createdDate)
+                        {vApp.createdAt || vApp.createdDate
+                          ? formatDate(vApp.createdAt || vApp.createdDate)
                           : 'Unknown'}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Modified</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.lastModifiedDate
-                          ? formatDate(vApp.lastModifiedDate)
+                        {vApp.updatedAt || vApp.lastModifiedDate
+                          ? formatDate(vApp.updatedAt || vApp.lastModifiedDate)
                           : 'Unknown'}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -399,11 +673,25 @@ const VAppDetail: React.FC = () => {
                           </Thead>
                           <Tbody>
                             {vApp.vms.map((vmCloudAPI) => {
-                              const vm = transformVMData(vmCloudAPI);
                               const vmId = vmCloudAPI.href
                                 ? extractVMIdFromHref(vmCloudAPI.href) ||
                                   vmCloudAPI.id
                                 : vmCloudAPI.id;
+
+                              const vmDetailData = vmDetails.get(vmId);
+                              const vm = transformVMData(vmCloudAPI);
+
+                              // Use detailed VM data if available, otherwise fallback to original
+                              const detailedVM = vmDetailData?.vm || vmCloudAPI;
+                              const isLoading = vmDetailData?.loading ?? true;
+
+                              // Use the detailed VM data which should have hardware info embedded
+
+                              // Create VM for actions with most up-to-date data
+                              const vmForActions = {
+                                ...vm,
+                                ...transformVMData(detailedVM),
+                              };
 
                               // Add defensive check for VM data
                               if (!vm || !vm.id) {
@@ -424,25 +712,49 @@ const VAppDetail: React.FC = () => {
                                         to={`/vms/${encodeURIComponent(vmId)}`}
                                         className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                       >
-                                        <strong>{vmCloudAPI.name}</strong>
+                                        <strong>{detailedVM.name}</strong>
                                       </Link>
                                     </div>
                                   </Td>
-                                  <Td>{getStatusBadge(vmCloudAPI.status)}</Td>
+                                  <Td>{getStatusBadge(detailedVM.status)}</Td>
                                   <Td>
-                                    {vm.cpu_count
-                                      ? `${vm.cpu_count} cores`
-                                      : 'N/A'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : (
+                                      (() => {
+                                        const cpuCount =
+                                          getCPUFromVM(detailedVM);
+                                        return cpuCount > 0
+                                          ? `${cpuCount} cores`
+                                          : 'N/A';
+                                      })()
+                                    )}
                                   </Td>
                                   <Td>
-                                    {vm.memory_mb
-                                      ? formatMemory(vm.memory_mb)
-                                      : 'N/A'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : (
+                                      (() => {
+                                        const memoryMb =
+                                          getMemoryFromVM(detailedVM);
+                                        return memoryMb > 0
+                                          ? formatMemory(memoryMb)
+                                          : 'N/A';
+                                      })()
+                                    )}
                                   </Td>
                                   <Td>
-                                    {vmCloudAPI.createdDate
-                                      ? formatDate(vmCloudAPI.createdDate)
-                                      : 'Unknown'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : detailedVM.createdAt ||
+                                      detailedVM.createdDate ? (
+                                      formatDate(
+                                        detailedVM.createdAt ||
+                                          detailedVM.createdDate
+                                      )
+                                    ) : (
+                                      'Unknown'
+                                    )}
                                   </Td>
                                   <Td>
                                     <div
@@ -453,12 +765,12 @@ const VAppDetail: React.FC = () => {
                                       }}
                                     >
                                       <VMPowerActions
-                                        vm={vm}
+                                        vm={vmForActions}
                                         variant="dropdown"
                                         size="sm"
                                       />
                                       <ActionsColumn
-                                        items={getVMActions(vmCloudAPI)}
+                                        items={getVMActions(detailedVM)}
                                       />
                                     </div>
                                   </Td>

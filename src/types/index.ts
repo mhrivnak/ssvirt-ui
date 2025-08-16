@@ -281,10 +281,6 @@ export interface VDC {
   isThinProvision: boolean;
   isEnabled: boolean;
   // Standard CloudAPI fields
-  org?: {
-    name: string;
-    id: string;
-  };
   creationDate?: string;
   lastModified?: string;
   status?: number;
@@ -580,6 +576,8 @@ export interface VApp {
   createdDate: string;
   createdAt?: string; // Alternative field name from API
   lastModifiedDate: string;
+  updatedAt?: string; // Alternative field name from API
+  vdcId?: string; // VDC URN format - direct reference to VDC (may not always be present)
   vms?: VMCloudAPI[];
   networks?: VAppNetwork[];
   numberOfVMs?: number; // VM count from API response
@@ -635,6 +633,13 @@ export interface CreateVAppFormData {
   vdcId: string;
 }
 
+// VM Hardware for ssvirt API
+export interface VMHardware {
+  numCpus: number;
+  coresPerSocket: number;
+  memoryMB: number;
+}
+
 // Enhanced VM interface for CloudAPI
 export interface VMCloudAPI {
   id: string; // URN format
@@ -644,9 +649,13 @@ export interface VMCloudAPI {
   href: string;
   type: string;
   createdDate: string;
+  createdAt?: string; // ssvirt API uses this field
   lastModifiedDate: string;
 
-  // Hardware details
+  // Hardware details - ssvirt API format
+  hardware?: VMHardware;
+
+  // Legacy vCloud Director hardware details (for backward compatibility)
   virtualHardwareSection?: VMHardwareSection;
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
