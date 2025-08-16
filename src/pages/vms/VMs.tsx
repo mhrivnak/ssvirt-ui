@@ -220,7 +220,7 @@ const VMs: React.FC = () => {
   // Calculate totals
   const totalVApps = filteredVApps.length;
   const totalVMs = filteredVApps.reduce(
-    (sum, vApp) => sum + (vApp.numberOfVMs || vApp.vms?.length || 0),
+    (sum, vApp) => sum + (vApp.numberOfVMs ?? vApp.vms?.length ?? 0),
     0
   );
 
@@ -892,7 +892,7 @@ const VMs: React.FC = () => {
                             </div>
                           </Td>
                           <Td>
-                            {vApp.numberOfVMs || vApp.vms?.length || 0} VMs
+                            {vApp.numberOfVMs ?? vApp.vms?.length ?? 0} VMs
                           </Td>
                           <Td>{getVAppStatusBadge(vApp.status)}</Td>
                           <Td>
