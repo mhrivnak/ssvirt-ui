@@ -581,53 +581,6 @@ export const handlers = [
     return HttpResponse.json(vm);
   }),
 
-  // Get VM hardware configuration
-  http.get(
-    '/cloudapi/1.0.0/vms/:vmUrn/virtualHardwareSection',
-    ({ params }) => {
-      const { vmUrn } = params;
-
-      // Mock hardware section
-      const hardwareSection = {
-        items: [
-          {
-            id: 1,
-            resourceType: 3,
-            elementName: 'CPU',
-            quantity: 2,
-            virtualQuantity: 2,
-            virtualQuantityUnits: 'hertz * 10^6',
-          },
-          {
-            id: 2,
-            resourceType: 4,
-            elementName: 'Memory',
-            quantity: 4096,
-            virtualQuantity: 4096,
-            virtualQuantityUnits: 'byte * 2^20',
-          },
-          {
-            id: 3,
-            resourceType: 17,
-            elementName: 'Hard Disk 1',
-            quantity: 50,
-            virtualQuantity: 50,
-            virtualQuantityUnits: 'byte * 2^30',
-          },
-        ],
-        links: [
-          {
-            rel: 'edit',
-            href: `https://vcd.example.com/cloudapi/1.0.0/vms/${vmUrn}/virtualHardwareSection`,
-            type: 'application/json',
-          },
-        ],
-      };
-
-      return HttpResponse.json(hardwareSection);
-    }
-  ),
-
   // VM Power Operations
   http.post('/cloudapi/1.0.0/vms/:vmUrn/actions/powerOn', () => {
     return HttpResponse.json(
