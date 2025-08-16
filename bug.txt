@@ -1,0 +1,5 @@
+When viewing a VM detail view such as this URL: https://ssvirt-ui-ssvirt.apps.qe1.kni.eng.rdu2.dc.redhat.com/vms/urn%3Avcloud%3Avm%3A19d891f5-3c9e-433c-ba3c-6cf37750c538
+
+If I use the power on or power off feature, after the modal pops up and I click
+the button, the whole page goes blank. I can also see an error in the chrome
+console, which you can see in the file console.log

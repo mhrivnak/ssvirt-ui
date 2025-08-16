@@ -203,12 +203,15 @@ const VMDetail: React.FC = () => {
       UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || {
+      color: 'grey' as const,
+      icon: ExclamationTriangleIcon,
+    };
     const IconComponent = config.icon;
 
     return (
       <Label color={config.color} icon={<IconComponent />}>
-        {VM_STATUS_LABELS[status]}
+        {VM_STATUS_LABELS[status] || status}
       </Label>
     );
   };
