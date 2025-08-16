@@ -633,6 +633,13 @@ export interface CreateVAppFormData {
   vdcId: string;
 }
 
+// VM Hardware for ssvirt API
+export interface VMHardware {
+  numCpus: number;
+  coresPerSocket: number;
+  memoryMB: number;
+}
+
 // Enhanced VM interface for CloudAPI
 export interface VMCloudAPI {
   id: string; // URN format
@@ -642,9 +649,13 @@ export interface VMCloudAPI {
   href: string;
   type: string;
   createdDate: string;
+  createdAt?: string; // ssvirt API uses this field
   lastModifiedDate: string;
 
-  // Hardware details
+  // Hardware details - ssvirt API format
+  hardware?: VMHardware;
+
+  // Legacy vCloud Director hardware details (for backward compatibility)
   virtualHardwareSection?: VMHardwareSection;
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;

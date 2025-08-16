@@ -787,111 +787,63 @@ export const generateMockVApp = (
       { suffix: '02', cpus: 4, memory: 8192 },
     ];
 
-    vapp.vms = vmConfigs.map((config) => ({
-      id: `${vmId}-${config.suffix}`,
-      name: `${vmName}-${config.suffix}`,
-      description: `VM in ${vapp.name}`,
-      status: 'POWERED_ON' as VMStatus,
-      href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(`${vmId}-${config.suffix}`)}`,
-      type: 'application/json',
-      createdDate: new Date().toISOString(),
-      lastModifiedDate: new Date().toISOString(),
-      vapp: { id: vappId, name: vapp.name },
-      vdc: vapp.vdc,
-      org: vapp.org,
-      virtualHardwareSection: {
-        items: [
-          {
-            id: 1,
-            resourceType: 3,
-            elementName: 'CPU',
-            quantity: config.cpus,
-            virtualQuantity: config.cpus,
-            virtualQuantityUnits: 'hertz * 10^6',
-          },
-          {
-            id: 2,
-            resourceType: 4,
-            elementName: 'Memory',
-            quantity: config.memory,
-            virtualQuantity: config.memory,
-            virtualQuantityUnits: 'byte * 2^20',
-          },
-          {
-            id: 3,
-            resourceType: 17,
-            elementName: 'Hard Disk 1',
-            quantity: 50,
-            virtualQuantity: 50,
-            virtualQuantityUnits: 'byte * 2^30',
-          },
-        ],
-        links: [
-          {
-            rel: 'edit',
-            href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(`${vmId}-${config.suffix}`)}/virtualHardwareSection`,
-            type: 'application/json',
-          },
-        ],
-      },
-    }));
+    vapp.vms = vmConfigs.map(
+      (config): VMCloudAPI => ({
+        id: `${vmId}-${config.suffix}`,
+        name: `${vmName}-${config.suffix}`,
+        description: `VM in ${vapp.name}`,
+        status: 'POWERED_ON' as VMStatus,
+        href: `https://vcd.example.com/cloudapi/1.0.0/vms/${encodeURIComponent(`${vmId}-${config.suffix}`)}`,
+        type: 'application/json',
+        createdAt: new Date().toISOString(),
+        createdDate: new Date().toISOString(),
+        lastModifiedDate: new Date().toISOString(),
+        vapp: { id: vappId, name: vapp.name },
+        vdc: vapp.vdc,
+        org: vapp.org,
+        hardware: {
+          numCpus: config.cpus,
+          coresPerSocket: 1,
+          memoryMB: config.memory,
+        },
+      })
+    );
   }
 
   return vapp;
 };
 
 // Mock CloudAPI VM generator
-export const generateMockCloudApiVM = (name?: string): VMCloudAPI => ({
-  id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
-  name: name || 'test-vm',
-  description: 'Mock VM for testing',
-  status: 'INSTANTIATING' as VMStatus,
-  href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id',
-  type: 'application/json',
-  createdDate: new Date().toISOString(),
-  lastModifiedDate: new Date().toISOString(),
-  vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
-  vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
-  org: {
-    id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
-    name: 'Engineering',
-  },
-  virtualHardwareSection: {
-    items: [
-      {
-        id: 1,
-        resourceType: 3,
-        elementName: 'CPU',
-        quantity: 2,
-        virtualQuantity: 2,
-        virtualQuantityUnits: 'hertz * 10^6',
-      },
-      {
-        id: 2,
-        resourceType: 4,
-        elementName: 'Memory',
-        quantity: 4096,
-        virtualQuantity: 4096,
-        virtualQuantityUnits: 'byte * 2^20',
-      },
-      {
-        id: 3,
-        resourceType: 17,
-        elementName: 'Hard Disk 1',
-        quantity: 50,
-        virtualQuantity: 50,
-        virtualQuantityUnits: 'byte * 2^30',
-      },
-    ],
-    links: [
-      {
-        rel: 'edit',
-        href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id/virtualHardwareSection',
-        type: 'application/json',
-      },
-    ],
-  },
-});
+export const generateMockCloudApiVM = (name?: string): VMCloudAPI => {
+  const baseVM: VMCloudAPI = {
+    id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
+    name: name || 'test-vm',
+    description: 'Mock VM for testing',
+    status: 'INSTANTIATING' as VMStatus,
+    href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id',
+    type: 'application/json',
+    createdDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    lastModifiedDate: new Date().toISOString(),
+    vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
+    vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+    org: {
+      id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
+      name: 'Engineering',
+    },
+  };
+
+  // Add specific hardware based on VM name
+  if (name === 'web-server-01') {
+    baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+  } else if (name === 'database-01') {
+    baseVM.hardware = { numCpus: 4, coresPerSocket: 1, memoryMB: 8192 };
+  } else if (name === 'api-server-01') {
+    baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+  }
+
+  return baseVM;
+};
 
 // Mock CloudAPI VMs collection
 export const generateMockCloudApiVMs = (): VMCloudAPI[] => [

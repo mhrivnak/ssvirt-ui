@@ -85,9 +85,11 @@ const VAppDetail: React.FC = () => {
   );
   const [vdcData, setVdcData] = useState<VDC | null>(null);
   const [vdcLoading, setVdcLoading] = useState(false);
-  const [orgData, setOrgData] = useState<{ id: string; name: string; displayName: string } | null>(
-    null
-  );
+  const [orgData, setOrgData] = useState<{
+    id: string;
+    name: string;
+    displayName: string;
+  } | null>(null);
 
   // Track attempted fetches to prevent hot loops
   const attemptedFetches = useRef<Set<string>>(new Set());
@@ -175,7 +177,11 @@ const VAppDetail: React.FC = () => {
             ) {
               // Store the organization data separately since VDC response doesn't include it
               const firstOrg = orgsResponse.values[0];
-              setOrgData({ id: firstOrg.id, name: firstOrg.name, displayName: firstOrg.displayName });
+              setOrgData({
+                id: firstOrg.id,
+                name: firstOrg.name,
+                displayName: firstOrg.displayName,
+              });
 
               // Try to get VDC details from admin API for the first organization
               try {
@@ -259,7 +265,23 @@ const VAppDetail: React.FC = () => {
           ? extractVMIdFromHref(vmCloudAPI.href) || vmCloudAPI.id
           : vmCloudAPI.id;
 
-        // Initialize loading state
+        // Check if VM already has the necessary data
+        const hasHardwareData =
+          !!vmCloudAPI.hardware?.numCpus && !!vmCloudAPI.hardware?.memoryMB;
+        const hasCreatedDate =
+          !!vmCloudAPI.createdAt || !!vmCloudAPI.createdDate;
+
+        // If VM already has all necessary data, use it directly
+        if (hasHardwareData && hasCreatedDate) {
+          newVmDetails.set(vmId, {
+            vm: vmCloudAPI,
+            hardware: undefined, // Hardware data is embedded in the VM object
+            loading: false,
+          });
+          continue;
+        }
+
+        // Initialize loading state for VMs that need additional data
         newVmDetails.set(vmId, {
           vm: vmCloudAPI,
           loading: true,
@@ -361,16 +383,12 @@ const VAppDetail: React.FC = () => {
     });
   };
 
-  const getCPUFromHardware = (hardware?: VMHardwareSection): number => {
-    if (!hardware?.items) return 0;
-    const cpuItem = hardware.items.find((item) => item.resourceType === 3);
-    return cpuItem?.virtualQuantity || 0;
+  const getCPUFromVM = (vm: VMCloudAPI): number => {
+    return vm.hardware?.numCpus || 0;
   };
 
-  const getMemoryFromHardware = (hardware?: VMHardwareSection): number => {
-    if (!hardware?.items) return 0;
-    const memoryItem = hardware.items.find((item) => item.resourceType === 4);
-    return memoryItem?.virtualQuantity || 0;
+  const getMemoryFromVM = (vm: VMCloudAPI): number => {
+    return vm.hardware?.memoryMB || 0;
   };
 
   const extractVMIdFromHref = (href: string): string | null => {
@@ -665,20 +683,14 @@ const VAppDetail: React.FC = () => {
 
                               // Use detailed VM data if available, otherwise fallback to original
                               const detailedVM = vmDetailData?.vm || vmCloudAPI;
-                              const hardware = vmDetailData?.hardware;
                               const isLoading = vmDetailData?.loading ?? true;
 
-                              // Create effective hardware with fallbacks
-                              const effectiveHardware =
-                                hardware || detailedVM.virtualHardwareSection;
+                              // Use the detailed VM data which should have hardware info embedded
 
-                              // Create VM for actions with most up-to-date data and hardware fallback
+                              // Create VM for actions with most up-to-date data
                               const vmForActions = {
                                 ...vm,
-                                ...transformVMData({
-                                  ...detailedVM,
-                                  virtualHardwareSection: effectiveHardware,
-                                }),
+                                ...transformVMData(detailedVM),
                               };
 
                               // Add defensive check for VM data
@@ -711,7 +723,7 @@ const VAppDetail: React.FC = () => {
                                     ) : (
                                       (() => {
                                         const cpuCount =
-                                          getCPUFromHardware(effectiveHardware);
+                                          getCPUFromVM(detailedVM);
                                         return cpuCount > 0
                                           ? `${cpuCount} cores`
                                           : 'N/A';
@@ -724,9 +736,7 @@ const VAppDetail: React.FC = () => {
                                     ) : (
                                       (() => {
                                         const memoryMb =
-                                          getMemoryFromHardware(
-                                            effectiveHardware
-                                          );
+                                          getMemoryFromVM(detailedVM);
                                         return memoryMb > 0
                                           ? formatMemory(memoryMb)
                                           : 'N/A';
@@ -736,8 +746,12 @@ const VAppDetail: React.FC = () => {
                                   <Td>
                                     {isLoading ? (
                                       <Spinner size="sm" />
-                                    ) : detailedVM.createdDate ? (
-                                      formatDate(detailedVM.createdDate)
+                                    ) : detailedVM.createdAt ||
+                                      detailedVM.createdDate ? (
+                                      formatDate(
+                                        detailedVM.createdAt ||
+                                          detailedVM.createdDate
+                                      )
                                     ) : (
                                       'Unknown'
                                     )}
