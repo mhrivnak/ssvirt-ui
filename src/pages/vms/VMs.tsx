@@ -220,7 +220,7 @@ const VMs: React.FC = () => {
   // Calculate totals
   const totalVApps = filteredVApps.length;
   const totalVMs = filteredVApps.reduce(
-    (sum, vApp) => sum + (vApp.vms?.length || 0),
+    (sum, vApp) => sum + (vApp.numberOfVMs || vApp.vms?.length || 0),
     0
   );
 
