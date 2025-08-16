@@ -63,7 +63,8 @@ import {
 } from '../../components/common';
 import { transformVMData } from '../../utils/vmTransformers';
 import { VMService } from '../../services/cloudapi/VMService';
-import type { VMStatus, VMCloudAPI, VMHardwareSection } from '../../types';
+import { VDCService } from '../../services/cloudapi/VDCService';
+import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
 interface VMDetailData {
@@ -79,6 +80,8 @@ const VAppDetail: React.FC = () => {
   const [vmDetails, setVmDetails] = useState<Map<string, VMDetailData>>(
     new Map()
   );
+  const [vdcData, setVdcData] = useState<VDC | null>(null);
+  const [vdcLoading, setVdcLoading] = useState(false);
 
   // Auto-refresh state management
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
@@ -111,6 +114,26 @@ const VAppDetail: React.FC = () => {
     derivedVApp as Record<string, unknown> | undefined,
     ['status', 'powerState', 'deployed', 'vmsCount']
   );
+
+  // Fetch VDC details when vApp data is available
+  useEffect(() => {
+    if (!vApp?.vdcId) return;
+
+    const fetchVDCDetails = async () => {
+      setVdcLoading(true);
+      try {
+        const vdc = await VDCService.getVDC(vApp.vdcId);
+        setVdcData(vdc);
+      } catch (error) {
+        console.error('Failed to fetch VDC details:', error);
+        setVdcData(null);
+      } finally {
+        setVdcLoading(false);
+      }
+    };
+
+    fetchVDCDetails();
+  }, [vApp?.vdcId]);
 
   // Fetch VM details for all VMs in the vApp
   useEffect(() => {
@@ -325,7 +348,7 @@ const VAppDetail: React.FC = () => {
                 {vApp.name}
               </Title>
               <p className="pf-v6-u-color-200">
-                vApp in {vApp.vdc?.name || 'Unknown VDC'}
+                vApp in {vdcLoading ? 'Loading VDC...' : (vdcData?.name || vApp.vdc?.name || 'Unknown VDC')}
               </p>
             </SplitItem>
             <SplitItem>
@@ -378,7 +401,16 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>VDC</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.vdc?.id ? (
+                        {vdcLoading ? (
+                          <Spinner size="sm" />
+                        ) : vdcData ? (
+                          <Link
+                            to={ROUTES.VDC_DETAIL.replace(':id', vdcData.id)}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {vdcData.name}
+                          </Link>
+                        ) : vApp.vdc?.id ? (
                           <Link
                             to={ROUTES.VDC_DETAIL.replace(':id', vApp.vdc.id)}
                             className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
@@ -386,14 +418,26 @@ const VAppDetail: React.FC = () => {
                             {vApp.vdc.name || vApp.vdc.id || 'Unknown VDC'}
                           </Link>
                         ) : (
-                          vApp.vdc?.name || 'No VDC specified'
+                          'No VDC specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Organization</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.org?.id ? (
+                        {vdcLoading ? (
+                          <Spinner size="sm" />
+                        ) : vdcData?.org ? (
+                          <Link
+                            to={ROUTES.ORGANIZATION_DETAIL.replace(
+                              ':id',
+                              vdcData.org.id
+                            )}
+                            className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                          >
+                            {vdcData.org.name}
+                          </Link>
+                        ) : vApp.org?.id ? (
                           <Link
                             to={ROUTES.ORGANIZATION_DETAIL.replace(
                               ':id',
@@ -406,7 +450,7 @@ const VAppDetail: React.FC = () => {
                               'Unknown Organization'}
                           </Link>
                         ) : (
-                          vApp.org?.name || 'No organization specified'
+                          'No organization specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
