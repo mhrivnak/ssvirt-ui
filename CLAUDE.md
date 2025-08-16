@@ -5,5 +5,5 @@
 - Do not push changes to the main branch without confirmation.
 - Run tests, lint, and format checking before commiting code.
 - Do not commit code that has any `TODO` or similar comments. You must implement any missing code before commit.
-
 - do not look at or consider any API documentation that was created by or is served by broadcom or vmware.
+- use this link for API documentation unless given specific instructions otherwise: https://raw.githubusercontent.com/mhrivnak/ssvirt/refs/heads/main/docs/api-reference.md
