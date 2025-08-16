@@ -163,3 +163,6 @@ export {
   useVisibilityAwarePolling,
   useAutoRefreshState,
 } from './useVisibilityAwarePolling';
+
+// Export session storage hooks
+export { useSessionStorage, useVAppsSessionFilters } from './useSessionStorage';

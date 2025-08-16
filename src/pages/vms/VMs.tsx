@@ -67,6 +67,7 @@ import {
   usePowerOperationTracking,
   useDeleteVApp,
   useUserPermissions,
+  useVAppsSessionFilters,
 } from '../../hooks';
 import {
   VMPowerActions,
@@ -113,12 +114,16 @@ const defaultPresets: FilterPreset[] = [
 const VMs: React.FC = () => {
   const navigate = useNavigate();
 
-  // State management
+  // Session storage for persistence
+  const { persistedFilters, updateOrganization, updateVDC } =
+    useVAppsSessionFilters();
+
+  // State management - initialize with persisted values
   const [filters, setFilters] = useState<VAppFilters>({
     search: '',
     status: '',
-    org_id: '',
-    vdc_id: '',
+    org_id: persistedFilters.org_id,
+    vdc_id: persistedFilters.vdc_id,
   });
   const [selectedVApps, setSelectedVApps] = useState<string[]>([]);
   // Note: Sorting removed for vApp-centric view - could be re-implemented per VDC if needed
@@ -171,7 +176,9 @@ const VMs: React.FC = () => {
   const deleteVAppMutation = useDeleteVApp();
 
   const organizations = orgsResponse?.data || [];
-  const vdcs = vdcsResponse?.values || [];
+  const vdcs = useMemo(() => {
+    return vdcsResponse?.values || [];
+  }, [vdcsResponse]);
   const vApps = useMemo(() => {
     return vAppsResponse?.values || [];
   }, [vAppsResponse]);
@@ -230,16 +237,39 @@ const VMs: React.FC = () => {
     }
   }, []);
 
+  // Auto-select VDC when organization has only one VDC
+  useEffect(() => {
+    if (filters.org_id && vdcs.length === 1 && !filters.vdc_id) {
+      const singleVDC = vdcs[0];
+      updateVDC(singleVDC.id);
+      setFilters((prev) => ({ ...prev, vdc_id: singleVDC.id }));
+    }
+  }, [filters.org_id, vdcs, filters.vdc_id, updateVDC]);
+
+  // Clear VDC when organization changes
+  useEffect(() => {
+    if (filters.org_id !== persistedFilters.org_id) {
+      setFilters((prev) => ({ ...prev, vdc_id: persistedFilters.vdc_id }));
+    }
+  }, [persistedFilters.org_id, persistedFilters.vdc_id, filters.org_id]);
+
   // Clear selections when filters change
   useEffect(() => {
     setSelectedVApps([]);
   }, [filters]);
 
   const handleFilterChange = (key: keyof VAppFilters, value: string) => {
+    if (key === 'org_id') {
+      updateOrganization(value);
+    } else if (key === 'vdc_id') {
+      updateVDC(value);
+    }
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClearFilters = () => {
+    updateOrganization('');
+    updateVDC('');
     setFilters({
       search: '',
       status: '',
