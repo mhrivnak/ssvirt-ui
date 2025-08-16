@@ -50,8 +50,17 @@ import {
   EditIcon,
   TrashIcon,
 } from '@patternfly/react-icons';
-import { useVApp, usePowerOperationTracking } from '../../hooks';
+import {
+  useVAppWithAutoRefresh,
+  usePowerOperationTracking,
+  useStateChangeDetection,
+  useAutoRefreshState,
+} from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
+import {
+  AutoRefreshControls,
+  StateChangeIndicator,
+} from '../../components/common';
 import { transformVMData } from '../../utils/vmTransformers';
 import type { VMStatus, VMCloudAPI } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
@@ -60,9 +69,30 @@ const VAppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
 
-  // Data fetching
-  const { data: vApp, isLoading, error } = useVApp(id!);
+  // Auto-refresh state management
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
+    'vapp-detail-auto-refresh',
+    true
+  );
+
+  // Data fetching with auto-refresh
+  const {
+    data: vApp,
+    isLoading,
+    error,
+    refetch: manualRefresh,
+    dataUpdatedAt,
+  } = useVAppWithAutoRefresh(id!, {
+    autoRefresh: autoRefreshEnabled,
+  });
+
   const { operations: powerOperations } = usePowerOperationTracking();
+
+  // State change detection for visual indicators
+  const { changedFields } = useStateChangeDetection(
+    vApp as Record<string, unknown> | undefined,
+    ['status', 'powerState', 'deployed', 'vmsCount']
+  );
 
   const getStatusBadge = (status: VMStatus) => {
     const statusConfig = {
@@ -211,6 +241,17 @@ const VAppDetail: React.FC = () => {
           </Split>
         </StackItem>
 
+        {/* Auto-refresh Controls */}
+        <StackItem>
+          <AutoRefreshControls
+            isEnabled={autoRefreshEnabled}
+            onToggle={setAutoRefreshEnabled}
+            onManualRefresh={() => manualRefresh()}
+            isLoading={isLoading}
+            lastUpdated={dataUpdatedAt ? new Date(dataUpdatedAt) : null}
+          />
+        </StackItem>
+
         {/* Basic Info Card */}
         <StackItem>
           <Card>
@@ -270,17 +311,25 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Status</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.status ? (
-                          <Label color="blue">{vApp.status}</Label>
-                        ) : (
-                          'Unknown'
-                        )}
+                        <StateChangeIndicator
+                          isChanged={changedFields.has('status')}
+                        >
+                          {vApp.status ? (
+                            <Label color="blue">{vApp.status}</Label>
+                          ) : (
+                            'Unknown'
+                          )}
+                        </StateChangeIndicator>
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>VMs</DescriptionListTerm>
                       <DescriptionListDescription>
-                        <Badge>{vApp.vms?.length || 0} VMs</Badge>
+                        <StateChangeIndicator
+                          isChanged={changedFields.has('vmsCount')}
+                        >
+                          <Badge>{vApp.vms?.length || 0} VMs</Badge>
+                        </StateChangeIndicator>
                       </DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
