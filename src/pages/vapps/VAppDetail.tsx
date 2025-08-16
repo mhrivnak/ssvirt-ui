@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   PageSection,
@@ -62,12 +62,23 @@ import {
   StateChangeIndicator,
 } from '../../components/common';
 import { transformVMData } from '../../utils/vmTransformers';
-import type { VMStatus, VMCloudAPI } from '../../types';
+import { VMService } from '../../services/cloudapi/VMService';
+import type { VMStatus, VMCloudAPI, VMHardwareSection } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
+
+interface VMDetailData {
+  vm: VMCloudAPI;
+  hardware?: VMHardwareSection;
+  loading: boolean;
+  error?: string;
+}
 
 const VAppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTabKey, setActiveTabKey] = useState<string | number>(0);
+  const [vmDetails, setVmDetails] = useState<Map<string, VMDetailData>>(
+    new Map()
+  );
 
   // Auto-refresh state management
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
@@ -100,6 +111,52 @@ const VAppDetail: React.FC = () => {
     derivedVApp as Record<string, unknown> | undefined,
     ['status', 'powerState', 'deployed', 'vmsCount']
   );
+
+  // Fetch VM details for all VMs in the vApp
+  useEffect(() => {
+    if (!vApp?.vms || vApp.vms.length === 0) return;
+
+    const fetchVMDetails = async () => {
+      const newVmDetails = new Map<string, VMDetailData>();
+
+      for (const vmCloudAPI of vApp.vms!) {
+        const vmId = vmCloudAPI.href
+          ? extractVMIdFromHref(vmCloudAPI.href) || vmCloudAPI.id
+          : vmCloudAPI.id;
+
+        // Initialize loading state
+        newVmDetails.set(vmId, {
+          vm: vmCloudAPI,
+          loading: true,
+        });
+
+        try {
+          // Fetch VM details and hardware in parallel
+          const [vmDetail, vmHardware] = await Promise.all([
+            VMService.getVM(vmId),
+            VMService.getVMHardware(vmId).catch(() => undefined), // Hardware might not be available
+          ]);
+
+          newVmDetails.set(vmId, {
+            vm: vmDetail,
+            hardware: vmHardware,
+            loading: false,
+          });
+        } catch (error) {
+          console.error(`Failed to fetch details for VM ${vmId}:`, error);
+          newVmDetails.set(vmId, {
+            vm: vmCloudAPI, // Fallback to original data
+            loading: false,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+
+      setVmDetails(newVmDetails);
+    };
+
+    fetchVMDetails();
+  }, [vApp?.vms]);
 
   const getStatusBadge = (status: VMStatus) => {
     const statusConfig = {
@@ -167,6 +224,18 @@ const VAppDetail: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const getCPUFromHardware = (hardware?: VMHardwareSection): number => {
+    if (!hardware?.items) return 0;
+    const cpuItem = hardware.items.find((item) => item.resourceType === 3);
+    return cpuItem?.virtualQuantity || 0;
+  };
+
+  const getMemoryFromHardware = (hardware?: VMHardwareSection): number => {
+    if (!hardware?.items) return 0;
+    const memoryItem = hardware.items.find((item) => item.resourceType === 4);
+    return memoryItem?.virtualQuantity || 0;
   };
 
   const extractVMIdFromHref = (href: string): string | null => {
@@ -314,10 +383,10 @@ const VAppDetail: React.FC = () => {
                             to={ROUTES.VDC_DETAIL.replace(':id', vApp.vdc.id)}
                             className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                           >
-                            {vApp.vdc.name || 'Unknown'}
+                            {vApp.vdc.name || vApp.vdc.id || 'Unknown VDC'}
                           </Link>
                         ) : (
-                          vApp.vdc?.name || 'Unknown'
+                          vApp.vdc?.name || 'No VDC specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -332,10 +401,12 @@ const VAppDetail: React.FC = () => {
                             )}
                             className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                           >
-                            {vApp.org.name || 'Unknown'}
+                            {vApp.org.name ||
+                              vApp.org.id ||
+                              'Unknown Organization'}
                           </Link>
                         ) : (
-                          vApp.org?.name || 'Unknown'
+                          vApp.org?.name || 'No organization specified'
                         )}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -376,8 +447,8 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Modified</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.lastModifiedDate
-                          ? formatDate(vApp.lastModifiedDate)
+                        {vApp.updatedAt || vApp.lastModifiedDate
+                          ? formatDate(vApp.updatedAt || vApp.lastModifiedDate)
                           : 'Unknown'}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -422,11 +493,18 @@ const VAppDetail: React.FC = () => {
                           </Thead>
                           <Tbody>
                             {vApp.vms.map((vmCloudAPI) => {
-                              const vm = transformVMData(vmCloudAPI);
                               const vmId = vmCloudAPI.href
                                 ? extractVMIdFromHref(vmCloudAPI.href) ||
                                   vmCloudAPI.id
                                 : vmCloudAPI.id;
+
+                              const vmDetailData = vmDetails.get(vmId);
+                              const vm = transformVMData(vmCloudAPI);
+
+                              // Use detailed VM data if available, otherwise fallback to original
+                              const detailedVM = vmDetailData?.vm || vmCloudAPI;
+                              const hardware = vmDetailData?.hardware;
+                              const isLoading = vmDetailData?.loading ?? true;
 
                               // Add defensive check for VM data
                               if (!vm || !vm.id) {
@@ -447,25 +525,45 @@ const VAppDetail: React.FC = () => {
                                         to={`/vms/${encodeURIComponent(vmId)}`}
                                         className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                       >
-                                        <strong>{vmCloudAPI.name}</strong>
+                                        <strong>{detailedVM.name}</strong>
                                       </Link>
                                     </div>
                                   </Td>
-                                  <Td>{getStatusBadge(vmCloudAPI.status)}</Td>
+                                  <Td>{getStatusBadge(detailedVM.status)}</Td>
                                   <Td>
-                                    {vm.cpu_count && vm.cpu_count > 0
-                                      ? `${vm.cpu_count} cores`
-                                      : 'N/A'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : (
+                                      (() => {
+                                        const cpuCount =
+                                          getCPUFromHardware(hardware);
+                                        return cpuCount > 0
+                                          ? `${cpuCount} cores`
+                                          : 'N/A';
+                                      })()
+                                    )}
                                   </Td>
                                   <Td>
-                                    {vm.memory_mb && vm.memory_mb > 0
-                                      ? formatMemory(vm.memory_mb)
-                                      : 'N/A'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : (
+                                      (() => {
+                                        const memoryMb =
+                                          getMemoryFromHardware(hardware);
+                                        return memoryMb > 0
+                                          ? formatMemory(memoryMb)
+                                          : 'N/A';
+                                      })()
+                                    )}
                                   </Td>
                                   <Td>
-                                    {vmCloudAPI.createdDate
-                                      ? formatDate(vmCloudAPI.createdDate)
-                                      : 'Unknown'}
+                                    {isLoading ? (
+                                      <Spinner size="sm" />
+                                    ) : detailedVM.createdDate ? (
+                                      formatDate(detailedVM.createdDate)
+                                    ) : (
+                                      'Unknown'
+                                    )}
                                   </Td>
                                   <Td>
                                     <div
@@ -481,7 +579,7 @@ const VAppDetail: React.FC = () => {
                                         size="sm"
                                       />
                                       <ActionsColumn
-                                        items={getVMActions(vmCloudAPI)}
+                                        items={getVMActions(detailedVM)}
                                       />
                                     </div>
                                   </Td>
