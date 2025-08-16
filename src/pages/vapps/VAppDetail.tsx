@@ -506,6 +506,19 @@ const VAppDetail: React.FC = () => {
                               const hardware = vmDetailData?.hardware;
                               const isLoading = vmDetailData?.loading ?? true;
 
+                              // Create effective hardware with fallbacks
+                              const effectiveHardware =
+                                hardware || detailedVM.virtualHardwareSection;
+
+                              // Create VM for actions with most up-to-date data and hardware fallback
+                              const vmForActions = {
+                                ...vm,
+                                ...transformVMData({
+                                  ...detailedVM,
+                                  virtualHardwareSection: effectiveHardware,
+                                }),
+                              };
+
                               // Add defensive check for VM data
                               if (!vm || !vm.id) {
                                 console.warn(
@@ -536,7 +549,7 @@ const VAppDetail: React.FC = () => {
                                     ) : (
                                       (() => {
                                         const cpuCount =
-                                          getCPUFromHardware(hardware);
+                                          getCPUFromHardware(effectiveHardware);
                                         return cpuCount > 0
                                           ? `${cpuCount} cores`
                                           : 'N/A';
@@ -549,7 +562,9 @@ const VAppDetail: React.FC = () => {
                                     ) : (
                                       (() => {
                                         const memoryMb =
-                                          getMemoryFromHardware(hardware);
+                                          getMemoryFromHardware(
+                                            effectiveHardware
+                                          );
                                         return memoryMb > 0
                                           ? formatMemory(memoryMb)
                                           : 'N/A';
@@ -574,7 +589,7 @@ const VAppDetail: React.FC = () => {
                                       }}
                                     >
                                       <VMPowerActions
-                                        vm={vm}
+                                        vm={vmForActions}
                                         variant="dropdown"
                                         size="sm"
                                       />
