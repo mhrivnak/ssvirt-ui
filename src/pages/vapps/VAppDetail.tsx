@@ -127,6 +127,31 @@ const VAppDetail: React.FC = () => {
     );
   };
 
+  const getVAppStatusBadge = (status: string) => {
+    const statusConfig = {
+      INSTANTIATING: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      RESOLVED: { color: 'blue' as const, icon: ExclamationTriangleIcon },
+      DEPLOYED: { color: 'green' as const, icon: PlayIcon },
+      POWERED_ON: { color: 'green' as const, icon: PlayIcon },
+      POWERED_OFF: { color: 'red' as const, icon: PowerOffIcon },
+      MIXED: { color: 'orange' as const, icon: ExclamationTriangleIcon },
+      FAILED: { color: 'red' as const, icon: ExclamationTriangleIcon },
+      UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      color: 'grey' as const,
+      icon: ExclamationTriangleIcon,
+    };
+    const IconComponent = config.icon;
+
+    return (
+      <Label color={config.color} icon={<IconComponent />}>
+        {status}
+      </Label>
+    );
+  };
+
   const formatMemory = (memoryMb: number) => {
     if (memoryMb >= 1024) {
       return `${(memoryMb / 1024).toFixed(1)} GB`;
@@ -324,11 +349,9 @@ const VAppDetail: React.FC = () => {
                         <StateChangeIndicator
                           isChanged={changedFields.has('status')}
                         >
-                          {vApp.status ? (
-                            <Label color="blue">{vApp.status}</Label>
-                          ) : (
-                            'Unknown'
-                          )}
+                          {vApp.status
+                            ? getVAppStatusBadge(vApp.status)
+                            : 'Unknown'}
                         </StateChangeIndicator>
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -345,8 +368,8 @@ const VAppDetail: React.FC = () => {
                     <DescriptionListGroup>
                       <DescriptionListTerm>Created</DescriptionListTerm>
                       <DescriptionListDescription>
-                        {vApp.createdDate
-                          ? formatDate(vApp.createdDate)
+                        {vApp.createdAt || vApp.createdDate
+                          ? formatDate(vApp.createdAt || vApp.createdDate)
                           : 'Unknown'}
                       </DescriptionListDescription>
                     </DescriptionListGroup>
@@ -430,12 +453,12 @@ const VAppDetail: React.FC = () => {
                                   </Td>
                                   <Td>{getStatusBadge(vmCloudAPI.status)}</Td>
                                   <Td>
-                                    {vm.cpu_count
+                                    {vm.cpu_count && vm.cpu_count > 0
                                       ? `${vm.cpu_count} cores`
                                       : 'N/A'}
                                   </Td>
                                   <Td>
-                                    {vm.memory_mb
+                                    {vm.memory_mb && vm.memory_mb > 0
                                       ? formatMemory(vm.memory_mb)
                                       : 'N/A'}
                                   </Td>
