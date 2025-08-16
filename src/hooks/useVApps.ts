@@ -28,6 +28,32 @@ export const useVApp = (id: string) => {
 };
 
 /**
+ * Hook to fetch a single vApp by ID with auto-refresh support
+ */
+export const useVAppWithAutoRefresh = (
+  id: string,
+  options?: {
+    autoRefresh?: boolean;
+    refetchInterval?: number;
+  }
+) => {
+  const { autoRefresh = true, refetchInterval = 2000 } = options || {};
+
+  return useQuery({
+    queryKey: QUERY_KEYS.vapp(id),
+    queryFn: ({ signal }) => VMService.getVApp(id, { signal }),
+    enabled: !!id,
+    refetchInterval: autoRefresh ? refetchInterval : false,
+    refetchIntervalInBackground: false, // Pause when tab is not active
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 0, // Always consider data stale for real-time updates
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+  });
+};
+
+/**
  * Hook to fetch vApps grouped by VDC
  * Returns a structure that groups vApps by their VDC for easy display
  * Note: This fetches all VDCs first, then gets vApps for each VDC

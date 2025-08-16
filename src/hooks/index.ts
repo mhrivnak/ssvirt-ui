@@ -49,6 +49,7 @@ export {
 export {
   useVApps,
   useVApp,
+  useVAppWithAutoRefresh,
   useVAppsByVDC,
   useVAppsByVDCId,
   useDeleteVApp,
@@ -62,6 +63,7 @@ export {
   useInstantiateTemplate,
   useVAppStatus,
   useVMDetails,
+  useVMDetailsWithAutoRefresh,
   useVMHardware,
   useCloudAPIVMs,
   useVApps as useCloudAPIVApps,
@@ -153,3 +155,11 @@ export {
   useUpdateRole,
   useDeleteRole,
 } from './useRoles';
+
+// Export auto-refresh utility hooks
+export { useStateChangeDetection } from './useStateChangeDetection';
+
+export {
+  useVisibilityAwarePolling,
+  useAutoRefreshState,
+} from './useVisibilityAwarePolling';

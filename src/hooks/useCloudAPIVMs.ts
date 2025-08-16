@@ -162,6 +162,32 @@ export const useVMDetails = (vmId?: string) => {
 };
 
 /**
+ * Hook to get VM details with auto-refresh support
+ */
+export const useVMDetailsWithAutoRefresh = (
+  vmId?: string,
+  options?: {
+    autoRefresh?: boolean;
+    refetchInterval?: number;
+  }
+) => {
+  const { autoRefresh = true, refetchInterval = 2000 } = options || {};
+
+  return useQuery({
+    queryKey: QUERY_KEYS.cloudApiVM(vmId || ''),
+    queryFn: ({ signal }) => VMService.getVM(vmId!, { signal }),
+    enabled: !!vmId,
+    refetchInterval: autoRefresh ? refetchInterval : false,
+    refetchIntervalInBackground: false, // Pause when tab is not active
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 0, // Always consider data stale for real-time updates
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+  });
+};
+
+/**
  * Hook to get VM hardware configuration
  */
 export const useVMHardware = (vmId?: string) => {

@@ -57,13 +57,22 @@ import {
   EllipsisVIcon,
 } from '@patternfly/react-icons';
 import type { MenuToggleElement } from '@patternfly/react-core';
-import { useVMDetails, usePowerOperationTracking } from '../../hooks';
+import {
+  useVMDetailsWithAutoRefresh,
+  usePowerOperationTracking,
+  useStateChangeDetection,
+  useAutoRefreshState,
+} from '../../hooks';
 import { transformVMData } from '../../utils/vmTransformers';
 import {
   VMPowerActions,
   PowerOperationStatus,
   VMConfigurationTab,
 } from '../../components/vms';
+import {
+  AutoRefreshControls,
+  StateChangeIndicator,
+} from '../../components/common';
 import type { VM, VMStatus } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
@@ -139,13 +148,33 @@ const VMDetail: React.FC = () => {
   const [newTag, setNewTag] = useState('');
   const [isAddingTag, setIsAddingTag] = useState(false);
 
-  // Use the CloudAPI to get individual VM details by ID
-  const { data: vmCloudAPI, isLoading, error } = useVMDetails(id);
+  // Auto-refresh state management
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useAutoRefreshState(
+    'vm-detail-auto-refresh',
+    true
+  );
+
+  // Use the CloudAPI to get individual VM details by ID with auto-refresh
+  const {
+    data: vmCloudAPI,
+    isLoading,
+    error,
+    refetch: manualRefresh,
+    dataUpdatedAt,
+  } = useVMDetailsWithAutoRefresh(id, {
+    autoRefresh: autoRefreshEnabled,
+  });
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
 
   // Transform CloudAPI VM to legacy format
   const vm = vmCloudAPI ? transformVMData(vmCloudAPI) : localVM || undefined;
   const { operations: powerOperations } = usePowerOperationTracking();
+
+  // State change detection for visual indicators
+  const { changedFields } = useStateChangeDetection(
+    vmCloudAPI as Record<string, unknown> | undefined,
+    ['status', 'deployed', 'guestOs', 'cpuCount', 'memoryMb']
+  );
 
   // Initialize local VM state when fetched VM changes
   useEffect(() => {
@@ -174,12 +203,15 @@ const VMDetail: React.FC = () => {
       UNKNOWN: { color: 'grey' as const, icon: ExclamationTriangleIcon },
     };
 
-    const config = statusConfig[status];
+    const config = statusConfig[status] || {
+      color: 'grey' as const,
+      icon: ExclamationTriangleIcon,
+    };
     const IconComponent = config.icon;
 
     return (
       <Label color={config.color} icon={<IconComponent />}>
-        {VM_STATUS_LABELS[status]}
+        {VM_STATUS_LABELS[status] || status}
       </Label>
     );
   };
@@ -290,7 +322,13 @@ const VMDetail: React.FC = () => {
                 </StackItem>
                 <StackItem>
                   <Flex spaceItems={{ default: 'spaceItemsSm' }}>
-                    <FlexItem>{getStatusBadge(vm.status)}</FlexItem>
+                    <FlexItem>
+                      <StateChangeIndicator
+                        isChanged={changedFields.has('status')}
+                      >
+                        {getStatusBadge(vm.status)}
+                      </StateChangeIndicator>
+                    </FlexItem>
                     <FlexItem>
                       <span className="pf-v6-u-color-200">VM ID: {vm.id}</span>
                     </FlexItem>
@@ -339,6 +377,17 @@ const VMDetail: React.FC = () => {
               </Flex>
             </SplitItem>
           </Split>
+        </StackItem>
+
+        {/* Auto-refresh Controls */}
+        <StackItem>
+          <AutoRefreshControls
+            isEnabled={autoRefreshEnabled}
+            onToggle={setAutoRefreshEnabled}
+            onManualRefresh={() => manualRefresh()}
+            isLoading={isLoading}
+            lastUpdated={dataUpdatedAt ? new Date(dataUpdatedAt) : null}
+          />
         </StackItem>
 
         {/* Main Content */}
