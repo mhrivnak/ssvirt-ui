@@ -62,6 +62,9 @@ import {
   usePowerOperationTracking,
   useStateChangeDetection,
   useAutoRefreshState,
+  useVDC,
+  useOrganization,
+  useIsSystemAdmin,
 } from '../../hooks';
 import { transformVMData } from '../../utils/vmTransformers';
 import {
@@ -164,6 +167,19 @@ const VMDetail: React.FC = () => {
   } = useVMDetailsWithAutoRefresh(id, {
     autoRefresh: autoRefreshEnabled,
   });
+
+  // Get VDC details to show displayName
+  const { data: vdcData, isLoading: isVDCLoading } = useVDC(
+    vmCloudAPI?.vdc?.id || ''
+  );
+
+  // Get Organization details to show displayName (System Admin only)
+  const { data: orgData, isLoading: isOrgLoading } = useOrganization(
+    vmCloudAPI?.org?.id || ''
+  );
+
+  // Check if user is System Admin
+  const isSystemAdmin = useIsSystemAdmin();
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
 
   // Transform CloudAPI VM to legacy format
@@ -435,26 +451,32 @@ const VMDetail: React.FC = () => {
                                   )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
-                                  {vm.vdc_name}
+                                  {isVDCLoading
+                                    ? vm.vdc_name
+                                    : vdcData?.name || vm.vdc_name}
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
-                            <DescriptionListGroup>
-                              <DescriptionListTerm>
-                                Organization
-                              </DescriptionListTerm>
-                              <DescriptionListDescription>
-                                <Link
-                                  to={ROUTES.ORGANIZATION_DETAIL.replace(
-                                    ':id',
-                                    vm.org_id
-                                  )}
-                                  className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                                >
-                                  {vm.org_name}
-                                </Link>
-                              </DescriptionListDescription>
-                            </DescriptionListGroup>
+                            {isSystemAdmin && (
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>
+                                  Organization
+                                </DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  <Link
+                                    to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                      ':id',
+                                      vm.org_id
+                                    )}
+                                    className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                                  >
+                                    {isOrgLoading
+                                      ? vm.org_name
+                                      : orgData?.displayName || vm.org_name}
+                                  </Link>
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            )}
                             <DescriptionListGroup>
                               <DescriptionListTerm>Created</DescriptionListTerm>
                               <DescriptionListDescription>
@@ -471,6 +493,24 @@ const VMDetail: React.FC = () => {
                                 {vm.updated_at
                                   ? formatDate(vm.updated_at)
                                   : 'N/A'}
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                            {vmCloudAPI?.description && (
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>
+                                  Description
+                                </DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  {vmCloudAPI.description}
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            )}
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>
+                                Guest OS
+                              </DescriptionListTerm>
+                              <DescriptionListDescription>
+                                {vmCloudAPI?.guestOs || 'Unknown'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
                           </DescriptionList>

@@ -825,6 +825,7 @@ export const generateMockCloudApiVM = (name?: string): VMCloudAPI => {
     createdDate: new Date().toISOString(),
     createdAt: new Date().toISOString(),
     lastModifiedDate: new Date().toISOString(),
+    guestOs: 'Ubuntu Server 22.04 LTS',
     vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
     vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
     org: {
@@ -833,13 +834,16 @@ export const generateMockCloudApiVM = (name?: string): VMCloudAPI => {
     },
   };
 
-  // Add specific hardware based on VM name
+  // Add specific hardware and OS based on VM name
   if (name === 'web-server-01') {
     baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+    baseVM.guestOs = 'Ubuntu Server 22.04 LTS';
   } else if (name === 'database-01') {
     baseVM.hardware = { numCpus: 4, coresPerSocket: 1, memoryMB: 8192 };
+    baseVM.guestOs = 'Red Hat Enterprise Linux 9';
   } else if (name === 'api-server-01') {
     baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+    baseVM.guestOs = 'CentOS Stream 9';
   }
 
   return baseVM;

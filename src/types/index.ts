@@ -652,6 +652,9 @@ export interface VMCloudAPI {
   createdAt?: string; // ssvirt API uses this field
   lastModifiedDate: string;
 
+  // Guest OS information
+  guestOs?: string;
+
   // Hardware details - ssvirt API format
   hardware?: VMHardware;
 
