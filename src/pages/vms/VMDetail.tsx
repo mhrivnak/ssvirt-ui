@@ -64,6 +64,7 @@ import {
   useStateChangeDetection,
   useAutoRefreshState,
   useVAppStatus,
+  useIsSystemAdmin,
 } from '../../hooks';
 import { transformVMData } from '../../utils/vmTransformers';
 import {
@@ -167,6 +168,9 @@ const VMDetail: React.FC = () => {
     autoRefresh: autoRefreshEnabled,
   });
 
+  // Check if user is System Admin for organization-related queries
+  const { isSystemAdmin } = useIsSystemAdmin();
+
   // Chain of API calls: VM -> vApp -> VDC -> Organization
   // 1. Get vApp details using vappId from VM
   const vappId = vmCloudAPI?.vappId || '';
@@ -191,14 +195,15 @@ const VMDetail: React.FC = () => {
       import('../../services/cloudapi/OrganizationService').then(
         ({ OrganizationService }) => OrganizationService.getOrganizations()
       ),
-    enabled: !!vdcData,
+    enabled: !!vdcData && isSystemAdmin,
   });
 
   // Find which organization contains this VDC by checking each org's VDCs
   const { data: orgData } = useQuery({
     queryKey: ['vdc-organization', vdcId],
     queryFn: async () => {
-      if (!organizationsData?.values || !vdcId) return null;
+      // Only run for System Administrators
+      if (!isSystemAdmin || !organizationsData?.values || !vdcId) return null;
 
       // Check each organization to see if it contains our VDC
       for (const org of organizationsData.values) {
@@ -216,7 +221,7 @@ const VMDetail: React.FC = () => {
       }
       return null;
     },
-    enabled: !!organizationsData?.values && !!vdcId,
+    enabled: !!organizationsData?.values && !!vdcId && isSystemAdmin,
   });
 
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
@@ -496,7 +501,7 @@ const VMDetail: React.FC = () => {
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
-                            {orgData && (
+                            {isSystemAdmin && orgData && (
                               <DescriptionListGroup>
                                 <DescriptionListTerm>
                                   Organization
