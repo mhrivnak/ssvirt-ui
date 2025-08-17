@@ -665,34 +665,6 @@ export interface VMCloudAPI {
   catalogItem?: EntityRef;
 }
 
-// Hardware Configuration
-/**
- * @deprecated This interface is deprecated. The virtualHardwareSection endpoint
- * does not exist in the ssvirt API. Use the embedded `hardware` field in VMCloudAPI
- * instead, which uses the VMHardware interface with numCpus, memoryMB, and coresPerSocket.
- * This will be removed in a future version.
- */
-export interface VMHardwareSection {
-  items: VMHardwareItem[];
-  links: Link[];
-}
-
-/**
- * @deprecated This interface is deprecated and will be removed in a future version.
- * Use the VMHardware interface instead.
- */
-export interface VMHardwareItem {
-  id: number;
-  resourceType: number;
-  resourceSubType?: string;
-  elementName: string;
-  description?: string;
-  quantity: number;
-  units?: string;
-  virtualQuantity?: number;
-  virtualQuantityUnits?: string;
-}
-
 // Guest Customization
 export interface VMGuestCustomizationSection {
   enabled: boolean;
@@ -945,7 +917,6 @@ export const QUERY_KEYS = {
   vmVdcs: ['cloudapi', 'vms', 'vdcs'] as const,
   cloudApiVMs: ['cloudapi', 'vms'] as const,
   cloudApiVM: (id: string) => ['cloudapi', 'vms', id] as const,
-  vmHardware: (id: string) => ['cloudapi', 'vms', id, 'hardware'] as const,
 
   // CloudAPI vApps
   vapps: ['cloudapi', 'vapps'] as const,

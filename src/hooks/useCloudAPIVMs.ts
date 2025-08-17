@@ -277,7 +277,6 @@ export const useDeleteVM = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
       // Remove the specific VM detail cache
       queryClient.removeQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
-      queryClient.removeQueries({ queryKey: QUERY_KEYS.vmHardware(vmId) });
     },
   });
 };
