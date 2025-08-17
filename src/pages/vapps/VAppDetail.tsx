@@ -31,6 +31,8 @@ import {
   Spinner,
   Bullseye,
   Badge,
+  Modal,
+  ModalVariant,
 } from '@patternfly/react-core';
 import {
   Table,
@@ -56,6 +58,7 @@ import {
   useStateChangeDetection,
   useAutoRefreshState,
   useIsSystemAdmin,
+  useDeleteVApp,
 } from '../../hooks';
 import { VMPowerActions, PowerOperationStatus } from '../../components/vms';
 import {
@@ -90,6 +93,13 @@ const VAppDetail: React.FC = () => {
     displayName: string;
   } | null>(null);
 
+  // Delete confirmation modal state
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    vAppId: string;
+    vAppName: string;
+  }>({ isOpen: false, vAppId: '', vAppName: '' });
+
   // Track attempted fetches to prevent hot loops
   const attemptedFetches = useRef<Set<string>>(new Set());
 
@@ -114,6 +124,9 @@ const VAppDetail: React.FC = () => {
   });
 
   const { operations: powerOperations } = usePowerOperationTracking();
+
+  // Mutations
+  const deleteVAppMutation = useDeleteVApp();
 
   // State change detection for visual indicators with derived fields
   const derivedVApp = vApp
@@ -394,6 +407,20 @@ const VAppDetail: React.FC = () => {
     return null; // return null on parse failure
   };
 
+  const confirmDeleteVApp = async () => {
+    if (!deleteConfirmation.vAppId) return;
+
+    try {
+      await deleteVAppMutation.mutateAsync(deleteConfirmation.vAppId);
+      setDeleteConfirmation({ isOpen: false, vAppId: '', vAppName: '' });
+      // Navigate back to VMs list after successful deletion
+      window.location.href = ROUTES.VMS;
+    } catch (error) {
+      console.error('Failed to delete vApp:', error);
+      // The error will be displayed via the mutation's error handling
+    }
+  };
+
   const getVMActions = (vmCloudAPI: VMCloudAPI) => {
     const vmId = vmCloudAPI.href
       ? extractVMIdFromHref(vmCloudAPI.href) || vmCloudAPI.id
@@ -486,7 +513,17 @@ const VAppDetail: React.FC = () => {
                   </Button>
                 </FlexItem>
                 <FlexItem>
-                  <Button variant="danger" icon={<TrashIcon />}>
+                  <Button
+                    variant="danger"
+                    icon={<TrashIcon />}
+                    onClick={() =>
+                      setDeleteConfirmation({
+                        isOpen: true,
+                        vAppId: vApp.id,
+                        vAppName: vApp.name,
+                      })
+                    }
+                  >
                     Delete vApp
                   </Button>
                 </FlexItem>
@@ -838,6 +875,77 @@ const VAppDetail: React.FC = () => {
 
       {/* Power Operation Status */}
       <PowerOperationStatus operations={powerOperations} />
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        variant={ModalVariant.small}
+        title="Delete vApp"
+        isOpen={deleteConfirmation.isOpen}
+        onClose={() =>
+          setDeleteConfirmation({ isOpen: false, vAppId: '', vAppName: '' })
+        }
+      >
+        <Stack hasGutter>
+          <StackItem>
+            <p>
+              Are you sure you want to delete the vApp{' '}
+              <strong>{deleteConfirmation.vAppName}</strong>? This action cannot
+              be undone.
+            </p>
+          </StackItem>
+          {vApp?.vms && vApp.vms.length > 0 && (
+            <StackItem>
+              <Alert variant={AlertVariant.warning} isInline title="Warning">
+                This vApp contains {vApp.vms.length} virtual machine(s) that
+                will also be deleted.
+              </Alert>
+            </StackItem>
+          )}
+          {deleteVAppMutation.error && (
+            <StackItem>
+              <Alert
+                variant={AlertVariant.danger}
+                isInline
+                title="Error deleting vApp"
+              >
+                {deleteVAppMutation.error instanceof Error
+                  ? deleteVAppMutation.error.message
+                  : String(deleteVAppMutation.error)}
+              </Alert>
+            </StackItem>
+          )}
+          <StackItem>
+            <Split hasGutter>
+              <SplitItem isFilled />
+              <SplitItem>
+                <Button
+                  variant="link"
+                  onClick={() =>
+                    setDeleteConfirmation({
+                      isOpen: false,
+                      vAppId: '',
+                      vAppName: '',
+                    })
+                  }
+                  isDisabled={deleteVAppMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </SplitItem>
+              <SplitItem>
+                <Button
+                  variant="danger"
+                  onClick={confirmDeleteVApp}
+                  isLoading={deleteVAppMutation.isPending}
+                  isDisabled={deleteVAppMutation.isPending}
+                >
+                  Delete
+                </Button>
+              </SplitItem>
+            </Split>
+          </StackItem>
+        </Stack>
+      </Modal>
     </PageSection>
   );
 };
