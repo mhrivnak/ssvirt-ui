@@ -472,7 +472,8 @@ const VMDetail: React.FC = () => {
                                   >
                                     {isOrgLoading
                                       ? vm.org_name
-                                      : orgData?.displayName || vm.org_name}
+                                      : orgData?.data?.displayName ||
+                                        vm.org_name}
                                   </Link>
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
