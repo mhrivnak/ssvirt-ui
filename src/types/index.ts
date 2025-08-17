@@ -253,6 +253,7 @@ export interface Organization {
 export interface VDC {
   id: string; // URN format: urn:vcloud:vdc:uuid
   name: string;
+  displayName: string;
   description?: string;
   allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
   computeCapacity: {

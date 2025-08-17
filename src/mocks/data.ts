@@ -133,6 +133,7 @@ export const generateMockVDCs = (): VDC[] => [
   {
     id: 'urn:vcloud:vdc:eng-dev-vdc',
     name: 'eng-dev-vdc',
+    displayName: 'Engineering Development VDC',
     description: 'Engineering development environment',
     allocationModel: 'AllocationPool',
     computeCapacity: {
@@ -168,6 +169,7 @@ export const generateMockVDCs = (): VDC[] => [
   {
     id: 'urn:vcloud:vdc:qa-test-vdc',
     name: 'qa-test-vdc',
+    displayName: 'QA Testing VDC',
     description: 'QA testing environment',
     allocationModel: 'Flex',
     computeCapacity: {

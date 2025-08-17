@@ -453,7 +453,9 @@ const VMDetail: React.FC = () => {
                                 >
                                   {isVDCLoading
                                     ? vm.vdc_name
-                                    : vdcData?.name || vm.vdc_name}
+                                    : vdcData?.displayName ||
+                                      vmCloudAPI?.vdc?.name ||
+                                      vm.vdc_name}
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
@@ -473,6 +475,7 @@ const VMDetail: React.FC = () => {
                                     {isOrgLoading
                                       ? vm.org_name
                                       : orgData?.data?.displayName ||
+                                        vmCloudAPI?.org?.name ||
                                         vm.org_name}
                                   </Link>
                                 </DescriptionListDescription>
@@ -481,8 +484,8 @@ const VMDetail: React.FC = () => {
                             <DescriptionListGroup>
                               <DescriptionListTerm>Created</DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vm.created_at
-                                  ? formatDate(vm.created_at)
+                                {vmCloudAPI?.createdDate
+                                  ? formatDate(vmCloudAPI.createdDate)
                                   : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
@@ -491,8 +494,8 @@ const VMDetail: React.FC = () => {
                                 Last Updated
                               </DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vm.updated_at
-                                  ? formatDate(vm.updated_at)
+                                {vmCloudAPI?.lastModifiedDate
+                                  ? formatDate(vmCloudAPI.lastModifiedDate)
                                   : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
