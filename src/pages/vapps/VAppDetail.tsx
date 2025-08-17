@@ -67,12 +67,11 @@ import { VMService } from '../../services/cloudapi/VMService';
 import { VDCPublicService } from '../../services/cloudapi/VDCPublicService';
 import { VDCAdminService } from '../../services/cloudapi/VDCAdminService';
 import { OrganizationService } from '../../services/cloudapi/OrganizationService';
-import type { VMStatus, VMCloudAPI, VMHardwareSection, VDC } from '../../types';
+import type { VMStatus, VMCloudAPI, VDC } from '../../types';
 import { ROUTES, VM_STATUS_LABELS } from '../../utils/constants';
 
 interface VMDetailData {
   vm: VMCloudAPI;
-  hardware?: VMHardwareSection;
   loading: boolean;
   error?: string;
 }
@@ -275,7 +274,6 @@ const VAppDetail: React.FC = () => {
         if (hasHardwareData && hasCreatedDate) {
           newVmDetails.set(vmId, {
             vm: vmCloudAPI,
-            hardware: undefined, // Hardware data is embedded in the VM object
             loading: false,
           });
           continue;
@@ -288,15 +286,11 @@ const VAppDetail: React.FC = () => {
         });
 
         try {
-          // Fetch VM details and hardware in parallel
-          const [vmDetail, vmHardware] = await Promise.all([
-            VMService.getVM(vmId),
-            VMService.getVMHardware(vmId).catch(() => undefined), // Hardware might not be available
-          ]);
+          // Fetch VM details
+          const vmDetail = await VMService.getVM(vmId);
 
           newVmDetails.set(vmId, {
             vm: vmDetail,
-            hardware: vmHardware,
             loading: false,
           });
         } catch (error) {

@@ -655,8 +655,6 @@ export interface VMCloudAPI {
   // Hardware details - ssvirt API format
   hardware?: VMHardware;
 
-  // Legacy vCloud Director hardware details (for backward compatibility)
-  virtualHardwareSection?: VMHardwareSection;
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
 
@@ -665,24 +663,6 @@ export interface VMCloudAPI {
   vdc?: EntityRef;
   org?: EntityRef;
   catalogItem?: EntityRef;
-}
-
-// Hardware Configuration
-export interface VMHardwareSection {
-  items: VMHardwareItem[];
-  links: Link[];
-}
-
-export interface VMHardwareItem {
-  id: number;
-  resourceType: number;
-  resourceSubType?: string;
-  elementName: string;
-  description?: string;
-  quantity: number;
-  units?: string;
-  virtualQuantity?: number;
-  virtualQuantityUnits?: string;
 }
 
 // Guest Customization
@@ -937,7 +917,6 @@ export const QUERY_KEYS = {
   vmVdcs: ['cloudapi', 'vms', 'vdcs'] as const,
   cloudApiVMs: ['cloudapi', 'vms'] as const,
   cloudApiVM: (id: string) => ['cloudapi', 'vms', id] as const,
-  vmHardware: (id: string) => ['cloudapi', 'vms', id, 'hardware'] as const,
 
   // CloudAPI vApps
   vapps: ['cloudapi', 'vapps'] as const,

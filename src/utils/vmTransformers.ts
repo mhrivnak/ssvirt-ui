@@ -17,14 +17,8 @@ export const transformVMData = (cloudApiVM: VMCloudAPI): VM => {
     vm_name: cloudApiVM.name,
     namespace: cloudApiVM.org?.name || '',
     status: cloudApiVM.status,
-    cpu_count:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 3
-      )?.virtualQuantity || 1,
-    memory_mb:
-      cloudApiVM.virtualHardwareSection?.items.find(
-        (item) => item.resourceType === 4
-      )?.virtualQuantity || 1024,
+    cpu_count: cloudApiVM.hardware?.numCpus || 1,
+    memory_mb: cloudApiVM.hardware?.memoryMB || 1024,
     created_at: cloudApiVM.createdDate,
     updated_at: cloudApiVM.lastModifiedDate,
     vdc_id: cloudApiVM.vdc?.id || '',

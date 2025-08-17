@@ -188,19 +188,6 @@ export const useVMDetailsWithAutoRefresh = (
 };
 
 /**
- * Hook to get VM hardware configuration
- */
-export const useVMHardware = (vmId?: string) => {
-  return useQuery({
-    queryKey: QUERY_KEYS.vmHardware(vmId || ''),
-    queryFn: () => VMService.getVMHardware(vmId!),
-    enabled: !!vmId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
-
-/**
  * Hook to get all VMs using CloudAPI
  */
 export const useCloudAPIVMs = () => {
@@ -290,7 +277,6 @@ export const useDeleteVM = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vapps });
       // Remove the specific VM detail cache
       queryClient.removeQueries({ queryKey: QUERY_KEYS.cloudApiVM(vmId) });
-      queryClient.removeQueries({ queryKey: QUERY_KEYS.vmHardware(vmId) });
     },
   });
 };

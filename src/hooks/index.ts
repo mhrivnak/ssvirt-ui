@@ -64,7 +64,6 @@ export {
   useVAppStatus,
   useVMDetails,
   useVMDetailsWithAutoRefresh,
-  useVMHardware,
   useCloudAPIVMs,
   useVApps as useCloudAPIVApps,
   usePowerOnVM as useCloudAPIPowerOnVM,

@@ -6,7 +6,6 @@ import type {
   InstantiateTemplateRequest,
   VApp,
   VMCloudAPI,
-  VMHardwareSection,
 } from '../../types';
 
 /**
@@ -102,18 +101,6 @@ export class VMService {
       {
         signal: options?.signal,
       }
-    );
-    return response.data;
-  }
-
-  /**
-   * Get VM hardware configuration
-   * Returns detailed hardware specifications including CPU, memory, and virtual devices
-   * @param vmId The VM URN
-   */
-  static async getVMHardware(vmId: string): Promise<VMHardwareSection> {
-    const response = await cloudApi.get<VMHardwareSection>(
-      `/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`
     );
     return response.data;
   }

@@ -107,8 +107,7 @@ GET /cloudapi/1.0.0/vapps/{vapp_id}
 GET /cloudapi/1.0.0/vms/{vm_id}
 // Get VM details and status
 
-GET /cloudapi/1.0.0/vms/{vm_id}/virtualHardwareSection
-// Get VM hardware configuration
+// NOTE: virtualHardwareSection endpoint removed - hardware data is embedded in VM object
 ```
 
 ### Implementation Plan
@@ -175,15 +174,7 @@ export class VMService {
     return response.data;
   }
 
-  /**
-   * Get VM hardware configuration
-   */
-  static async getVMHardware(vmId: string): Promise<VMHardwareSection> {
-    const response = await api.get<VMHardwareSection>(
-      `/cloudapi/1.0.0/vms/${encodeURIComponent(vmId)}/virtualHardwareSection`
-    );
-    return response.data;
-  }
+  // NOTE: getVMHardware method removed - hardware data is embedded in VM object
 }
 ```
 
@@ -254,8 +245,7 @@ export interface VM {
   createdDate: string;
   lastModifiedDate: string;
 
-  // Hardware details
-  virtualHardwareSection?: VMHardwareSection;
+  // Hardware details - now embedded in hardware field using VMHardware interface
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
 
@@ -288,22 +278,8 @@ export type VAppStatus =
   | 'UNKNOWN';
 
 // Hardware Configuration
-export interface VMHardwareSection {
-  items: VMHardwareItem[];
-  links: Link[];
-}
-
-export interface VMHardwareItem {
-  id: number;
-  resourceType: number;
-  resourceSubType?: string;
-  elementName: string;
-  description?: string;
-  quantity: number;
-  units?: string;
-  virtualQuantity?: number;
-  virtualQuantityUnits?: string;
-}
+// NOTE: VMHardwareSection and VMHardwareItem interfaces removed
+// Use VMHardware interface instead: { numCpus, memoryMB, coresPerSocket }
 ```
 
 #### Phase 3: React Hooks Updates ✅ COMPLETED
