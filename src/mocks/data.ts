@@ -817,8 +817,17 @@ export const generateMockVApp = (
 
 // Mock CloudAPI VM generator
 export const generateMockCloudApiVM = (name?: string): VMCloudAPI => {
+  // Use consistent IDs based on VM name for reliable routing
+  const vmIdMap = {
+    'web-server-01': 'urn:vcloud:vm:web-server-01-id',
+    'database-01': 'urn:vcloud:vm:database-01-id',
+    'api-server-01': 'urn:vcloud:vm:api-server-01-id',
+  };
+
   const baseVM: VMCloudAPI = {
-    id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
+    id:
+      vmIdMap[name as keyof typeof vmIdMap] ||
+      `urn:vcloud:vm:${name || 'test-vm'}-id`,
     name: name || 'test-vm',
     description: 'Mock VM for testing',
     status: 'INSTANTIATING' as VMStatus,

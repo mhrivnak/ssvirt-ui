@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   PageSection,
   Title,
@@ -62,9 +63,7 @@ import {
   usePowerOperationTracking,
   useStateChangeDetection,
   useAutoRefreshState,
-  useVDC,
-  useOrganization,
-  useIsSystemAdmin,
+  useVAppStatus,
 } from '../../hooks';
 import { transformVMData } from '../../utils/vmTransformers';
 import {
@@ -168,16 +167,58 @@ const VMDetail: React.FC = () => {
     autoRefresh: autoRefreshEnabled,
   });
 
-  // Get VDC details to show displayName
-  const vdcId = vmCloudAPI?.vdc?.id || '';
-  const { data: vdcData } = useVDC(vdcId);
+  // Chain of API calls: VM -> vApp -> VDC -> Organization
+  // 1. Get vApp details using vappId from VM
+  const vappId = vmCloudAPI?.vappId || '';
+  const { data: vappData } = useVAppStatus(vappId);
 
-  // Get Organization details to show displayName (System Admin only)
-  const orgId = vmCloudAPI?.org?.id || '';
-  const { data: orgData } = useOrganization(orgId);
+  // 2. Get VDC details using vdcId from vApp
+  const vdcId = vappData?.vdcId || '';
+  // Use public VDC API directly to avoid admin API requirement
+  const { data: vdcData } = useQuery({
+    queryKey: ['vdc', vdcId],
+    queryFn: () =>
+      import('../../services/cloudapi/VDCPublicService').then(
+        ({ VDCPublicService }) => VDCPublicService.getVDC(vdcId)
+      ),
+    enabled: !!vdcId,
+  });
 
-  // Check if user is System Admin
-  const isSystemAdmin = useIsSystemAdmin();
+  // 3. Get Organization info for System Admins by finding which org contains this VDC
+  const { data: organizationsData } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: () =>
+      import('../../services/cloudapi/OrganizationService').then(
+        ({ OrganizationService }) => OrganizationService.getOrganizations()
+      ),
+    enabled: !!vdcData,
+  });
+
+  // Find which organization contains this VDC by checking each org's VDCs
+  const { data: orgData } = useQuery({
+    queryKey: ['vdc-organization', vdcId],
+    queryFn: async () => {
+      if (!organizationsData?.values || !vdcId) return null;
+
+      // Check each organization to see if it contains our VDC
+      for (const org of organizationsData.values) {
+        try {
+          const { VDCAdminService } = await import(
+            '../../services/cloudapi/VDCAdminService'
+          );
+          await VDCAdminService.getVDC(org.id, vdcId);
+          // If we get here without error, this org contains our VDC
+          return org;
+        } catch {
+          // This org doesn't contain our VDC, continue to next
+          continue;
+        }
+      }
+      return null;
+    },
+    enabled: !!organizationsData?.values && !!vdcId,
+  });
+
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
 
   // Transform CloudAPI VM to legacy format
@@ -449,14 +490,13 @@ const VMDetail: React.FC = () => {
                                   )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
-                                  {vmCloudAPI?.vdc?.displayName ||
-                                    vdcData?.displayName ||
-                                    vmCloudAPI?.vdc?.name ||
+                                  {vdcData?.displayName ||
+                                    vdcData?.name ||
                                     vm.vdc_name}
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
-                            {isSystemAdmin && (
+                            {orgData && (
                               <DescriptionListGroup>
                                 <DescriptionListTerm>
                                   Organization
@@ -465,14 +505,11 @@ const VMDetail: React.FC = () => {
                                   <Link
                                     to={ROUTES.ORGANIZATION_DETAIL.replace(
                                       ':id',
-                                      vm.org_id
+                                      orgData.id
                                     )}
                                     className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                   >
-                                    {vmCloudAPI?.org?.displayName ||
-                                      orgData?.data?.displayName ||
-                                      vmCloudAPI?.org?.name ||
-                                      vm.org_name}
+                                    {orgData.displayName || orgData.name}
                                   </Link>
                                 </DescriptionListDescription>
                               </DescriptionListGroup>
@@ -480,8 +517,8 @@ const VMDetail: React.FC = () => {
                             <DescriptionListGroup>
                               <DescriptionListTerm>Created</DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vmCloudAPI?.createdDate
-                                  ? formatDate(vmCloudAPI.createdDate)
+                                {vmCloudAPI?.createdAt
+                                  ? formatDate(vmCloudAPI.createdAt)
                                   : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
@@ -490,8 +527,8 @@ const VMDetail: React.FC = () => {
                                 Last Updated
                               </DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vmCloudAPI?.lastModifiedDate
-                                  ? formatDate(vmCloudAPI.lastModifiedDate)
+                                {vmCloudAPI?.updatedAt
+                                  ? formatDate(vmCloudAPI.updatedAt)
                                   : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>

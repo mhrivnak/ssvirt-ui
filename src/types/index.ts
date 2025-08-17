@@ -254,7 +254,7 @@ export interface Organization {
 export interface VDC {
   id: string; // URN format: urn:vcloud:vdc:uuid
   name: string;
-  displayName: string;
+  displayName?: string;
   description?: string;
   allocationModel: 'PayAsYouGo' | 'AllocationPool' | 'ReservationPool' | 'Flex';
   computeCapacity: {
@@ -282,6 +282,7 @@ export interface VDC {
   }>;
   isThinProvision: boolean;
   isEnabled: boolean;
+
   // Standard CloudAPI fields
   creationDate?: string;
   lastModified?: string;
@@ -642,32 +643,48 @@ export interface VMHardware {
   memoryMB: number;
 }
 
-// Enhanced VM interface for CloudAPI
+// Enhanced VM interface for CloudAPI based on actual ssvirt API
 export interface VMCloudAPI {
   id: string; // URN format
   name: string;
   description?: string;
   status: VMStatus;
-  href: string;
-  type: string;
-  createdDate: string;
-  createdAt?: string; // ssvirt API uses this field
-  lastModifiedDate: string;
+  powerState?: string;
 
-  // Guest OS information
-  guestOs?: string;
+  // Parent references
+  vappId?: string; // Parent vApp URN
+  templateId?: string; // Source template URN
 
-  // Hardware details - ssvirt API format
+  // Timestamps
+  createdAt?: string; // Created timestamp
+  updatedAt?: string; // Last updated timestamp
+
+  // System information
+  guestOs?: string; // Guest OS type
+  vmTools?: {
+    status?: string;
+    version?: string;
+  };
+
+  // Hardware details
   hardware?: VMHardware;
+  storageProfile?: unknown;
+  network?: unknown;
 
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
 
-  // Relationships
-  vapp?: EntityRef;
-  vdc?: EntityRef;
-  org?: EntityRef;
-  catalogItem?: EntityRef;
+  // Legacy fields for backward compatibility
+  createdDate?: string; // @deprecated Use createdAt
+  lastModifiedDate?: string; // @deprecated Use updatedAt
+  href?: string; // @deprecated
+  type?: string; // @deprecated
+  vapp?: EntityRef; // @deprecated Use vappId
+  vdc?: EntityRef; // @deprecated Not available in VM response
+  vdcId?: string; // @deprecated Not available in VM response
+  org?: EntityRef; // @deprecated Not available in VM response
+  orgEntityRef?: EntityRef; // @deprecated Not available in VM response
+  catalogItem?: EntityRef; // @deprecated Use templateId
 }
 
 // Guest Customization
