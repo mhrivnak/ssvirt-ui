@@ -655,8 +655,6 @@ export interface VMCloudAPI {
   // Hardware details - ssvirt API format
   hardware?: VMHardware;
 
-  // Legacy vCloud Director hardware details (for backward compatibility)
-  virtualHardwareSection?: VMHardwareSection;
   guestCustomizationSection?: VMGuestCustomizationSection;
   networkConnectionSection?: VMNetworkConnectionSection;
 
@@ -668,11 +666,21 @@ export interface VMCloudAPI {
 }
 
 // Hardware Configuration
+/**
+ * @deprecated This interface is deprecated. The virtualHardwareSection endpoint
+ * does not exist in the ssvirt API. Use the embedded `hardware` field in VMCloudAPI
+ * instead, which uses the VMHardware interface with numCpus, memoryMB, and coresPerSocket.
+ * This will be removed in a future version.
+ */
 export interface VMHardwareSection {
   items: VMHardwareItem[];
   links: Link[];
 }
 
+/**
+ * @deprecated This interface is deprecated and will be removed in a future version.
+ * Use the VMHardware interface instead.
+ */
 export interface VMHardwareItem {
   id: number;
   resourceType: number;
