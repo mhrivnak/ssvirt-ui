@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   PageSection,
   Title,
@@ -62,6 +63,8 @@ import {
   usePowerOperationTracking,
   useStateChangeDetection,
   useAutoRefreshState,
+  useVAppStatus,
+  useIsSystemAdmin,
 } from '../../hooks';
 import { transformVMData } from '../../utils/vmTransformers';
 import {
@@ -164,6 +167,63 @@ const VMDetail: React.FC = () => {
   } = useVMDetailsWithAutoRefresh(id, {
     autoRefresh: autoRefreshEnabled,
   });
+
+  // Check if user is System Admin for organization-related queries
+  const { isSystemAdmin } = useIsSystemAdmin();
+
+  // Chain of API calls: VM -> vApp -> VDC -> Organization
+  // 1. Get vApp details using vappId from VM
+  const vappId = vmCloudAPI?.vappId || '';
+  const { data: vappData } = useVAppStatus(vappId);
+
+  // 2. Get VDC details using vdcId from vApp
+  const vdcId = vappData?.vdcId || '';
+  // Use public VDC API directly to avoid admin API requirement
+  const { data: vdcData } = useQuery({
+    queryKey: ['vdc', vdcId],
+    queryFn: () =>
+      import('../../services/cloudapi/VDCPublicService').then(
+        ({ VDCPublicService }) => VDCPublicService.getVDC(vdcId)
+      ),
+    enabled: !!vdcId,
+  });
+
+  // 3. Get Organization info for System Admins by finding which org contains this VDC
+  const { data: organizationsData } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: () =>
+      import('../../services/cloudapi/OrganizationService').then(
+        ({ OrganizationService }) => OrganizationService.getOrganizations()
+      ),
+    enabled: !!vdcData && isSystemAdmin,
+  });
+
+  // Find which organization contains this VDC by checking each org's VDCs
+  const { data: orgData } = useQuery({
+    queryKey: ['vdc-organization', vdcId],
+    queryFn: async () => {
+      // Only run for System Administrators
+      if (!isSystemAdmin || !organizationsData?.values || !vdcId) return null;
+
+      // Check each organization to see if it contains our VDC
+      for (const org of organizationsData.values) {
+        try {
+          const { VDCAdminService } = await import(
+            '../../services/cloudapi/VDCAdminService'
+          );
+          await VDCAdminService.getVDC(org.id, vdcId);
+          // If we get here without error, this org contains our VDC
+          return org;
+        } catch {
+          // This org doesn't contain our VDC, continue to next
+          continue;
+        }
+      }
+      return null;
+    },
+    enabled: !!organizationsData?.values && !!vdcId && isSystemAdmin,
+  });
+
   const [localVM, setLocalVM] = useState<VM | undefined>(undefined);
 
   // Transform CloudAPI VM to legacy format
@@ -435,31 +495,35 @@ const VMDetail: React.FC = () => {
                                   )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
-                                  {vm.vdc_name}
+                                  {vdcData?.displayName ||
+                                    vdcData?.name ||
+                                    vm.vdc_name}
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
-                            <DescriptionListGroup>
-                              <DescriptionListTerm>
-                                Organization
-                              </DescriptionListTerm>
-                              <DescriptionListDescription>
-                                <Link
-                                  to={ROUTES.ORGANIZATION_DETAIL.replace(
-                                    ':id',
-                                    vm.org_id
-                                  )}
-                                  className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
-                                >
-                                  {vm.org_name}
-                                </Link>
-                              </DescriptionListDescription>
-                            </DescriptionListGroup>
+                            {isSystemAdmin && orgData && (
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>
+                                  Organization
+                                </DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  <Link
+                                    to={ROUTES.ORGANIZATION_DETAIL.replace(
+                                      ':id',
+                                      orgData.id
+                                    )}
+                                    className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
+                                  >
+                                    {orgData.displayName || orgData.name}
+                                  </Link>
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            )}
                             <DescriptionListGroup>
                               <DescriptionListTerm>Created</DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vm.created_at
-                                  ? formatDate(vm.created_at)
+                                {vmCloudAPI?.createdAt
+                                  ? formatDate(vmCloudAPI.createdAt)
                                   : 'N/A'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
@@ -468,9 +532,27 @@ const VMDetail: React.FC = () => {
                                 Last Updated
                               </DescriptionListTerm>
                               <DescriptionListDescription>
-                                {vm.updated_at
-                                  ? formatDate(vm.updated_at)
+                                {vmCloudAPI?.updatedAt
+                                  ? formatDate(vmCloudAPI.updatedAt)
                                   : 'N/A'}
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                            {vmCloudAPI?.description && (
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>
+                                  Description
+                                </DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  {vmCloudAPI.description}
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            )}
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>
+                                Guest OS
+                              </DescriptionListTerm>
+                              <DescriptionListDescription>
+                                {vmCloudAPI?.guestOs || 'Unknown'}
                               </DescriptionListDescription>
                             </DescriptionListGroup>
                           </DescriptionList>

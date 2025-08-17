@@ -133,6 +133,7 @@ export const generateMockVDCs = (): VDC[] => [
   {
     id: 'urn:vcloud:vdc:eng-dev-vdc',
     name: 'eng-dev-vdc',
+    displayName: 'Engineering Development VDC',
     description: 'Engineering development environment',
     allocationModel: 'AllocationPool',
     computeCapacity: {
@@ -168,6 +169,7 @@ export const generateMockVDCs = (): VDC[] => [
   {
     id: 'urn:vcloud:vdc:qa-test-vdc',
     name: 'qa-test-vdc',
+    displayName: 'QA Testing VDC',
     description: 'QA testing environment',
     allocationModel: 'Flex',
     computeCapacity: {
@@ -773,7 +775,7 @@ export const generateMockVApp = (
       id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
       name: 'Engineering',
     },
-    vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+    vdc: { id: 'urn:vcloud:vdc:eng-dev-vdc', name: 'eng-dev-vdc' },
   };
 
   // Add VMs if requested
@@ -815,31 +817,55 @@ export const generateMockVApp = (
 
 // Mock CloudAPI VM generator
 export const generateMockCloudApiVM = (name?: string): VMCloudAPI => {
+  // Use consistent IDs based on VM name for reliable routing
+  const vmIdMap = {
+    'web-server-01': 'urn:vcloud:vm:web-server-01-id',
+    'database-01': 'urn:vcloud:vm:database-01-id',
+    'api-server-01': 'urn:vcloud:vm:api-server-01-id',
+  };
+
   const baseVM: VMCloudAPI = {
-    id: `urn:vcloud:vm:${Math.random().toString(36).slice(2, 11)}`,
+    id:
+      vmIdMap[name as keyof typeof vmIdMap] ||
+      `urn:vcloud:vm:${name || 'test-vm'}-id`,
     name: name || 'test-vm',
     description: 'Mock VM for testing',
     status: 'INSTANTIATING' as VMStatus,
     href: 'https://vcd.example.com/cloudapi/1.0.0/vms/mock-vm-id',
     type: 'application/json',
-    createdDate: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    lastModifiedDate: new Date().toISOString(),
+    createdDate: '2024-01-15T10:30:00.000Z',
+    createdAt: '2024-01-15T10:30:00.000Z',
+    lastModifiedDate: '2024-01-16T14:20:00.000Z',
+    guestOs: 'Ubuntu Server 22.04 LTS',
     vapp: { id: 'urn:vcloud:vapp:1', name: 'test-vapp' },
-    vdc: { id: 'urn:vcloud:vdc:1', name: 'eng-dev-vdc' },
+    vdc: {
+      id: 'urn:vcloud:vdc:eng-dev-vdc',
+      name: 'eng-dev-vdc',
+      displayName: 'Engineering Development VDC',
+    },
     org: {
       id: 'urn:vcloud:org:12345678-1234-1234-1234-123456789abc',
       name: 'Engineering',
+      displayName: 'Engineering',
     },
   };
 
-  // Add specific hardware based on VM name
+  // Add specific hardware and OS based on VM name
   if (name === 'web-server-01') {
     baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+    baseVM.guestOs = 'Ubuntu Server 22.04 LTS';
+    baseVM.createdDate = '2024-01-15T10:30:00.000Z';
+    baseVM.lastModifiedDate = '2024-01-16T14:20:00.000Z';
   } else if (name === 'database-01') {
     baseVM.hardware = { numCpus: 4, coresPerSocket: 1, memoryMB: 8192 };
+    baseVM.guestOs = 'Red Hat Enterprise Linux 9';
+    baseVM.createdDate = '2024-01-14T08:15:00.000Z';
+    baseVM.lastModifiedDate = '2024-01-15T16:45:00.000Z';
   } else if (name === 'api-server-01') {
     baseVM.hardware = { numCpus: 2, coresPerSocket: 1, memoryMB: 4096 };
+    baseVM.guestOs = 'CentOS Stream 9';
+    baseVM.createdDate = '2024-01-13T12:00:00.000Z';
+    baseVM.lastModifiedDate = '2024-01-14T09:30:00.000Z';
   }
 
   return baseVM;

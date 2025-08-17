@@ -780,8 +780,8 @@ const VAppDetail: React.FC = () => {
                                     ) : detailedVM.createdAt ||
                                       detailedVM.createdDate ? (
                                       formatDate(
-                                        detailedVM.createdAt ||
-                                          detailedVM.createdDate
+                                        (detailedVM.createdAt ||
+                                          detailedVM.createdDate)!
                                       )
                                     ) : (
                                       'Unknown'
