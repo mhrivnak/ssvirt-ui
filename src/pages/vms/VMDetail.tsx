@@ -169,14 +169,12 @@ const VMDetail: React.FC = () => {
   });
 
   // Get VDC details to show displayName
-  const { data: vdcData, isLoading: isVDCLoading } = useVDC(
-    vmCloudAPI?.vdc?.id || ''
-  );
+  const vdcId = vmCloudAPI?.vdc?.id || '';
+  const { data: vdcData } = useVDC(vdcId);
 
   // Get Organization details to show displayName (System Admin only)
-  const { data: orgData, isLoading: isOrgLoading } = useOrganization(
-    vmCloudAPI?.org?.id || ''
-  );
+  const orgId = vmCloudAPI?.org?.id || '';
+  const { data: orgData } = useOrganization(orgId);
 
   // Check if user is System Admin
   const isSystemAdmin = useIsSystemAdmin();
@@ -451,11 +449,10 @@ const VMDetail: React.FC = () => {
                                   )}
                                   className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                 >
-                                  {isVDCLoading
-                                    ? vm.vdc_name
-                                    : vdcData?.displayName ||
-                                      vmCloudAPI?.vdc?.name ||
-                                      vm.vdc_name}
+                                  {vmCloudAPI?.vdc?.displayName ||
+                                    vdcData?.displayName ||
+                                    vmCloudAPI?.vdc?.name ||
+                                    vm.vdc_name}
                                 </Link>
                               </DescriptionListDescription>
                             </DescriptionListGroup>
@@ -472,11 +469,10 @@ const VMDetail: React.FC = () => {
                                     )}
                                     className="pf-v6-c-button pf-v6-m-link pf-v6-m-inline"
                                   >
-                                    {isOrgLoading
-                                      ? vm.org_name
-                                      : orgData?.data?.displayName ||
-                                        vmCloudAPI?.org?.name ||
-                                        vm.org_name}
+                                    {vmCloudAPI?.org?.displayName ||
+                                      orgData?.data?.displayName ||
+                                      vmCloudAPI?.org?.name ||
+                                      vm.org_name}
                                   </Link>
                                 </DescriptionListDescription>
                               </DescriptionListGroup>

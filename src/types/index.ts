@@ -61,6 +61,7 @@ export interface FilterParams {
 export interface EntityRef {
   name: string;
   id: string; // URN format: urn:vcloud:type:uuid
+  displayName?: string; // Optional display name for UI
 }
 
 // VMware Cloud Director Session Response
