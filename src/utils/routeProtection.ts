@@ -132,7 +132,7 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/vdcs',
     component: React.lazy(() => import('../pages/vdcs/VDCs')),
-    requiredCapabilities: ['canManageOrganizations'],
+    requiredCapabilities: ['canManageUsers'],
   },
   {
     path: '/vdcs/create',
@@ -147,7 +147,7 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/vdcs/:id',
     component: React.lazy(() => import('../pages/vdcs/VDCDetail')),
-    requiredCapabilities: ['canManageOrganizations'],
+    requiredCapabilities: ['canManageUsers'],
   },
   {
     path: '/org-users',
