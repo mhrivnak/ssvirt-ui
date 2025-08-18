@@ -132,7 +132,7 @@ export class PermissionChecker {
       canManageOrganizations: isSystemAdmin,
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
-      canCreateVApps: isSystemAdmin || isOrgAdmin, // System Admins and Org Admins can create vApps
+      canCreateVApps: isSystemAdmin || isOrgAdmin || this.isVAppUser(user), // System Admins, Org Admins, and vApp Users can create vApps
       // System admins get empty array to indicate access to all orgs
       accessibleOrganizations: isSystemAdmin
         ? []

@@ -9,10 +9,10 @@ import {
 } from '@patternfly/react-core';
 import {
   useInstantiateTemplate,
-  useVMVDCs,
   useCatalogs,
   useAllCatalogItems,
   useVAppStatus,
+  useOrganizationVDCs,
 } from '../../hooks';
 import type {
   InstantiateTemplateRequest,
@@ -111,7 +111,10 @@ const VMCreationWizard: React.FC<VMCreationWizardProps> = ({
 
   // Hooks
   const instantiateTemplateMutation = useInstantiateTemplate();
-  const { data: vdcsResponse } = useVMVDCs();
+
+  // Use organization VDCs for all users - this works for both admin and regular users
+  // and properly applies organization-scoped filtering
+  const { data: vdcsResponse } = useOrganizationVDCs();
   const vdcs = vdcsResponse?.values || [];
   const { data: catalogsResponse } = useCatalogs();
   const catalogs = catalogsResponse?.values || [];
