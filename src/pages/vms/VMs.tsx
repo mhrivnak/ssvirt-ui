@@ -255,16 +255,21 @@ const VMs: React.FC = () => {
     setSelectedVApps([]);
   }, [filters]);
 
-  // Auto-select organization for Organization Administrators
+  // Auto-select organization for Organization Administrators and vApp Users
   useEffect(() => {
     // Only auto-select if:
-    // 1. User is an Organization Administrator (can manage organizations)
+    // 1. User is an Organization Administrator OR vApp User
     // 2. No organization is currently selected
     // 3. User has a primary organization
     // 4. Organizations data is loaded
+    const isOrgAdminOrVAppUser =
+      (capabilities.canManageOrganizations && !capabilities.canManageSystem) || // Org Admin
+      (capabilities.canManageVMs &&
+        !capabilities.canManageOrganizations &&
+        !capabilities.canManageSystem); // vApp User
+
     if (
-      capabilities.canManageOrganizations &&
-      !capabilities.canManageSystem && // Not a system admin
+      isOrgAdminOrVAppUser &&
       !filters.org_id &&
       capabilities.primaryOrganization &&
       orgsResponse?.data?.length
@@ -274,7 +279,7 @@ const VMs: React.FC = () => {
       );
 
       if (primaryOrg) {
-        // Auto-select the organization administrator's primary organization
+        // Auto-select the user's primary organization
         updateOrganization(primaryOrg.id);
         updateVDC(''); // Clear VDC selection
         setFilters((prev) => ({
@@ -287,6 +292,7 @@ const VMs: React.FC = () => {
   }, [
     capabilities.canManageOrganizations,
     capabilities.canManageSystem,
+    capabilities.canManageVMs,
     capabilities.primaryOrganization,
     filters.org_id,
     orgsResponse?.data,
