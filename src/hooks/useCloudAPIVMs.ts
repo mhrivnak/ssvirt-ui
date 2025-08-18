@@ -9,18 +9,6 @@ import type {
 } from '../types';
 
 /**
- * Hook to get accessible VDCs for VM creation
- */
-export const useVMVDCs = () => {
-  return useQuery({
-    queryKey: QUERY_KEYS.vmVdcs,
-    queryFn: () => VMService.getVDCs(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
-
-/**
  * Hook to get catalog items (templates) for VM creation
  */
 export const useCatalogItems = (catalogId?: string) => {

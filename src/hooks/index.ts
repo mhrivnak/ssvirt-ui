@@ -57,7 +57,6 @@ export {
 
 // Export CloudAPI VM hooks
 export {
-  useVMVDCs,
   useCatalogItems as useCloudAPICatalogItems,
   useAllCatalogItems,
   useInstantiateTemplate,
