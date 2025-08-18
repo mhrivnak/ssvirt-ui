@@ -290,9 +290,7 @@ const OrganizationDetail: React.FC = () => {
                         variant="secondary"
                         icon={<PlusCircleIcon />}
                         onClick={() =>
-                          navigate('/vdcs/create', {
-                            state: { organizationId: organization.id },
-                          })
+                          navigate(`/organizations/${organization.id}/vdcs/new`)
                         }
                         isBlock
                       >
@@ -382,9 +380,7 @@ const OrganizationDetail: React.FC = () => {
                 size="sm"
                 icon={<PlusCircleIcon />}
                 onClick={() =>
-                  navigate('/vdcs/create', {
-                    state: { organizationId: organization.id },
-                  })
+                  navigate(`/organizations/${organization.id}/vdcs/new`)
                 }
               >
                 Create VDC
@@ -410,9 +406,7 @@ const OrganizationDetail: React.FC = () => {
                 variant="primary"
                 icon={<PlusCircleIcon />}
                 onClick={() =>
-                  navigate('/vdcs/create', {
-                    state: { organizationId: organization.id },
-                  })
+                  navigate(`/organizations/${organization.id}/vdcs/new`)
                 }
               >
                 Create VDC
@@ -439,9 +433,9 @@ const OrganizationDetail: React.FC = () => {
                       variant="link"
                       isInline
                       onClick={() =>
-                        navigate(`/vdcs/${vdc.id}`, {
-                          state: { organizationId: organization.id },
-                        })
+                        navigate(
+                          `/organizations/${organization.id}/vdcs/${vdc.id}`
+                        )
                       }
                     >
                       {vdc.name}
@@ -467,16 +461,16 @@ const OrganizationDetail: React.FC = () => {
                         {
                           title: 'View Details',
                           onClick: () =>
-                            navigate(`/vdcs/${vdc.id}`, {
-                              state: { organizationId: organization.id },
-                            }),
+                            navigate(
+                              `/organizations/${organization.id}/vdcs/${vdc.id}`
+                            ),
                         },
                         {
                           title: 'Edit',
                           onClick: () =>
-                            navigate(`/vdcs/${vdc.id}/edit`, {
-                              state: { organizationId: organization.id },
-                            }),
+                            navigate(
+                              `/organizations/${organization.id}/vdcs/${vdc.id}/edit`
+                            ),
                         },
                         {
                           title: 'View VMs',

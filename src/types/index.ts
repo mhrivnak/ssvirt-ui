@@ -122,6 +122,7 @@ export interface RoleCapabilities {
   canCreateOrganizations: boolean;
   canManageUsers: boolean;
   canManageVMs: boolean;
+  canViewVDCs: boolean;
   canViewReports: boolean;
   primaryOrganization: string; // Primary organization ID from login response
   operatingOrganization?: string; // Operating organization ID if different

@@ -30,14 +30,14 @@ import { ROUTES } from '../../utils/constants';
 import type { CreateVDCRequest } from '../../types';
 
 const VDCForm: React.FC = () => {
-  const { id: vdcId } = useParams<{ id?: string }>();
+  const { orgId, id: vdcId } = useParams<{ orgId?: string; id?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const { capabilities } = useRole();
   const isEditing = !!vdcId;
 
-  // Get organization ID from navigation state or show error if missing
-  const organizationId = location.state?.organizationId;
+  // Get organization ID from URL params or navigation state (prefer URL params)
+  const organizationId = orgId || location.state?.organizationId;
 
   // Hooks for VDC operations
   const createVDCMutation = useCreateVDC();

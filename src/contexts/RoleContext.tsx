@@ -71,6 +71,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         canCreateOrganizations: false,
         canManageUsers: false,
         canManageVMs: false,
+        canViewVDCs: false,
         canViewReports: false,
         primaryOrganization: '',
         operatingOrganization: undefined,
