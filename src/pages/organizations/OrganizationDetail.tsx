@@ -433,7 +433,9 @@ const OrganizationDetail: React.FC = () => {
                       variant="link"
                       isInline
                       onClick={() =>
-                        navigate(`/organizations/${organization.id}/vdcs/${vdc.id}`)
+                        navigate(
+                          `/organizations/${organization.id}/vdcs/${vdc.id}`
+                        )
                       }
                     >
                       {vdc.name}
@@ -459,12 +461,16 @@ const OrganizationDetail: React.FC = () => {
                         {
                           title: 'View Details',
                           onClick: () =>
-                            navigate(`/organizations/${organization.id}/vdcs/${vdc.id}`),
+                            navigate(
+                              `/organizations/${organization.id}/vdcs/${vdc.id}`
+                            ),
                         },
                         {
                           title: 'Edit',
                           onClick: () =>
-                            navigate(`/organizations/${organization.id}/vdcs/${vdc.id}/edit`),
+                            navigate(
+                              `/organizations/${organization.id}/vdcs/${vdc.id}/edit`
+                            ),
                         },
                         {
                           title: 'View VMs',
