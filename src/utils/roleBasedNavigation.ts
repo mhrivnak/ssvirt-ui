@@ -136,9 +136,9 @@ export const getNavigationForRole = (
   return [
     ...baseNavigation,
     {
-      id: 'my-vms',
-      label: 'My Virtual Machines',
-      to: '/my-vms',
+      id: 'vms',
+      label: 'Virtual Applications',
+      to: '/vms',
       icon: VirtualMachineIcon,
     },
     {

@@ -155,7 +155,7 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                   You don't have any virtual machines yet. Get started by
                   creating your first VM.
                 </p>
-                <Link to="/my-vms/new">
+                <Link to="/vms/create">
                   <Button variant="primary" icon={<PlusIcon />}>
                     Create Virtual Machine
                   </Button>
@@ -180,7 +180,7 @@ const UserVMDashboard: React.FC<{ vms: UserVM[] }> = ({ vms }) => {
                 </Title>
               </SplitItem>
               <SplitItem>
-                <Link to="/my-vms">
+                <Link to="/vms">
                   <Button variant="secondary" size="sm">
                     View All
                   </Button>
@@ -254,7 +254,7 @@ const GettingStartedPanel: React.FC = () => {
                 Start with pre-configured environments
               </ListItem>
               <ListItem>
-                <Link to="/my-vms/new">Create your first virtual machine</Link>{' '}
+                <Link to="/vms/create">Create your first virtual machine</Link>{' '}
                 - Deploy a VM for development or testing
               </ListItem>
               <ListItem>
@@ -316,7 +316,7 @@ const QuickTemplatesPanel: React.FC<{ templates: CatalogTemplate[] }> = ({
                           </div>
                         </FlexItem>
                         <FlexItem>
-                          <Link to={`/my-vms/new?template=${template.id}`}>
+                          <Link to={`/vms/create?template=${template.id}`}>
                             <Button variant="secondary" size="sm">
                               Deploy
                             </Button>
@@ -382,7 +382,7 @@ export const VAppUserDashboard: React.FC = () => {
                 value={mockUserVMs.length}
                 subtitle={`${runningVMs} running`}
                 icon={<VirtualMachineIcon />}
-                to="/my-vms"
+                to="/vms"
               />
             </GridItem>
             <GridItem span={6}>

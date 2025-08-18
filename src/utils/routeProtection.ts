@@ -196,17 +196,6 @@ export const roleBasedRoutes: RouteConfig[] = [
     requiredCapabilities: ['canManageVMs'],
   },
 
-  // vApp User specific routes
-  {
-    path: '/my-vms',
-    component: React.lazy(() => import('../pages/vms/UserVMs')),
-    requiredRoles: [
-      ROLE_NAMES.VAPP_USER,
-      ROLE_NAMES.ORG_ADMIN,
-      ROLE_NAMES.SYSTEM_ADMIN,
-    ],
-  },
-
   // Catalogs (available to system admins, org admins and vApp users)
   {
     path: '/catalogs',
