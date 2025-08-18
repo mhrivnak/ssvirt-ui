@@ -937,7 +937,6 @@ export const QUERY_KEYS = {
   vmsByVdc: (vdcId: string) => ['vms', 'vdc', vdcId] as const,
 
   // CloudAPI VMs
-  vmVdcs: ['cloudapi', 'vms', 'vdcs'] as const,
   cloudApiVMs: ['cloudapi', 'vms'] as const,
   cloudApiVM: (id: string) => ['cloudapi', 'vms', id] as const,
 

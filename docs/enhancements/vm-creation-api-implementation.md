@@ -287,17 +287,10 @@ export type VAppStatus =
 **CloudAPI VM Hooks (`src/hooks/useCloudAPIVMs.ts`) ✅**
 
 ```typescript
-/**
- * Hook to get accessible VDCs for VM creation
- */
-export const useVMVDCs = () => {
-  return useQuery({
-    queryKey: QUERY_KEYS.vmVdcs,
-    queryFn: () => VMService.getVDCs(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
+// DEPRECATED: useVMVDCs has been removed in favor of useOrganizationVDCs
+// The VM Creation Wizard now uses useOrganizationVDCs() for proper role-based
+// VDC filtering that works for all user types (System Admin, Org Admin, vApp User).
+// See: useVDC.ts:useOrganizationVDCs()
 
 /**
  * Hook to get catalog items (templates) for VM creation
