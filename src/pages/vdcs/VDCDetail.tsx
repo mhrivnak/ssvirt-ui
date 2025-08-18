@@ -167,9 +167,7 @@ const VDCDetail: React.FC = () => {
                 variant="primary"
                 icon={<EditIcon />}
                 onClick={() =>
-                  navigate(`/vdcs/${vdcIdentifier}/edit`, {
-                    state: { organizationId },
-                  })
+                  navigate(`/organizations/${organizationId}/vdcs/${vdcIdentifier}/edit`)
                 }
               >
                 Edit VDC
