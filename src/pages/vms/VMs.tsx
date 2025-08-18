@@ -69,6 +69,7 @@ import {
   useUserPermissions,
   useVAppsSessionFilters,
 } from '../../hooks';
+import { useRole } from '../../hooks/useRole';
 import {
   VMPowerActions,
   PowerOperationStatus,
@@ -151,6 +152,9 @@ const VMs: React.FC = () => {
   // Data fetching
   const { data: userPermissions } = useUserPermissions();
   const { data: orgsResponse } = useOrganizations();
+
+  // Role-based context for auto-selection
+  const { capabilities } = useRole();
 
   // For VDCs, we need different approaches based on user role
   const isSystemAdmin = userPermissions?.canManageSystem;
@@ -250,6 +254,45 @@ const VMs: React.FC = () => {
   useEffect(() => {
     setSelectedVApps([]);
   }, [filters]);
+
+  // Auto-select organization for Organization Administrators
+  useEffect(() => {
+    // Only auto-select if:
+    // 1. User is an Organization Administrator (can manage organizations)
+    // 2. No organization is currently selected
+    // 3. User has a primary organization
+    // 4. Organizations data is loaded
+    if (
+      capabilities.canManageOrganizations &&
+      !capabilities.canManageSystem && // Not a system admin
+      !filters.org_id &&
+      capabilities.primaryOrganization &&
+      orgsResponse?.data?.length
+    ) {
+      const primaryOrg = orgsResponse.data.find(
+        (org) => org.id === capabilities.primaryOrganization
+      );
+
+      if (primaryOrg) {
+        // Auto-select the organization administrator's primary organization
+        updateOrganization(primaryOrg.id);
+        updateVDC(''); // Clear VDC selection
+        setFilters((prev) => ({
+          ...prev,
+          org_id: primaryOrg.id,
+          vdc_id: '',
+        }));
+      }
+    }
+  }, [
+    capabilities.canManageOrganizations,
+    capabilities.canManageSystem,
+    capabilities.primaryOrganization,
+    filters.org_id,
+    orgsResponse?.data,
+    updateOrganization,
+    updateVDC,
+  ]);
 
   const handleFilterChange = (key: keyof VAppFilters, value: string) => {
     if (key === 'org_id') {
