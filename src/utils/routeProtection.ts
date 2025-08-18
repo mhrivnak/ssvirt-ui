@@ -132,7 +132,7 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/vdcs',
     component: React.lazy(() => import('../pages/vdcs/VDCs')),
-    requiredCapabilities: ['canManageUsers'],
+    requiredCapabilities: ['canViewVDCs'],
   },
   {
     path: '/vdcs/create',
@@ -147,14 +147,14 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/vdcs/:id',
     component: React.lazy(() => import('../pages/vdcs/VDCDetail')),
-    requiredCapabilities: ['canManageUsers'],
+    requiredCapabilities: ['canManageUsers', 'canViewVDCs'],
   },
 
   // Organization-scoped VDC routes
   {
     path: '/organizations/:orgId/vdcs',
     component: React.lazy(() => import('../pages/vdcs/VDCs')),
-    requiredCapabilities: ['canManageUsers'],
+    requiredCapabilities: ['canViewVDCs'],
   },
   {
     path: '/organizations/:orgId/vdcs/new',
@@ -169,7 +169,7 @@ export const roleBasedRoutes: RouteConfig[] = [
   {
     path: '/organizations/:orgId/vdcs/:id',
     component: React.lazy(() => import('../pages/vdcs/VDCDetail')),
-    requiredCapabilities: ['canManageUsers'],
+    requiredCapabilities: ['canManageUsers', 'canViewVDCs'],
   },
   {
     path: '/org-users',
