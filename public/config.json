@@ -1,6 +1,6 @@
 {
   "apiBaseUrl": "",
-  "appTitle": "SSVIRT Web UI",
+  "appTitle": "SSVirt",
   "appVersion": "1.0.0",
-  "logoUrl": "/vite.svg"
+  "logoUrl": "/ssvirt-logo.png"
 }

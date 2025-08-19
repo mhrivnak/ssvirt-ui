@@ -121,7 +121,11 @@ export const RoleAwareLayout: React.FC<RoleAwareLayoutProps> = ({
     <Masthead>
       <MastheadMain>
         <MastheadBrand>
-          <Brand src="/logo.svg" alt="VMware Cloud Director" />
+          <Brand
+            src="/ssvirt-logo.png"
+            alt="SSVirt - VMware Cloud Director Management"
+            style={{ maxHeight: '80px', width: 'auto' }}
+          />
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>
