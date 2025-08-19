@@ -125,6 +125,11 @@ const Login: React.FC = () => {
       textContent="Self-Service Virtual Infrastructure Runtime"
       loginTitle="Log in to your account"
       loginSubtitle="Please enter your credentials"
+      style={
+        {
+          '--pf-v6-c-login__brand img': 'max-height: 120px; width: auto;',
+        } as React.CSSProperties
+      }
     >
       {loginForm}
     </LoginPage>
