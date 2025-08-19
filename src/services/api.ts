@@ -367,6 +367,11 @@ export class AuthService {
       (role) => role === ROLE_NAMES.ORG_ADMIN
     );
 
+    // Check if user has vApp user role
+    const isVAppUser = sessionData.roles.some(
+      (role) => role === ROLE_NAMES.VAPP_USER
+    );
+
     // Extract user's organizations
     // [] means all organizations / global scope
     const accessibleOrganizations = isSystemAdmin
@@ -387,7 +392,7 @@ export class AuthService {
       canManageOrganizations: isSystemAdmin,
       canViewVDCs: true, // All authenticated users can view VDCs
       canManageVDCs: isSystemAdmin,
-      canCreateVApps: isSystemAdmin || isOrgAdmin, // Organization Admins can create vApps
+      canCreateVApps: isSystemAdmin || isOrgAdmin || isVAppUser, // vApp Users can create vApps
       accessibleOrganizations,
     };
   }

@@ -59,6 +59,7 @@ export function determineUserCapabilities(
     canManageVMs: isSystemAdmin || isOrgAdmin || isVappUser,
     canViewVDCs: isSystemAdmin || isOrgAdmin || isVappUser,
     canViewReports: isSystemAdmin || isOrgAdmin,
+    canCreateVApps: isSystemAdmin || isOrgAdmin || isVappUser,
     primaryOrganization: sessionResponse.org.id,
     operatingOrganization: sessionResponse.operatingOrg?.id,
   };

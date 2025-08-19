@@ -124,6 +124,7 @@ export interface RoleCapabilities {
   canManageVMs: boolean;
   canViewVDCs: boolean;
   canViewReports: boolean;
+  canCreateVApps: boolean;
   primaryOrganization: string; // Primary organization ID from login response
   operatingOrganization?: string; // Operating organization ID if different
 }
