@@ -127,7 +127,7 @@ const Login: React.FC = () => {
       loginSubtitle="Please enter your credentials"
       style={
         {
-          '--pf-v6-c-login__brand img': 'max-height: 120px; width: auto;',
+          '--pf-v6-c-brand--Height': '120px',
         } as React.CSSProperties
       }
     >
