@@ -73,6 +73,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children }) => {
         canManageVMs: false,
         canViewVDCs: false,
         canViewReports: false,
+        canCreateVApps: false,
         primaryOrganization: '',
         operatingOrganization: undefined,
       };
